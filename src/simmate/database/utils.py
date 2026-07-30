@@ -543,26 +543,37 @@ def start_postgres_docker(
     # Ensure the database directory exists
     db_volume = get_directory(settings.config_directory / "database")
 
-    # Define the docker command
-    docker_command = [
-        "docker",
-        "run",
-        "--name",
-        "simmate_db",
-        "-d",
-        "-p",
-        f"{port}:5432",
-        "-v",
-        f"{db_volume}:/var/lib/postgresql/data",
-        "-e",
-        f"POSTGRES_PASSWORD={password}",
-        "informaticsmatters/rdkit-cartridge-debian:Release_2025_03_3",
-    ]
+    # Check if the container already exists
+    check_command = ["docker", "container", "inspect", "simmate_db"]
+    result = subprocess.run(check_command, capture_output=True)
 
-    # execute the command
-    logging.info("Starting Postgres container via Docker...")
-    subprocess.run(docker_command, check=True)
-    logging.info("Success! Container 'simmate_db' is running.")
+    if result.returncode == 0:
+        # Container exists, just start it
+        logging.info("Container 'simmate_db' already exists. Restarting...")
+        start_command = ["docker", "start", "simmate_db"]
+        subprocess.run(start_command, check=True)
+        logging.info("Success! Container 'simmate_db' is running.")
+    else:
+        # Define the docker command to create and run a new container
+        docker_command = [
+            "docker",
+            "run",
+            "--name",
+            "simmate_db",
+            "-d",
+            "-p",
+            f"{port}:5432",
+            "-v",
+            f"{db_volume}:/var/lib/postgresql/data",
+            "-e",
+            f"POSTGRES_PASSWORD={password}",
+            "informaticsmatters/rdkit-cartridge-debian:Release_2025_03_3",
+        ]
+
+        # execute the command
+        logging.info("Starting Postgres container via Docker...")
+        subprocess.run(docker_command, check=True)
+        logging.info("Success! Container 'simmate_db' is running.")
 
     # check the current settings and update if they don't match
     new_db_settings = {
@@ -580,21 +591,19 @@ def start_postgres_docker(
 
 def stop_postgres_docker():
     """
-    Stops and removes the Postgres container 'simmate_db'
+    Stops the Postgres container 'simmate_db'
     """
 
     # Define the docker commands
     stop_command = ["docker", "stop", "simmate_db"]
-    remove_command = ["docker", "rm", "simmate_db"]
 
     # execute the commands
-    logging.info("Stopping and removing Postgres container via Docker...")
+    logging.info("Stopping Postgres container via Docker...")
     try:
         subprocess.run(stop_command, check=True, capture_output=True)
-        subprocess.run(remove_command, check=True, capture_output=True)
-        logging.info("Success! Container 'simmate_db' has been stopped and removed.")
+        logging.info("Success! Container 'simmate_db' has been stopped.")
     except subprocess.CalledProcessError as error:
-        logging.error(f"Failed to stop/remove container: {error.stderr.decode()}")
+        logging.error(f"Failed to stop container: {error.stderr.decode()}")
 
 
 def create_prebuild():
