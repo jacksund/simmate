@@ -31,7 +31,7 @@ from ..featurizers import (
 )
 from ..filters import RemoveInvalidSmiles
 from .base import Datastore
-from .numba_funcs import tanimoto_ecfp4, tanimoto_maccs
+from .numba_funcs import tanimoto_ecfp4, tanimoto_ecfp4_1024, tanimoto_maccs
 from .utils import update_column, update_table
 
 
@@ -268,6 +268,20 @@ class MoleculeDatastore(Datastore):
             "metric_fn": tanimoto_ecfp4,  # same 2048-bit packed layout as ecfp4
             "featurizer": Fcfp4Fingerprint,
         },
+        "ecfp4_1024": {
+            "ndim": 1024,
+            "stored_bytes": 128,
+            "metric_fn": tanimoto_ecfp4_1024,
+            "featurizer": Ecfp4Fingerprint,
+            "featurizer_kwargs": {"size": 1024},
+        },
+        "fcfp4_1024": {
+            "ndim": 1024,
+            "stored_bytes": 128,
+            "metric_fn": tanimoto_ecfp4_1024,
+            "featurizer": Fcfp4Fingerprint,
+            "featurizer_kwargs": {"size": 1024},
+        },
     }
 
     @update_table()
@@ -322,6 +336,7 @@ class MoleculeDatastore(Datastore):
                 df["smiles"].to_list(),
                 parallel=True,
                 vector_type="numpy_packbits_bytes",
+                **cfg.get("featurizer_kwargs", {}),
             )
             return df.with_columns(polars.Series(fingerprint_type, fp_list))
 
@@ -526,7 +541,9 @@ class MoleculeDatastore(Datastore):
 
         cfg = cls._FP_CONFIGS[fp_type]
         fp_bytes = cfg["featurizer"].featurize(
-            query, vector_type="numpy_packbits_bytes"
+            query,
+            vector_type="numpy_packbits_bytes",
+            **cfg.get("featurizer_kwargs", {}),
         )
         vec = numpy.frombuffer(fp_bytes, dtype=numpy.uint8).copy()
 
