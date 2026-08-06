@@ -51,6 +51,7 @@ class ChemspaceFreedom4(MoleculeDatastore):
 
     num_chunks = 20_000
     index_batch_size = 8
+    index_load_mode = "scan-zstd"
 
     @classmethod
     def convert_source_to_parquet(cls, parallel_job: bool = False) -> Path:
