@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy
 import polars
 import pyarrow
+import zstandard as zstd
 from usearch.index import (
     CompiledMetric,
     Index,
@@ -242,7 +243,7 @@ class MoleculeDatastore(Datastore):
 
     index_load_mode: str = "memory"
     """
-    "memory" | "view" | "scan" — see load_fingerprint_index()
+    "memory" | "view" | "scan" | "scan-zstd" — see load_fingerprint_index()
     """
 
     _fingerprint_indexes: dict = {}
@@ -332,7 +333,9 @@ class MoleculeDatastore(Datastore):
 
     @classmethod
     def build_fingerprint_index(
-        cls, fp_type: str = "ecfp4", parallel_job: bool = False
+        cls,
+        fp_type: str = "ecfp4",
+        parallel_job: bool = False,
     ) -> None:
         """
         Builds USearch binary indexes from the chunk parquet files.
@@ -341,12 +344,17 @@ class MoleculeDatastore(Datastore):
         and writes them to datastore_dir/vectors/. Run after add_fingerprints()
         has fully completed.
         """
+        use_zstd = cls.index_load_mode == "scan-zstd"
+
         vectors_dir = get_directory(cls.base_directory / "vectors")
         batches = [
             list(range(i, min(i + cls.index_batch_size, cls.num_chunks)))
             for i in range(0, cls.num_chunks, cls.index_batch_size)
         ]
-        done_batches = {p.stem for p in vectors_dir.glob(f"{fp_type}-*.usearch")}
+        done_batches = {
+            p.name.replace(".usearch.zst", "").replace(".usearch", "")
+            for p in vectors_dir.glob(f"{fp_type}-*.usearch*")
+        }
         batches_to_process = [
             b for b in batches if f"{fp_type}-{b[0]}-{b[-1]}" not in done_batches
         ]
@@ -359,12 +367,16 @@ class MoleculeDatastore(Datastore):
             cls._build_fingerprint_index_single_batch,
             parallel="job" if parallel_job else "single",
             fp_type=fp_type,
+            use_zstd=use_zstd,
         )
         logging.info("USearch index build complete!")
 
     @classmethod
     def _build_fingerprint_index_single_batch(
-        cls, batch: list[int], fp_type: str = "ecfp4"
+        cls,
+        batch: list[int],
+        fp_type: str = "ecfp4",
+        use_zstd: bool = False,
     ):
         live_dir = cls.live_directory
         vectors_dir = cls.base_directory / "vectors"
@@ -372,7 +384,11 @@ class MoleculeDatastore(Datastore):
 
         cfg = cls._FP_CONFIGS[fp_type]
 
-        index_path = str(vectors_dir / f"{fp_type}-{batch[0]}-{batch[-1]}.usearch")
+        uncompressed_path = str(
+            vectors_dir / f"{fp_type}-{batch[0]}-{batch[-1]}.usearch"
+        )
+        index_path = uncompressed_path + ".zst" if use_zstd else uncompressed_path
+
         if Path(index_path).exists():
             logging.info(f"Skipping batch {batch[0]}-{batch[-1]} - already built.")
             return
@@ -386,7 +402,7 @@ class MoleculeDatastore(Datastore):
                 kind=MetricKind.Tanimoto,
                 signature=MetricSignature.ArrayArray,
             ),
-            path=index_path,
+            path=uncompressed_path,
         )
 
         lf = polars.scan_parquet(source_glob, hive_partitioning=True)
@@ -415,8 +431,19 @@ class MoleculeDatastore(Datastore):
             )
 
             index.add(keys, vectors)
-            index.save(index_path)
+            index.save(uncompressed_path)
+
+            if use_zstd:
+                with open(uncompressed_path, "rb") as f_in:
+                    data = f_in.read()
+                with open(index_path, "wb") as f_out:
+                    cctx = zstd.ZstdCompressor()
+                    f_out.write(cctx.compress(data))
+
             logging.info(f"  Saved progress | Vectors: {len(index):,}")
+
+        if use_zstd and Path(uncompressed_path).exists():
+            Path(uncompressed_path).unlink()
 
     @classmethod
     def load_fingerprint_index(cls, fp_type: str = "ecfp4") -> None:
@@ -430,6 +457,7 @@ class MoleculeDatastore(Datastore):
           (low RAM, nearly as fast as memory mode).
         - ``"scan"``: Store file paths only; ``search_similar`` opens each file
           one at a time (lowest RAM, slowest search).
+        - ``"scan-zstd"``: Like scan, but reads zstd compressed index files.
 
         Args:
             fp_type: Fingerprint type to load. One of ``"ecfp4"``, ``"maccs"``,
@@ -439,7 +467,7 @@ class MoleculeDatastore(Datastore):
             return
 
         vectors_dir = cls.base_directory / "vectors"
-        index_files = sorted(vectors_dir.glob(f"{fp_type}-*.usearch"))
+        index_files = sorted(vectors_dir.glob(f"{fp_type}-*.usearch*"))
         if not index_files:
             raise FileNotFoundError(
                 f"No {fp_type} index files found in {vectors_dir}. "
@@ -458,14 +486,14 @@ class MoleculeDatastore(Datastore):
                 f"Opening {len(index_files)} {fp_type} index file(s) as memory-mapped views..."
             )
             payload = Indexes(paths=[str(p) for p in index_files], view=True)
-        elif mode == "scan":
+        elif mode in ["scan", "scan-zstd"]:
             logging.info(
                 f"Registering {len(index_files)} {fp_type} index file(s) for scan-mode search."
             )
             payload = index_files
         else:
             raise ValueError(
-                f"Unknown index_load_mode: {mode!r}. Use 'memory', 'view', or 'scan'."
+                f"Unknown index_load_mode: {mode!r}. Use 'memory', 'view', 'scan', or 'scan-zstd'."
             )
 
         cls._fingerprint_indexes[fp_type] = (mode, payload)
@@ -517,9 +545,15 @@ class MoleculeDatastore(Datastore):
             matches = payload.search(vec, count)
             all_keys = matches.keys.tolist()
             all_distances = matches.distances.tolist()
-        elif mode == "scan":
+        elif mode in ["scan", "scan-zstd"]:
             for path in payload:
-                index = Indexes(paths=[str(path)], view=True)
+                if str(path).endswith(".zst"):
+                    with open(path, "rb") as f:
+                        dctx = zstd.ZstdDecompressor()
+                        data = dctx.decompress(f.read())
+                    index = Index.restore(data)
+                else:
+                    index = Indexes(paths=[str(path)], view=True)
                 matches = index.search(vec, count)
                 all_keys.extend(matches.keys.tolist())
                 all_distances.extend(matches.distances.tolist())
