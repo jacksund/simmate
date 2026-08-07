@@ -917,9 +917,7 @@ class MoleculeDatastore(Datastore):
                 IVF+PQ shards cannot be mapped at all.
         """
         is_zstd = path.suffix == ".zst"
-        raw = (
-            zstd.ZstdDecompressor().decompress(path.read_bytes()) if is_zstd else None
-        )
+        raw = zstd.ZstdDecompressor().decompress(path.read_bytes()) if is_zstd else None
 
         if cls.index_engine != "faiss-ivfpq":
             if is_zstd:
