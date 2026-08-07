@@ -6,11 +6,12 @@ from pathlib import Path
 import faiss
 import numpy
 import polars
-import zstandard as zstd
 
-from simmate.utils import chunk_list, dispatch
+from simmate.utils import dispatch
 
-from .base import VectorIndex
+from simmate.toolkit.similarity import Tanimoto
+
+from .base import VectorIndex, get_hits_dataframe
 
 
 class FaissIvfPqIndex(VectorIndex):
@@ -23,10 +24,17 @@ class FaissIvfPqIndex(VectorIndex):
     """
 
     index_suffix: str = "faiss"
+    train_size: int = 250_000
+    add_batch_size: int = 250_000
+    max_training_files: int = 64
 
     def __init__(
         self,
         column_name: str,
+        ndim: int,
+        metric_fn,
+        featurizer,
+        featurizer_kwargs: dict = None,
         batch_size: int = 1,
         load_mode: str = "memory",
         nlist: int = 4096,
@@ -34,7 +42,15 @@ class FaissIvfPqIndex(VectorIndex):
         nbits: int = 8,
         nprobe: int = 16,
     ):
-        super().__init__(column_name, batch_size, load_mode)
+        super().__init__(
+            column_name=column_name,
+            ndim=ndim,
+            metric_fn=metric_fn,
+            featurizer=featurizer,
+            featurizer_kwargs=featurizer_kwargs,
+            batch_size=batch_size,
+            load_mode=load_mode,
+        )
         self.nlist = nlist
         self.m = m
         self.nbits = nbits
@@ -63,10 +79,9 @@ class FaissIvfPqIndex(VectorIndex):
         if template_file.exists() and not rebuild:
             return template_file
 
-        ndim = datastore_cls._VECTOR_CONFIGS[self.column_name]["ndim"]
-        if ndim % self.m != 0:
+        if self.ndim % self.m != 0:
             raise ValueError(
-                f"faiss_settings['m'] ({self.m}) must divide the {self.column_name} ndim ({ndim})."
+                f"faiss_settings['m'] ({self.m}) must divide the {self.column_name} ndim ({self.ndim})."
             )
 
         vectors = self._sample_training_vectors(datastore_cls)
@@ -81,7 +96,7 @@ class FaissIvfPqIndex(VectorIndex):
             f"nlist={self.nlist}, m={self.m}, nbits={self.nbits}"
         )
         index = faiss.IndexIVFPQ(
-            faiss.IndexFlatL2(ndim), ndim, self.nlist, self.m, self.nbits
+            faiss.IndexFlatL2(self.ndim), self.ndim, self.nlist, self.m, self.nbits
         )
         index.train(vectors)
 
@@ -91,9 +106,6 @@ class FaissIvfPqIndex(VectorIndex):
         return template_file
 
     def _sample_training_vectors(self, datastore_cls) -> numpy.ndarray:
-        train_size = 250_000
-        max_files = 64
-
         chunk_files = datastore_cls.chunk_files
         if not chunk_files:
             raise FileNotFoundError(
@@ -101,11 +113,11 @@ class FaissIvfPqIndex(VectorIndex):
                 "Nothing to train an index on."
             )
 
-        if len(chunk_files) > max_files:
-            step = len(chunk_files) / max_files
-            chunk_files = [chunk_files[int(i * step)] for i in range(max_files)]
+        if len(chunk_files) > self.max_training_files:
+            step = len(chunk_files) / self.max_training_files
+            chunk_files = [chunk_files[int(i * step)] for i in range(self.max_training_files)]
 
-        rows_per_file = max(1, train_size // len(chunk_files))
+        rows_per_file = max(1, self.train_size // len(chunk_files))
         frames = []
         for file in chunk_files:
             df = polars.read_parquet(
@@ -117,21 +129,7 @@ class FaissIvfPqIndex(VectorIndex):
         return self._unpacked_vectors(datastore_cls, polars.concat(frames))
 
     def build(self, datastore_cls, parallel_job: bool = False) -> None:
-        chunk_keys = list(range(datastore_cls.num_chunks))
-        batches = [list(b) for b in chunk_list(chunk_keys, self.batch_size)]
-
-        built = self._built_shard_names(datastore_cls)
-        batches_to_process = [
-            b
-            for b in batches
-            if self._shard_name(b) not in built
-            and f"{self._shard_name(b)}.zst" not in built
-        ]
-
-        logging.info(
-            f"{len(batches) - len(batches_to_process)} batches already done, "
-            f"{len(batches_to_process)} to process"
-        )
+        batches_to_process = self._get_pending_batches(datastore_cls)
 
         if batches_to_process:
             self.train_faiss_template(datastore_cls)
@@ -152,14 +150,12 @@ class FaissIvfPqIndex(VectorIndex):
 
         index = faiss.clone_index(self._faiss_template(datastore_cls))
 
-        add_batch_size = 250_000
-
         for chunk_key in batch:
             logging.info(f"  {self.column_name} chunk_key={chunk_key}")
             lazy_df = self._chunk_vectors(datastore_cls, chunk_key)
             offset = 0
             while True:
-                df = lazy_df.slice(offset, add_batch_size).collect()
+                df = lazy_df.slice(offset, self.add_batch_size).collect()
                 if len(df) == 0:
                     break
                 index.add_with_ids(
@@ -170,54 +166,33 @@ class FaissIvfPqIndex(VectorIndex):
             logging.info(f"  Added {offset:,} | Vectors: {index.ntotal:,}")
 
         temp_path = self._add_suffix(uncompressed_path, ".partial")
-        if self._use_zstd():
+        if self.use_zstd:
             raw = faiss.serialize_index(index).tobytes()
-            temp_path.write_bytes(zstd.ZstdCompressor().compress(raw))
+            self._write_bytes(raw, temp_path, use_zstd=True)
         else:
             faiss.write_index(index, str(temp_path))
         temp_path.replace(index_path)
         logging.info(f"  Saved {index.ntotal:,} vectors → {index_path}")
 
-    def load(self, datastore_cls) -> None:
-        if self._cached_payload is not None and self._cached_mode == self.load_mode:
-            return
-
-        mode = self.load_mode
-        if mode not in ["memory", "scan", "scan-zstd"]:
-            raise ValueError(
-                f"Unknown load_mode: {mode!r}. " "Use 'memory', 'scan', or 'scan-zstd'."
-            )
-
-        index_files = self._index_files(datastore_cls)
-        if not index_files:
-            raise FileNotFoundError(
-                f"No {self.column_name} faiss index files found in "
-                f"{self.vectors_directory(datastore_cls)}. "
-                "Run build() first."
-            )
-
-        n_files = f"{len(index_files)} {self.column_name} faiss index file(s)"
-        if mode == "memory":
-            logging.info(f"Loading {n_files} into RAM...")
+    def _load_payload(self, index_files: list[Path], n_files_str: str):
+        if self.load_mode == "memory":
+            logging.info(f"Loading {n_files_str} into RAM...")
             payload = [self._read_index(p) for p in index_files]
             n_vectors = sum(i.ntotal for i in payload)
             logging.info(f"Loaded {n_vectors:,} vectors.")
         else:
-            logging.info(f"Registering {n_files} for scan-mode search.")
+            logging.info(f"Registering {n_files_str} for scan-mode search.")
             payload = index_files
-
-        self._cached_mode = mode
-        self._cached_payload = payload
+        return payload
 
     def _read_index(self, path: Path):
         is_zstd = path.suffix == ".zst"
-        raw = zstd.ZstdDecompressor().decompress(path.read_bytes()) if is_zstd else None
-
-        index = (
-            faiss.deserialize_index(numpy.frombuffer(raw, dtype=numpy.uint8))
-            if is_zstd
-            else faiss.read_index(str(path), faiss.IO_FLAG_READ_ONLY)
-        )
+        if is_zstd:
+            raw = self._read_bytes(path)
+            index = faiss.deserialize_index(numpy.frombuffer(raw, dtype=numpy.uint8))
+        else:
+            index = faiss.read_index(str(path), faiss.IO_FLAG_READ_ONLY)
+        
         index.nprobe = self.nprobe
         return index
 
@@ -244,7 +219,7 @@ class FaissIvfPqIndex(VectorIndex):
         found = keys != -1
         keys, pq_distances = keys[found], pq_distances[found]
         if len(keys) == 0:
-            return self._hits_dataframe([], [], count)
+            return get_hits_dataframe([], [], count)
 
         if len(keys) > n_candidates:
             closest = numpy.argpartition(pq_distances, n_candidates)[:n_candidates]
@@ -256,8 +231,8 @@ class FaissIvfPqIndex(VectorIndex):
             .select("datastore_id", self.column_name)
             .collect()
         )
-        return self._hits_dataframe(
+        return get_hits_dataframe(
             df["datastore_id"].to_numpy().astype(numpy.int64),
-            self._tanimoto_distances(vec, self._packed_vectors(datastore_cls, df)),
+            Tanimoto.get_distance_packed(vec, self._packed_vectors(datastore_cls, df)),
             count,
         )

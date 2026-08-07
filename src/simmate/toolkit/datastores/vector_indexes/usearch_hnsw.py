@@ -3,7 +3,6 @@
 import logging
 from pathlib import Path
 
-import zstandard as zstd
 from usearch.index import (
     CompiledMetric,
     Index,
@@ -13,9 +12,9 @@ from usearch.index import (
     ScalarKind,
 )
 
-from simmate.utils import chunk_list, dispatch
+from simmate.utils import dispatch
 
-from .base import VectorIndex
+from .base import VectorIndex, get_hits_dataframe
 
 
 class UsearchHnswIndex(VectorIndex):
@@ -25,23 +24,10 @@ class UsearchHnswIndex(VectorIndex):
     """
 
     index_suffix: str = "usearch"
+    valid_load_modes: list[str] = ["memory", "view", "scan", "scan-zstd"]
 
     def build(self, datastore_cls, parallel_job: bool = False) -> None:
-        chunk_keys = list(range(datastore_cls.num_chunks))
-        batches = [list(b) for b in chunk_list(chunk_keys, self.batch_size)]
-
-        built = self._built_shard_names(datastore_cls)
-        batches_to_process = [
-            b
-            for b in batches
-            if self._shard_name(b) not in built
-            and f"{self._shard_name(b)}.zst" not in built
-        ]
-
-        logging.info(
-            f"{len(batches) - len(batches_to_process)} batches already done, "
-            f"{len(batches_to_process)} to process"
-        )
+        batches_to_process = self._get_pending_batches(datastore_cls)
 
         dispatch(
             batches_to_process,
@@ -57,12 +43,11 @@ class UsearchHnswIndex(VectorIndex):
             f"Building {self.column_name} batch {batch[0]}-{batch[-1]} → {index_path}"
         )
 
-        cfg = datastore_cls._VECTOR_CONFIGS[self.column_name]
         index = Index(
-            ndim=cfg["ndim"],
+            ndim=self.ndim,
             dtype=ScalarKind.B1,
             metric=CompiledMetric(
-                pointer=cfg["metric_fn"].address,
+                pointer=self.metric_fn.address,
                 kind=MetricKind.Tanimoto,
                 signature=MetricSignature.ArrayArray,
             ),
@@ -83,57 +68,33 @@ class UsearchHnswIndex(VectorIndex):
             index.add(keys, self._packed_vectors(datastore_cls, df))
             index.save(str(uncompressed_path))
 
-            if self._use_zstd():
-                compressed = zstd.ZstdCompressor().compress(
-                    uncompressed_path.read_bytes()
-                )
-                index_path.write_bytes(compressed)
+            if self.use_zstd:
+                self._write_bytes(uncompressed_path.read_bytes(), index_path, use_zstd=True)
 
             logging.info(f"  Saved progress | Vectors: {len(index):,}")
 
-        if self._use_zstd():
+        if self.use_zstd:
             uncompressed_path.unlink(missing_ok=True)
 
-    def load(self, datastore_cls) -> None:
-        if self._cached_payload is not None and self._cached_mode == self.load_mode:
-            return
-
-        mode = self.load_mode
-        if mode not in ["memory", "view", "scan", "scan-zstd"]:
-            raise ValueError(
-                f"Unknown load_mode: {mode!r}. "
-                "Use 'memory', 'view', 'scan', or 'scan-zstd'."
-            )
-
-        index_files = self._index_files(datastore_cls)
-        if not index_files:
-            raise FileNotFoundError(
-                f"No {self.column_name} usearch index files found in "
-                f"{self.vectors_directory(datastore_cls)}. "
-                "Run build() first."
-            )
-
-        n_files = f"{len(index_files)} {self.column_name} usearch index file(s)"
-        if mode == "memory":
-            logging.info(f"Loading {n_files} into RAM...")
+    def _load_payload(self, index_files: list[Path], n_files_str: str):
+        if self.load_mode == "memory":
+            logging.info(f"Loading {n_files_str} into RAM...")
             payload = [self._read_index(p, into_memory=True) for p in index_files]
             n_vectors = sum(len(i) for i in payload)
             logging.info(f"Loaded {n_vectors:,} vectors.")
-        elif mode == "view":
-            logging.info(f"Opening {n_files} as memory-mapped views...")
+        elif self.load_mode == "view":
+            logging.info(f"Opening {n_files_str} as memory-mapped views...")
             payload = Indexes(paths=[str(p) for p in index_files], view=True)
         else:
-            logging.info(f"Registering {n_files} for scan-mode search.")
+            logging.info(f"Registering {n_files_str} for scan-mode search.")
             payload = index_files
-
-        self._cached_mode = mode
-        self._cached_payload = payload
+        return payload
 
     def _read_index(self, path: Path, into_memory: bool = False):
         is_zstd = path.suffix == ".zst"
-        raw = zstd.ZstdDecompressor().decompress(path.read_bytes()) if is_zstd else None
-
+        
         if is_zstd:
+            raw = self._read_bytes(path)
             return Index.restore(raw)
         if into_memory:
             return Index.restore(str(path))
@@ -150,11 +111,11 @@ class UsearchHnswIndex(VectorIndex):
         if self._cached_mode == "view":
             matches = self._cached_payload.search(vec, count)
             keys, distances = matches.keys.tolist(), matches.distances.tolist()
-            return self._hits_dataframe(keys, distances, count)
+            return get_hits_dataframe(keys, distances, count)
 
         all_keys, all_distances = [], []
         for index in self._iter_indexes():
             matches = index.search(vec, count)
             all_keys.extend(matches.keys.tolist())
             all_distances.extend(matches.distances.tolist())
-        return self._hits_dataframe(all_keys, all_distances, count)
+        return get_hits_dataframe(all_keys, all_distances, count)

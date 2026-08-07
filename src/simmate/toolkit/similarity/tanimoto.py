@@ -61,3 +61,18 @@ class Tanimoto(SimilarityEngine):
             fingerprint_rdkit,
             fingerprints_rdkit,
         )
+
+    @staticmethod
+    def get_distance_packed(
+        query: numpy.ndarray,
+        candidates: numpy.ndarray,
+    ) -> numpy.ndarray:
+        """
+        Tanimoto distance between one packed query fingerprint and a
+        (n_candidates, stored_bytes) matrix of packed fingerprints.
+        """
+        intersection = numpy.bitwise_count(query & candidates).sum(axis=1)
+        union = numpy.bitwise_count(query | candidates).sum(axis=1)
+        with numpy.errstate(invalid="ignore", divide="ignore"):
+            similarity = numpy.where(union > 0, intersection / union, 0.0)
+        return (1 - similarity).astype(numpy.float32)
