@@ -50,3 +50,18 @@ def tanimoto_ecfp4(a, b):
         ands += word_popcount(a_array[i] & b_array[i])
         ors += word_popcount(a_array[i] | b_array[i])
     return 1 - types.float32(ands) / ors
+
+
+@cfunc(numba_signature_u32)
+def tanimoto_ecfp4_1024(a, b):
+    """
+    Compute Tanimoto distance for ECFP4 fingerprints (1024 bits = 32 uint32 words).
+    """
+    a_array = carray(a, 32)
+    b_array = carray(b, 32)
+    ands = 0
+    ors = 0
+    for i in range(32):
+        ands += word_popcount(a_array[i] & b_array[i])
+        ors += word_popcount(a_array[i] | b_array[i])
+    return 1 - types.float32(ands) / ors
