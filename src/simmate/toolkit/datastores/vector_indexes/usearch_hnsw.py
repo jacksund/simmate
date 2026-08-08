@@ -69,7 +69,9 @@ class UsearchHnswIndex(VectorIndex):
             index.save(str(uncompressed_path))
 
             if self.use_zstd:
-                self._write_bytes(uncompressed_path.read_bytes(), index_path, use_zstd=True)
+                self._write_bytes(
+                    uncompressed_path.read_bytes(), index_path, use_zstd=True
+                )
 
             logging.info(f"  Saved progress | Vectors: {len(index):,}")
 
@@ -92,7 +94,7 @@ class UsearchHnswIndex(VectorIndex):
 
     def _read_index(self, path: Path, into_memory: bool = False):
         is_zstd = path.suffix == ".zst"
-        
+
         if is_zstd:
             raw = self._read_bytes(path)
             return Index.restore(raw)

@@ -7,9 +7,8 @@ import faiss
 import numpy
 import polars
 
-from simmate.utils import dispatch
-
 from simmate.toolkit.similarity import Tanimoto
+from simmate.utils import dispatch
 
 from .base import VectorIndex, get_hits_dataframe
 
@@ -35,7 +34,7 @@ class FaissIvfPqIndex(VectorIndex):
         metric_fn,
         featurizer,
         featurizer_kwargs: dict = None,
-        batch_size: int = 1,
+        batch_size: int = 200,
         load_mode: str = "memory",
         nlist: int = 4096,
         m: int = 8,
@@ -115,7 +114,9 @@ class FaissIvfPqIndex(VectorIndex):
 
         if len(chunk_files) > self.max_training_files:
             step = len(chunk_files) / self.max_training_files
-            chunk_files = [chunk_files[int(i * step)] for i in range(self.max_training_files)]
+            chunk_files = [
+                chunk_files[int(i * step)] for i in range(self.max_training_files)
+            ]
 
         rows_per_file = max(1, self.train_size // len(chunk_files))
         frames = []
@@ -192,7 +193,7 @@ class FaissIvfPqIndex(VectorIndex):
             index = faiss.deserialize_index(numpy.frombuffer(raw, dtype=numpy.uint8))
         else:
             index = faiss.read_index(str(path), faiss.IO_FLAG_READ_ONLY)
-        
+
         index.nprobe = self.nprobe
         return index
 

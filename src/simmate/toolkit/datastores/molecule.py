@@ -6,7 +6,7 @@ import numpy
 import polars
 
 from simmate.toolkit import Molecule
-from simmate.toolkit.datastores.vector_indexes import UsearchHnswIndex
+from simmate.toolkit.datastores.vector_indexes import FaissIvfPqIndex, UsearchHnswIndex
 from simmate.utils import filter_polars_df
 
 from ..dataframes import MoleculeDataFrame
@@ -256,6 +256,13 @@ class MoleculeDatastore(Datastore):
             featurizer=Fcfp4Fingerprint,
             featurizer_kwargs={"size": 1024},
         ),
+        "ecfp4_1024_faiss": FaissIvfPqIndex(
+            column_name="ecfp4_1024",
+            ndim=1024,
+            metric_fn=tanimoto_ecfp4_1024,
+            featurizer=Ecfp4Fingerprint,
+            featurizer_kwargs={"size": 1024},
+        ),
     }
 
     @update_table()
@@ -284,7 +291,11 @@ class MoleculeDatastore(Datastore):
             ValueError: If ``fingerprint_type`` is not recognized.
         """
         if len(df) == 0:
-            cols = ["maccs", "ecfp4", "fcfp4"] if fingerprint_type == "usearch" else [fingerprint_type]
+            cols = (
+                ["maccs", "ecfp4", "fcfp4"]
+                if fingerprint_type == "usearch"
+                else [fingerprint_type]
+            )
             return df.with_columns(
                 [polars.Series(c, [], dtype=polars.Binary) for c in cols]
             )
@@ -308,7 +319,7 @@ class MoleculeDatastore(Datastore):
                 vector_type="numpy_packbits_bytes",
                 **index.featurizer_kwargs,
             )
-            return df.with_columns(polars.Series(fingerprint_type, fp_list))
+            return df.with_columns(polars.Series(index.column_name, fp_list))
 
         valid = ["usearch"] + list(cls.vector_indexes.keys())
         raise ValueError(
@@ -328,8 +339,9 @@ class MoleculeDatastore(Datastore):
         Args:
             query: Query molecule as a ``Molecule`` object or SMILES string.
             count: Number of top results to return.
-            similarity_type: Fingerprint type to use. One of ``"ecfp4"``, ``"maccs"``,
-                ``"fcfp4"``, ``"ecfp4_1024"``, or ``"fcfp4_1024"``.
+            similarity_type: Index to use. One of ``"ecfp4"``, ``"maccs"``,
+                ``"fcfp4"``, ``"ecfp4_1024"``, ``"fcfp4_1024"``, or
+                ``"ecfp4_1024_faiss"``.
         """
         if isinstance(query, str):
             query = Molecule.from_smiles(query)
