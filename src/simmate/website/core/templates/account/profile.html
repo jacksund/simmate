@@ -1,5 +1,5 @@
 {% extends "core/site_base.html" %}
-{% block tabtitle %}Profile | Simmate{% endblock %}
+{% block tabtitle %}Profile - Simmate{% endblock %}
 {% block body %}
     <section class="jumbotron text-center">
         <div class="container py-5">
@@ -14,6 +14,7 @@
             {% include "account/for_view/notifications_tab.html" %}
             {% include "account/for_view/projects_tab.html" %}
             {% include "account/for_view/inventory_tab.html" %}
+            {% include "account/for_view/calculations_tab.html" %}
         </div>
     </div>
 {% endblock %}

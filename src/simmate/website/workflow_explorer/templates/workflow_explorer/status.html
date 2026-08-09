@@ -1,7 +1,7 @@
 {% extends "htmx/form_base.html" %}
 {% block form %}
     <form class="m-0 p-0">
-        {% htmx_refresh refresh_loop="5s" %}
+        {% htmx_refresh refresh_loop="5s" indicator=False %}
         {% with status=component.current_status %}
             {% if status == "Completed" %}
                 <div class="alert alert-success text-center fw-bold m-0 p-0">{{ status }}</div>

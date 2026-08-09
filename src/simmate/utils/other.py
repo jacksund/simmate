@@ -9,6 +9,7 @@ import logging
 import textwrap
 from functools import wraps
 
+import cloudpickle
 import requests
 from rich.progress import track
 
@@ -427,6 +428,18 @@ def get_chunk_key(string_id: str, num_chunks: int) -> int:
     return int.from_bytes(h, "big") % num_chunks
 
 
+def _run_cloudpickled_chunk(payload: bytes) -> list:
+    """
+    Unpacks a cloudpickle payload and runs fn over a chunk of items.
+
+    This must stay module-level so that `ProcessPoolExecutor` can pickle it
+    by reference. The real callable (which is often a closure or lambda, and
+    therefore unpicklable by the stdlib) travels inside `payload` instead.
+    """
+    fn, chunk_items, kwargs = cloudpickle.loads(payload)
+    return [fn(item, **kwargs) for item in chunk_items]
+
+
 def dispatch(
     items,
     fn,
@@ -455,12 +468,12 @@ def dispatch(
     elif parallel is True or parallel == "core":
         from concurrent.futures import ProcessPoolExecutor
 
-        def process_chunk(chunk_items, **kwargs_inner):
-            return [fn(i, **kwargs_inner) for i in chunk_items]
-
         with ProcessPoolExecutor(max_workers=max_workers) as executor:
             futures = [
-                executor.submit(process_chunk, chunk, **kwargs)
+                executor.submit(
+                    _run_cloudpickled_chunk,
+                    cloudpickle.dumps((fn, chunk, kwargs)),
+                )
                 for chunk in chunk_list(full_list=items, chunk_size=batch_size)
             ]
             # flatten results before returning

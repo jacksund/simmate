@@ -37,9 +37,38 @@ def profile_default_view(request):
     for n in unread_notifications:
         grouped_unread[n.notification_type].append(n)
 
+    from simmate.database import workflow_results
+
+    calc_models = [
+        workflow_results.BandStructureCalc,
+        workflow_results.DensityofStatesCalc,
+        workflow_results.DiffusionAnalysis,
+        workflow_results.Dynamics,
+        workflow_results.PopulationAnalysis,
+        workflow_results.Relaxation,
+        workflow_results.StagedRelaxStatic,
+        workflow_results.StagedWorkflow,
+        workflow_results.StaticEnergy,
+    ]
+    user_calcs = []
+    for model in calc_models:
+        try:
+            # grab the most recent 10 from each to avoid huge queries
+            calcs = list(
+                model.objects.filter(submitted_by=request.user)
+                .only("id", "run_id", "workflow_name", "status", "updated_at")
+                .order_by("-updated_at")[:10]
+            )
+            user_calcs += calcs
+        except:
+            pass
+    user_calcs.sort(key=lambda x: x.updated_at, reverse=True)
+    user_calcs = user_calcs[:50]
+
     context = {
         "notifications": notifications,
         "grouped_unread": dict(grouped_unread),
+        "user_calcs": user_calcs,
         "breadcrumbs": [request.user.username],
     }
     template = "account/profile.html"
