@@ -1,0 +1,71 @@
+<div class="tab-pane" id="notifications-section">
+    <div class="d-flex justify-content-end mb-4">
+        {% if grouped_unread %}
+            <a href="{% url 'mark_notifications_as_read' %}"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-check-all"></i> Mark all as read
+            </a>
+        {% endif %}
+    </div>
+    {% if not notifications %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+            <p class="lead text-muted mt-3">You have no notifications yet.</p>
+        </div>
+    {% else %}
+        {# Unread Notifications grouped by type #}
+        {% if grouped_unread %}
+            <div class="mb-5">
+                <h4 class="text-primary mb-3">Unread</h4>
+                {% for type, items in grouped_unread.items %}
+                    <div class="card mb-3 border-primary shadow-sm">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">{{ type|title|replace:"_, " }}</span>
+                            <span class="badge bg-white text-primary rounded-pill">{{ items|length }}</span>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            {% for n in items %}
+                                <li class="list-group-item list-group-item-action">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div>{{ n.message }}</div>
+                                            <small class="text-muted">{{ n.created_at|timesince }} ago</small>
+                                        </div>
+                                        {% if n.target_url %}
+                                            <a href="{{ n.target_url }}" class="btn btn-outline-primary btn-sm">
+                                                View <i class="bi bi-arrow-right"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {# Recent History #}
+        <div class="mt-4">
+            <h4 class="text-muted mb-3">Recent History</h4>
+            <div class="list-group shadow-sm">
+                {% for n in notifications|slice:":20" %}
+                    <div class="list-group-item list-group-item-action {% if not n.is_read %}border-start border-primary border-4{% endif %}">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1 {% if not n.is_read %}fw-bold{% endif %}">{{ n.message }}</h6>
+                            <small class="text-muted">{{ n.created_at|date:"M d, Y" }}</small>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <span class="badge bg-light text-dark border">{{ n.notification_type|title|replace:"_, " }}</span>
+                            {% if n.target_url %}
+                                <a href="{{ n.target_url }}"
+                                   class="btn btn-link btn-sm p-0 text-decoration-none">
+                                    View <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>

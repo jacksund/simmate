@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.quantum_espresso.workflows.base import PwscfWorkflow
+from ..base import PwscfWorkflow
 
 
 class StaticEnergy__QuantumEspresso__Quality00(PwscfWorkflow):
     """
     A very a basic static energy calc for testing
     """
+
+    accuracy_rating = 0.5
 
     control = dict(
         pseudo_dir__auto=True,
@@ -31,7 +33,7 @@ class StaticEnergy__QuantumEspresso__Quality00(PwscfWorkflow):
         conv_thr="1.0e-8",
     )
 
-    psuedo_mappings_set = "SSSP_PBE_EFFICIENCY"
+    pseudo_mappings_set = "SSSP_PBE_EFFICIENCY"
 
     k_points = dict(
         spacing=0.5,

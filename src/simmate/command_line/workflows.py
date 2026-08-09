@@ -12,7 +12,9 @@ workflows_app = typer.Typer(rich_markup_mode="markdown")
 
 @workflows_app.callback(no_args_is_help=True)
 def workflows():
-    """A group of commands for running workflows or viewing their settings"""
+    """
+    Commands for exploring, configuring, and executing Simmate workflows.
+    """
     pass
 
 
@@ -112,10 +114,14 @@ def parse_parameters(context: Context) -> dict:
 
 
 @workflows_app.command()
-def explore(include_subflows: bool = False):
+def explore(
+    include_subflows: bool = typer.Option(
+        False,
+        help="Whether to include sub-workflows (internal steps) in the exploration list.",
+    )
+):
     """
-    interactively view all available workflows to see docs & paramaters
-    available
+    Interactively explore available workflows, their descriptions, and parameters.
     """
     # make a convenience variable that we use repeatedly below
     esub = not include_subflows
@@ -124,7 +130,7 @@ def explore(include_subflows: bool = False):
     # string, so we save this up front
     prefix = "\n\n[bold green]"
 
-    from simmate.workflows.utilities import (
+    from simmate.workflows.utils import (
         get_all_workflow_types,
         get_apps_by_type,
         get_workflow,
@@ -180,7 +186,7 @@ def explore(include_subflows: bool = False):
 
     endnote = Markdown(
         "To understand each parameter, you can read through "
-        "[our parameter docs](https://jacksund.github.io/simmate/parameters/)"
+        "[our parameter docs](https://jacksund.github.io/simmate/full_guides/workflows/parameters/overview/)"
         ", which give full descriptions and examples."
     )
     console.print(endnote)
@@ -189,14 +195,19 @@ def explore(include_subflows: bool = False):
 
 
 @workflows_app.command()
-def list_all(include_subflows: bool = False):
+def list_all(
+    include_subflows: bool = typer.Option(
+        False,
+        help="Whether to include sub-workflows (internal steps) in the list.",
+    )
+):
     """
-    This lists off all available workflows.
+    Lists all registered Simmate workflows.
     """
 
-    from simmate.workflows.utilities import get_all_workflow_names
+    from simmate.workflows.utils import get_all_workflow_names
 
-    print("These are the workflows that have been registerd:")
+    print("These are the workflows that have been registered:")
     all_workflows = get_all_workflow_names(exclude_subflows=not include_subflows)
     for i, workflow in enumerate(all_workflows):
         workflow_number = str(i + 1).zfill(2)
@@ -204,15 +215,20 @@ def list_all(include_subflows: bool = False):
 
 
 @workflows_app.command()
-def show_config(workflow_name: str):
+def show_config(
+    workflow_name: str = typer.Argument(
+        ...,
+        help="The full name of the workflow (e.g., 'relaxation.vasp.staged').",
+    )
+):
     """
-    The calculation's configuration settings are displayed
+    Displays the configuration settings for a specific workflow.
 
-    For example, a VASP workflow will show a dictionary that details how
-    INCAR settings are selected.
+    For simulation-based workflows (like VASP), this shows the input parameters
+    (e.g., INCAR settings) that will be used.
     """
 
-    from simmate.workflows.utilities import get_workflow
+    from simmate.workflows.utils import get_workflow
 
     workflow = get_workflow(workflow_name)
 
@@ -225,14 +241,22 @@ def show_config(workflow_name: str):
         allow_extra_args=True,
     )
 )
-def setup_only(context: Context, workflow_name: str):
+def setup_only(
+    context: Context,
+    workflow_name: str = typer.Argument(
+        ...,
+        help="The full name of the workflow to set up.",
+    ),
+):
     """
-    the calculation is set up but not ran (S3Workflows only)
+    Generates input files for a workflow without executing the simulation.
 
-    This is useful when you just want the input files to view/edit.
+    This is useful for reviewing or manually modifying input files before
+    running a job. Supported primarily by `S3Workflow` types (e.g., VASP,
+    Quantum Espresso).
     """
 
-    from simmate.workflows.utilities import get_workflow
+    from simmate.workflows.utils import get_workflow
 
     workflow = get_workflow(workflow_name)
     kwargs_input = parse_parameters(context=context)
@@ -240,7 +264,7 @@ def setup_only(context: Context, workflow_name: str):
 
     # if no folder was given, just name it after the workflow. We also replace
     # spaces with underscores
-    from simmate.utilities import get_directory
+    from simmate.utils import get_directory
 
     directory = kwargs_cleaned.get("directory", None)
     if not directory:
@@ -253,7 +277,7 @@ def setup_only(context: Context, workflow_name: str):
 
     # Not all workflows have a single input because some are NestWorkflows,
     # meaning they are made of multiple smaller workflows.
-    from simmate.workflows.base_flow_types import S3Workflow
+    from simmate.workflows.common import S3Workflow
 
     if issubclass(workflow, S3Workflow):
         workflow.setup(**kwargs_cleaned)
@@ -273,10 +297,21 @@ def setup_only(context: Context, workflow_name: str):
         allow_extra_args=True,
     )
 )
-def run_quick(context: Context, workflow_name: str):
-    """Runs a workflow using provided parameters as CLI arguments"""
+def run_quick(
+    context: Context,
+    workflow_name: str = typer.Argument(
+        ...,
+        help="The full name of the workflow to run.",
+    ),
+):
+    """
+    Executes a workflow immediately using parameters provided as CLI arguments.
 
-    from simmate.workflows.utilities import get_workflow
+    Example:
+    `simmate workflows run-quick relaxation.vasp.staged --structure example.cif`
+    """
+
+    from simmate.workflows.utils import get_workflow
 
     workflow = get_workflow(workflow_name)
     kwargs_cleaned = parse_parameters(context=context)
@@ -285,9 +320,14 @@ def run_quick(context: Context, workflow_name: str):
 
 
 @workflows_app.command()
-def run(filename: Path):
+def run(
+    filename: Path = typer.Argument(
+        ...,
+        help="The YAML or TOML file containing workflow parameters.",
+    )
+):
     """
-    Runs a workflow locally where parameters are loaded from a yaml or toml file
+    Executes a workflow locally using parameters loaded from a configuration file.
     """
 
     from simmate.workflows import Workflow
@@ -296,10 +336,14 @@ def run(filename: Path):
 
 
 @workflows_app.command()
-def run_cloud(filename: Path):
+def run_cloud(
+    filename: Path = typer.Argument(
+        ...,
+        help="The YAML or TOML file containing workflow parameters.",
+    )
+):
     """
-    Submits a workflow to cloud for remote running where parameters are loaded
-    from a yaml file
+    Submits a workflow for remote execution on a cluster or cloud resource.
     """
 
     from simmate.workflows import Workflow

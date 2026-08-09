@@ -21,7 +21,7 @@ RUN apt-get update && \
     apt-get clean
 
 # Download & unpack OPERA source code + build files
-RUN wget https://archives.simmate.org/OPERA2.9_CL_mcr.tar.gz -O opera.tar.gz --no-check-certificate && \
+RUN wget https://assets.simmate.org/OPERA2.9_CL_mcr.tar.gz -O opera.tar.gz --no-check-certificate && \
     tar -xzf opera.tar.gz && \
     rm opera.tar.gz
 

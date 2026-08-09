@@ -4,7 +4,7 @@ from functools import cached_property
 
 from django.contrib.auth.models import User
 
-from simmate.configuration import settings
+from simmate.config import settings
 
 
 class UserInput:

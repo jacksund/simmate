@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from dask import bag
-from dask.diagnostics import ProgressBar
+from simmate.utils import dispatch
 
 
 class Validator:
@@ -22,19 +21,14 @@ class Validator:
             "make sure you add a custom 'check_structure' method to your Validator"
         )
 
-    def check_many_structures(self, structures, progressbar=True, mode="threads"):
-        # REFACTOR: switch to the get_dask_client utility here.
-
-        # using dask to parallelize
-        structures_bag = bag.from_sequence(structures)
-        validation_bag = structures_bag.map(self.check_structure)
-
-        # Based on whether the user wants a progress bar or not, decide how
-        # the compute() command is called.
-        if progressbar:
-            with ProgressBar():
-                checks = validation_bag.compute(scheduler=mode)
-        else:
-            checks = validation_bag.compute(scheduler=mode)
-
+    def check_many_structures(
+        self,
+        structures,
+        parallel: bool | str = True,
+    ):
+        checks = dispatch(
+            structures,
+            self.check_structure,
+            parallel=parallel,
+        )
         return checks

@@ -20,6 +20,8 @@ class StaticEnergy__Vasp__Quality04(Relaxation__Vasp__Quality04):
     of rough relaxations are done.
     """
 
+    accuracy_rating = 1
+
     _incar_updates = dict(
         ALGO="Normal",
         IBRION=-1,  # (optional) locks everything between ionic steps

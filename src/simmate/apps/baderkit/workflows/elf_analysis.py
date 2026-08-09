@@ -10,7 +10,7 @@ from simmate.apps.baderkit.models import (
     SpinElfAnalysisCalculation,
 )
 from simmate.database import connect
-from simmate.workflows.base_flow_types import Workflow
+from simmate.workflows.core import Workflow
 
 
 class ElfAnalysisBase(Workflow):

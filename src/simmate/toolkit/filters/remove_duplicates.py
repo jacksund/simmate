@@ -30,7 +30,7 @@ class RemoveDuplicates(Filter):
         **kwargs,
     ) -> list[bool]:
         """
-        Identifies duplicates in a list of molecules. The first occurance of
+        Identifies duplicates in a list of molecules. The first occurrence of
         each molecule with yield True, while following duplicates will give
         False -- indicating that they should be removed.
         """

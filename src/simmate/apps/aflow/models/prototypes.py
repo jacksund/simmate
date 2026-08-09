@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import Structure, table_column
+from simmate.database.core import table_column
+from simmate.database.mixins import Structure, ThirdPartyData
+from simmate.database.utils import batch_bulk_create
 
 
-class AflowPrototype(Structure):
+class AflowPrototype(ThirdPartyData, Structure):
     """
     A collection of prototype crystal structures from the AFLOW library.
 
@@ -24,17 +26,6 @@ class AflowPrototype(Structure):
 
     # -------------------------------------------------------------------------
 
-    html_display_name = "AFLOW Prototypes"
-    html_description_short = (
-        "Encyclopedia of Crystallographic Prototypes from the Automatic-FLOW"
-        " for Materials Discovery"
-    )
-
-    html_entries_template = "aflow/prototype/table.html"
-    html_entry_template = "aflow/prototype/view.html"
-
-    # -------------------------------------------------------------------------
-
     external_website = "https://www.aflowlib.org/prototype-encyclopedia/"
     source_doi = "https://doi.org/10.1016/j.commatsci.2017.01.017"
     is_redistribution_allowed = False
@@ -50,7 +41,7 @@ class AflowPrototype(Structure):
 
     # -------------------------------------------------------------------------
 
-    remote_archive_link = "https://archives.simmate.org/AflowPrototype-2023-07-06.zip"
+    remote_archive_link = "https://assets.simmate.org/AflowPrototype-2023-07-06.zip"
     archive_fields = [
         "mineral_name",
         "aflow_id",
@@ -111,6 +102,7 @@ class AflowPrototype(Structure):
     # -------------------------------------------------------------------------
 
     @classmethod
+    @batch_bulk_create(batch_size=1_000)
     def load_source_data(cls):
         """
         This method is for pulling AFLOW data into the Simmate database.
@@ -128,8 +120,6 @@ class AflowPrototype(Structure):
         from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
         from rich.progress import track
 
-        # create database objects but don't save them to the database yet
-        db_objects = []
         for prototype_data in track(AFLOW_PROTOTYPE_LIBRARY):
             # first let's grab the structure
             structure = prototype_data["snl"].structure
@@ -139,7 +129,7 @@ class AflowPrototype(Structure):
             structure_sym = SpacegroupAnalyzer(structure).get_symmetrized_structure()
 
             # Organize the data into our database format
-            new_prototype = cls.from_toolkit(
+            yield cls.from_toolkit(
                 structure=structure,
                 mineral_name=prototype_data["tags"]["mineral"],
                 aflow_id=prototype_data["tags"]["aflow"],
@@ -147,11 +137,3 @@ class AflowPrototype(Structure):
                 strukturbericht_symbol=prototype_data["tags"]["strukturbericht"],
                 nsites_wyckoff=len(structure_sym.wyckoff_symbols),
             )
-            db_objects.append(new_prototype)
-
-        # and save it to our database
-        cls.objects.bulk_create(
-            db_objects,
-            batch_size=15000,
-            ignore_conflicts=True,
-        )

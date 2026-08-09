@@ -196,7 +196,7 @@ potcar files. Instead, I think you should either 1) let the user indicate exactl
 where the files are located or 2) have a simmate/ folder in their home directory.
 This makes it so users can see exactly where their files are located. I don't
 think you should mess with the site-packages folder as this could even cause issues
-on shared installs. There should instead be at simmate configuration folder that
+on shared installs. There should instead be at simmate config folder that
 is easily accessible.
 
 Vasp provides their POTCARs in a dist/Potentials folder. Pymatgen takes their
@@ -205,7 +205,7 @@ their original folder structure and just move it to /simmate/vasp/Potentials
 This saves the user from having to rename anything and also saves us from having
 to code it and confuse the user where it's being stored
 
-Together, the simmate folder means I can also just copy/paste a configuration
+Together, the simmate folder means I can also just copy/paste a config
 folder to a new computer if I'd like.
 
 I need to learn more about other DFT programs but I'm sure there's a generic

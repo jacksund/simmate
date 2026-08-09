@@ -6,7 +6,7 @@ from langchain_core.runnable import RunnablePassthrough
 from langchain_core.tools import tool
 
 from ..data import EmbeddingDbHelper
-from ..utilities import get_llm
+from ..utils import get_llm
 
 
 @tool

@@ -15,5 +15,7 @@ class Diffusion__Vasp__NebFromEndpointsMit(NebFromEndpointWorkflow):
     MIT settings.
     """
 
+    accuracy_rating = 2
+
     endpoint_relaxation_workflow = Relaxation__Vasp__MvlNebEndpoint
     from_images_workflow = Diffusion__Vasp__NebFromImagesMit

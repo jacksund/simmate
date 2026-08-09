@@ -13,9 +13,9 @@ from clease.tools import update_db as update_clease_db
 
 from simmate.toolkit import Structure
 from simmate.toolkit.file_converters import AseAtomsAdaptor
-from simmate.utilities import get_chemical_subsystems, get_directory
+from simmate.utils import get_chemical_subsystems, get_directory
 from simmate.workflows import Workflow
-from simmate.workflows.utilities import get_workflow
+from simmate.workflows.utils import get_workflow
 
 
 class ClusterExpansion__Clease__BulkStructure(Workflow):

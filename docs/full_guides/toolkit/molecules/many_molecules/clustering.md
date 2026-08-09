@@ -72,13 +72,15 @@ similarity_engine_kwargs = dict(
 
 ### 3. Choose clustering method
 
-Select any clustering method from the `simmate.toolkit.clustering` module. You can also select *any* kwargs that `cluster_fingerprints` method accepts. Currently, we support the following clustering method:
+Select any clustering method from the `simmate.toolkit.clustering` module. You can also select *any* kwargs that the `cluster_fingerprints` method accepts. Currently, we support the following clustering methods:
 
 - `Butina`
+- `Identity`
+- `KMeans`
 
 Example:
 ``` python
-from simmate.toolkit.featurizers import Butina
+from simmate.toolkit.clustering import Butina
 
 clustering_kwargs = dict(
     similarity_cutoff=0.50,

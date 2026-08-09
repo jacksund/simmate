@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import Calculation, table_column
+from simmate.database.core import table_column
+from simmate.database.mixins import Calculation
 
 
 class VariableNsitesCompositionSearch(Calculation):
 
-    html_display_name = "Variable nSites Searches"
-    html_description_short = (
-        "All evolutionary searches ran for a given reduced composition. "
-        "This means the composition ratio is kept constant while atom count is "
-        "allowed to change. This is essentially many fixed-composition searches."
-    )
-
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
+        db_table = "workflows_variablensitescompositionsearch"
 
     # OPTIMIZE: This is really just a copy/paste of the fixed-composition
     # workflow, where we aren't using the table directly in the search and

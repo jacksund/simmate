@@ -5,7 +5,7 @@ from simmate.website.htmx.components import HtmxComponent
 from ..models import PricedItem
 
 
-class PricedItemsReport(HtmxComponent):
+class PricedItemsReportComponent(HtmxComponent):
 
     template_name = "price_catalog/priced_items/report.html"
 

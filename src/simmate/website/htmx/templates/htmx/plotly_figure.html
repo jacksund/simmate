@@ -1,0 +1,6 @@
+{{ figure_html }}
+{% if stream_interval %}
+    <div class="d-none"
+         {% htmx_post trigger=trigger method_name="stream_plotly_data" method_kwargs=method_kwargs javascript_only=True indicator="None" %}>
+    </div>
+{% endif %}

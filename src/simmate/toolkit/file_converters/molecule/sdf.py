@@ -96,7 +96,7 @@ class SdfAdapter:
         final_str = ""
         for molecule in track(molecules):
             mol_str = molecule.to_sdf(**kwargs)
-            final_str += f"{mol_str}$$$$\n"
+            final_str += mol_str
         return final_str
 
     @classmethod
@@ -122,7 +122,7 @@ class SdfAdapter:
         # in order to make this a faster function.
 
         # doing a local import bc of the kemistree package
-        from simmate.utilities import chunk_read
+        from simmate.utils import chunk_read
 
         filename = Path(filename)
         chunk_filenames = []

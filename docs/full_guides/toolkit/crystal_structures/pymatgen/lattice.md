@@ -20,10 +20,12 @@ lattice = structure.lattice
 ## Lattice Loading
 
 ### basic
+
 - `from_dict`
 - `from_parameters`
 
 ### constructors
+
 - `cubic`
 - `hexagonal`
 - `monoclinic`
@@ -44,6 +46,7 @@ lattice = structure.lattice
 ## Basic Properties
 
 ### vectors
+
 - `a`
 - `b`
 - `c`
@@ -52,12 +55,14 @@ lattice = structure.lattice
 - `pbc`
 
 ### angles
+
 - `alpha`
 - `beta`
 - `gamma`
 - `angles`
 
 ### full lattice
+
 - `matrix`
 - `volume`
 - `is_3d_periodic`
@@ -70,6 +75,7 @@ lattice = structure.lattice
 --------------------------------------------------------------------------------
 
 ## Measurements
+
 - `d_hkl`
 - `dot`
 - `norm`
@@ -88,6 +94,7 @@ lattice = structure.lattice
 --------------------------------------------------------------------------------
 
 ## Analysis Methods
+
 - `get_all_distances`
 - `get_brillouin_zone`
 - `get_cartesian_coords`

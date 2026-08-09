@@ -7,7 +7,7 @@
             {% endfor %}
         </div>
     {% endif %}
-    {% if component.form_mode == "update_many" %}
+    {% if component.component_type == "update_many" %}
         {% if not component.is_update_many_confirmed %}
             <div>There is no undo button! Are you sure you want to update all these entries?</div>
             {% with target_id="#"|add:component.component_id|add:"-submit-button" %}
@@ -19,7 +19,7 @@
             </div>
             {% htmx_button method_name="submit_form" label="Save to database" icon="floppy2" %}
         {% endif %}
-    {% elif component.form_mode == "search" %}
+    {% elif component.component_type == "search" %}
         {% htmx_button method_name="submit_form" label="Search" icon="search" %}
     {% else %}
         {% htmx_button method_name="submit_form" label="Save to database" icon="floppy2" %}

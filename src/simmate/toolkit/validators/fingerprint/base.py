@@ -10,7 +10,7 @@ from rich.progress import track
 
 from simmate.toolkit import Structure
 from simmate.toolkit.validators import Validator
-from simmate.utilities import chunk_list
+from simmate.utils import chunk_list
 
 
 class FingerprintValidator(Validator):
@@ -66,7 +66,7 @@ class FingerprintValidator(Validator):
             # fingerprints -- both from different fingerprint featurizers AND
             # using different settings for a given featurizer. We therefore
             # need to store the init kwargs with each fingerprint in the database
-            from simmate.database.base_data_types import FingerprintPool
+            from simmate.database.mixins import FingerprintPool
             from simmate.workflows import Workflow
 
             self.init_kwargs = Workflow._serialize_parameters(
@@ -264,7 +264,7 @@ class FingerprintValidator(Validator):
                 # fingerprints to the database. We add distinct to keep our
                 # query smaller and just grab one. Distinct is also not supported
                 # by sqlite
-                from simmate.configuration import settings
+                from simmate.config import settings
 
                 if settings.database.engine != "django.db.backends.sqlite3":
                     query = query.distinct("database_id")
@@ -296,13 +296,6 @@ class FingerprintValidator(Validator):
         new_structures = self.structure_pool_queryset.filter(
             id__in=new_ids
         ).to_toolkit()
-
-        # OPTIMIZE: I attempted to calculate fingerprints with Dask, but without
-        # any luck. Ends up crashing in many scenarios.
-        # from simmate.configuration.dask import get_dask_client
-        # with get_dask_client() as client:
-        #     futures = [client.submit(self._get_fingerprint, s) for s in new_structures]
-        #     fingerprints = [future.result() for future in track(futures)]
 
         # calculate each fingerprint and add it to the database
         fingerprints = [

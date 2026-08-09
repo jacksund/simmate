@@ -11,5 +11,7 @@ class StaticEnergy__Vasp__MatprojHsesol(StaticEnergy__Vasp__MatprojHse):
     not have an HSEsol static energy, so this is the make-shift alternative.
     """
 
+    accuracy_rating = 5
+
     # tells VASP to use PBEsol functional
     _incar_updates = dict(GGA="PS")

@@ -1,15 +1,22 @@
 # -*- coding: utf-8 -*-
 
+import logging
+import shutil
+import urllib.request
+import zipfile
 from pathlib import Path
 
 import pandas
 from rich.progress import track
 
-from simmate.database.base_data_types import Structure, table_column
+from simmate.config import settings
+from simmate.database.core import table_column
+from simmate.database.mixins import Structure, ThirdPartyData
+from simmate.database.utils import batch_bulk_create
 from simmate.toolkit import Structure as ToolkitStructure
 
 
-class OqmdStructure(Structure):
+class OqmdStructure(ThirdPartyData, Structure):
     """
     Crystal structures from the [OQMD](http://oqmd.org/) database.
 
@@ -20,14 +27,6 @@ class OqmdStructure(Structure):
 
     class Meta:
         db_table = "oqmd__structures"
-
-    # -------------------------------------------------------------------------
-
-    html_display_name = "OQMD"
-    html_description_short = "The Open Quantum Materials Database"
-
-    html_entries_template = "oqmd/structures/table.html"
-    html_entry_template = "oqmd/structures/view.html"
 
     # -------------------------------------------------------------------------
 
@@ -42,100 +41,135 @@ class OqmdStructure(Structure):
         """
         # Links to the OQMD dashboard for this structure. An example is...
         #   http://oqmd.org/materials/entry/10435
-        id_number = self.id.split("-")[-1]  # this removes the "oqmd-" from the id
-        return f"http://oqmd.org/materials/entry/{id_number}"
+        return f"http://oqmd.org/materials/entry/{self.id}"
 
     # -------------------------------------------------------------------------
 
-    remote_archive_link = "https://archives.simmate.org/OqmdStructure-2023-07-21.zip"
+    remote_archive_link = "https://assets.simmate.org/OqmdStructure-2026-03-29.zip"
     archive_fields = ["formation_energy"]
 
     # -------------------------------------------------------------------------
 
-    id = table_column.CharField(max_length=25, primary_key=True)
+    energy_per_atom = table_column.FloatField(blank=True, null=True)
     """
-    The id used to represent the structure (ex: "oqmd-12345")
-    """
-
-    # OQMD did not provide energy so the Thermodynamics mix-in can't be used
-    formation_energy = table_column.FloatField(blank=True, null=True)
-    """
-    The formation energy of the structure as provided by the OQMD.
+    The final energy per atom of the structure as provided by the OQMD.
     """
 
     # -------------------------------------------------------------------------
 
     @classmethod
+    @batch_bulk_create(batch_size=1_000)
     def load_source_data(
         cls,
-        base_directory: str = "oqmd",
+        base_directory: str = None,
         only_add_new_cifs: bool = True,
     ):
         """
-        Loads OQMD data into the Simmate database.
+        Downloads and loads OQMD data into the Simmate database.
 
-        Jiahong Shen was kind enough to provide all the crystal structures from
-        the OQMD as POSCAR files. This makes loading the structures into the
-        Simmate database much faster as we are no longer bottlenecked by the REST
-        API and internet connections.
+        Source files are downloaded from `https://assets.simmate.org/oqmd/raw/`
+        if they are not already present in the base directory.
 
-        All POSCARs are in the same folder, where the name of each is the
-        <id>-<composition> (ex: 12345-NaCl). There are also csv's that contain
-        additional data such as the energy:
+        Yichen Li was kind enough to provide all the crystal structures from
+        the OQMD as POSCAR files on 2026-03-24. This makes loading the structures
+        into the Simmate database much faster as we are no longer bottlenecked by
+        the REST API and internet connections. (Previously Jiahong Shen provided
+        these on 2022-02-21). Chris Wolverton (the PI) directed us to these students
+        to help each time.
 
-            - all_oqmd_entry.csv
-            - all_public_entries.csv
-            - all_public_fes.csv
-            - get_all_entry_id_public.py
-            - get_all_entry_poscar.py
+        All structures are provided as CONTCARs in a compressed folder
+        (`static_contcars_all_parts.tar.gz`) containing zip files of the structures.
+        There is also a csv file `static_final_energy.csv` that contains
+        additional data such as the final energy. We host these files on Cloudflare
+        R2 for easy access by others.
 
-        There are currently 1,013,654 structures and this function takes roughly
-        3hrs to run.
-
-        Note: there is a REST API and a python wrapper for that API (qmpy-rester),
-        but the API is not good for bulk downloads and the wrapper has not been
-        updated since 2021. Maybe I'll revisit their API in the future.
-            - http://oqmd.org/static/docs/restful.html
-            - https://github.com/mohanliu/qmpy_rester
+        There are currently over 1,000,000 structures and this function takes
+        a few hours to run.
         """
+        base_directory = Path(
+            base_directory or settings.config_directory / "oqmd" / "raw"
+        )
+        base_directory.mkdir(parents=True, exist_ok=True)
 
-        base_directory = Path(base_directory)
+        # Download files if they do not exist
+        files = {
+            "static_contcars_all_parts-2026-03-24.tar.gz": None,
+            "static_final_energy-2026-03-24.csv": None,
+        }
+        for filename in files:
+            file_path = base_directory / filename
+            files[filename] = file_path
+            if not file_path.exists():
+                logging.info(f"Downloading {filename}...")
+                url = f"https://assets.simmate.org/oqmd/raw/{filename}"
+                urllib.request.urlretrieve(url, file_path)
 
-        # load the csv that contains the list of filenames and their values
-        df = pandas.read_csv(base_directory / "all_oqmd_entry.csv")
-        # df = df[:1000]  # FOR TESTING
+        tar_path, csv_path = files.values()
+
+        # load the csv file that contains the list of ids and their energy
+        df = pandas.read_csv(csv_path)
+        energy_dict = dict(zip(df["oqmd_id"], df["final_energy"]))
+
+        if only_add_new_cifs:
+            logging.info("Gathering existing IDs...")
+            existing_ids = set(cls.objects.values_list("id", flat=True))
+        else:
+            existing_ids = set()
+
+        # We check for zip files to see if the archive has already been unpacked
+        zip_files = list(base_directory.glob("*.zip"))
+        if not zip_files:
+            shutil.unpack_archive(tar_path, base_directory)
+            zip_files = list(base_directory.glob("*.zip"))
 
         # iterate through the list and load the structures to our database!
-        # Use rich to monitor progress.
-        failed_entries = []
-        db_objects = []
-        for _, row in track(df.iterrows(), total=len(df)):
-            # load the structure from the poscar file
-            filename = base_directory / row.filename
-            with filename.open() as file:
-                contents = file.read()
-            structure = ToolkitStructure.from_str(contents, "poscar")
+        for zip_path in track(zip_files, description="Processing zip files..."):
+            with zipfile.ZipFile(zip_path) as z:
+                for file_info in z.infolist():
+                    if file_info.is_dir() or "CONTCAR" not in file_info.filename:
+                        continue
 
-            # save the data to the Simmate database
-            # now convert the entry to a database object
-            try:
-                structure_db = cls.from_toolkit(
-                    id="oqmd-" + str(row.entry_id),
-                    structure=structure,
-                    formation_energy=row.formationenergy,
-                )
-                db_objects.append(structure_db)
-            # A few structures fail because of the symmetry analyzer can't determine
-            # the spacegroup. These are...
-            # 1443135, 1443014, 1451986, 1452015, 1452024
-            except:
-                failed_entries.append(row.entry_id)
+                    # Filename example: oqmd_1605_calc_1228803_CONTCAR
+                    name = file_info.filename.split("/")[-1]
+                    parts = name.split("_")
+                    if len(parts) >= 2 and parts[0] == "oqmd":
+                        try:
+                            entry_id = int(parts[1])
+                        except ValueError:
+                            continue
+                    else:
+                        continue
 
-        # and save it to our database
-        cls.objects.bulk_create(
-            db_objects,
-            batch_size=15000,
-            ignore_conflicts=True,
-        )
+                    # Skip if we already loaded this structure in a previous run
+                    if entry_id in existing_ids:
+                        continue
 
-        return failed_entries
+                    # load the structure from the poscar file
+                    with z.open(file_info) as f:
+                        contents = f.read().decode("utf-8")
+
+                    energy = energy_dict.get(entry_id)
+
+                    try:
+                        structure = ToolkitStructure.from_str(contents, "poscar")
+                        # Mark overly complex structures as invalid to avoid database blowup
+                        if (
+                            len(structure) > 500
+                            or len(structure.composition.chemical_system) > 25
+                            or len(structure.composition.formula) > 50
+                            or len(structure.composition.reduced_formula) > 50
+                            or len(structure.composition.anonymized_formula) > 50
+                        ):
+                            raise ValueError("Structure too complex")
+                        yield cls.from_toolkit(
+                            id=entry_id,
+                            structure=structure,
+                            energy_per_atom=energy,
+                        )
+                    except Exception:
+                        yield cls.from_toolkit(
+                            id=entry_id,
+                            structure=None,
+                            energy_per_atom=energy,
+                            is_invalid_structure=True,
+                        )

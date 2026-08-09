@@ -1,0 +1,72 @@
+<div class="tab-pane show active" id="overview-section">
+    <div class="row">
+        <div class="col-xl-12">{% include "rdkit/molecule_entry_display.html" %}</div>
+    </div>
+    <div class="row py-2">
+        <div class="col-12">
+            {# base info #}
+            <div class="row pt-2">
+                <div class="col-xl-7">
+                    <table class="table table-centered table-striped mb-0 border">
+                        <thead class="table-primary">
+                            <tr>
+                                <th style="width: 45%">Base Info</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>ChEMBL ID</td>
+                                <td>
+                                    <a href="{{ table_entry.external_link }}" target="_blank">
+                                        {{ table_entry.chembl_id }} <i class="mdi mdi-open-in-new"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Molecule Type</td>
+                                <td>{{ table_entry.molecule_type|default:"--" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Drug Likeness</td>
+                                <td>{{ table_entry.drug_likeness|default:"--" }}</td>
+                            </tr>
+                            <tr>
+                                <td>ALogP</td>
+                                <td>{{ table_entry.alog_p_chembl|default:"--" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Rule of 3 Pass</td>
+                                <td>
+                                    {% if table_entry.rule_of_3_pass == True %}
+                                        <i class="mdi mdi-check text-success"></i> Yes
+                                    {% elif table_entry.rule_of_3_pass == False %}
+                                        <i class="mdi mdi-close text-danger"></i> No
+                                    {% else %}
+                                        --
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Rule of 5 Violations</td>
+                                <td>{{ table_entry.rule_of_5_violations|default:"--" }}</td>
+                            </tr>
+                            <tr>
+                                <td>H-Bond Acceptors</td>
+                                <td>{{ table_entry.num_h_acceptors_lipinski|default:"--" }}</td>
+                            </tr>
+                            <tr>
+                                <td>H-Bond Donors</td>
+                                <td>{{ table_entry.num_h_donors_lipinski|default:"--" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Natural Product Likeness</td>
+                                <td>{{ table_entry.natural_product_likeness|default:"--" }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

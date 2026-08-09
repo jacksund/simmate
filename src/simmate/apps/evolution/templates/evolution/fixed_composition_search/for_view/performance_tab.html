@@ -1,0 +1,14 @@
+<div class="tab-pane" id="performance-section">
+    <div class="row">
+        <div class="col-12">
+            <h4>Subworkflow Times</h4>
+            <div class="d-flex justify-content-center">{% htmx_plotly_figure table_entry.get_subworkflow_times_plot %}</div>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-12">
+            <h4>Staged Series Times</h4>
+            <div class="d-flex justify-content-center">{% htmx_plotly_figure table_entry.get_staged_series_times_plot %}</div>
+        </div>
+    </div>
+</div>

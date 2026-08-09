@@ -15,13 +15,13 @@ from rich.progress import track
 from simmate.apps.evolution import selectors as selector_module
 from simmate.apps.evolution import stop_conditions as stop_conditions_module
 from simmate.apps.evolution.models import SteadystateSource
-from simmate.configuration.dask import get_dask_client
-from simmate.database.base_data_types import Calculation, table_column
+from simmate.compute import WorkItem
+from simmate.database.core import table_column
+from simmate.database.mixins import Calculation
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.validators import fingerprint as validator_module
 from simmate.toolkit.visualization.plotting import PlotlyFigure
-from simmate.utilities import get_directory
-from simmate.workflows.execution import WorkItem
+from simmate.utils import dispatch, get_directory
 
 
 class FixedCompositionSearch(Calculation):
@@ -30,15 +30,9 @@ class FixedCompositionSearch(Calculation):
     search and also has convient methods to analyze the data + write output files.
     """
 
-    html_display_name = "Fixed-Composition Searches"
-    html_description_short = (
-        "All evolutionary searches ran for a given fixed-composition. "
-        "Fixed means the composition and atom count are the same for all "
-        "structures evaluated (e.g., Na1Cl1 or Ca4N2Cl1)."
-    )
-
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
+        db_table = "workflows_fixedcompositionsearch"
 
     # !!! consider making a composition-based mixin
     composition = table_column.CharField(max_length=50, null=True, blank=True)
@@ -164,7 +158,7 @@ class FixedCompositionSearch(Calculation):
         from simmate.apps.evolution.singleshot_sources.substitution import (
             get_structures_from_substitution_of_known,
         )
-        from simmate.apps.evolution.workflows.utilities import (
+        from simmate.apps.evolution.workflows.utils import (
             write_and_submit_structures,
         )
 
@@ -394,7 +388,7 @@ class FixedCompositionSearch(Calculation):
     @property
     def subworkflow(self):
         # local import to prevent circular import issues
-        from simmate.workflows.utilities import get_workflow
+        from simmate.workflows.utils import get_workflow
 
         # Initialize the workflow if a string was given.
         # Otherwise we should already have a workflow class.
@@ -781,15 +775,19 @@ class Correctness(PlotlyFigure):
             for _, s in structures_dataframe.iterrows()
         ]
 
-        # generating fingerprints is slow so we use dask to parallelize
-        client = get_dask_client()
-        logging.info("Submitting to jobs dask...")
-        futures = [
-            client.submit(featurizer.featurize, s.structure, pure=False)
-            for _, s in track(list(structures_dataframe.iterrows()))
+        # generating fingerprints is slow so we use dispatch to parallelize
+
+        logging.info("Submitting to dispatch (parallel_core)...")
+        structures_to_featurize = [
+            s.structure for _, s in structures_dataframe.iterrows()
         ]
-        logging.info("Waiting for dask jobs to finish...")
-        structures_dataframe["fingerprint"] = [numpy.array(f.result()) for f in futures]
+        fingerprints = dispatch(
+            structures_to_featurize,
+            featurizer.featurize,
+            parallel=True,
+            batch_size=100,
+        )
+        structures_dataframe["fingerprint"] = [numpy.array(f) for f in fingerprints]
         logging.info("Done.")
 
         fingerprint_known = numpy.array(featurizer.featurize(structure_known))

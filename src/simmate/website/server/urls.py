@@ -1,0 +1,133 @@
+# -*- coding: utf-8 -*-
+
+from django.contrib import admin
+from django.urls import include, path
+from django.views.generic import RedirectView
+
+from simmate.config import settings
+from simmate.utils import get_app_submodule
+from simmate.website.server import views
+
+
+def get_app_urls():
+    # First let's find our custom simmate apps that supply a 'urls' module. We
+    # want to automatically make these avaialable in the web UI.
+
+    extra_url_paths = []
+
+    for app_name in settings.apps:
+        urls_path = get_app_submodule(app_name, "urls")
+        if urls_path:
+            simple_name = urls_path.split(".")[-2]
+            new_path = path(
+                route=f"apps/{simple_name}/",
+                # set the namespace so that we can easily look up app urls
+                #   https://stackoverflow.com/questions/48608894
+                view=include((urls_path, simple_name), namespace=simple_name),
+                name=simple_name,
+            )
+            extra_url_paths.append(new_path)
+
+    return extra_url_paths
+
+
+def get_disabled_urls():
+    """
+    Collects any pages that should be disabled
+    """
+    disabled_url_paths = []
+
+    # We want to turn off the new account signup form if we require all users
+    # to sign in using their allauth (e.g. Microsoft login)
+    if settings.website.require_login_internal:
+        new_path = path(route="accounts/signup/", view=views.permission_denied)
+        disabled_url_paths.append(new_path)
+
+    return disabled_url_paths
+
+
+urlpatterns = [
+    #
+    # This is the path to the homepage (just simmate.org)
+    path(route="", view=views.home, name="home"),
+    #
+    # Redirect root favicon requests to the static SVG icon
+    path(
+        route="favicon.ico",
+        view=RedirectView.as_view(
+            url="/static/images/simmate-icon.svg", permanent=True
+        ),
+    ),
+    #
+    # Disabled urls (such as the account signup form), must come first. The only
+    # page that can't be disabled is the home page.
+    *get_disabled_urls(),
+    #
+    # This is the built-in admin site that django provides
+    path(route="admin/", view=admin.site.urls, name="admin"),
+    #
+    # This is the profile system with login/logout.
+    path(
+        route="accounts/",
+        view=include("allauth.urls"),
+        name="accounts",
+    ),
+    # On login success, you will be pointed to /accounts/profile by default.
+    # If you want to change this defualt, then set LOGIN_REDIRECT_URL in
+    # the settings.py file
+    path(route="accounts/profile/", view=views.profile, name="profile"),
+    path(
+        route="accounts/profile/mark-as-read/",
+        view=views.mark_notifications_as_read,
+        name="mark_notifications_as_read",
+    ),
+    # When you sign out, you are sent to LOGOUT_REDIRECT_URL (set in settings.py)
+    path(route="accounts/loginstatus/", view=views.loginstatus, name="loginstatus"),
+    #
+    #
+    path(
+        route="data/",
+        view=include(
+            ("simmate.website.data_explorer.urls", "simmate.website.data_explorer"),
+            namespace="data_explorer",
+        ),
+        name="data_explorer",
+    ),
+    #
+    #
+    # All local calculations are stored at this endpoint
+    path(
+        route="workflows/",
+        view=include(
+            (
+                "simmate.website.workflow_explorer.urls",
+                "simmate.website.workflow_explorer",
+            ),
+            namespace="workflow_explorer",
+        ),
+        name="workflow_explorer",
+    ),
+    #
+    # And extra one-page views
+    path(route="about/", view=views.about, name="about"),
+    path(route="contact/", view=views.contact, name="contact"),
+    path(route="pricing/", view=views.pricing, name="pricing"),
+    path(route="faqs/", view=views.faqs, name="faqs"),
+    #
+    # HTMX urls
+    path(
+        route="htmx/",
+        view=include(
+            (
+                "simmate.website.htmx.urls",
+                "simmate.website.htmx",
+            ),
+            namespace="htmx",
+        ),
+        name="htmx",
+    ),
+    #
+    # Custom Simmate apps (if present)
+    path(route="apps/", view=views.apps, name="apps"),
+    *get_app_urls(),
+]

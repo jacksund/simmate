@@ -12,6 +12,8 @@ class Relaxation__Vasp__MvlSlab(Relaxation__Vasp__MvlGrainboundary):
     with slab_mode=True.
     """
 
+    accuracy_rating = 3
+
     description_doc_short = "based on pymatgen's MVLGBSet(slab=True)"
 
     _incar_updates = dict(

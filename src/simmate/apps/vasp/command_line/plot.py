@@ -10,38 +10,58 @@ plot_app = typer.Typer(rich_markup_mode="markdown")
 @plot_app.callback(no_args_is_help=True)
 def plot():
     """
-    A group of commands for plotting results from VASP outputs
+    Commands for visualizing VASP output data (band structures, DOS, etc.).
     """
     pass
 
 
 @plot_app.command()
-def band_structure(directory: Path = Path.cwd()):
+def band_structure(
+    directory: Path = typer.Option(
+        Path.cwd(),
+        help="The directory containing the `vasprun.xml` file.",
+    )
+):
     """
-    Plot the band structure using the vasprun.xml output file
-    """
-    raise NotImplementedError("This command is still under testing")
-
-
-@plot_app.command()
-def neb_diffusion(directory: Path = Path.cwd()):
-    """
-    Plot the NEB diffusion barrier using the vasprun.xml output file
+    Generates a band structure plot from VASP output.
     """
     raise NotImplementedError("This command is still under testing")
 
 
 @plot_app.command()
-def density_of_states(directory: Path = Path.cwd()):
+def neb_diffusion(
+    directory: Path = typer.Option(
+        Path.cwd(),
+        help="The directory containing the NEB calculation folders.",
+    )
+):
     """
-    Plot the density of states using the vasprun.xml output file
+    Generates an NEB diffusion barrier plot from VASP output.
     """
     raise NotImplementedError("This command is still under testing")
 
 
 @plot_app.command()
-def relaxation(directory: Path = Path.cwd()):
+def density_of_states(
+    directory: Path = typer.Option(
+        Path.cwd(),
+        help="The directory containing the `vasprun.xml` file.",
+    )
+):
     """
-    Plot the relaxation convergence using the vasprun.xml output file
+    Generates a density of states (DOS) plot from VASP output.
+    """
+    raise NotImplementedError("This command is still under testing")
+
+
+@plot_app.command()
+def relaxation(
+    directory: Path = typer.Option(
+        Path.cwd(),
+        help="The directory containing the `vasprun.xml` file.",
+    )
+):
+    """
+    Generates a relaxation convergence plot from VASP output.
     """
     raise NotImplementedError("This command is still under testing")

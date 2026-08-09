@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import platform
+from contextlib import closing
 
 import numpy
 import pandas
@@ -93,8 +94,6 @@ class MsSqlDB:
         }
 
         self.config_str = ";".join([f"{k}={v}" for k, v in config.items()])
-        self.connection = pyodbc.connect(self.config_str)
-        self.cursor = self.connection.cursor()
 
     def get_query_data(self, query: str) -> pandas.DataFrame:
         """
@@ -105,14 +104,22 @@ class MsSqlDB:
         # fetchall, fetchmany (+ chunksize), fetch (i.e. chunksize = 1)
         # fetch_type: str = "fetchall",
         # chunk_size: str = None,
-        self.cursor.execute(query)
 
-        data = pandas.DataFrame(
-            # BUG: for some reason I need to convert the list of Tuples to
-            # a list of lists for pandas to read this successfully...
-            data=[list(e) for e in self.cursor.fetchall()],
-            columns=[c[0] for c in self.cursor.description],
-        )
+        # NOTE: Unlike other database drivers, pyodbc's context manager (the 'with'
+        # statement) only handles transactions (commit/rollback) and does NOT
+        # automatically close the connection. We must use contextlib.closing
+        # to ensure the connection is closed.
+        with closing(pyodbc.connect(self.config_str)) as connection:
+            with closing(connection.cursor()) as cursor:
+                cursor.execute(query)
+
+                data = pandas.DataFrame(
+                    # BUG: for some reason I need to convert the list of Tuples to
+                    # a list of lists for pandas to read this successfully...
+                    data=[list(e) for e in cursor.fetchall()],
+                    columns=[c[0] for c in cursor.description],
+                )
+
         # ---- BUG FIXES -----------------------
         # BUG-FIX (nan-->None)
         data = data.replace({numpy.nan: None})

@@ -9,7 +9,7 @@ import plotly.graph_objects as plotly_go
 from django.utils.timezone import make_aware
 from rich.progress import track
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 
 
 class PricedItem(DatabaseTable):
@@ -18,18 +18,6 @@ class PricedItem(DatabaseTable):
 
     class Meta:
         db_table = "price_catalog__priced_items"
-
-    html_display_name = "Market Data & Price Catalog"
-    html_description_short = (
-        "Prices and economic indicators spanning common chemicals, stocks, "
-        "commodities, cryptocurrencies, and macroeconomic metrics."
-    )
-
-    html_entries_template = "price_catalog/priced_items/table.html"
-    html_entry_template = "price_catalog/priced_items/entry.html"
-
-    # html_form_component = "priced-item-form"
-    # html_enabled_forms = ["search"]
 
     # -------------------------------------------------------------------------
 
@@ -108,15 +96,6 @@ class PricedItem(DatabaseTable):
     price_10y_stats = table_column.JSONField(blank=True, null=True)
 
     price_25y_stats = table_column.JSONField(blank=True, null=True)
-
-    # -------------------------------------------------------------------------
-
-    enable_html_report = True
-    report_df_columns = ["id"]
-
-    @classmethod
-    def get_report_from_df(cls, df: pandas.DataFrame):
-        return {"test": 123}
 
     # -------------------------------------------------------------------------
 

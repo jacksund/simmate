@@ -11,24 +11,28 @@ simmate_analysis_dashboard_app = typer.Typer(rich_markup_mode="markdown")
 @simmate_analysis_dashboard_app.callback(no_args_is_help=True)
 def base_command():
     """
-    Welcome to the command-line interface for Simmate's Analysis Dashboard!
+    Commands for managing the Simmate Analysis Dashboard, a Streamlit-based
+    interface for data visualization and analysis.
     """
-    # When we call the command "simmate-chatbot" this is where we start, and
-    # it then looks for all other functions that have the decorator
-    # "@simmate_chatbot_app.command()" to decide what to do from there.
     pass
 
 
 @simmate_analysis_dashboard_app.command()
-def run_server(port: int = 8501, address: str = None):
+def run_server(
+    port: int = typer.Option(
+        8501,
+        help="The port to run the dashboard on. Default is 8501.",
+    ),
+    address: str = typer.Option(
+        None,
+        help="The network address to bind the server to (e.g., '0.0.0.0' for all interfaces).",
+    ),
+):
     """
-    Runs the local test server.
+    Starts a local Streamlit server to host the Analysis Dashboard.
 
-    While this command is running, you can then view the dashboard web UI
-    at http://localhost:8501 (aka http://127.0.0.1:8501/)
-
-    This is a streamlit app, so this is really just a wrapper around the
-    command: `streamlit run web_service.py`
+    While the server is running, you can access the dashboard in your browser
+    at http://localhost:8501/.
     """
     import subprocess
 

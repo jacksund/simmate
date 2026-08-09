@@ -6,15 +6,15 @@ Displays a multi-line text input widget and maps its value to the backend as a s
 === "frontend (html+django)"
 
     ``` html+django
-    {% text_area name="my_input" %}
+    {% htmx_text_area name="my_input" %}
     ```
 
 === "backend (python)"
 
     ``` python
-    from simmate.website.core_components.components import DynamicFormComponent
+    from simmate.website.htmx.components import HtmxComponent
 
-    class ExampleView(DynamicFormComponent):
+    class ExampleView(HtmxComponent):
         my_input = "some default value"
  
     ```
@@ -28,6 +28,7 @@ Displays a multi-line text input widget and maps its value to the backend as a s
 | `show_label`  | Whether to display the label alongside the input field.<br><small>*Type: `bool`, Default: `True`*</small>                                                         |
 | `help_text`   | Optional helper text to be shown alongside the input field.<br><small>*Type: `str`, Default: `None`*</small>                                                      |
 | `placeholder` | The placeholder text to display when input field is empty.<br><small>*Type: `str`, Default: `"Enter details..."`*</small>                                         |
-| `ncols`       | The number of columns that the text area should render with.<br><small>*Type: `int`, Default: `4`*</small>                                                          |
-| `nrows`       | The number of rows that the text area should render with.<br><small>*Type: `int`, Default: `30`*</small>                                                            |
+| `ncols`       | The number of columns that the text area should render with.<br><small>*Type: `int`, Default: `30`*</small>                                                         |
+| `nrows`       | The number of rows that the text area should render with.<br><small>*Type: `int`, Default: `4`*</small>                                                            |
 | `defer`       | Whether to defer processing or submission of the input value.<br><small>*Type: `bool`, Default: `True`*</small>                                                   |
+| `required`    | Whether the field is required for form submission.<br><small>*Type: `bool`, Default: `False`*</small>                                                             |

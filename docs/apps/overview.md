@@ -26,6 +26,7 @@ Apps are installable Simmate add-ons. Each one adds support for a third-party so
 | EPPO Global Database  | :material-beaker-outline: `other` | --                 | --                 | :white_check_mark: |
 | Evolutionary Searches | :simple-crystal: `crystal`        | --                 | :white_check_mark: | --                 |
 | JARVIS                | :simple-crystal: `crystal`        | --                 | --                 | :white_check_mark: |
+| Lab Automation        | :material-beaker-outline: `other` | --                 | --                 | --                 |
 | Materials Project     | :simple-crystal: `crystal`        | --                 | :white_check_mark: | :white_check_mark: |
 | OQMD                  | :simple-crystal: `crystal`        | --                 | --                 | :white_check_mark: |
 | PDB                   | :simple-moleculer: `molecule`     | --                 | --                 | :white_check_mark: |

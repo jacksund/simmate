@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 
 from .substance import Substance
 
@@ -9,14 +9,6 @@ class Mixture(DatabaseTable):
 
     class Meta:
         db_table = "inventory_management__mixtures"
-
-    html_display_name = "Mixtures"
-    html_description_short = (
-        "Mixtures are the combination of two or more substances. "
-        "For example, a solution would be a mixture of two substances: NaCl and water. "
-        "This table includes mixtures of both specified and unspecified ratios, "
-        "meaning 'salt water' and '0.1M salt water' can be separate entries."
-    )
 
     # -------------------------------------------------------------------------
 
@@ -40,6 +32,15 @@ class Mixture(DatabaseTable):
     common_name = table_column.CharField(max_length=255, blank=True, null=True)
 
     synonyms = table_column.JSONField(blank=True, null=True, default=list)
+
+    # -------------------------------------------------------------------------
+
+    # TODO: If the mixture contains at least one stereoisomer
+    # ├── Racemate (1:1 Enantiomeric Mixture)
+    # ├── Enantiopure (Single Enantiomer)
+    # └── Scalemic (Enriched, but not 1:1 or 100%)
+    # OR... even enhanced stereochem that allows unknown. Might need separate
+    # column or even table to store the clean & enhanced smiles/molfile for these
 
     # -------------------------------------------------------------------------
 

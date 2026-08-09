@@ -5,9 +5,10 @@ import traceback
 import warnings
 from pathlib import Path
 
-from simmate.database.base_data_types import Calculation, table_column
+from simmate.database.core import table_column
+from simmate.database.mixins import Calculation
 from simmate.toolkit import Composition
-from simmate.utilities import get_chemical_subsystems, get_directory
+from simmate.utils import get_chemical_subsystems, get_directory
 
 # BUG: This prints a tqdm error so we silence it here.
 with warnings.catch_warnings(record=True):
@@ -16,16 +17,9 @@ with warnings.catch_warnings(record=True):
 
 class ChemicalSystemSearch(Calculation):
 
-    html_display_name = "Chemical System Searches"
-    html_description_short = (
-        "All evolutionary searches ran for a given chemical system (e.g. Na-Cl or Ca-N-Cl). "
-        "This are also known as variable composition searches, where both the composition "
-        " and total atom counts are allowed to change."
-        "This is essentially many variable nsites composition searches in one."
-    )
-
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
+        db_table = "workflows_chemicalsystemsearch"
 
     chemical_system = table_column.CharField(max_length=10, null=True, blank=True)
     subworkflow_name = table_column.CharField(max_length=200, null=True, blank=True)
@@ -71,7 +65,7 @@ class ChemicalSystemSearch(Calculation):
 
     @property
     def subworkflow(self):
-        from simmate.workflows.utilities import get_workflow
+        from simmate.workflows.utils import get_workflow
 
         return get_workflow(self.subworkflow_name)
 

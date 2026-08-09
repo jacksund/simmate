@@ -1,0 +1,20 @@
+{% extends "core/site_base.html" %}
+{% block tabtitle %}Profile - Simmate{% endblock %}
+{% block body %}
+    <section class="jumbotron text-center">
+        <div class="container py-5">
+            <h1>Welcome {{ user.username }}!</h1>
+            <p class="lead text-muted">Manage your account and view your notifications below.</p>
+        </div>
+    </section>
+    <div class="container mb-5">
+        {% include "account/for_view/tabs_header.html" %}
+        <div class="tab-content">
+            {% include "account/for_view/overview_tab.html" %}
+            {% include "account/for_view/notifications_tab.html" %}
+            {% include "account/for_view/projects_tab.html" %}
+            {% include "account/for_view/inventory_tab.html" %}
+            {% include "account/for_view/calculations_tab.html" %}
+        </div>
+    </div>
+{% endblock %}

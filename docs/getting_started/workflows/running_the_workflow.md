@@ -129,7 +129,7 @@ When we go to the `Parameters` documentation, we see that `structure` input acce
 For instance, you can try running the following workflow:
 
 ``` yaml
-workflow_name: tatic-energy.quantum-espresso.quality00
+workflow_name: static-energy.quantum-espresso.quality00
 structure:
     database_table: MatprojStructure
     database_id: mp-22862

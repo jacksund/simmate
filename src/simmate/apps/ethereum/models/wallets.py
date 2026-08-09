@@ -1,24 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from simmate.configuration import settings
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.config import settings
+from simmate.database.core import DatabaseTable, table_column
+from simmate.database.mixins import ThirdPartyData
 
 
-class EthereumWallet(DatabaseTable):
+class EthereumWallet(ThirdPartyData, DatabaseTable):
 
     class Meta:
         db_table = "ethereum__wallets"
 
-    html_display_name = "Ethereum Wallets"
-    html_description_short = "Ethereum addresses monitored via Etherscan.io and Alchemy"
-
     external_website = "https://etherscan.io/"  # even if we pull from alchemy
-
-    html_entries_template = "ethereum/wallets/table.html"
-    html_entry_template = "ethereum/wallets/entry.html"
-
-    # html_form_component = "ethereum-wallet-form"
-    # html_enabled_forms = ["search"]
 
     # -------------------------------------------------------------------------
 

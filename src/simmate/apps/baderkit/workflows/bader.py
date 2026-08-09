@@ -4,8 +4,7 @@ from pathlib import Path
 from baderkit.core import Bader, Grid
 
 from simmate.apps.baderkit.models.bader import Bader as BaderModel
-from simmate.database import connect
-from simmate.workflows.base_flow_types import Workflow
+from simmate.workflows.core import Workflow
 
 
 class Bader__Baderkit__Bader(Workflow):

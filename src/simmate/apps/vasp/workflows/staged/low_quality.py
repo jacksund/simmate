@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflows.base_flow_types import StagedWorkflow
+from simmate.workflows.common import StagedRelaxStatic
 
 
-class StaticEnergy__Vasp__LowQuality(StagedWorkflow):
+class StagedRelaxStatic__Vasp__LowQuality(StagedRelaxStatic):
     """
     Runs a series of increasing-quality relaxations and then finishes with a single
     static energy calculation.
@@ -12,6 +12,8 @@ class StaticEnergy__Vasp__LowQuality(StagedWorkflow):
     large supercells. More precise relaxations+energy calcs should be done
     afterwards because ettings are still below MIT and Materials Project quality.
     """
+
+    accuracy_rating = 0.5
 
     exclude_from_archives = [
         "CHG",

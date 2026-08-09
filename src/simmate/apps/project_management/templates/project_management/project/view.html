@@ -1,10 +1,10 @@
-{% extends "data_explorer/table_entry.html" %}
+{% extends "data_explorer/entry.html" %}
 {% block entrycontent %}
     <div>
         {% include "project_management/project/for_view/tabs_header.html" %}
         <div class="tab-content">
             {% include "project_management/project/for_view/overview_tab.html" %}
-            {% include "project_management/project/for_view/tags_tab.html" %}
+            {# include "project_management/project/for_view/tags_tab.html" #}
         </div>
     </div>
 {% endblock %}

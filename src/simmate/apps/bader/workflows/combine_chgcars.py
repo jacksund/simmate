@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflows.base_flow_types import S3Workflow
+from simmate.workflows.common import S3Workflow
 
 
 # TODO: The chgsum.pl script will be replaced with a simple python function
@@ -13,10 +13,13 @@ class PopulationAnalysis__Bader__CombineChgcars(S3Workflow):
     a script from the Henkleman group.
     """
 
+    is_hidden = True
+    use_database = False
+
     command = "chgsum.pl AECCAR0 AECCAR2 > chgsum.out"
     monitor = False
     required_files = ["CHGCAR", "AECCAR0", "AECCAR2"]
-    use_database = False
+
     # Note -- POTCAR is copied over so that downstream workflows can grab it
     use_previous_directory = ["CHGCAR", "AECCAR0", "AECCAR2", "POTCAR"]
     parent_workflows = ["population-analysis.vasp-bader.bader-matproj"]

@@ -17,6 +17,8 @@ class ElectronicStructure__Vasp__MatprojHseFull(ElectronicStructureWorkflow):
     runs DOS and BS at Materials Project settings
     """
 
+    accuracy_rating = 5
+
     description_doc_short = "runs DOS and BS at Materials Project settings"
 
     # table not implemented yet. This is a placeholder

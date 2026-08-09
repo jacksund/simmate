@@ -11,6 +11,8 @@ class StaticEnergy__Vasp__MatprojScan(Relaxation__Vasp__MatprojScan):
     [MPScanStaticSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPScanStaticSet).
     """
 
+    accuracy_rating = 4
+
     _incar_updates = dict(
         ALGO="Fast",
         NSW=0,

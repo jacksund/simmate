@@ -14,44 +14,61 @@ config_app = typer.Typer(rich_markup_mode="markdown")
 
 
 @config_app.callback(no_args_is_help=True)
-def utilities():
+def config():
     """
-    A group of commands for managing Simmate settings
+    Commands for managing Simmate settings, including viewing, updating, and testing
+    app configurations.
     """
     pass
 
 
 @config_app.command()
-def write(filename: Path = None):
+def write(
+    filename: Path = typer.Option(
+        None,
+        help="The filename (including path) to write settings to. Defaults to `simmate_settings.yaml` in the current directory.",
+    )
+):
     """
-    Writes the final simmate settings to yaml file
-
-    - `filename`: file name to write settings to
+    Writes the final Simmate configuration (including defaults) to a YAML file.
     """
 
-    from simmate.configuration import settings
+    from simmate.config import settings
 
     settings.write_settings(filename=filename)
 
 
 @config_app.command()
-def show(user_only: bool = False):
+def show(
+    user_only: bool = typer.Option(
+        False,
+        help="Only display settings that have been explicitly modified by the user. If false, all settings including defaults are shown.",
+    )
+):
     """
-    Takes the final simmate settings and prints them in a yaml format that is
-    easier to read.
+    Displays the final Simmate settings in an easy-to-read YAML format.
     """
-    from simmate.configuration import settings
+    from simmate.config import settings
 
     settings.show_settings(user_only=user_only)
 
 
 @config_app.command()
-def add(app_name: str, custom: bool = False):
+def add(
+    app_name: str = typer.Argument(
+        ...,
+        help="The name of the app to register (e.g., 'vasp', 'materials_project').",
+    ),
+    custom: bool = typer.Option(
+        False,
+        help="Whether the app name refers to a custom Python module (e.g., 'my_custom_app.config.MyAppConfig').",
+    ),
+):
     """
-    Adds a specified Simmate app to the list of registered apps
+    Adds a specified Simmate app to the list of registered apps in your configuration.
     """
 
-    from simmate.configuration import settings
+    from simmate.config import settings
 
     if app_name == "aflow":
         settings.add_apps_and_update(
@@ -167,52 +184,65 @@ def add(app_name: str, custom: bool = False):
 
 
 @config_app.command()
-def update(config: str):
+def update(
+    config_update: str = typer.Argument(
+        ...,
+        metavar="CONFIG_UPDATE",
+        help="The setting to update using dot-notation (e.g., 'database.backend=postgresql').",
+    )
+):
     """
-    Updates Simmate settings using dot-notation
+    Updates one or more Simmate settings using dot-notation and writes them to
+    your settings file.
     """
 
-    from simmate.configuration import settings
+    from simmate.config import settings
 
-    config_cleaned = settings._parse_input(config)
+    config_cleaned = settings._parse_input(config_update)
     settings.write_updated_settings(config_cleaned)
 
 
 @config_app.command()
-def test(app_name: str):
+def test(
+    app_name: str = typer.Argument(
+        ...,
+        help="The name of the app to test configuration for.",
+    )
+):
     """
-    Tests whether an app is properly configured
+    Validates the configuration of a specified app (e.g., checking for installed
+    software like VASP).
     """
 
     # OPTIMIZE: this code can be refactored and condensed. but it works for now
 
     if app_name == "bader":
-        from simmate.apps.bader.configuration import test_config
+        from simmate.apps.bader.config import test_config
 
         passed = test_config()
 
     elif app_name == "baderkit":
-        from simmate.apps.baderkit.configuration import test_config
+        from simmate.apps.baderkit.config import test_config
 
         passed = test_config()
 
     elif app_name == "materials_project":
-        from simmate.apps.materials_project.configuration import test_config
+        from simmate.apps.materials_project.config import test_config
 
         passed = test_config()
 
     elif app_name == "quantum_espresso":
-        from simmate.apps.quantum_espresso.configuration import test_config
+        from simmate.apps.quantum_espresso.config import test_config
 
         passed = test_config()
 
     elif app_name == "vasp":
-        from simmate.apps.vasp.configuration import test_config
+        from simmate.apps.vasp.config import test_config
 
         passed = test_config()
 
     elif app_name == "warren_lab":
-        from simmate.apps.warren_lab.configuration import test_config
+        from simmate.apps.warren_lab.config import test_config
 
         passed = test_config()
 

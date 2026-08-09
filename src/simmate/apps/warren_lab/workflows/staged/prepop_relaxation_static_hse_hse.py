@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate.apps.warren_lab.workflows.relaxation.hse import Relaxation__Vasp__HseWarren
-from simmate.workflows.base_flow_types import StagedWorkflow
+from simmate.workflows.common import StagedRelaxStatic
 
 
 class Relaxation__Vasp__HseWithWavecarWarren(Relaxation__Vasp__HseWarren):
@@ -14,7 +14,7 @@ class Relaxation__Vasp__HseWithWavecarWarren(Relaxation__Vasp__HseWarren):
     _incar_updates = dict(LWAVE=True)
 
 
-class StaticEnergy__Vasp__RelaxationStaticHseHseWarren(StagedWorkflow):
+class StagedRelaxStatic__Vasp__RelaxationStaticHseHseWarren(StagedRelaxStatic):
     """
     Runs a PBEsol quality structure relaxation, an HSE quality relaxation, and
     an HSE static energy calculation. This method will also write the ELFCAR
@@ -25,7 +25,7 @@ class StaticEnergy__Vasp__RelaxationStaticHseHseWarren(StagedWorkflow):
     subworkflow_names = [
         "relaxation.vasp.warren-lab-pbesol-with-wavecar",
         "relaxation.vasp.warren-lab-hse-with-wavecar",
-        "static-energy.vasp.warren-lab-prebadelf-hse",
+        "static-energy.vasp.prebadelf-hse-warren",
     ]
     files_to_copy = ["WAVECAR"]
     # We use pbesol as our default relaxation functional because it doesn't take

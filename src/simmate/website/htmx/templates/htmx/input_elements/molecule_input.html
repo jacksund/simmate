@@ -1,5 +1,5 @@
 <div class="my-2">
-    {% include "core_components/basic_elements/label.html" %}
+    {% include "core/basic_elements/label.html" %}
     {% if molecule is None %}
         {% if many_molecules %}
             {% alert theme="danger" message="This section assumes all individual components are their own molecule, which means it will incorrectly split up salts and make things like Na+ or Cl- their own entries. Until this is fixed, avoid using the create_many form for such compounds." %}
@@ -29,14 +29,14 @@
                  hx-preserve>
                 {% if show_option_labels %}<label class="form-label">{{ sketcher_input_label }}</label>{% endif %}
                 <div id="{{ name }}-{{ component.component_id }}"
-                     style="width: 600px;
-                            height: 400px"></div>
+                     style="width: 100%;
+                            height: 500px"></div>
                 <script>add_mol_sketcher("{{ name }}-{{ component.component_id }}");</script>
                 <input type="hidden"
                     id="{{ name }}-{{ component.component_id }}-hidden"
                     name="{{ sketcher_input_name }}"
                     {# this defer works, but it is annoying because there is a loading bar every time you make an edit #}
-                    {% if not defer %}{% htmx_post %}{% endif %}>
+                    {% if not defer %}{% htmx_post indicator=indicator %}{% endif %}>
                 </input>
                 <script>enable_mol_autowrite('{{ name }}-{{ component.component_id }}', '{{ name }}-{{ component.component_id }}-hidden', '{{ export_format }}');</script>
             </div>

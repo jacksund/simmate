@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
 
+import logging
+import warnings
+from pathlib import Path
+
 from simmate.apps.rdkit.models import Molecule
-from simmate.database.base_data_types import table_column
+from simmate.config import settings
+from simmate.database.core import table_column
+from simmate.database.mixins import ThirdPartyData
+from simmate.utils import get_directory
 
 
-class ChemSpaceFreedomSpaceMolecule(Molecule):
+class ChemSpaceFreedomSpaceMolecule(ThirdPartyData, Molecule):
     """
     Molecules from the
     [ChemSpace "Freedom Space"](https://chem-space.com/compounds/freedom-space)
@@ -15,16 +22,9 @@ class ChemSpaceFreedomSpaceMolecule(Molecule):
         db_table = "chemspace__freedom_space__molecules"
 
     # TODO: Freedom space is now 5bil molecules... The "Screening Compound Catalog"
-    # is now what we'd want. It is roughly 7.5mil compounds:
-    #   https://chem-space.com/compounds#screening-compounds
-
-    html_display_name = "ChemSpace Freedom"
-    html_description_short = (
-        "A diverse set of 201M compounds, 73% of which comply with Ro5."
-    )
-    is_redistribution_allowed = False
 
     external_website = "https://chem-space.com/compounds/freedom-space"
+    is_redistribution_allowed = False
 
     id = table_column.CharField(max_length=25, primary_key=True)
     """
@@ -38,3 +38,11 @@ class ChemSpaceFreedomSpaceMolecule(Molecule):
         URL to this molecule in the ChemSpace website.
         """
         return f"https://chem-space.com/{self.chemspace_id}"
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def load_source_data(cls):
+        raise NotImplementedError(
+            "We do not yet support loading into a database. Use the datastore instead."
+        )

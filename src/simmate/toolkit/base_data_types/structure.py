@@ -19,9 +19,9 @@ from pymatgen.core import Structure as PymatgenStructure
 class Structure(PymatgenStructure):
     # Leave docstring blank and just inherit from pymatgen
 
-    database_object = None  # simmate.database.base_data_types.Structure
+    database_object = None  # simmate.database.mixins.Structure
     """
-    If this structure came from a `simmate.database.base_data_types.Structure`
+    If this structure came from a `simmate.database.mixins.Structure`
     object, then this attribute will be set to the original database object.
     
     Otherwise, this will be left as `None`.

@@ -737,7 +737,6 @@ class Molecule:
 
     def to_smiles(
         self,
-        remove_hydrogen: bool = True,
         kekulize: bool = False,
     ) -> str:
         """
@@ -755,16 +754,9 @@ class Molecule:
             Defaults to False as we preferred the canonical form, though benchtop
             chemists tend to prefer the kekulized form.
         """
-        return (
-            AllChem.MolToSmiles(
-                AllChem.RemoveHs(self.rdkit_molecule),
-                kekuleSmiles=kekulize,
-            )
-            if remove_hydrogen
-            else AllChem.MolToSmiles(
-                self.rdkit_molecule,
-                kekuleSmiles=kekulize,
-            )
+        return AllChem.MolToSmiles(
+            self.rdkit_molecule,
+            kekuleSmiles=kekulize,
         )
 
     def to_cx_smiles(self) -> str:
@@ -773,25 +765,17 @@ class Molecule:
         """
         return AllChem.MolToCXSmiles(self.rdkit_molecule)
 
-    def to_inchi(self, remove_hydrogen: bool = True) -> str:
+    def to_inchi(self) -> str:
         """
         Converts the current `Molecule` object to an INCHI string
         """
-        return (
-            AllChem.MolToInchi(AllChem.RemoveHs(self.rdkit_molecule))
-            if remove_hydrogen
-            else AllChem.MolToInchi(self.rdkit_molecule)
-        )
+        return AllChem.MolToInchi(self.rdkit_molecule)
 
     def to_inchi_key(self, remove_hydrogen: bool = True) -> str:
         """
         Converts the current `Molecule` object to an INCHI key string
         """
-        return (
-            AllChem.MolToInchiKey(AllChem.RemoveHs(self.rdkit_molecule))
-            if remove_hydrogen
-            else AllChem.MolToInchiKey(self.rdkit_molecule)
-        )
+        return AllChem.MolToInchiKey(self.rdkit_molecule)
 
     # -------------------------------------------------------------------------
 
@@ -1607,23 +1591,18 @@ class Molecule:
 
     # Fingerprints
 
-    # !!! OPTIMIZE: we need to better understand the performance tradeoffs
-    # of dense (the default) vs sparse fingerprints. Also count vs. normal.
-
     @cached_property
     def fingerprint(self) -> numpy.ndarray:
         """
         Generates and caches the **simmate preferred** fingerprint.
 
         If you want to choose your fingerprint parameters (such as the size or
-        path length), you should use `get_fingerprint` or it's underlying methods
-        such as `get_topological_fingerprint`.
+        path length), you should use `get_fingerprint`.
 
-        This property is inteaded for beginers, as we choose basic fingerprint
+        This property is inteaded for beginners, as we choose basic fingerprint
         settings that work in most cases and enable other high-level features,
         such as `mol1 / mol2` -> to give similarity
         """
-        # TODO: maybe add setting to allow user to configure the default fp globally
         return self.get_fingerprint("morgan", "numpy")
 
     def get_fingerprint(
@@ -1633,44 +1612,36 @@ class Molecule:
         **kwargs,
     ):
         """
-        Generates a molecule fingerprint from one of several options and formats
+        Generates a molecule fingerprint from one of several options and formats.
+
+        fingerprint_type options: topological, circular/morgan, maccs, ecfp4, fcfp4, pattern
+        vector_type options: rdkit, list, numpy, numpy_packbits, base64
         """
+        from ..featurizers import (
+            Ecfp4Fingerprint,
+            Fcfp4Fingerprint,
+            MaccsFingerprint,
+            MorganFingerprint,
+            PatternFingerprint,
+            TopologicalFingerprint,
+        )
 
-        if fingerprint_type == "topological":
-            return self.get_topological_fingerprint(**kwargs)
-
-        elif fingerprint_type in ["circular", "morgan"]:
-            return self.get_morgan_fingerprint(**kwargs)
-
-        elif fingerprint_type == "pattern":
-            from ..featurizers import PatternFingerprint
-
-            return PatternFingerprint.featurize(
-                molecule=self,
-                vector_type=vector_type,
-                **kwargs,
-            )
-
-        else:
-            raise Exception(f"Unknown fingerprint type: {type}")
-
-    def get_topological_fingerprint(self, **kwargs):
-        """
-        Generates a topological fingerprint (aka RDkit fingerprint)
-
-        Recommend similarity scoring: Tanimoto
-        """
-        fpgen = AllChem.GetRDKitFPGenerator(**kwargs)
-        return fpgen.GetFingerprint(self.rdkit_molecule)
-
-    def get_morgan_fingerprint(self, radius=2, size=1024, **kwargs):
-        """
-        Generates a morgan fingerprint (aka a circular fingerprint).
-
-        Recommend similarity scoring: Dice
-        """
-        fpgen = AllChem.GetMorganGenerator(radius=radius, fpSize=size, **kwargs)
-        return fpgen.GetCountFingerprint(self.rdkit_molecule)
+        _fp_map = {
+            "topological": TopologicalFingerprint,
+            "circular": MorganFingerprint,
+            "morgan": MorganFingerprint,
+            "maccs": MaccsFingerprint,
+            "ecfp4": Ecfp4Fingerprint,
+            "fcfp4": Fcfp4Fingerprint,
+            "pattern": PatternFingerprint,
+        }
+        if fingerprint_type not in _fp_map:
+            raise Exception(f"Unknown fingerprint type: {fingerprint_type}")
+        return _fp_map[fingerprint_type].featurize(
+            molecule=self,
+            vector_type=vector_type,
+            **kwargs,
+        )
 
     # -------------------------------------------------------------------------
 

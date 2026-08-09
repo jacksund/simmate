@@ -6,7 +6,7 @@ import numpy
 import pandas
 import requests
 
-from simmate.configuration import settings
+from simmate.config import settings
 
 from ..mappings import EthereumMappings
 

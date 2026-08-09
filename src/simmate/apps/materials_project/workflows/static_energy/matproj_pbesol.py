@@ -14,5 +14,7 @@ class StaticEnergy__Vasp__MatprojPbesol(StaticEnergy__Vasp__Matproj):
     make-shift alternative.
     """
 
+    accuracy_rating = 3
+
     # tell VASP to use PBEsol functional
     _incar_updates = dict(GGA="PS")

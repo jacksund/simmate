@@ -10,7 +10,7 @@ from simmate.apps.materials_project.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
 from simmate.toolkit import Structure
-from simmate.utilities import copy_files_from_directory
+from simmate.utils import copy_files_from_directory
 from simmate.workflows import Workflow
 
 
@@ -20,6 +20,8 @@ class PopulationAnalysis__VaspBader__BadelfMatproj(Workflow):
     carries out Bader analysis on the resulting charge density using the ELFCAR
     as a reference when partitioning.
     """
+
+    accuracy_rating = 3
 
     @classmethod
     def run_config(
@@ -119,6 +121,8 @@ class StaticEnergy__Vasp__PrebadelfMatproj(StaticEnergy__Vasp__Matproj):
     from the Materials Project. Results can be used for Bader analysis where
     the ELF is used as the reference instead of the CHGCAR.
     """
+
+    accuracy_rating = 3
 
     # The key thing for bader analysis is that we need a very fine FFT mesh. Other
     # than that, it's the same as a static energy calculation.

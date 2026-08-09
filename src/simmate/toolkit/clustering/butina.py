@@ -4,7 +4,7 @@ import numpy
 from rich.progress import track
 
 from .base import ClusteringEngine, SimilarityEngine
-from .utilities import flatten_clusters
+from .utils import flatten_clusters
 
 
 class Butina(ClusteringEngine):

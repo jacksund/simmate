@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: simmate-worker-data
+spec:
+  accessModes:
+    - {{ .Values.workers.access_mode }}  # bc many worker pods will access this volume
+  {{- if and (eq .Values.workers.access_mode "ReadWriteMany") .Values.workers.storage_class_name }}
+  storageClassName: {{ .Values.workers.storage_class_name }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.workers.storage }}

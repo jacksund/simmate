@@ -14,24 +14,65 @@ database_app = typer.Typer(rich_markup_mode="markdown")
 
 @database_app.callback(no_args_is_help=True)
 def base_command():
-    """A group of commands for managing your database"""
+    """
+    Commands for managing the Simmate database, including Postgres setup,
+    schema migrations, and data I/O.
+    """
     pass
 
 
 @database_app.command()
-def reset(confirm_delete: bool = False, use_prebuilt: bool = None):
+def start(
+    password: str = typer.Option(
+        "postgres",
+        help="The password for the `postgres` user in the Docker container.",
+    ),
+    port: int = typer.Option(
+        5432,
+        help="The port to expose the database on. Defaults to 5432.",
+    ),
+):
     """
-    Removes any existing data and sets up a clean database
+    Starts a Postgres database instance in a Docker container.
 
-
-    - `--confirm-delete`: automatically confirms you want to delete the
-    existing database.
-    :warning::warning: Use this with caution.:warning::warning:
-
-    - `--use-prebuilt` and `--no-use-prebuilt`: automatically say yes/no to a
-    prebuilt database. This only applies if you are using sqlite.
+    This is a quick way to set up a robust database for local use without
+    manual installation.
     """
-    from simmate.configuration import settings
+
+    from simmate.database.utils import start_postgres_docker
+
+    start_postgres_docker(password=password, port=port)
+
+
+@database_app.command()
+def stop():
+    """
+    Stops the Postgres database Docker container.
+    """
+    from simmate.database.utils import stop_postgres_docker
+
+    stop_postgres_docker()
+
+
+@database_app.command()
+def reset(
+    confirm_delete: bool = typer.Option(
+        False,
+        "--confirm-delete",
+        help="Automatically confirm that you want to delete and reset the existing database.",
+    ),
+    use_prebuilt: bool = typer.Option(
+        None,
+        "--use-prebuilt/--no-use-prebuilt",
+        help="Whether to use a pre-populated database (SQLite only). If not provided, you will be prompted.",
+    ),
+):
+    """
+    Wipes the existing database and initializes a fresh, empty schema.
+
+    :warning: **This action is irreversible.** All your data will be lost. :warning:
+    """
+    from simmate.config import settings
 
     database_name = str(settings.database.name)
     print(f"\nUsing {database_name}")
@@ -50,64 +91,84 @@ def reset(confirm_delete: bool = False, use_prebuilt: bool = None):
     if settings.database_backend == "sqlite3" and use_prebuilt is None:
         use_prebuilt = typer.confirm(
             "\nIt looks like you are using the default database backend (sqlite3). \n"
-            "Would you like to use a prebuilt-database with all third-party data "
-            "already loaded? \n"
+            "Would you like to use a prebuilt-database with third-party data "
+            "already loaded in? \n"
             "If this is the first time you using the prebuild, this will "
-            "involve a ~1.5GB \ndownload and will unpack to roughly 10GB.\n\n"
-            "We recommend answering 'yes' for beginners."
+            "involve a ~4GB \ndownload and will unpack to ~35GB."
         )
 
     from simmate.database import connect
-    from simmate.database.utilities import reset_database
+    from simmate.database.utils import reset_database
 
     reset_database(use_prebuilt=use_prebuilt)
 
 
 @database_app.command()
 def update():
-    """Updates the database with any changes made"""
+    """
+    Updates the database schema to reflect any recent changes to Django models.
+    """
 
     from simmate.database import connect
-    from simmate.database.utilities import update_database
+    from simmate.database.utils import update_database
 
     update_database()
 
 
 @database_app.command()
-def download(app_name: str):
+def download(
+    app_name: str = typer.Argument(
+        ...,
+        help="The name of the app to download data for (e.g., 'cod').",
+    ),
+    source: str = typer.Option(
+        "direct",
+        help="Where to download the data from. Options are 'direct' or 'archive'.",
+    ),
+):
     """
-    Downloads all data for a given Simmate app & loads it into the Simmate database
+    Downloads and populates the database with third-party data for a specific app.
     """
 
     from simmate.database import connect
-    from simmate.database.utilities import download_app_data
+    from simmate.database.utils import download_app_data
 
-    download_app_data(app_name)
+    download_app_data(app_name, source=source)
 
 
 @database_app.command()
-def dump_data(filename: Path = "database_dump.json", exclude: list[str] = []):
+def dump_data(
+    filename: Path = typer.Option(
+        "database_dump.json",
+        help="The JSON file where the database contents should be written.",
+    ),
+    exclude: list[str] = typer.Option(
+        [],
+        help="List of apps or models to exclude from the dump. Use `--exclude example` for each item.",
+    ),
+):
     """
-    Takes the Simmate database and writes it to a json file
-
-    - `--filename` is the file to write the all the JSON data to
+    Exports the current database contents to a JSON file.
     """
 
     from simmate.database import connect
-    from simmate.database.utilities import dump_database_to_json
+    from simmate.database.utils import dump_database_to_json
 
     dump_database_to_json(filename=filename, exclude=exclude)
 
 
 @database_app.command()
-def load_data(filename: Path = "database_dump.json"):
+def load_data(
+    filename: Path = typer.Option(
+        "database_dump.json",
+        help="The JSON file containing the database contents to load.",
+    )
+):
     """
-    Takes a JSON database and loads it into the Simmate database
-
-    - `--filename` is the file to load the all the JSON data from
+    Imports database contents from a JSON file.
     """
 
     from simmate.database import connect
-    from simmate.database.utilities import load_database_from_json
+    from simmate.database.utils import load_database_from_json
 
     load_database_from_json(filename=filename)

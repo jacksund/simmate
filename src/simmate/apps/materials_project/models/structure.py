@@ -1,9 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import Structure, Thermodynamics, table_column
+from rich.progress import track
+
+from simmate.config import settings
+from simmate.database.core import table_column
+from simmate.database.mixins import (
+    Structure,
+    Thermodynamics,
+    ThirdPartyData,
+)
+from simmate.database.utils import batch_bulk_create
 
 
-class MatprojStructure(Structure, Thermodynamics):
+class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
     """
     Crystal structures from the [Materials Project](https://materialsproject.org/)
     database.
@@ -15,14 +24,6 @@ class MatprojStructure(Structure, Thermodynamics):
 
     class Meta:
         db_table = "materials_project__structures"
-
-    # -------------------------------------------------------------------------
-
-    html_display_name = "Materials Project"
-    html_description_short = "The Materials Project at Berkeley National Labs"
-
-    html_entries_template = "materials_project/structures/table.html"
-    html_entry_template = "materials_project/structures/view.html"
 
     # -------------------------------------------------------------------------
 
@@ -42,7 +43,7 @@ class MatprojStructure(Structure, Thermodynamics):
 
     # -------------------------------------------------------------------------
 
-    remote_archive_link = "https://archives.simmate.org/MatprojStructure-2023-07-07.zip"
+    remote_archive_link = "https://assets.simmate.org/MatprojStructure-2026-03-20.zip"
     archive_fields = [
         "energy_uncorrected",
         "band_gap",
@@ -92,20 +93,28 @@ class MatprojStructure(Structure, Thermodynamics):
     """
     # TODO: reverse to be is_experimental
 
-    updated_at = table_column.DateTimeField(blank=True, null=True)
+    updated_at_original = table_column.DateTimeField(blank=True, null=True)
     """
     Timestamp of when this row was was lasted changed / updated by the 
     Materials Project
     """
-    # TODO: change to updated_at_original
 
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_all_structures(
+    def load_remote_archive(cls, **kwargs):
+        """
+        Downloads the remote archive and populates the database table.
+        This also runs `update_all_stabilities` once the data is loaded.
+        """
+        super().load_remote_archive(**kwargs)
+        cls.update_all_stabilities()
+
+    @classmethod
+    @batch_bulk_create(batch_size=1_000)
+    def load_source_data(
         cls,
-        api_key: str,
-        update_stabilities: bool = False,
+        api_key: str = None,
     ):
         """
         Only use this function if you are part of the Simmate dev team!
@@ -121,25 +130,29 @@ class MatprojStructure(Structure, Thermodynamics):
         #### Parameters
 
         - `api_key`:
-            Your Materials Project API key.
+            Your Materials Project API key. Default is to use the api_key in
+            your Simmate settings.
         - `criteria`:
             Filtering criteria for which structures to load. The default is all
             existing structures (137,885 as of 2022-01-16), which will take rouhghly
             15 min to complete (not including stabilities).
-        - `update_stabilities`:
-            Whether to run update_all_stabilities on the database table. Note this
-            will add over an hour to this process. Default is True.
         """
 
-        from django.utils.timezone import make_aware
-        from rich.progress import track
+        # grab the api key from settings if it wasn't provided
+        api_key = api_key or settings.materials_project.api_key
+        if not api_key:
+            raise ValueError(
+                "You must provide an api_key or set it in your Simmate settings.\n"
+                "To get an API key, visit: https://next-gen.materialsproject.org/api\n"
+                "Then set it by running: `simmate config add materials_project.api_key YOUR_KEY_HERE`"
+            )
 
         try:
             from mp_api.client import MPRester
         except:
             raise Exception(
                 "To use this method, MP-API is required. Please install it "
-                "with `pip install mp-api"
+                "with `uv pip install mp-api"
             )
 
         # Connect to their database with personal API key
@@ -231,69 +244,27 @@ class MatprojStructure(Structure, Thermodynamics):
                 all_fields=False,
                 fields=fields_to_load,
                 deprecated=False,
-                # !!! DEV NOTE: you can uncomment these lines for quick testing
-                # num_chunks=3,
-                chunk_size=1000,
+                chunk_size=1_000,
+                # num_chunks=3,  # for local testing
             )
-
-            # BUG: The search above is super unstable, so instead, I grab all mp-id
-            # in one search, then make individual queries for the data of each
-            # after that.
-            # This takes about 30 minutes.
-            # mp_ids = mpr.summary.search(
-            #     all_fields=False,
-            #     fields=["material_id"],
-            #     deprecated=False,
-            # )
-            # data = []
-            # chunk_ids = []
-            # for entry in track(mp_ids):
-            #     chunk_ids.append(entry.material_id)
-            #     if (
-            #         len(chunk_ids) >= 1000
-            #         or entry.material_id == mp_ids[-1].material_id
-            #     ):
-            #         result = mpr.summary.search(
-            #             material_ids=[entry.material_id],
-            #             all_fields=False,
-            #             fields=fields_to_load,
-            #         )
-            #         data += result
-            #         chunk_ids = []
 
         # Let's iterate through each structure and save it to the database
         # This also takes a while, so we use a progress bar
-        failed_entries = []
-        db_objects = []
         for entry in track(data):
             try:
                 # convert the data to a Simmate database object
-                structure_db = cls.from_toolkit(
+                yield cls.from_toolkit(
                     id=str(entry.material_id),
                     structure=entry.structure,
                     energy=entry.energy_per_atom * entry.structure.num_sites,
                     energy_uncorrected=entry.uncorrected_energy_per_atom
                     * entry.structure.num_sites,
-                    updated_at=make_aware(entry.last_updated),
+                    updated_at_original=entry.last_updated,
                     band_gap=entry.band_gap,
                     is_gap_direct=entry.is_gap_direct,
                     is_magnetic=entry.is_magnetic,
                     total_magnetization=entry.total_magnetization,
                     is_theoretical=entry.theoretical,
                 )
-                db_objects.append(structure_db)
             except:
-                failed_entries.append(entry)
-
-        # and save it to our database
-        cls.objects.bulk_create(
-            db_objects,
-            batch_size=15000,
-            ignore_conflicts=True,
-        )
-
-        # once all structures are saved, let's update the Thermodynamic columns
-        if update_stabilities:
-            cls.update_all_stabilities()
-
-        return failed_entries
+                pass

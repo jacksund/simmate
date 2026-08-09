@@ -1,0 +1,440 @@
+# -*- coding: utf-8 -*-
+
+import shutil
+import time
+from pathlib import Path
+from tempfile import mkdtemp
+
+import requests
+from rich.progress import track
+
+
+def get_directory(directory: Path | str = None) -> Path:
+    """
+    Initializes a directory.
+
+    There are many cases where the user can choose their working directory
+    for a calculation, and they may want to provide their directory in various
+    formats. This includes... None, a string, or a TemporaryDirectory instance.
+    Based on the input, this function does the following:
+      - `None`:
+          returns the full path to a new folder inside python's
+          current working directory named "simmate-task-<randomID>"
+      - `str` or `pathlib.Path`:
+          makes the directory if it doesnt exist and then returns the full path
+
+    #### Parameters
+
+    - `directory`:
+        Either None, a path to the directory, or a tempdir. The default is None.
+
+    #### Returns
+
+    - `directory`:
+        The full path to the initialized directory as a `pathlib.Path` object
+    """
+
+    # if no directory was provided, we create a new folder within the current
+    # working directory. All of these folders are named randomly.
+    # Note: we can't name these nicely (like simmate-task-001) because that will
+    # introduce race conditions when making these folders in production.
+    if not directory:
+        # create a directory in the current working directory. Note, even though
+        # we are creating a "TemporaryDirectory" here, this directory is never
+        # actually deleted. Note, Path() gives the working directory
+        from simmate.config import settings
+
+        directory_new = mkdtemp(prefix="simmate-task-", dir=settings.scratch_dir)
+        directory_cleaned = Path(directory_new)
+
+    # otherwise make sure the directory the user provided exists and if it does
+    # not, then make it!
+    else:
+        directory_cleaned = Path(directory)
+        if not directory_cleaned.exists():
+            # We use parents=True because we want to make these directories
+            # recursively. That is, we can do "path/to/newfolder1/newfolder2" where
+            # multiple folders can be made with one call.
+            # Also if the folder already exists, we don't want to raise an error.
+            directory_cleaned.mkdir(parents=True, exist_ok=True)
+
+    # and return the full path to the directory
+    return directory_cleaned.absolute()
+
+
+def copy_files_from_directory(
+    files_to_copy: list[Path],
+    directory_old: Path,
+    directory_new: Path = None,
+) -> Path:
+    """
+    Given an old directory, copies all of the files listed over to a new one.
+
+    #### Parameters
+
+    - `files_to_copy`:
+        a list of filenames that should be copied over. If you want ALL files,
+        try using the `copy_directory` utility instead
+
+    - `directory_old`:
+        Name of the directory to be copied over. Must exist.
+
+    - `directory_new`:
+        Name of the new directory (optional). This will be passed to the
+        `get_directory` utility.
+
+    #### Returns
+
+    - `directory`:
+        The path to the new directory as a string
+
+    """
+
+    # Start by creating a new directory or grabbing the one given.
+    directory_new_cleaned = get_directory(directory_new)
+
+    # and make sure we have a path obj
+    directory_old = Path(directory_old)
+
+    # TODO: this is a copy/paste of the code in copy_directory. Consider
+    # refactoring and making a context manager (bc the delete_tmp is used below)
+    # First check if the previous directory exists. There are several
+    # possibilities that we need to check for:
+    #   1. directory exists on the same file system and can be found
+    #   2. directory exists on the same file system but is now an archive
+    #   3. directory/archive is on another file system (requires ssh to access)
+    #   4. directory was deleted and unavailable
+    if directory_old.exists():
+        # everything is good to go
+        delete_temp = False
+    elif directory_old.with_suffix(".zip").exists():
+        # unpack the old archive
+        shutil.unpack_archive(
+            filename=directory_old.with_suffix(".zip"),
+            extract_dir=directory_old.parent,
+        )
+        delete_temp = True
+    else:
+        raise Exception(
+            "Unable to locate the previous directory to copy. Make sure the "
+            "past directory is located on the same file system. Directory that "
+            f"couldn't be found was... {directory_old}"
+        )
+    # TODO: for possibility 3, I could implement automatic copying with
+    # the "fabric" python package (uses ssh). I'd also need to store
+    # filesystem names (e.g. "WarWulf") to know where to connect.
+
+    for filename in files_to_copy:
+        source_file = directory_old / filename
+        destination = directory_new_cleaned / filename
+        if not source_file.exists:
+            raise Exception(
+                "Unable to locate the file to copy. Make sure the "
+                "past directory is located on the same file system. File that "
+                f"couldn't be found was... {source_file}"
+            )
+        shutil.copy(source_file, destination)
+
+    # Then remove the unpacked archive now that we copied it.
+    # This leaves the original archive behind and unaltered too.
+    if delete_temp:
+        shutil.rmtree(directory_old)
+
+    return directory_new_cleaned
+
+
+def copy_directory(
+    directory_old: Path,
+    directory_new: Path = None,
+    ignore_simmate_files: bool = False,
+) -> Path:
+    """
+    Given an old directory, copies all of it's contents over to a new one.
+    Optionally, you can avoid copying any simmate_* files and archives within
+    that original directory to save on disk space.
+
+    #### Parameters
+
+    - `directory_old`:
+        Name of the directory to be copied over. Must exist.
+
+    - `directory_new`:
+        Name of the new directory (optional). This will be passed to the
+        `get_directory` utility.
+
+    - `ignore_simmate_files`:
+        Whether to ignore simmate_* files when copying over. Defaults to False.
+
+    #### Returns
+
+    - `directory`:
+        The path to the new directory as a string
+
+    """
+
+    # Start by creating a new directory or grabbing the one given.
+    directory_new_cleaned = get_directory(directory_new)
+
+    # and make sure we have a path obj
+    directory_old = Path(directory_old)
+
+    # First check if the previous directory exists. There are several
+    # possibilities that we need to check for:
+    #   1. directory exists on the same file system and can be found
+    #   2. directory exists on the same file system but is now an archive
+    #   3. directory/archive is on another file system (requires ssh to access)
+    #   4. directory was deleted and unavailable
+    # When copying over the directory, we ignore any `simmate_` files
+    # that correspond to metadata/results/corrections/etc.
+    if directory_old.exists():
+        # copy the old directory to the new one
+        shutil.copytree(
+            src=directory_old,
+            dst=directory_new_cleaned,
+            ignore=(
+                shutil.ignore_patterns("simmate_*") if ignore_simmate_files else None
+            ),
+            dirs_exist_ok=True,
+        )
+    elif directory_old.with_suffix(".zip").exists():
+        # unpack the old archive
+        shutil.unpack_archive(
+            filename=directory_old.with_suffix(".zip"),
+            extract_dir=directory_old.parent,
+        )
+        # copy the old directory to the new one
+        shutil.copytree(
+            src=directory_old,
+            dst=directory_new_cleaned,
+            ignore=(
+                shutil.ignore_patterns("simmate_*") if ignore_simmate_files else None
+            ),
+            dirs_exist_ok=True,
+        )
+        # Then remove the unpacked archive now that we copied it.
+        # This leaves the original archive behind and unaltered too.
+        shutil.rmtree(directory_old)
+    else:
+        raise Exception(
+            "Unable to locate the previous directory to copy. Make sure the "
+            "past directory is located on the same file system. Directory that "
+            f"couldn't be found was... {directory_old}"
+        )
+    # TODO: for possibility 3, I could implement automatic copying with
+    # the "fabric" python package (uses ssh). I'd also need to store
+    # filesystem names (e.g. "WarWulf") to know where to connect.
+
+    return directory_new_cleaned
+
+
+def make_archive(directory: Path, files_to_exclude: list[str] = []):
+    """
+    Compresses the directory to a zip file of the same name. After compressing,
+    it then deletes the original directory.
+
+    #### Parameters
+
+    - `directory`:
+        Path to the folder that should be archived
+    """
+
+    directory_full = directory.absolute()
+
+    # Remove any files that were requested to be deleted. For example, POTCAR
+    # files of VASP calculations.
+    for file_to_remove in files_to_exclude:
+        for file_found in directory.rglob(file_to_remove):
+            file_found.unlink()
+
+    # This wraps shutil.make_archive to change the default parameters. Normally,
+    # it writes the archive in the working directory, but we update it to use the
+    # the same directory as the folder being archived. The format is also set
+    # to zip.
+    shutil.make_archive(
+        # By default I choose within the current directory and save
+        # it as the same name of the directory (+ zip ending)
+        base_name=directory_full,
+        # format to use switch to gztar after testing
+        format="zip",
+        # full path to up tp directory that will be archived
+        root_dir=directory_full.parent,
+        # directory within root_directory to archive
+        base_dir=directory_full.name,
+    )
+    # now remove the directory we just archived
+    shutil.rmtree(directory)
+
+
+def make_error_archive(directory: Path):
+    """
+    Compresses the directory to a zip file and stores the new archive within the
+    original. This utility is meant for creating archives within the directory
+    of a failed calculation, so the new archive will be named something like
+    `simmate_attempt_01.zip`, where the number is automatically determined. When
+    archiving the folder, all "simmate_*" files within the directory are ignore
+    (this is includes earlier simmate_attempt_*.zip archives).
+
+    #### Parameters
+
+    - `directory`:
+        Path to the folder that should be archived
+    """
+
+    full_path = directory.absolute()
+
+    # check the directory and see how many other "simmate_attempt_*.zip" files
+    # already exist. Our archive number will be based off of this.
+    count = (
+        len([f for f in full_path.iterdir() if f.name.startswith("simmate_attempt_")])
+        + 1
+    )
+    count_str = str(count).zfill(2)
+    base_name = full_path / f"simmate_attempt_{count_str}"
+
+    # Before we make the archive, we want to avoid also storing other simmate
+    # archives and files within this new archive. We therefore copy all files
+    # that do NOT start with "simmate_" over into a folder and then archive it.
+    shutil.copytree(
+        src=full_path,
+        dst=base_name,
+        ignore=shutil.ignore_patterns("simmate_*"),
+    )
+
+    # now convert the copied files to a new archive
+    make_archive(base_name)
+
+
+def archive_old_runs(
+    directory: Path = None,
+    time_cutoff: float = 3 * 7 * 24 * 60 * 60,  # equal to 3 weeks
+):
+    """
+    Goes through a given directory and finds all "simmate-task-" folders that
+    are older than a given time cutoff. Each of these folders is then compressed
+    to a zip file and then the original folder is removed.
+
+    #### Parameters
+
+    - `directory`:
+        base directory that will contain folders to archive. Defaults to the
+        working directory.
+    - `time_cutoff`:
+        The time (in seconds) required to determine whether a folder is old or not.
+        If the folder is considered old, then it will be archived and then deleted.
+        The default is 3 weeks.
+
+    """
+    if not directory:
+        directory = Path.cwd()
+
+    # load the full path to the desired directory
+    directory = get_directory(directory)
+
+    # grab all files/folders in this directory and then limit this list to those
+    # that are...
+    #   1. folders
+    #   2. start with "simmate-task-"
+    #   3. haven't been modified for at least time_cutoff
+    foldernames = []
+    for foldername in directory.iterdir():
+        foldername_full = directory / foldername
+        if (
+            foldername_full.is_dir()
+            and "simmate-task-" in foldername.name
+            and time.time() - foldername_full.lstat().st_mtime > time_cutoff
+        ):
+            foldernames.append(foldername_full)
+
+    # now go through this list and archive the folders that met the criteria
+    [make_archive(f) for f in foldernames]
+
+
+def empty_directory(directory: Path, files_to_keep: list[Path] = []):
+    """
+    Deletes all files and folders within a directory, except for those provided
+    to the files_to_keep parameter.
+
+    #### Parameters
+
+    - `directory`:
+        base directory that should be emptied
+    - `files_to_keep`:
+        A list of file and folder names within the base directory that should
+        not be deleted. The default is [].
+    """
+    # grab all of the files and folders inside the listed directory
+    for filename in directory.iterdir():
+        full_path = filename.absolute()
+        if filename not in files_to_keep:
+            # check if we have a folder or a file.
+            # Folders we delete with shutil and files with the os module
+            if full_path.is_dir():
+                shutil.rmtree(full_path)  # ignore_errors=False
+            else:
+                full_path.unlink()
+
+
+def chunk_read(
+    filename: Path | str,
+    chunk_size: int,
+    delimiter: str,
+) -> list:
+    """
+    Yields n-sized chunks of entries from a file, where the chunks sizes are
+    determined by a delimiter.
+
+    This is useful for reading large files, such as a molecular format or CSV
+    that is too large to load into memory.
+
+    As an alternative to this function, consider using Dask to load larger than
+    memory CSVs.
+    """
+    filename = Path(filename)
+    with filename.open("r") as file:
+        is_end = False
+        while not is_end:
+            delimiter_count = 1  # start at 1 bc we need to match chunk_size at end
+            lines = []
+            while delimiter_count < chunk_size:
+                line = file.readline()
+                if not line:
+                    is_end = True
+                    break
+                lines.append(line)
+                if delimiter in line:
+                    delimiter_count += 1
+            lines = "".join(lines)
+            yield lines.split(delimiter)
+
+
+def download_file(
+    url: str,
+    dest_path: str | Path,
+    chunk_size: int = 1048576,  # 1MB chunks
+) -> Path:
+    """
+    Downloads a large file from a URL to a local destination using streaming.
+
+    This function uses a streaming GET request to ensure memory efficiency,
+    writing the file in chunks rather than loading it entirely into RAM.
+    A progress bar is displayed in the terminal via the rich library.
+    """
+
+    dest_path = Path(dest_path)
+
+    with requests.get(url, stream=True) as response:
+        response.raise_for_status()
+        total_size = int(response.headers.get("content-length", 0))
+
+        # Calculate total iterations for the progress bar
+        # We use max(1, ...) to avoid division by zero if total_size is unknown
+        total_chunks = total_size // chunk_size if total_size else None
+
+        with open(dest_path, "wb") as f:
+            for chunk in track(
+                response.iter_content(chunk_size=chunk_size),
+                total=total_chunks,
+            ):
+                f.write(chunk)
+
+    return dest_path

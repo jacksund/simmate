@@ -1,0 +1,38 @@
+{% load simmate_input_forms %}
+<div class="tab-pane" id="calculations-section">
+    <div class="container-fluid mt-3">
+        {% if user_calcs %}
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th scope="col" class="ps-4">Run ID</th>
+                            <th scope="col">Workflow Name</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Updated At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for calc in user_calcs %}
+                            <tr>
+                                <td class="ps-4 font-monospace small">{% foreign_key_link calc "run_id" truncate_chars=10 %}</td>
+                                <td>
+                                    <b>{{ calc.workflow_name }}</b>
+                                </td>
+                                <td>{% htmx_component "workflow-status-component" table_entry=calc %}</td>
+                                <td class="small text-muted">{{ calc.updated_at|timesince }} ago</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-calculator text-muted" style="font-size: 3rem;"></i>
+                <p class="lead text-muted mt-3">You haven't submitted any calculations yet.</p>
+                <a href="/workflows/" class="btn btn-primary mt-2">Explore Workflows</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+</div>

@@ -32,15 +32,12 @@ from simmate.toolkit.featurizers import PropertyGrabber
 my_final_props = PropertyGrabber.featurize_many(
     molecules=input_molecules,
     properties=["num_rings", "num_stereocenters", "molecular_weight"],
-    parallel=True,  # this is the key reason you'd want to use a Featurizer class!
+    parallel=True,  # this utilizes multiple CPU cores for speedup!
 )
 ```
 
-!!! bug
-    `parallel=True` has not yet been implemented
-
 !!! tip
-    Both APIs yield the same result. The main difference is that the `Featurizer` API can use Dask for parallelization when `parallel=True`. If feature generation takes more than 15 minutes for all molecules, we recommend using the `Featurizer` API. This is typically the case when working with datasets of over 1 million molecules.
+    Both APIs yield the same result. The main difference is that the `Featurizer` API provides built-in parallelization using `ProcessPoolExecutor` when `parallel=True`. This is highly recommended for large datasets (e.g., >10,000 molecules) or computationally expensive features.
 
 !!! warning
     Our API is still in the early stages of development and may undergo changes to improve usability.

@@ -18,6 +18,8 @@ class Diffusion__Vasp__NebAllPathsMit(NebAllPathsWorkflow):
     MIT settings.
     """
 
+    accuracy_rating = 2
+
     bulk_relaxation_workflow = Relaxation__Vasp__Mit
     bulk_static_energy_workflow = StaticEnergy__Vasp__Mit
     single_path_workflow = Diffusion__Vasp__NebSinglePathMit

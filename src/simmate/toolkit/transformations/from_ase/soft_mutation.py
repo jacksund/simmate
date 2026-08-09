@@ -80,7 +80,7 @@ class SoftMutation(Transformation):
 
         # their code searches for a atoms.info['confid'] to check for
         # previously used modes -- it's unfortunately dependent on the entire
-        # ga structure config stands for configuration, which I'm not actually
+        # ga structure config, which I'm not actually
         # using. So I set this to some random value which has no effect.
         structure_ase.info.update({"confid": 0})
         # !!! I don't understand what this index represents and need to contact

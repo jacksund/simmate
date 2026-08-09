@@ -7,12 +7,13 @@ import pandas
 from rich.progress import track
 
 from simmate.apps.rdkit.models import Molecule
-from simmate.database.base_data_types import table_column
+from simmate.database.core import table_column
+from simmate.database.mixins import ThirdPartyData
 from simmate.toolkit import Molecule as ToolkitMolecule
 from simmate.toolkit.file_converters import SmilesAdapter
 
 
-class EnamineRealMolecule(Molecule):
+class EnamineRealMolecule(ThirdPartyData, Molecule):
     """
     Molecules from the [Enamine REAL](https://enamine.net/) database.
     """
@@ -20,10 +21,6 @@ class EnamineRealMolecule(Molecule):
     class Meta:
         db_table = "enamine__real__molecules"
 
-    html_display_name = "Enamine REAL"
-    html_description_short = (
-        "The largest enumerated database of synthetically feasible molecules"
-    )
     is_redistribution_allowed = False
 
     external_website = (

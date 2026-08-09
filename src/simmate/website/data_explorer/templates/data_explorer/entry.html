@@ -1,0 +1,15 @@
+{% extends "core/site_base.html" %}
+{% block tabtitle %}{{ table_entry.table_name }} {{ table_entry.html_tabtitle_label }} - Simmate{% endblock %}
+{% block body %}
+    <div class="text-center my-3">
+        <h1>
+            <span class="badge text-bg-primary">{{ table_entry.table_name }} ID: {{ table_entry.id }}</span>
+        </h1>
+        <div class="text-muted small mt-2">
+            Created at {{ table_entry.created_at|date:"M. jS Y @ P T" }}
+            &nbsp;|&nbsp;
+            Last updated at {{ table_entry.updated_at|date:"M. jS Y @ P T" }}
+        </div>
+    </div>
+    {% block entrycontent %}{% endblock %}
+{% endblock %}

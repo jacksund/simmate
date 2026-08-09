@@ -9,17 +9,18 @@ import typer
 from simmate.apps.vasp.command_line.inputs import inputs_app
 from simmate.apps.vasp.command_line.plot import plot_app
 
-vasp_app = typer.Typer(rich_markup_mode="markdown")
+vasp_app = typer.Typer(
+    rich_markup_mode="markdown",
+    add_completion=False,
+)
 
 
 @vasp_app.callback(no_args_is_help=True)
 def base_command():
     """
-    A collection of utilities to help work with VASP
+    Commands and utilities for managing VASP calculations, input files,
+    and output visualizations.
     """
-    # When we call the command "simmate-vasp" this is where we start, and it then
-    # looks for all other functions that have the decorator "@simmate_vasp.command()"
-    # to decide what to do from there.
     pass
 
 

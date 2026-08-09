@@ -23,6 +23,8 @@ class Diffusion__Vasp__NebFromImagesMit(
     which call this workflow for you.
     """
 
+    accuracy_rating = 2
+
     _incar_updates = dict(
         ALGO="Normal",
         EDIFF=5e-5,

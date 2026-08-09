@@ -3,30 +3,20 @@ from datetime import datetime
 
 from django.utils.timezone import make_aware
 
-from simmate.configuration import settings
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.config import settings
+from simmate.database.core import DatabaseTable, table_column
+from simmate.database.mixins import ThirdPartyData
 
 from ..mappings import EthereumMappings
 from .wallets import EthereumWallet
 
 
-class EthereumTransaction(DatabaseTable):
+class EthereumTransaction(ThirdPartyData, DatabaseTable):
 
     class Meta:
         db_table = "ethereum__transactions"
 
-    # -------------------------------------------------------------------------
-
-    html_display_name = "Ethereum Transactions"
-    html_description_short = "Ethereum transactions monitored via Etherscan.io"
-
     external_website = "https://etherscan.io/"
-
-    html_entries_template = "ethereum/transactions/table.html"
-    html_entry_template = "ethereum/transactions/entry.html"
-
-    # html_form_component = "ethereum-transaction-form"
-    # html_enabled_forms = ["search"]
 
     # -------------------------------------------------------------------------
 

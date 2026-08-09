@@ -21,6 +21,8 @@ class Relaxation__Vasp__Quality04(VaspWorkflow):
     workflow, which uses this calculation as a fifth step (and final relaxation).
     """
 
+    accuracy_rating = 1
+
     description_doc_short = (
         "much less bare-bones settings for randomly-created structures"
     )

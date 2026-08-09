@@ -1,4 +1,4 @@
-# Data Integrity Safegaurds
+# Data Integrity Safeguards
 
 
 ### Summary
@@ -20,7 +20,7 @@ So how do we ensure community workers are being honest? Intrusive software (i.e.
 
 For (1), Simmate will randomly re-run ~5% of all calculations using a set of certified and well-trusted workers that we call "validators". Validators will select jobs that have already completed (or even failed!) and see if they get the same results within expected margins of error. Inconsistent results could lead to an investigation of the workers and/or their user. In many cases, issues could be an irregularity or unexpected bug, in which case the user who submitted the original workflow will be notified of the issue, refunded, and (if the issue was fixed) provided corrected results at no charge.
 
-For (2), workers must send USD($) into a locked “worker-collatoral wallet” which they can later withdraw in full amount when the workers are taken offline. The required collateral amount is proportional to worker compute power and potential total earnings (e.g., $10 per CPU-core provided, though this value varies based on compute demand). In rare cases where an investigation from (1) concludes that a worker is misbehaving, the worker will lose their collateral permanently – and the funds are shared among validators.
+For (2), workers must send USD($) into a locked “worker-collateral wallet” which they can later withdraw in full amount when the workers are taken offline. The required collateral amount is proportional to worker compute power and potential total earnings (e.g., $10 per CPU-core provided, though this value varies based on compute demand). In rare cases where an investigation from (1) concludes that a worker is misbehaving, the worker will lose their collateral permanently – and the funds are shared among validators.
 
 So to summarize, funds can only be moved out of the escrow once validators confirm a portion of a worker's results. With this system in place, we can ensure results are accurate before finally paying workers for the compute time that they provided. Funds out of the escrow are then split in the following manner: 85% to the individual worker, 10% to the validator pool, and 5% to the Simmate Treasury wallet (more on this later).
 

@@ -5,7 +5,7 @@ from pathlib import Path
 from simmate.apps.openeye_omega.inputs import OmegaParm
 from simmate.toolkit import Molecule
 from simmate.toolkit.file_converters import SmilesAdapter
-from simmate.workflows.base_flow_types import S3Workflow
+from simmate.workflows.common import S3Workflow
 
 
 class OmegaWorkflow(S3Workflow):
@@ -19,7 +19,7 @@ class OmegaWorkflow(S3Workflow):
     handlers work properly, make sure your command has "-param parameters.txt" 
     at the end.
     """
-    # TODO: add support for grabbing a user-set default from their configuration
+    # TODO: add support for grabbing a user-set default from their config
     # TODO: add auto check for parameters.txt ending
 
     parameters: dict = None

@@ -1,0 +1,6 @@
+<a href="{{ link }}"
+   class="my-2 btn btn-{{ theme }} {% if small %}btn-sm{% endif %}"
+   {% if open_in_new %}target="_blank"{% endif %}>
+    {% if label %}{{ label }}{% endif %}
+    {% if icon %}<small><i class="bi bi-{{ icon }}"></i></small>{% endif %}
+</a>

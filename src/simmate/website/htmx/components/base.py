@@ -10,15 +10,19 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonRes
 from django.shortcuts import render
 
 from simmate.toolkit import Molecule, Structure
-from simmate.utilities import dotdict, str_to_datatype
-from simmate.website.utilities import parse_request_get
+from simmate.utils import dotdict, str_to_datatype
+from simmate.website.utils import parse_request_get
 
-from .utilities import get_uuid_starting_with_letter, htmx_redirect
+from .utils import get_uuid_starting_with_letter, htmx_redirect
 
 LOCAL_COMPONENT_CACHE = LRUCache(maxsize=10_000)
 
 
 class HtmxComponent:
+
+    # Prevents Django from instantiating this class when accessing class attributes in templates
+    # (e.g., when accessing `dataset.table` where `dataset` is an uninstantiated HtmxComponent)
+    do_not_call_in_templates = True
 
     template_name: str = None
 
@@ -39,6 +43,7 @@ class HtmxComponent:
     request: HttpRequest = None  # overwritten on each new ajax call
 
     def __init__(self, context: dict = None, **kwargs):
+
         # Objects are always initialized through the {% htmx_component ... %} templatetag.
         # So they are built when the html page is being rendered. On init, we
         # also add it to the cache, so that htmx ajax calls can load the object
@@ -47,10 +52,10 @@ class HtmxComponent:
         self.form_data = {}
         self.initial_context = context
         self.request = (
-            context.request if context else None
+            getattr(context, "request", None) if context else None
         )  # updated with new request every new call
         # this part allows us to pass kwargs to the html tag and apply them to attrs
-        # ex: form_mode="example" --> apply to python obj on init
+        # ex: component_type="example" --> apply to python obj on init
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
@@ -59,18 +64,16 @@ class HtmxComponent:
 
     # -------------------------------------------------------------------------
 
-    _direct_obj_attrs_in_context: bool = False
-
     def get_context(self):
-        obj_attrs = self.__dict__ if self._direct_obj_attrs_in_context else {}
-        return {
-            "component": self,
-            **obj_attrs,
-        }
-        # **self.initial_context.flatten(),  # include this?
+        # TODO: consider adding...
+        # **self.__dict__
+        # **self.initial_context.flatten()
+        return {"component": self}
 
     def handle_request(
-        self, request: HttpRequest, method_name: str = None
+        self,
+        request: HttpRequest,
+        method_name: str = None,
     ) -> HttpResponse:
 
         self.request = request  # for easy access elsewhere
@@ -382,5 +385,30 @@ class HtmxComponent:
 
     def process(self):
         pass
+
+    # -------------------------------------------------------------------------
+
+    def stream_plotly_data(self, **kwargs):
+        """
+        HTMX endpoint to retrieve the latest data and return a JSON action
+        to extend the plotly trace on the client side.
+        """
+        fetch_method = kwargs.get("fetch_method")
+        div_id = kwargs.get("div_id")
+        max_points = int(kwargs.get("max_points", 10000))
+
+        method = getattr(self, fetch_method)
+        new_data = method()
+
+        action = {
+            "extendPlotlyTrace": [
+                div_id,
+                new_data.get("x", []),
+                new_data.get("y", []),
+                max_points,
+            ]
+        }
+
+        return JsonResponse([action], safe=False)
 
     # -------------------------------------------------------------------------

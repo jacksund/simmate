@@ -1,0 +1,86 @@
+<table class="table table-centered table-striped mb-4 border">
+    <thead class="table-primary">
+        <tr>
+            <th style="width: 45%">Composition</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Full Formula</td>
+            <td>{{ table_entry.formula_full|chemical_formula }}</td>
+        </tr>
+        <tr>
+            <td>Reduced Formula</td>
+            <td>{{ table_entry.formula_reduced|chemical_formula }}</td>
+        </tr>
+        <tr>
+            <td>Anonymous Formula</td>
+            <td>{{ table_entry.formula_anonymous|chemical_formula }}</td>
+        </tr>
+        <tr>
+            <td>Chemical System</td>
+            <td>{{ table_entry.chemical_system }}</td>
+        </tr>
+        <tr>
+            <td>Elements</td>
+            <td>{{ table_entry.elements|join:", " }}</td>
+        </tr>
+        <tr>
+            <td>Elements (#)</td>
+            <td>{{ table_entry.nelements }}</td>
+        </tr>
+    </tbody>
+</table>
+<table class="table table-centered table-striped mb-4 border">
+    <thead class="table-primary">
+        <tr>
+            <th style="width: 45%">Structure & Symmetry</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Space Group</td>
+            <td>{% foreign_key_link table_entry.spacegroup "symbol" %}</td>
+        </tr>
+        <tr>
+            <td>Sites (#)</td>
+            <td>{{ table_entry.nsites }}</td>
+        </tr>
+        <tr>
+            <td>Volume</td>
+            <td>
+                {{ table_entry.volume|floatformat:3|default:"--" }} &Aring;<sup>3</sup>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table class="table table-centered table-striped mb-0 border">
+    <thead class="table-primary">
+        <tr>
+            <th style="width: 45%">Density & Properties</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Mass Density</td>
+            <td>
+                {{ table_entry.density|floatformat:3|default:"--" }} g/cm<sup>3</sup>
+            </td>
+        </tr>
+        <tr>
+            <td>Atomic Density</td>
+            <td>
+                {{ table_entry.density_atomic|floatformat:3|default:"--" }} atoms/&Aring;<sup>3</sup>
+            </td>
+        </tr>
+        <tr>
+            <td>Molar Volume</td>
+            <td>
+                {{ table_entry.volume_molar|floatformat:3|default:"--" }} cm<sup>3</sup>/mol
+            </td>
+        </tr>
+    </tbody>
+</table>

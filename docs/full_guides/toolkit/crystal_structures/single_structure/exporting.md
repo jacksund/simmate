@@ -1,90 +1,76 @@
 # Exporting Structures
 
-!!! danger
-    The simmate toolkit is still in early development and not ready for use. Stick to the "PyMatgen Help" section for now.
+--------------------------------------------------------------------------------
+
+## Overview
+
+Simmate's `Structure` class provides simple and flexible methods for exporting your data to common formats, including file-based outputs, standard Python objects, and visualization-ready formats.
 
 --------------------------------------------------------------------------------
 
-## Introduction
+## Files
 
-After loading a molecule, you can convert it to a different format using a `to_` method of `Structure`. 
-
-For instance, use `to_cif` to output a CIF, use `to_poscar` for a POSCAR output, and use `to_pymatgen` for a PyMatGen object.
-
-Thus, file format conversion typically involves two steps:
-
-1. Load using a `from_*` method
-2. Export using a `to_*` method
+To write a structure to a file, use the `to` method. Simmate supports all formats that PyMatGen does.
 
 ``` python
 from simmate.toolkit import Structure
 
-# step 1: LOAD
-structure = Structure.from_cif_file("example.cif")
+# read a structure
+structure = Structure.from_file("example.cif")
 
-# step 2: EXPORT
-structure.to_poscar_file("POSCAR")
+# write it back to a new file and format
+structure.to(filename="my_new_file.poscar", fmt="poscar")
 ```
 
-!!! note
-    For exporting numerous structures or handling large files, refer to our "Many Structures" section. 
+Commonly supported formats:
+
+-   CIF
+-   POSCAR
+-   CSSR
+-   JSON (via `to_json`)
 
 --------------------------------------------------------------------------------
 
-## Basic Exportation
+## Visualization
 
-### Files
+### Three.js JSON
 
-File-based outputs accept a filename as a string or a `pathlib.Path` object.
+Simmate includes a specialized method for exporting structure data in a JSON format designed for rendering with Three.js. This is the same format used for the visualizations on the Simmate website.
 
 ``` python
-structure = Structure.to_cif_file("example.cif")
+# Generate JSON for Three.js rendering
+json_data = structure.to_threejs_json(
+    add_edge_elements=True,
+    bonding_method="CrystalNN",
+    sanitize=True,
+)
 ```
-
-| TYPE               | METHOD           |
-| ------------------ | ---------------- |
-| CIF                | `to_cif_file`    |
-| POSCAR (& CONTCAR) | `to_poscar_file` |
-
-!!! tip
-    Each of these methods has a corresponding submethod for exporting to a string, as detailed in the section below. For instance, `to_cif` outputs a string, while `to_cif_file` writes a `.cif` file.
-
-!!! warning
-    Writing numerous files (with many structures in each) can be slow using these methods. Refer to the "many structures" section for optimized writing of thousands or millions of structures.
 
 --------------------------------------------------------------------------------
 
-### Raw Text / Strings
+## Python Objects
 
-Instead of writing to a file, you can also obtain the converted format as a python variable (string) for use elsewhere.
+### Dictionaries and JSON
 
-``` python
-poscar_str = structure.to_poscar()
-```
-
-| TYPE               | METHOD      |
-| ------------------ | ----------- |
-| CIF                | `to_cif`    |
-| POSCAR (& CONTCAR) | `to_poscar` |
-
-!!! tip
-    Each of these methods has a corresponding submethod for exporting directly to a file, as detailed in the section above. For instance, `to_cif` outputs a string, while `to_cif_file` writes a `.cif` file.
-
---------------------------------------------------------------------------------
-
-### Python Objects
-
-Methods are available to convert to other popular python objects, such as those from RDKit.
+You can export a structure to a standard Python dictionary or a JSON string for easy storage or transfer.
 
 ``` python
-molecule.to_rdkit()
+# Export as a dictionary
+structure_dict = structure.as_dict()
+
+# Export as a JSON string
+structure_json = structure.to_json()
 ```
 
-| TYPE                        | METHOD         |
-| --------------------------- | -------------- |
-| Python `dict`               | `to_dict`      |
-| Pandas `DataFrame`          | `to_dataframe` |
-| PyMatGen `Structure` object | `to_pymatgen`  |
-| ASE `Atoms` object          | `to_ase`       |
+### ASE Atoms
+
+For integration with the Atomic Simulation Environment (ASE), Simmate provides a converter.
+
+``` python
+# Coming soon: easier conversion!
+# For now, you can use the ASE adapter directly:
+from simmate.toolkit.file_converters import AseAtomsAdaptor
+ase_atoms = AseAtomsAdaptor.get_atoms(structure)
+```
 
 --------------------------------------------------------------------------------

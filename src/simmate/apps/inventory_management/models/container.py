@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 
 from .batch import Batch
 from .storage_location import StorageLocation
@@ -10,25 +10,6 @@ class Container(DatabaseTable):
 
     class Meta:
         db_table = "inventory_management__containers"
-
-    # -------------------------------------------------------------------------
-
-    html_display_name = "Containers"
-    html_description_short = (
-        "Containers are specific vessels that contain part (or all) of a batch. A "
-        "single batch can have multiple containers because batches might need to be "
-        "split up and/or have different storage destinations."
-    )
-
-    html_entries_template = "inventory_management/container/table.html"
-    html_entry_template = "inventory_management/container/view.html"
-
-    html_form_component = "container-form"
-    html_enabled_forms = [
-        "search",
-        "create",
-        "update",
-    ]
 
     # -------------------------------------------------------------------------
 

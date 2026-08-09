@@ -66,7 +66,7 @@ class SmilesAdapter:
         # in order to make this a faster function.
 
         # doing a local import bc of the kemistree package
-        from simmate.utilities import chunk_read
+        from simmate.utils import chunk_read
 
         filename = Path(filename)
         file_ext = filename.suffix

@@ -60,7 +60,7 @@ class MigrationHop(PymatgenMigrationHop):
         from django.utils.module_loading import import_string
 
         from simmate.database import connect
-        from simmate.website.workflows import models as all_datatables
+        from simmate.website.workflow_explorer import models as all_datatables
 
         datatable_str = migration_hop["database_table"]
 

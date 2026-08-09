@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 
 from .project import Project
 
@@ -9,22 +9,6 @@ class Tag(DatabaseTable):
 
     class Meta:
         db_table = "project_management__tags"
-
-    html_display_name = "Tags, Labels, & Categories"
-    html_description_short = (
-        "Labels that help with organizing Project items "
-        "like hypotheses, targets, & orders. "
-    )
-
-    html_entries_template = "project_management/tag/table.html"
-    html_entry_template = "project_management/tag/view.html"
-
-    html_form_component = "tag-form"
-    html_enabled_forms = [
-        "search",
-        "create",
-        "update",
-    ]
 
     # TODO: Maybe allow FilteredScope objects to be linked to these for
     # auto-tagging things in other tables

@@ -1,6 +1,6 @@
 {# djlint:off #}
 <div class="my-2">
-    {% include "core_components/basic_elements/label.html" %}
+    {% include "core/basic_elements/label.html" %}
     <textarea id="{{ context.component.component_id }}-{{ name }}"
            name="{{ name }}"
            class="form-control"
@@ -8,7 +8,7 @@
            rows="{{ nrows }}"
            placeholder="{{ placeholder }}"
            hx-preserve
-           {% if not defer %}{% htmx_post %}{% endif %}
+           {% if not defer %}{% htmx_post indicator=indicator %}{% endif %}
            {% if disabled %}disabled{% endif %}
            {% if required %}required{% endif %}>{% if current_value %}{{ current_value }}{% endif %}</textarea>
 </div>

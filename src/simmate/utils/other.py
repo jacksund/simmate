@@ -1,0 +1,489 @@
+# -*- coding: utf-8 -*-
+
+import ast
+import hashlib
+import importlib
+import inspect
+import json
+import logging
+import textwrap
+from functools import wraps
+
+import cloudpickle
+import requests
+from rich.progress import track
+
+import simmate
+
+
+def get_latest_version() -> str:
+    """
+    Looks at the jacks/simmate repo and grabs the latest release version.
+    """
+    # Access the data via a web request
+    response = requests.get(
+        "https://api.github.com/repos/jacksund/simmate/releases/latest"
+    )
+
+    # load the version from the json response
+    # [1:] simply removes the first letter "v" from something like "v1.2.3"
+    latest_version = response.json()["tag_name"][1:]
+    return latest_version
+
+
+def check_if_using_latest_version(current_version=simmate.__version__):
+    """
+    Checks if there's a newer version by looking at the latest release on Github
+    and comparing it to the currently installed version
+    """
+    latest_version = get_latest_version()
+
+    if current_version != latest_version:
+        logging.warning(
+            "There is a new version of Simmate available. "
+            f"You are currently using v{current_version} while v{latest_version} "
+            "is the latest."
+        )
+
+
+def get_chemical_subsystems(chemical_system: str):
+    """
+    Given a chemical system, this returns all chemical systems that are also
+    contained within it.
+
+    For example, "Y-C" would return ["Y", "C", "C-Y"]. Note that the returned
+    list has elements of a given system in alphabetical order (i.e. it gives
+    "C-Y" and not "Y-C")
+
+    #### Parameters
+
+    - `chemical_system`:
+        A chemical system of elements. Elements must be separated by dashes (-)
+
+    #### Returns
+
+    - `subsystems`:
+        A list of chemical systems that make up the input chemical system.
+    """
+
+    # TODO: this code may be better located elsewhere. Maybe even as a method for
+    # the Composition class or alternatively as a ChemicalSystem class.
+
+    # I convert the system to a composition where the number of atoms dont
+    # apply here. (e.g. "Ca-N" --> "Ca1 N1")
+    from simmate.toolkit import Composition
+
+    composition = Composition(chemical_system.replace("-", ""))
+
+    return composition.chemical_subsystems
+
+
+def chunk_list(full_list: list, chunk_size: int) -> list:
+    """
+    Yields successive n-sized chunks from a list.
+    """
+    for i in range(0, len(full_list), chunk_size):
+        yield full_list[i : i + chunk_size]
+
+
+def str_to_datatype(
+    parameter: str,
+    value: str,
+    type_mappings: dict = {},
+    strip_quotes: bool = False,
+    allow_type_guessing: bool = False,
+):
+    """
+    When given a parameter name and it's value as a string, this helper
+    function will use the key (parameter) to determine how to convert the
+    val string to the proper python datatype (int, float, bool, list...).
+    A full mapping of parameters should be provided, but if a parameter is
+    given that isn't mapped, the value will be leave left as a string.
+
+    This is often ment to read to/from non-standard parameter file formats.
+    For example, VASP's INCAR does not follow any standard (yaml, toml, json,
+    etc.) so this function helps read values into python types.
+
+    Example type_mapping using random VASP settings:
+    ``` python
+    type_mapping = {
+        "LDAU": bool,
+        "EDIFF": float,
+        "NSW": int,
+        "LDAUL": list[int],
+        "LDAUU": list[float],
+        "DIPOL": list[list[float]],
+    }
+    ```
+    """
+
+    # If the value is not a string, then assume we are already in the correct
+    # format. List mode can't do this because we'd still have list such as
+    # ["123", "345"] which might need converted to list[int] or something else.
+    if not isinstance(value, str):
+        return value
+
+    # grab the type from mapping dictionary.
+    target_type = type_mappings.get(parameter, None)
+
+    # If the parameter is not mapped, we can try guessing OR just assume it
+    # is a str. Assuming it's a string is safer and the default.
+    if not target_type:
+        if allow_type_guessing:
+            if value.isdigit():
+                target_type = int
+            elif value.replace(".", "", 1).isdigit():
+                target_type = float
+            elif value.lower() in ["on", "true", "off", "false"]:
+                target_type = bool
+            elif value.lower() in ["none", ""]:
+                return None  # special case. return immediately
+            else:
+                target_type = str
+        else:
+            target_type = str
+
+    # Now that we know the target type to convert to, we can go through
+    # decide how to handle converting the value
+
+    if target_type == str:
+        # assert type(value) == str
+        if strip_quotes and ("'" in value or '"' in value):
+            return value.strip("'").strip('"')
+        return value
+
+    elif target_type == int:
+        # sometimes "1." was written to indicate an integer so check for
+        # this and remove it if needed.
+        if value[-1] == ".":
+            value = value[:-1]
+        # return the value integer
+        return int(value)
+
+    elif target_type == float:
+        # return the value float
+        return float(value)
+
+    elif target_type == bool:
+        # Python is weird where bool("FALSE") will return True... So I need
+        # to convert the string to lowercase and read it to know what to
+        # return here.
+        if "t" in value.lower() or value == "on":
+            return True
+        elif "f" in value.lower() or value == "off":
+            return False
+
+    elif target_type == list[float]:
+        final_list = []
+        for item in value.split():
+            # Sometimes, the values are given as "3*0.1 2*0.5" where the "*"
+            # means to include that value that many times. For example, this
+            # input would be the same as "0.1 0.1 0.1 0.5 0.5". We need to
+            # account for this when parsing.
+            if "*" in item:
+                nsubitems, subitem = item.split("*")
+                for n in range(int(nsubitems)):
+                    final_list.append(float(subitem))
+            else:
+                final_list.append(float(item))
+        return final_list
+
+    elif target_type == list[int]:
+        return [int(item) for item in value.split()]
+
+    # BUG: I assume we want to split by spaces, but I don't know of a good
+    # way to override this on a per-variable basis.
+    elif target_type == list[str]:
+        return value.split()
+
+    # These vectors are always 3x floats
+    elif target_type == list[list[float]]:
+        # convert a string of...
+        #   "x1 y1 z1 x2 y2 z2 x3 y3 z3"
+        # to...
+        #   [x1,y1,z1,x2,y2,z2,x3,y3,z3] (list of floats)
+        # and then to...
+        #   [[x1,y1,z1],[x2,y2,z2],[x3,y3,z3]]
+        value = [float(item) for item in value.split()]
+        return [value[i : i + 3] for i in range(0, len(value), 3)]
+
+    # If we have a dictionary, the value should be a JSON string
+    elif target_type == dict:
+        return json.loads(value)
+
+    # If it is not in the common keys listed, just leave it as a string.
+    else:
+        logging.warning(
+            "Unknown parameter mapping of {parameter}: {target_type}. "
+            "Leaving as str."
+        )
+        return value
+
+
+def get_class(class_path: str):
+    """
+    Given the import path for a python class (e.g. path.to.MyClass), this
+    utility will load the class given (MyClass).
+    """
+    config_modulename = ".".join(class_path.split(".")[:-1])
+    config_name = class_path.split(".")[-1]
+    config_module = importlib.import_module(config_modulename)
+    config = getattr(config_module, config_name)
+    return config
+
+
+def get_app_submodule(
+    app_name: str,
+    submodule_name: str,
+) -> str:
+    """
+    Checks if an app has a submodule present and returns the import path for it.
+    This is useful for checking if there are workflows or urls defined, which
+    are optional accross all apps. None is return if no app exists
+    """
+    config = get_class(app_name)
+    app_path = config.name
+    submodule_path = f"{app_path}.{submodule_name}"
+
+    # check if there is a workflows module in the app, and if so,
+    # try loading the workflows.
+    #   stackoverflow.com/questions/14050281
+    has_submodule = importlib.util.find_spec(submodule_path) is not None
+
+    return submodule_path if has_submodule else None
+
+
+def bypass_nones(bypass_kwarg: str = None, multi_cols: bool = False):
+    """
+    experimental utility that removes None values before passing a list of
+    entries to a method or function. The method or function then returns
+    a list of results with the None values placed back in the proper index.
+    """
+    # https://stackoverflow.com/questions/5929107/decorators-with-parameters
+
+    def decorator(function_to_wrap):
+        @wraps(function_to_wrap)
+        def wrapper(*args, **kwargs):
+
+            # grab the list of original inputs
+            entries = kwargs.pop(bypass_kwarg)
+            # BUG: position arguments will cause errors
+
+            # remove None values and keep a record of their original positions
+            passed_entries = []
+            failed_idxs = []
+            for idx, entry in enumerate(entries):
+                if entry:
+                    passed_entries.append(entry)
+                else:
+                    failed_idxs.append(idx)
+            kwargs[bypass_kwarg] = passed_entries
+
+            # RUN THE ORIGINAL METHOD
+            results_orig = function_to_wrap(*args, **kwargs)
+
+            if not multi_cols:
+                results_orig = [results_orig]
+            results_final = []
+            for column in results_orig:
+                # Add back None values in the proper position for this single column
+                col_final = []
+                failed_count = 0
+                for idx, result in enumerate(column):
+                    while (idx + failed_count) in failed_idxs:
+                        failed_count += 1
+                        col_final.append(None)
+                    col_final.append(result)
+                # there may be extra None values needed at the end. We add Nones until
+                # we get the correct list length
+                while len(entries) != len(col_final):
+                    col_final.append(None)
+                results_final.append(col_final)
+
+            return results_final if multi_cols else results_final[0]
+
+        return wrapper
+
+    return decorator
+
+
+class dotdict(dict):
+    """
+    Provides dot.notation access to dictionary attributes
+    """
+
+    # This class is modified from suggestions here:
+    # https://stackoverflow.com/questions/2352181/
+
+    # BUG: these two methods need to be updated to be recursive like I did
+    # with __getattr__ below
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+    def __getattr__(self, name: str):
+        if name not in self.keys():
+            raise Exception(f"Unknown property: {name}")
+
+        setting = self.get(name, None)
+
+        # if the property accessed is a dictionary, then we make it a dotdict
+        # so that we can perform recursive dot access
+        if isinstance(setting, dict):
+            return dotdict(setting)
+        else:
+            return setting
+
+
+def deep_update(default_dict: dict, override_dict: dict) -> dict:
+    """
+    Recursively update the default dictionary with values from the override dictionary.
+    """
+
+    # This fxn mirrors pydantic's deep_update util
+    # https://stackoverflow.com/questions/3232943/
+
+    final_dict = default_dict.copy()
+
+    for key, value in override_dict.items():
+        if (
+            isinstance(value, dict)
+            and key in final_dict
+            and isinstance(final_dict[key], dict)
+        ):
+            final_dict[key] = deep_update(final_dict[key], value)
+
+        else:
+            final_dict[key] = value
+
+    return final_dict
+
+
+def get_attributes_doc(cls: type, dedent_and_strip: bool = True) -> dict[str, str]:
+    """
+    Grabs a dictionary of attribute names to docstrings for the given class.
+    However, if the class is locally defined and not within a package, the
+    dictionary will be empty.
+    """
+
+    # Turns out PEP 224 which sets Attribute Docstrings was never accepted!
+    # See also https://stackoverflow.com/questions/55672640/
+
+    # We therefore borrow some code from...
+    # https://github.com/tkukushkin/attributes-doc/
+    # Specifically this is a fork of their get_attributes_doc function
+
+    result = {}
+    for parent in reversed(cls.mro()):
+        if cls is object:
+            continue
+        try:
+            source = inspect.getsource(parent)
+        except (TypeError, OSError):
+            continue  # can't find the source-code file
+        source = textwrap.dedent(source)
+        module = ast.parse(source)
+        cls_ast = module.body[0]
+        for stmt1, stmt2 in zip(cls_ast.body, cls_ast.body[1:]):
+            if not isinstance(stmt1, (ast.Assign, ast.AnnAssign)) or not isinstance(
+                stmt2, ast.Expr
+            ):
+                continue
+            doc_expr_value = stmt2.value
+            if isinstance(doc_expr_value, ast.JoinedStr):
+                raise Exception("F-strings are not allowed for attribute docstrings")
+            if isinstance(doc_expr_value, ast.Constant):
+                if isinstance(stmt1, ast.AnnAssign):
+                    attr_names = [stmt1.target.id]  # type: ignore
+                else:
+                    attr_names = [target.id for target in stmt1.targets]  # type: ignore
+
+                attr_doc_value = doc_expr_value.value
+                if not isinstance(attr_doc_value, str):
+                    continue
+
+                for attr_name in attr_names:
+                    if dedent_and_strip:
+                        attr_doc_value = textwrap.dedent(attr_doc_value).strip()
+                    result[attr_name] = attr_doc_value
+    return result
+
+
+def get_hash_key(text_to_hash: str) -> str:
+    """
+    Generates an MD5 hash key of a string
+    """
+    return hashlib.md5(text_to_hash.encode("utf-8")).hexdigest()
+
+
+def get_chunk_key(string_id: str, num_chunks: int) -> int:
+    """
+    Deterministically maps a string ID to an integer chunk index.
+
+    Uses MD5 hashing to evenly distribute IDs across `num_chunks` buckets.
+    The same `string_id` always maps to the same chunk, making this suitable
+    for sharding large datasets where chunk membership must be known without
+    scanning all chunks.
+    """
+    h = hashlib.md5(string_id.encode("utf-8")).digest()
+    return int.from_bytes(h, "big") % num_chunks
+
+
+def _run_cloudpickled_chunk(payload: bytes) -> list:
+    """
+    Unpacks a cloudpickle payload and runs fn over a chunk of items.
+
+    This must stay module-level so that `ProcessPoolExecutor` can pickle it
+    by reference. The real callable (which is often a closure or lambda, and
+    therefore unpicklable by the stdlib) travels inside `payload` instead.
+    """
+    fn, chunk_items, kwargs = cloudpickle.loads(payload)
+    return [fn(item, **kwargs) for item in chunk_items]
+
+
+def dispatch(
+    items,
+    fn,
+    parallel: bool | str = False,
+    tags: list = None,
+    batch_size: int = 1000,
+    max_workers: int = None,
+    **kwargs,
+) -> list:
+    """
+    Runs fn(item, **kwargs) for each item in items based on the requested
+    parallel mode.
+    """
+    if parallel == "job":
+        from simmate.database import connect  # isort:skip
+        from simmate.compute import SimmateExecutor  # isort:skip
+
+        results = []
+        for item in track(items):
+            result = SimmateExecutor.submit(
+                fn, item, tags=tags or ["simmate"], **kwargs
+            )
+            results.append(result)
+        return results
+
+    elif parallel is True or parallel == "core":
+        from concurrent.futures import ProcessPoolExecutor
+
+        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+            futures = [
+                executor.submit(
+                    _run_cloudpickled_chunk,
+                    cloudpickle.dumps((fn, chunk, kwargs)),
+                )
+                for chunk in chunk_list(full_list=items, chunk_size=batch_size)
+            ]
+            # flatten results before returning
+            return [item for future in track(futures) for item in future.result()]
+
+    elif not parallel or parallel == "single":
+        results = []
+        for item in track(items):
+            results.append(fn(item, **kwargs))
+        return results
+
+    else:
+        raise Exception(f"Unknown parallel mode: {parallel}")

@@ -1,0 +1,103 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    {% if entries %}
+        {% block search_results_table %}
+            {% if component.report %}
+                <div id="search_results_report">
+                    {% block table_report %}{% endblock %}
+                </div>
+            {% endif %}
+            {% if component.page %}
+                <div class="col-12">
+                    <div class="alert alert-secondary d-flex align-items-center mt-2 p-2"
+                         role="alert">
+                        <i class="bi bi-info-circle"></i>&nbsp;&nbsp;
+                        <div>
+                            Showing <b>{{ component.page.start_index }}-{{ component.page.end_index }}</b> of
+                            <b>
+                                {# linting is disabled for this line to stop it from adding a space #}
+                                {# djlint:off #}
+                                        {% if component.total == 10000 %}&gt;{% endif %}{{ component.total|intcomma }}
+                                {# djlint:on #}
+                            </b> filtered results.
+                            {% if component.total == 10000 %}
+                                We limit searches to 10k results for our Web UI and API. Switch to Python or SQL if you need the full dataset.
+                            {% endif %}
+                            <a class="text-dark text-decoration-underline" href=".">
+                                Clear Filters <i class="bi bi-arrow-clockwise"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            <form id="select_search_results"
+                  action="#"
+                  method="post"
+                  enctype="multipart/form-data">
+                {% if component.enable_select %}
+                    <div class="row">
+                        <div class="py-2">
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   name="entry_row_select_all"
+                                   onClick="toggle_select_all(this, 'entry_row_select')" />
+                            <b>Select All</b>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead class="table-primary">
+                            <tr>
+                                {% if component.enable_select %}<th></th>{% endif %}
+                                {% block table_headers %}
+                                    <th>ID</th>
+                                    <th>Created</th>
+                                    <th>Updated</th>
+                                {% endblock %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in entries %}
+                                <tr>
+                                    {% if component.enable_select %}
+                                        <td>
+                                            <input type="checkbox"
+                                                   class="form-check-input entry_row_select"
+                                                   id="select{{ entry.id }}"
+                                                   name="BULK_UPDATE_{{ entry.id }}">
+                                        </td>
+                                    {% endif %}
+                                    {% block table_rows %}
+                                        <td>{% foreign_key_link entry %}</td>
+                                        <td>{{ entry.created_at|date:"Y-m-d" }}</td>
+                                        <td>{{ entry.updated_at|date:"Y-m-d" }}</td>
+                                    {% endblock %}
+                                </tr>
+                            {% endfor %}
+                            {% if truncated %}
+                                <tr>
+                                    <td class="text-center" colspan="100">
+                                        <b><em>*** select View All for the full dataset ***</em></b>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        {% endblock %}
+        {% if component.page %}
+            {% include "data_explorer/pagination.html" with page=component.page pagination_urls=component.pagination_urls %}
+        {% endif %}
+    {% else %}
+        <div class="alert alert-danger d-flex align-items-center p-2" role="alert">
+            <div>
+                <i class="bi bi-exclamation-triangle"></i>&nbsp;&nbsp;<b>No entries were found that match your search criteria!</b>&nbsp;&nbsp;
+                <a class="text-dark text-decoration-underline" href=".">
+                    Clear Filters<i class="bi bi-arrow-clockwise"></i>
+                </a>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

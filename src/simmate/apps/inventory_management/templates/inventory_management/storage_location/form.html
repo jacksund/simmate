@@ -11,7 +11,7 @@
                 {% htmx_number_input name="temperature_celsius" label="Temperature (&deg;C)" placeholder="leave at 20 for 'room temp'" %}
             </div>
         </div>
-        {% if component.form_mode != "search" %}
+        {% if component.component_type != "search" %}
             <div class="row">
                 <div class="col-sm">
                     {% htmx_text_area name="description" placeholder="A quick description about this project and its scope" %}

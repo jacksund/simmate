@@ -2,7 +2,7 @@
 
 import stripe
 
-from simmate.configuration import settings
+from simmate.config import settings
 
 # See https://dashboard.stripe.com/
 stripe.api_key = settings.stripe.api_key

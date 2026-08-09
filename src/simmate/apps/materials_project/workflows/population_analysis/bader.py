@@ -7,7 +7,7 @@ from simmate.apps.materials_project.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
 from simmate.toolkit import Structure
-from simmate.utilities import copy_files_from_directory
+from simmate.utils import copy_files_from_directory
 from simmate.workflows import Workflow
 
 
@@ -16,6 +16,8 @@ class PopulationAnalysis__VaspBader__BaderMatproj(Workflow):
     Runs a static energy calculation using an extra-fine FFT grid and then
     carries out Bader analysis on the resulting charge density.
     """
+
+    accuracy_rating = 3
 
     @classmethod
     def run_config(
@@ -73,6 +75,8 @@ class StaticEnergy__Vasp__PrebaderMatproj(StaticEnergy__Vasp__Matproj):
 
     See `bader.workflows.materials_project`.
     """
+
+    accuracy_rating = 3
 
     # The key thing for bader analysis is that we need a very fine FFT mesh. Other
     # than that, it's the same as a static energy calculation.

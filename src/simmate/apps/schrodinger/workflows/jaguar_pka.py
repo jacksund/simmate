@@ -4,7 +4,7 @@ from pathlib import Path
 
 from simmate.apps.schrodinger.inputs import JaguarInput
 from simmate.toolkit import Molecule
-from simmate.workflows.base_flow_types import S3Workflow
+from simmate.workflows.common import S3Workflow
 
 
 class Pka__Schrodinger__JaguarPka(S3Workflow):

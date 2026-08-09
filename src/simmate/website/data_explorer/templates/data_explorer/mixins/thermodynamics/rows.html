@@ -1,3 +1,5 @@
+<td>{{ entry.energy|floatformat:4|default:"--" }}</td>
+<td>{{ entry.energy_per_atom|floatformat:4|default:"--" }}</td>
 <td class="text-center">
     {% if entry.is_stable %}
         <i class="bi bi-check-circle-fill text-primary"></i>
@@ -19,3 +21,26 @@
         --
     {% endif %}
 </td>
+<td>{{ entry.formation_energy|floatformat:3|default:"--" }}</td>
+<td>
+    {% if entry.decomposes_to %}
+        {{ entry.decomposes_to|join:", " }}
+    {% else %}
+        --
+    {% endif %}
+</td>
+<td>
+    {% if entry.band_gap is not None %}
+        {{ entry.band_gap|floatformat:3 }}
+        {% if entry.is_gap_direct %}
+            (direct)
+        {% else %}
+            (indirect)
+        {% endif %}
+    {% else %}
+        --
+    {% endif %}
+</td>
+<td>{{ entry.energy_fermi|floatformat:3|default:"--" }}</td>
+<td>{{ entry.conduction_band_minimum|floatformat:3|default:"--" }}</td>
+<td>{{ entry.valence_band_maximum|floatformat:3|default:"--" }}</td>

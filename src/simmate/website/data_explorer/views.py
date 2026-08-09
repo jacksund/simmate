@@ -1,19 +1,35 @@
 # -*- coding: utf-8 -*-
 
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 
-from simmate.configuration import settings
-from simmate.database.base_data_types import DatabaseTable
-from simmate.database.utilities import get_table
-from simmate.website.utilities import get_pagination_urls
+from simmate.config import settings
+from simmate.database.core import DatabaseTable
+from simmate.website.htmx.utils import get_component
+from simmate.website.utils import get_pagination_urls
 
 # -----------------------------------------------------------------------------
 
+
+def get_data_explorer_components() -> dict:
+    """
+    Uses the settings to build out Data sections + associated list of components
+    within each section.
+    """
+    data_config = {}
+    for section_name, entry_list in settings.website.data.items():
+        data_config[section_name] = []
+        for name in entry_list:
+            component = get_component(name)
+            data_config[section_name].append(component)
+    return data_config
+
+
 # We build this dict up front to reduce overhead on all API calls.
-_SAFE_TABLES = {
-    get_table(table_name).table_name: get_table(table_name)
-    for section_name, table_names in settings.website.data.items()
-    for table_name in table_names
+_SAFE_COMPONENTS = {
+    component.table.table_name: component
+    for section_name, components in get_data_explorer_components().items()
+    for component in components
 }
 
 
@@ -26,8 +42,8 @@ def get_table_safe(table_name: str) -> DatabaseTable:
     that could grab sensitive tables, such as those with API keys or passwords
     hashes.
     """
-    provider_table = _SAFE_TABLES[table_name]
-    return provider_table
+    component = _SAFE_COMPONENTS[table_name]
+    return component.table
 
 
 def get_table_entry_safe(table_name: str, table_entry_id: str | int) -> DatabaseTable:
@@ -43,18 +59,44 @@ def get_table_entry_safe(table_name: str, table_entry_id: str | int) -> Database
 
 def home(request):
 
+    from simmate.website.data_explorer.models import TableCount
+
+    # Grab all counts at once to prevent N+1 queries
+    counts_dict = dict(TableCount.objects.values_list("table_name", "row_count"))
+
     # Uses the settings to build out Data sections + associated list of tables
     # within each section. There is also a HIDDEN section that is handled
     # the same here. The html template handles that case separately.
-    #
-    # Note: We don't need `get_table_safe` here because we are building directly
-    # from the settings
-    data_config = {}
-    for section_name, table_list in settings.website.data.items():
-        data_config[section_name] = [get_table(table_name) for table_name in table_list]
+    data_config = get_data_explorer_components()
+
+    # We provide default icons for the built-in sections.
+    # Any custom sections will fallback to a default table icon.
+    section_icons = {
+        "Project Management": "bi-clipboard2-data",
+        "Inventory Management": "bi-flask",
+        "Crystalline Catalogs": "bi-gem",
+        "Molecular Catalogs": "bi-nut",
+        "Workflow Results": "bi-diagram-3",
+        "Business and Finance": "bi-bank",
+        "Compute Resources": "bi-pc-display-horizontal",
+        "Other": "bi-three-dots",
+    }
+
+    sections = []
+    for name, datasets in data_config.items():
+        if name == "HIDDEN" or not datasets:
+            continue
+        sections.append(
+            {
+                "name": name,
+                "icon": section_icons.get(name, "bi-table"),
+                "datasets": datasets,
+            }
+        )
 
     context = {
-        "data_config": data_config,
+        "sections": sections,
+        "counts_dict": counts_dict,
         "breadcrumbs": ["Data"],
     }
     template = "data_explorer/home.html"
@@ -62,44 +104,49 @@ def home(request):
 
 
 def table_about(request, table_name):
-    table = get_table_safe(table_name)
+    component = _SAFE_COMPONENTS[table_name]
+    table = component.table
     context = {
         "table": table,
         "table_docs": table.get_table_docs(),
-        # TODO: **table.html_extra_about_context,
+        **getattr(component, "extra_about_context", {}),
         "page_title": table_name,
         "breadcrumbs": ["Data", table_name, "About"],
     }
-    template = table.html_about_template
+    template = component.template_names.get("about", "data_explorer/about.html")
     return render(request, template, context)
 
 
 def table_entries(request, table_name):
 
-    table = get_table_safe(table_name)
-    view_format = request.GET.get("format", "html")  # default is html
+    component_class = _SAFE_COMPONENTS[table_name]
+    component = component_class(component_type="dashboard", request=request)
+
+    # TODO: support datastores
+    table = component.table
+
+    # check whether this is a web ui, API, or download request
+    view_format = request.GET.get("format", "html")
 
     if view_format == "html":
         page = table.filter_from_request(request)
         pagination_urls = get_pagination_urls(request, page)
         context = {
+            "component": component,
             "table": table,
             "page": page,
             "pagination_urls": pagination_urls,
             "total": page.paginator.count,  # often limited to 10k
-            "report": table.get_report(page) if table.enable_html_report else {},
+            "report": component.get_report(page),
             # "paginator": page.paginator,
             # "entries": page.object_list,  # page.paginator.object_list gives ALL results
             "page_title": table_name,
             "page_title_icon": "mdi-database",
-            "breadcrumbs": ["Data", table.html_display_name],
+            "breadcrumbs": ["Data", component.display_name],
             "title_json_link": True,
-            **table.html_extra_table_context,
-            # make left sidebar compact (only icons) when there's a quick-search
-            # view, so that we can put the search form on the right side
-            # "compact_sidebar": True if table.html_search_view else False,
+            **component.get_extra_table_context(request),
         }
-        template = table.html_table_template
+        template = component.template_name
         return render(request, template, context)
 
     elif view_format == "json":
@@ -126,6 +173,7 @@ def table_entries(request, table_name):
 
 def table_entry(request, table_name, table_entry_id):
 
+    component_class = _SAFE_COMPONENTS[table_name]
     table_entry = get_table_entry_safe(table_name, table_entry_id)
 
     # move to proper view function based on requested format
@@ -137,17 +185,41 @@ def table_entry(request, table_name, table_entry_id):
             "page_title": "Table Entry",
             "breadcrumbs": [
                 "Data",
-                table_entry.html_display_name,
+                component_class.display_name,
                 table_entry_id,
             ],
             "title_json_link": True,
-            **table_entry.html_extra_entry_context,
+            **component_class.get_extra_entry_context(request, table_entry),
         }
-        template = table_entry.html_entry_template
+        template = component_class.template_names.get(
+            "entry", "data_explorer/entry.html"
+        )
         return render(request, template, context)
 
     elif view_format == "json":
         return table_entry.to_json_response()
+
+    elif view_format == "cif":
+        content = table_entry.to_toolkit().to(fmt="cif")
+        response = HttpResponse(content, content_type="text/plain")
+        response["Content-Disposition"] = f'attachment; filename="{table_entry_id}.cif"'
+        return response
+
+    elif view_format == "poscar":
+        content = table_entry.to_toolkit().to(fmt="poscar")
+        response = HttpResponse(content, content_type="text/plain")
+        response["Content-Disposition"] = (
+            f'attachment; filename="POSCAR_{table_entry_id}"'
+        )
+        return response
+
+    elif view_format == "input":
+        content = table_entry.structure
+        response = HttpResponse(content, content_type="text/plain")
+        response["Content-Disposition"] = (
+            f'attachment; filename="{table_entry_id}_input.txt"'
+        )
+        return response
 
     else:
         raise Exception(f"Unknown 'format' GET arg given: {view_format}")
@@ -157,31 +229,20 @@ def table_search(request, table_name):
     raise NotImplementedError("Search view still under dev.")
 
 
-# -------------------------------------------------------------------------
-# Below are HTML Form views -- typically these are POST, but we use
-# django-unicorn which contains any POSTs within a component (AJAX requests).
-#
-# TODO: in the future, I may want to allow JSON post requests so that
-# rows can be added/updated via API calls. I don't do this yet because the
-# ORM is preferred + using admin permissions.
-# -------------------------------------------------------------------------
-
-
 def table_entry_new(request, table_name):
 
-    table = get_table_safe(table_name)
-    if not table.html_form_component:
-        raise NotImplementedError(
-            "This model does not have an 'entry-new' component yet!"
-        )
-
+    component_class = _SAFE_COMPONENTS[table_name]
     context = {
-        "component_name": table.html_form_component,
+        "component_name": component_class.component_name,
         "page_title": table_name,
         "page_title_icon": "mdi-database",
         "breadcrumbs": ["Data", table_name, "Form"],
     }
-    template = table.html_entry_form_template
+    template = getattr(
+        component_class,
+        "entry_form_template",
+        "htmx/full_page_component.html",
+    )
     return render(request, template, context)
 
 

@@ -13,6 +13,8 @@ class StaticEnergy__Vasp__MatprojHse(Relaxation__Vasp__MatprojHse):
     not have an HSE static energy, so this is the make-shift alternative.
     """
 
+    accuracy_rating = 5
+
     _incar_updates = dict(
         IBRION=-1,  # (optional) locks everything between ionic steps
         NSW=0,  # this is the main static energy setting

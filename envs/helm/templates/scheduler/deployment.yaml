@@ -18,23 +18,17 @@ spec:
     spec:
       containers:
         - name: simmate-scheduler
-          image: simmate/simmate-scheduler:latest
-          # TODO: much of this env is copy/pasted from gunicorn deployment
+          image: jacksund/simmate:{{ .Values.version }}
+          imagePullPolicy: Always
+          command: ["simmate", "compute", "start-schedules"]
           env:
             {{- include "simmate.env_config" . | indent 12 }}
-          volumeMounts:
-            - mountPath: /simmate_workers
-              name: simmate-worker-data
           resources:
             requests:
-              memory: "6Gi"
-              cpu: "1"
-              ephemeral-storage: "1Gi"
+              memory: {{ .Values.scheduler.memory.request }}
+              cpu: {{ .Values.scheduler.cpu.request }}
+              ephemeral-storage: {{ .Values.scheduler.ephemeral.request }}
             limits:
-              memory: "12Gi"
-              cpu: "1"
-              ephemeral-storage: "2Gi"
-      volumes:
-        - name: simmate-worker-data
-          persistentVolumeClaim:
-            claimName: simmate-worker-data
+              memory: {{ .Values.scheduler.memory.limit }}
+              cpu: {{ .Values.scheduler.cpu.limit }}
+              ephemeral-storage: {{ .Values.scheduler.ephemeral.limit }}

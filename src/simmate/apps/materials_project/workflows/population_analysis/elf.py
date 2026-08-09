@@ -12,6 +12,8 @@ class PopulationAnalysis__Vasp__ElfMatproj(StaticEnergy__Vasp__Matproj):
     and also writes the electron localization function (to ELFCAR).
     """
 
+    accuracy_rating = 3
+
     _incar_updates = dict(
         LELF=True,  # writes ELFCAR
         NPAR=1,  # must be set if LELF is set to True

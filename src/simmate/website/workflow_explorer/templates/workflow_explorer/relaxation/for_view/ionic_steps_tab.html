@@ -1,0 +1,28 @@
+<div class="tab-pane" id="ionic-steps-section">
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-sm table-centered table-striped mb-0 border">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Step</th>
+                        <th>Energy (eV/atom)</th>
+                        <th>Volume (&Aring;&sup3;)</th>
+                        <th>Max Force (eV/&Aring;)</th>
+                        <th>Max Stress (eV/&Aring;&sup3;)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for step in table_entry.structures.all|dictsort:"number" %}
+                        <tr>
+                            <td>{{ step.number }}</td>
+                            <td>{{ step.energy_per_atom|floatformat:4 }}</td>
+                            <td>{{ step.volume|floatformat:2 }}</td>
+                            <td>{{ step.site_force_norm_max|floatformat:4 }}</td>
+                            <td>{{ step.lattice_stress_norm|floatformat:4 }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

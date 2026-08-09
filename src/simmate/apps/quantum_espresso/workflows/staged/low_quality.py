@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflows.base_flow_types import StagedWorkflow
+from simmate.workflows.common import StagedRelaxStatic
 
 
-class StaticEnergy__QuantumEspresso__LowQuality(StagedWorkflow):
+class StagedRelaxStatic__QuantumEspresso__LowQuality(StagedRelaxStatic):
     """
     Runs a series of increasing-quality relaxations and then finishes with a single
     static energy calculation.
@@ -15,7 +15,7 @@ class StaticEnergy__QuantumEspresso__LowQuality(StagedWorkflow):
 
     is_recommended = True
 
-    accuracy_rating = 1.5
+    accuracy_rating = 0.5
 
     # -------------------------------------------------------------------------
 

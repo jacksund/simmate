@@ -2,7 +2,7 @@
 
 from django.contrib.auth.models import User
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 
 from .wallet import Wallet
 
@@ -11,12 +11,6 @@ class Transaction(DatabaseTable):
 
     class Meta:
         db_table = "project_management__transactions"
-
-    html_display_name = "Wallet Transactions"
-    html_description_short = "The full ledger of wallet transactions"
-
-    html_entries_template = "project_management/transaction/table.html"
-    html_entry_template = "project_management/transaction/view.html"
 
     # -------------------------------------------------------------------------
 

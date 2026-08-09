@@ -5,10 +5,12 @@ import urllib
 
 from django import template
 from django.template.loader import render_to_string
+from django.utils.safestring import mark_safe
+from plotly.graph_objects import Figure
 
-from simmate.website.utilities import hash_options
+from simmate.website.utils import hash_options
 
-from ..utilities import get_component
+from ..utils import get_component
 
 register = template.Library()
 
@@ -83,6 +85,7 @@ def htmx_component(context: dict, component_name: str, **kwargs):
     return render_to_string(
         template_name=component.template_name,
         context=component.get_context(),
+        request=getattr(context, "request", None),
     )
 
 
@@ -94,6 +97,25 @@ def htmx_js_actions(actions):
 @register.inclusion_tag(filename="htmx/loading_spinner.html")
 def htmx_loading_spinner():
     return  # html is static so no vars passed
+
+
+@register.inclusion_tag(
+    filename="htmx/input_elements/refresh.html",
+    takes_context=True,
+)
+def htmx_refresh(
+    context: dict,
+    refresh_loop: str = "5s",
+    method_name: str = None,
+    include: str = None,
+    target: str = None,
+    indicator: str = "#loading-spinner-corner",
+    **method_kwargs,
+):
+    method_kwargs = urllib.parse.urlencode(method_kwargs)
+    component = context.get("component")
+    trigger = f"every {refresh_loop}"
+    return locals()
 
 
 @register.inclusion_tag(
@@ -109,6 +131,7 @@ def htmx_post(
     javascript_only: str = False,
     method_name: str = None,
     method_kwargs: dict = None,
+    indicator: str = "#loading-spinner-corner",
 ):
     if not component_id:
         # We may be in a nested context (e.g. htmx_post is called inside another
@@ -121,11 +144,16 @@ def htmx_post(
         if component:
             component_id = component.component_id
 
+    if method_kwargs and isinstance(method_kwargs, dict):
+        import urllib.parse
+
+        method_kwargs = urllib.parse.urlencode(method_kwargs)
+
     if not target:
         target = f"#{component_id}"
     if not include:
         include = f"#{component_id}"
-    swap = "outerHTML" if not javascript_only else "none"
+    swap = "outerHTML settle:0" if not javascript_only else "none"
     return locals()
 
 
@@ -148,12 +176,14 @@ def htmx_text_input(
     dynamically_set: bool = False,
     defer: bool = True,
     required: bool = False,
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a single-line text input widget.
     """
     label = _get_input_label(name, label)
     current_value = _get_input_value(context, name)
+    component = context.get("component")
     return locals()
 
 
@@ -172,12 +202,14 @@ def htmx_text_area(
     nrows: int = 4,
     defer: bool = True,
     required: bool = False,
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a multi-line text input widget.
     """
     label = _get_input_label(name, label)
     current_value = _get_input_value(context, name)
+    component = context.get("component")
     return locals()
 
 
@@ -198,6 +230,7 @@ def htmx_number_input(
     step_size: float | int = None,
     defer: bool = True,
     required: bool = False,
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a numeric input widget.
@@ -211,6 +244,36 @@ def htmx_number_input(
     if not placeholder:
         placeholder = "123" if is_int else "0.123"
 
+    component = context.get("component")
+    return locals()
+
+
+@register.inclusion_tag(
+    filename="htmx/input_elements/date_input.html",
+    takes_context=True,
+)
+def htmx_date_input(
+    context: dict,
+    name: str,
+    label: str = None,
+    show_label: bool = True,
+    help_text: str = None,
+    placeholder: str = None,
+    maximum: str = None,  # e.g. "2026-07-13" (or "2026-07-13T14:30" if include_time)
+    minimum: str = None,
+    include_time: bool = False,  # renders a datetime-local input instead of date
+    defer: bool = True,
+    required: bool = False,
+    disabled: bool = False,
+    indicator: str = "#loading-spinner-corner",
+):
+    """
+    Display a date input widget (or a datetime input when `include_time=True`).
+    Uses the browser-native <input type="date"> so no extra JS library is needed.
+    """
+    label = _get_input_label(name, label)
+    current_value = _get_input_value(context, name)
+    component = context.get("component")
     return locals()
 
 
@@ -228,12 +291,14 @@ def htmx_checkbox(
     defer: bool = True,
     required: bool = False,
     switch_mode: bool = True,
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a checkbox widget.
     """
     label = _get_input_label(name, label)
     current_value = _get_input_value(context, name)
+    component = context.get("component")
     return locals()
 
 
@@ -249,6 +314,7 @@ def htmx_radio(
     show_label: bool = True,
     defer: bool = True,
     required: bool = False,
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a radio select widget.
@@ -264,6 +330,7 @@ def htmx_radio(
     if options and isinstance(options[0], (list, tuple)):
         tuple_mode = True  # we assume they have the correct format
 
+    component = context.get("component")
     return locals()
 
 
@@ -279,6 +346,7 @@ def htmx_button_select(
     show_label: bool = True,
     defer: bool = True,
     required: bool = False,
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a button select widget (i.e., a button group of options)
@@ -294,6 +362,7 @@ def htmx_button_select(
     if options and isinstance(options[0], (list, tuple)):
         tuple_mode = True  # we assume they have the correct format
 
+    component = context.get("component")
     return locals()
 
 
@@ -315,6 +384,7 @@ def htmx_selectbox(
     defer: bool = True,
     method_name: str = None,  # fxn_to_call -- presumes defer=False
     include: str = None,
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a selectbox widget.
@@ -372,6 +442,7 @@ def htmx_button(
     include: str = None,
     target: str = None,
     grouped: bool = False,
+    indicator: str = "#loading-spinner-corner",
     **method_kwargs,
 ):
     """
@@ -381,6 +452,8 @@ def htmx_button(
         label = method_name.replace("_", " ").title()
 
     method_kwargs = urllib.parse.urlencode(method_kwargs)
+
+    component = context.get("component")
 
     return locals()
 
@@ -424,9 +497,10 @@ def htmx_molecule_input(
     allow_custom_input: bool = False,
     custom_input_label: str = "Custom Input",
     custom_input_placeholder: str = "12345",
+    indicator: str = "#loading-spinner-corner",
 ):
     """
-    Display a ChemDraw.js (or ChemDoodle.js) input widget.
+    Display a ChemDraw.js (or Ketcher.js) input widget.
     """
     label = _get_input_label(name, label)
     molecule = _get_input_value(context, name)
@@ -470,6 +544,41 @@ def htmx_molecule_input(
 
 
 @register.inclusion_tag(
+    filename="htmx/input_elements/structure_input.html",
+    takes_context=True,
+)
+def htmx_structure_input(
+    context: dict,
+    name: str = "structure",
+    label: str = None,
+    show_label: bool = True,
+    help_text: str = None,
+    allow_file_input: bool = True,
+    allow_database_input: bool = False,
+):
+    """
+    Display a structure input widget.
+    """
+    label = _get_input_label(name, label)
+    structure = _get_input_value(context, name)
+
+    file_name = f"{name}__file"
+    url_name = f"{name}__url"
+    database_id_name = f"{name}__database_id"
+    database_table_name = f"{name}__database_table"
+
+    component = context["component"]
+    viewer_id = f"{name}-{component.component_id}-viewer"
+
+    database_table_options = getattr(component, "database_table_options", [])
+
+    return locals()
+
+
+# -----------------------------------------------------------------------------
+
+
+@register.inclusion_tag(
     filename="htmx/input_elements/file_upload.html",
     takes_context=True,
 )
@@ -484,20 +593,85 @@ def htmx_file_upload(
     defer: bool = False,
     file_type: str = None,  # only accept CSV files. Comma sep for others
     allow_multiple: bool = False,
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a file upload widget.
     """
     label = _get_input_label(name, label)
+    component = context.get("component")
     return locals()
+
+
+@register.inclusion_tag("htmx/plotly_figure.html", takes_context=True)
+def htmx_plotly_figure(
+    context: dict,
+    figure: Figure,
+    div_id: str = None,
+    stream_method: str = "get_new_data",
+    stream_interval: int = None,
+    max_points: int = 10000,
+):
+    """
+    Converts a plotly figure object to an html element for the frontend.
+    Optionally supports streaming new data dynamically via htmx.
+    """
+    component = context.get("component")
+    if not div_id and component and stream_interval:
+        # Give a fallback stable ID based on the component if streaming.
+        # Otherwise, we want a random ID so Plotly natively reconstructs toolbars on full swaps
+        div_id = f"{component.component_id}-plotly"
+
+    figure_html = figure.to_html(
+        full_html=False,
+        include_plotlyjs=False,
+        div_id=div_id,
+    )
+
+    # The htmx_post template tag expects a python dictionary for method_kwargs.
+    # It internally calls urllib.parse.urlencode() to serialize these arguments
+    # into URL query parameters for the POST request, so we must build the dictionary here
+    # rather than passing a string directly in the html template.
+    method_kwargs = {
+        "fetch_method": stream_method,
+        "div_id": div_id,
+        "max_points": max_points,
+    }
+
+    return {
+        "context": context,
+        "component": component,
+        "figure_html": mark_safe(figure_html),
+        "stream_interval": stream_interval,
+        "trigger": f"every {stream_interval}s" if stream_interval else None,
+        "method_kwargs": method_kwargs,
+    }
 
 
 # -----------------------------------------------------------------------------
 
+
+@register.inclusion_tag(
+    filename="htmx/input_elements/periodic_table.html",
+    takes_context=True,
+)
+def htmx_periodic_table_input(
+    context: dict,
+    name: str = "composition",
+):
+    """
+    Display an interactive periodic table to select elements.
+    """
+    current_value = _get_input_value(context, name) or ""
+    selected_elements = [e for e in current_value.split("-") if e]
+    component = context.get("component")
+    return locals()
+
+
 # TODO
 
 # @register.inclusion_tag(
-#     filename="core_components/input_elements/search_box.html",
+#     filename="core/input_elements/search_box.html",
 #     takes_context=True,
 # )
 # def search_box(
@@ -525,13 +699,14 @@ def htmx_file_upload(
 #     if not label:
 #         label = name.replace("_", " ").title()
 
+#
 #     if show_selectbox and not selectbox_name:
 #         selectbox_name = f"{name}_type"
-
+#
 #     if show_selectbox and not selectbox_options:
 #         selectbox_options = context.get(f"{selectbox_name}_options", [])
-
+#
 #     if not button_name:
 #         button_name = f"set_{name}"
-
+#
 #     return locals()

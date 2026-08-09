@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from baderkit.core import ElfLabeler
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 
 
 class ElfRadii(DatabaseTable):

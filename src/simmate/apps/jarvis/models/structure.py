@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import Structure, table_column
+from rich.progress import track
+
+from simmate.database.core import table_column
+from simmate.database.mixins import Structure, ThirdPartyData
+from simmate.database.utils import batch_bulk_create
+from simmate.toolkit import Structure as ToolkitStructure
 
 
-class JarvisStructure(Structure):
+class JarvisStructure(ThirdPartyData, Structure):
     """
     Crystal structures from the [JARVIS](https://jarvis.nist.gov/) database.
 
@@ -13,16 +18,6 @@ class JarvisStructure(Structure):
 
     class Meta:
         db_table = "jarvis__structures"
-
-    # -------------------------------------------------------------------------
-
-    html_display_name = "JARVIS"
-    html_description_short = (
-        "Joint Automated Repository for Various Integrated Simulations"
-    )
-
-    html_entries_template = "jarvis/structures/table.html"
-    html_entry_template = "jarvis/structures/view.html"
 
     # -------------------------------------------------------------------------
 
@@ -43,7 +38,7 @@ class JarvisStructure(Structure):
 
     # -------------------------------------------------------------------------
 
-    remote_archive_link = "https://archives.simmate.org/JarvisStructure-2023-07-07.zip"
+    remote_archive_link = "https://assets.simmate.org/JarvisStructure-2026-03-20.zip"
     archive_fields = ["energy_above_hull"]
 
     # -------------------------------------------------------------------------
@@ -63,6 +58,7 @@ class JarvisStructure(Structure):
     # -------------------------------------------------------------------------
 
     @classmethod
+    @batch_bulk_create(batch_size=1_000)
     def load_source_data(cls):
         """
         This method pulls JARVIS data into the Simmate database.
@@ -75,10 +71,6 @@ class JarvisStructure(Structure):
         [their database json files](https://jarvis-materials-design.github.io/dbdocs/thedownloads/). We specifically look at the "3D-materials curated data".
         """
 
-        from rich.progress import track
-
-        from simmate.toolkit import Structure as ToolkitStructure
-
         # Jarvis is not a dependency of simmate, so make sure you install it
         # before using this method
         try:
@@ -89,35 +81,37 @@ class JarvisStructure(Structure):
             )
 
         # Load all of the 3D data from JARVIS. This gives a list of dictionaries
-        # TODO: In the future, we can add other datasets like the 2D dataset.
         data = jarvis_helper("dft_3d")
+        # TODO: In the future, we can add other datasets like the 2D dataset.
 
         # Now iterate through all the data -- which is a list of dictionaries.
         # We convert the data into a pymatgen object and sanitize it before
         # saving to the Simmate database
-        db_objects = []
         for entry in track(data):
             # The structure is in the atoms field as a dictionary. We pull
             # this data out and convert it to a pymatgen Structure object
-            structure = ToolkitStructure(
-                lattice=entry["atoms"]["lattice_mat"],
-                species=entry["atoms"]["elements"],
-                coords=entry["atoms"]["coords"],
-                coords_are_cartesian=entry["atoms"]["cartesian"],
-            )
+            try:
+                structure = ToolkitStructure(
+                    lattice=entry["atoms"]["lattice_mat"],
+                    species=entry["atoms"]["elements"],
+                    coords=entry["atoms"]["coords"],
+                    coords_are_cartesian=entry["atoms"]["cartesian"],
+                )
 
-            # now convert the entry to a database object
-            structure_db = cls.from_toolkit(
-                id=entry["jid"].lower(),
-                structure=structure,
-                energy_above_hull=entry["ehull"] if entry["ehull"] != "na" else None,
-            )
-
-            db_objects.append(structure_db)
-
-        # and save it to our database
-        cls.objects.bulk_create(
-            db_objects,
-            batch_size=15000,
-            ignore_conflicts=True,
-        )
+                # now convert the entry to a database object
+                yield cls.from_toolkit(
+                    id=entry["jid"].lower(),
+                    structure=structure,
+                    energy_above_hull=(
+                        entry["ehull"] if entry["ehull"] != "na" else None
+                    ),
+                )
+            except Exception:
+                yield cls.from_toolkit(
+                    id=entry["jid"].lower(),
+                    structure=None,
+                    energy_above_hull=(
+                        entry["ehull"] if entry["ehull"] != "na" else None
+                    ),
+                    is_invalid_structure=True,
+                )

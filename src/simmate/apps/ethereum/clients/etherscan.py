@@ -8,7 +8,7 @@ import pandas
 import requests
 from rich.progress import track
 
-from simmate.configuration import settings
+from simmate.config import settings
 
 from ..mappings import EthereumMappings
 

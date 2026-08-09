@@ -9,7 +9,7 @@ from simmate.command_line.database import database_app
 
 @pytest.fixture  # BUG: is this test actually running...?
 def test_database_reset(django_db_blocker, command_line_runner):
-    # django-pytest does not let us to test the initial setup/configuration of the
+    # django-pytest does not let us to test the initial setup/config of the
     # database, so we need to do it within this context.
     #   https://pytest-django.readthedocs.io/en/latest/database.html#django-db-blocker
     with django_db_blocker.unblock():

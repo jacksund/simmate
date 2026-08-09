@@ -12,22 +12,20 @@ from requests.auth import HTTPBasicAuth
 from rich.progress import track
 
 from simmate.apps.rdkit.models import Molecule
-from simmate.configuration import settings
-from simmate.database.base_data_types import table_column
+from simmate.config import settings
+from simmate.database.core import table_column
+from simmate.database.mixins import ThirdPartyData
 from simmate.toolkit import Molecule as ToolkitMolecule
-from simmate.utilities import chunk_list, get_directory
+from simmate.utils import chunk_list, get_directory
 
 
-class EmoleculesMolecule(Molecule):
+class EmoleculesMolecule(ThirdPartyData, Molecule):
     """
     Molecules from the [eMolecules](https://www.emolecules.com/) database.
     """
 
     class Meta:
         db_table = "emolecules__molecules"
-
-    html_display_name = "eMolecules"
-    html_description_short = "A vendor catalog of chemicals"
 
     external_website = "https://www.emolecules.com/"
     source_doi = "https://www.emolecules.com/data-downloads"

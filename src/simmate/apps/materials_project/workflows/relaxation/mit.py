@@ -59,6 +59,8 @@ class Relaxation__Vasp__Mit(VaspWorkflow):
     ```
     """
 
+    accuracy_rating = 2
+
     description_doc_short = "based on pymatgen's MITRelaxSet"
 
     functional = "PBE"

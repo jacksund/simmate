@@ -71,23 +71,27 @@
 ## Structure Modification
 
 ### Composition Transforms
+
 - `substitute`
 - `replace`
 - `replace_species`
 
 ### Cell Transforms
+
 - `apply_operation`
 - `scale_lattice`
 - `apply_strain`
 - `make_supercell`
 
 ### Site Transforms
+
 - `merge_sites`
 - `rotate_sites`
 - `translate_sites`
 - `perturb`
 
 ### Charges
+
 - `set_charge`
 - `unset_charge`
 - `add_oxidation_state_by_element`
@@ -103,6 +107,7 @@
 - `remove_spin`
 
 ### List-like API
+
 - `append`
 - `count`
 - `extend`
@@ -115,6 +120,7 @@
 - `sort`
 
 ### Other
+
 - `relax`
 
 --------------------------------------------------------------------------------

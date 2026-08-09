@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
+from simmate.database.mixins import ThirdPartyData
 
 from ..client import EppoWebScrapper
 
@@ -15,7 +16,7 @@ _MAJOR_CROP_CODES = [
 ]
 
 
-class EppoCode(DatabaseTable):
+class EppoCode(ThirdPartyData, DatabaseTable):
     """
     EPPO Codes are labels to provide all pest-specific information that has been
     produced or collected by the European and Mediterranean Plant Protection
@@ -31,18 +32,7 @@ class EppoCode(DatabaseTable):
     class Meta:
         db_table = "eppo_gd__eppo_codes"
 
-    html_display_name = "EPPO Global Database"
-    html_description_short = (
-        "EPPO codes and metadata for >95k species of interest to agriculture. "
-        "Codes are loaded 'lazily' from EPPO GD, and so this is not a complete list "
-        "of crops, pests, and pathogens."
-    )
     is_redistribution_allowed = True
-
-    external_website = "https://gd.eppo.int/"
-
-    html_entries_template = "eppo_gd/eppo_codes/table.html"
-    # html_entry_template = "eppo_gd/eppo_codes/view.html"
 
     # -------------------------------------------------------------------------
 

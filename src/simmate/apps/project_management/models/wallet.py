@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db import transaction as django_db_transaction
 from django.db.models import F, Sum
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 
 from .project import Project
 
@@ -15,16 +15,6 @@ class Wallet(DatabaseTable):
 
     class Meta:
         db_table = "project_management__wallets"
-
-    # -------------------------------------------------------------------------
-
-    html_display_name = "Wallets"
-    html_description_short = (
-        "Digital accounts that contain USDC or Token assets for budgeting and spending."
-    )
-
-    html_entries_template = "project_management/wallet/table.html"
-    html_entry_template = "project_management/wallet/view.html"
 
     # -------------------------------------------------------------------------
 

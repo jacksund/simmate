@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("core_components", "0002_alter_fingerprint_id_alter_fingerprintpool_id"),
+        ("core", "0002_alter_fingerprint_id_alter_fingerprintpool_id"),
     ]
 
     operations = [
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.PROTECT,
-                        to="core_components.spacegroup",
+                        to="core.spacegroup",
                     ),
                 ),
             ],

@@ -27,6 +27,10 @@ class BcpcConfig(AppConfig):
     name = "simmate.apps.bcpc"
 
 
+class BlenderConfig(AppConfig):
+    name = "simmate.apps.blender"
+
+
 class BioviaCosmoConfig(AppConfig):
     name = "simmate.apps.biovia_cosmo"
 
@@ -41,6 +45,11 @@ class ChatbotConfig(AppConfig):
 
 class ChemblConfig(AppConfig):
     name = "simmate.apps.chembl"
+    load_order = [
+        "ChemblDocument",
+        "ChemblMolecule",
+        "ChemblAssayResult",
+    ]
 
 
 class ChemspaceConfig(AppConfig):
@@ -85,6 +94,12 @@ class InventoryManagementConfig(AppConfig):
 
 class JarvisConfig(AppConfig):
     name = "simmate.apps.jarvis"
+
+
+class LabAutomationConfig(AppConfig):
+    name = "simmate.apps.lab_automation"
+    verbose_name = "Lab Automation"
+    description_short = "A dashboard for controling and monitoring sensors/devices"
 
 
 class MaterialsProjectConfig(AppConfig):

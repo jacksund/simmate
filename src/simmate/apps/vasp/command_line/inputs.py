@@ -10,17 +10,28 @@ inputs_app = typer.Typer(rich_markup_mode="markdown")
 @inputs_app.callback(no_args_is_help=True)
 def inputs():
     """
-    A group of commands for creating and analyzing VASP inputs
+    Commands for generating and analyzing VASP input files (POTCAR, INCAR, etc.).
     """
     pass
 
 
 @inputs_app.command()
-def get_potcar(elements: list[str], functional: str = "PBE", combine: bool = False):
+def get_potcar(
+    elements: list[str] = typer.Argument(
+        ...,
+        help="The list of elements to fetch POTCAR files for (e.g., 'Y', 'C', 'F').",
+    ),
+    functional: str = typer.Option(
+        "PBE",
+        help="The VASP functional type (e.g., 'PBE', 'LDA').",
+    ),
+    combine: bool = typer.Option(
+        False,
+        help="Whether to combine individual POTCAR files into a single master POTCAR.",
+    ),
+):
     """
-    Grabs the POTCAR file(s) of the requested type
-
-    ex: `simmate-vasp inputs get-potcar Y C F`
+    Retrieves and saves POTCAR files for the specified elements and functional.
     """
     from pymatgen.core import Element
 
@@ -39,10 +50,18 @@ def get_potcar(elements: list[str], functional: str = "PBE", combine: bool = Fal
 
 
 @inputs_app.command()
-def compare_incars(incar1: Path, incar2: Path):
+def compare_incars(
+    incar1: Path = typer.Argument(
+        ...,
+        help="The path to the first INCAR file.",
+    ),
+    incar2: Path = typer.Argument(
+        ...,
+        help="The path to the second INCAR file.",
+    ),
+):
     """
-    Compares settings between two INCAR files and shows their similarities and
-    differences
+    Compares two INCAR files and displays similarities and differences in YAML format.
     """
     import yaml
 

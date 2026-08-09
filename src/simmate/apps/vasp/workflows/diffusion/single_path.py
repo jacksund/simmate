@@ -4,7 +4,7 @@ from pathlib import Path
 
 from simmate.toolkit import Structure
 from simmate.toolkit.diffusion import MigrationHop, MigrationImages
-from simmate.toolkit.diffusion.utilities import clean_start_end_images
+from simmate.toolkit.diffusion.utils import clean_start_end_images
 from simmate.workflows import Workflow
 
 

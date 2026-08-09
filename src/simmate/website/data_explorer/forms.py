@@ -2,13 +2,13 @@
 
 from django import forms
 
-from simmate.utilities import get_chemical_subsystems
+from simmate.utils import get_chemical_subsystems
 
 # NOTE TO DEV: This form is a special case where we are searching MANY tables
 # for information -- so it is therefore not a ModelForm and cannot use
 # our mix-ins. I need to think of the best way to leverage these mix-ins without
 # creating this form from scratch. For now, this form is effectively a copy/paste
-# of `from simmate.website.core_components.filters import Structure`.
+# of `from simmate.website.core.filters import Structure`.
 
 
 class ChemicalSystemForm(forms.Form):

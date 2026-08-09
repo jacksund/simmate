@@ -8,9 +8,9 @@ from langchain.tools import tool
 from langchain_experimental.tools.python.tool import PythonAstREPLTool, sanitize_input
 from plotly.graph_objects import Figure
 
-from simmate.utilities import get_hash_key
+from simmate.utils import get_hash_key
 
-from .utilities import get_llm
+from .utils import get_llm
 
 # Used this post as a starting point:
 # https://g-giasemidis.medium.com/chat-with-and-visualise-your-data-part-i-40b7272a16d1
@@ -120,7 +120,7 @@ def get_plotly_figure(
     python_repl.run(script)
     # BUG: I should be able to use this lower level util instead of PythonAstREPLTool
     # but it doesn't properly pass locals for some reason
-    #   from langchain_experimental.utilities import PythonREPL
+    #   from langchain_experimental.utils import PythonREPL
 
     # Inspect the variables of the script run and grab the plotly figure
     final_figure = python_repl.locals.get("fig", None)

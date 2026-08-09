@@ -13,4 +13,5 @@ Meanwhile, Simmate's VASP app builds workflows and utilities on top of the VASP 
 
  - [Official Website](https://www.vasp.at/)
  - [User Manual](https://www.vasp.at/wiki/index.php/The_VASP_Manual)
+ - [PC Installation Guide](https://www.vasp.at/wiki/index.php/Personal_computer_installation)
  - [Tutorials](https://www.vasp.at/tutorials/latest/)

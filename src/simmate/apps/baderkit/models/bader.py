@@ -7,7 +7,8 @@ import numpy as np
 from baderkit.core import Bader as BaderClass
 from pandas import DataFrame
 
-from simmate.database.base_data_types import Calculation, Structure, table_column
+from simmate.database.core import table_column
+from simmate.database.mixins import Calculation, Structure
 
 
 class Bader(Structure, Calculation):
@@ -15,9 +16,6 @@ class Bader(Structure, Calculation):
     This table contains results from a Bader charge analysis run using
     the BaderKit package.
     """
-
-    html_display_name = "BaderKit Charge Analysis"
-    html_description_short = "Results for BaderKit Charge Analysis Calculations"
 
     class Meta:
         app_label = "baderkit"

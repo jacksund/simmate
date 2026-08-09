@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflows.base_flow_types import StagedWorkflow
+from simmate.workflows.common import StagedRelaxStatic
 
 
-class StaticEnergy__Vasp__EvoTutorial(StagedWorkflow):
+class StagedRelaxStatic__Vasp__EvoTutorial(StagedRelaxStatic):
     """
     Runs a series of increasing-quality relaxations and then finishes with a single
     static energy calculation.
@@ -12,6 +12,8 @@ class StaticEnergy__Vasp__EvoTutorial(StagedWorkflow):
     desireable to have calculations take very little time. The results
     will be VERY unreasonable.
     """
+
+    accuracy_rating = 0.5
 
     exclude_from_archives = [
         "CHG",

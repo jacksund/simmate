@@ -4,9 +4,9 @@ import numpy
 from rdkit.Chem import AllChem
 
 from simmate.toolkit import Molecule
-from simmate.toolkit.featurizers.base import Featurizer
 
-from .utilities import convert_rdkit_fingerprint
+from .base import Featurizer
+from .utils import convert_rdkit_fingerprint
 
 
 class PatternFingerprint(Featurizer):

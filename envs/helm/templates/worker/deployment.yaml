@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simmate-worker-deployment
+  labels:
+    app: simmate-worker
+spec:
+  selector:
+    matchLabels:
+      app: simmate-worker
+  replicas: {{ .Values.workers.replicas }}
+  template:
+    metadata:
+      labels:
+        app: simmate-worker
+        # bug-fix: https://stackoverflow.com/questions/46336852/
+        date: "{{ now | unixEpoch }}"
+    spec:
+      containers:
+        - name: simmate-worker
+          image: jacksund/simmate-worker:{{ .Values.version }}
+          imagePullPolicy: Always
+          command: ["simmate", "compute", "start-worker"]
+          env:
+            {{- include "simmate.env_config" . | indent 12 }}
+          volumeMounts:
+            - mountPath: /simmate_workers
+              name: simmate-worker-data
+          resources:
+            requests:
+              memory: {{ .Values.workers.memory.request }}
+              cpu: {{ .Values.workers.cpu.request }}
+              ephemeral-storage: {{ .Values.workers.ephemeral.request }}
+            limits:
+              memory: {{ .Values.workers.memory.limit }}
+              cpu: {{ .Values.workers.cpu.limit }}
+              ephemeral-storage: {{ .Values.workers.ephemeral.limit }}
+      volumes:
+        - name: simmate-worker-data
+          persistentVolumeClaim:
+            claimName: simmate-worker-data

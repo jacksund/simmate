@@ -60,7 +60,7 @@ featurizer_kwargs = dict(
 
 ### 2. Choose Mapping Method
 
-Select a mapping method from the `simmate.toolkit.clustering` module. You can also select any kwargs that the `map_fingerprints` method accepts. We currently support `Pca`, `Tsne`, and `Umap` methods.
+Select a mapping method from the `simmate.toolkit.mapping` module. You can also select any kwargs that the `map_fingerprints` method accepts. We currently support `Pca`, `Tsne`, and `Umap` methods.
 
 Example:
 ``` python
@@ -82,7 +82,7 @@ mapping_kwargs = dict(
 Once you've selected your methods and parameters, you can put them together:
 
 ``` python
-from simmate.toolkit.clustering import Butina
+from simmate.toolkit.featurizers import MorganFingerprint
 from simmate.toolkit.mapping import Umap
 
 x, y = Umap.map_molecules(
@@ -105,10 +105,9 @@ x, y = Umap.map_molecules(
 If you already have fingerprints and want to use those instead of `Molecule` objects, you can skip the first step and replace `map_molecules` with the `map_fingerprints` method:
 
 ``` python
-from simmate.toolkit.clustering import Butina
 from simmate.toolkit.mapping import Umap
 
-clusters = Umap.map_molecules(
+x, y = Umap.map_fingerprints(
     fingerprints=[...],  # This should be a list of fingerprints (1D array of floats)
     metric="jaccard",
     n_neighbors=25,

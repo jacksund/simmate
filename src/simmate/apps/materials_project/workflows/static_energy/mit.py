@@ -12,6 +12,8 @@ class StaticEnergy__Vasp__Mit(Relaxation__Vasp__Mit):
     This is identical to relaxation/mit, but just a single ionic step.
     """
 
+    accuracy_rating = 2
+
     _incar_updates = dict(
         ALGO="Normal",
         IBRION=-1,  # (optional) locks everything between ionic steps

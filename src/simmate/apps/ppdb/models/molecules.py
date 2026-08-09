@@ -5,12 +5,13 @@ import logging
 from rich.progress import track
 
 from simmate.apps.rdkit.models import Molecule
-from simmate.database.base_data_types import table_column
+from simmate.database.core import table_column
+from simmate.database.mixins import ThirdPartyData
 
 from ..web_scraper import PpdbWebScraper
 
 
-class PpdbMolecule(Molecule):
+class PpdbMolecule(ThirdPartyData, Molecule):
     """
     The PPDB is the 'Pesticide Properties DataBase' from a team at the
     University of Hertfordshire.
@@ -26,12 +27,6 @@ class PpdbMolecule(Molecule):
 
     class Meta:
         db_table = "ppdb__molecules"
-
-    html_display_name = "PPDB"
-    html_description_short = "The Pesticide Properties Database."
-
-    html_entries_template = "ppdb/molecules/table.html"
-    html_entry_template = "ppdb/molecules/view.html"
 
     external_website = "https://sitem.herts.ac.uk/aeru/ppdb/en/index.htm"
     source_doi = "https://sitem.herts.ac.uk/aeru/ppdb/en/atoz.htm"
