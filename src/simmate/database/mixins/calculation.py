@@ -3,6 +3,8 @@
 import platform
 from datetime import datetime
 
+from django.contrib.auth.models import User
+
 from ..core import DatabaseTable, table_column
 
 
@@ -33,6 +35,17 @@ class Calculation(DatabaseTable):
     ]
 
     # -------------------------------------------------------------------------
+
+    submitted_by = table_column.ForeignKey(
+        User,
+        on_delete=table_column.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="%(class)s_calculations",
+    )
+    """
+    The user who submitted this calculation.
+    """
 
     started_at = table_column.DateTimeField(blank=True, null=True)
     """

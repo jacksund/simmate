@@ -153,7 +153,7 @@ def htmx_post(
         target = f"#{component_id}"
     if not include:
         include = f"#{component_id}"
-    swap = "outerHTML" if not javascript_only else "none"
+    swap = "outerHTML settle:0" if not javascript_only else "none"
     return locals()
 
 
@@ -244,6 +244,35 @@ def htmx_number_input(
     if not placeholder:
         placeholder = "123" if is_int else "0.123"
 
+    component = context.get("component")
+    return locals()
+
+
+@register.inclusion_tag(
+    filename="htmx/input_elements/date_input.html",
+    takes_context=True,
+)
+def htmx_date_input(
+    context: dict,
+    name: str,
+    label: str = None,
+    show_label: bool = True,
+    help_text: str = None,
+    placeholder: str = None,
+    maximum: str = None,  # e.g. "2026-07-13" (or "2026-07-13T14:30" if include_time)
+    minimum: str = None,
+    include_time: bool = False,  # renders a datetime-local input instead of date
+    defer: bool = True,
+    required: bool = False,
+    disabled: bool = False,
+    indicator: str = "#loading-spinner-corner",
+):
+    """
+    Display a date input widget (or a datetime input when `include_time=True`).
+    Uses the browser-native <input type="date"> so no extra JS library is needed.
+    """
+    label = _get_input_label(name, label)
+    current_value = _get_input_value(context, name)
     component = context.get("component")
     return locals()
 
@@ -620,6 +649,24 @@ def htmx_plotly_figure(
 
 
 # -----------------------------------------------------------------------------
+
+
+@register.inclusion_tag(
+    filename="htmx/input_elements/periodic_table.html",
+    takes_context=True,
+)
+def htmx_periodic_table_input(
+    context: dict,
+    name: str = "composition",
+):
+    """
+    Display an interactive periodic table to select elements.
+    """
+    current_value = _get_input_value(context, name) or ""
+    selected_elements = [e for e in current_value.split("-") if e]
+    component = context.get("component")
+    return locals()
+
 
 # TODO
 

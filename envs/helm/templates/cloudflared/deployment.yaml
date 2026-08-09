@@ -2,21 +2,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cloudflared
+  name: simmate-cloudflared-deployment
   labels:
-    app: cloudflared
+    app: simmate-cloudflared
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cloudflared
+      app: simmate-cloudflared
   template:
     metadata:
       labels:
-        app: cloudflared
+        app: simmate-cloudflared
     spec:
       containers:
-        - name: cloudflared
+        - name: simmate-cloudflared
           image: cloudflare/cloudflared:latest
           args:
             - tunnel

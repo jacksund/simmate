@@ -1,19 +1,13 @@
-# -*- coding: utf-8 -*-
-
 from simmate.database.core import table_column
-from simmate.database.mixins import (
-    Structure,
-    Thermodynamics,
-    ThirdPartyData,
-)
+from simmate.database.mixins import Structure, Thermodynamics, ThirdPartyData
 
 
 class AflowStructure(ThirdPartyData, Structure, Thermodynamics):
     """
     Crystal structures from the [AFLOW](http://aflowlib.org/) database.
 
-    Currently, this table only stores strucure and thermodynamic information,
-    but the AFLOW has much more data available via their
+    Currently, this table only stores structure and thermodynamic information,
+    but AFLOW has much more data available via their
     [REST API](http://aflowlib.duke.edu/aflowwiki/doku.php?id=documentation:start)
     and website.
     """
@@ -38,13 +32,14 @@ class AflowStructure(ThirdPartyData, Structure, Thermodynamics):
         # Links to the AFLOW dashboard for this structure. An example is...
         #   http://aflow.org/material/?id=aflow:ffea9279661c929f
         # !!! I could also consider an alternative link which points to an interactive
-        # REST endpoint. The API is also sporatic for these, An example one is...
+        # REST endpoint. The API is also sporadic for these, An example one is...
         #   aflowlib.duke.edu/AFLOWDATA/ICSD_WEB/FCC/Dy1Mn2_ICSD_602151
         id_formatted = self.id.replace("-", ":")
         return f"http://aflow.org/material/?id={id_formatted}"
 
     # -------------------------------------------------------------------------
 
+    @classmethod
     def load_source_data(cls):
         """
         Loads all structures directly for the AFLOW database into the local

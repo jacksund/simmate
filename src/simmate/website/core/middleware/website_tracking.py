@@ -20,6 +20,10 @@ class WebsitePageVisitMiddleware:
         url_parameters = parse_request_get(request)
         user = request.user if not isinstance(request.user, AnonymousUser) else None
 
+        # if the user is not signed in, we don't want to track the visit.
+        if not user:
+            return self.get_response(request)
+
         # note: we don't want to save AJAX requests (i.e. HTMX)
         # because this is essentially tracking mouse clicks -- and would slow
         # down our dynamic pages.

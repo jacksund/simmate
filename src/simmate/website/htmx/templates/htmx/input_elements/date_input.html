@@ -1,0 +1,17 @@
+{# djlint:off #}
+<div class="my-2">
+    {% include "core/basic_elements/label.html" %}
+    <input id="{{ context.component.component_id }}-{{ name }}"
+           name="{{ name }}"
+           class="form-control"
+           type="{% if include_time %}datetime-local{% else %}date{% endif %}"
+           {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+           {% if current_value %}value="{{ current_value }}"{% endif %}
+           {% if maximum %}max="{{ maximum }}"{% endif %}
+           {% if minimum %}min="{{ minimum }}"{% endif %}
+           hx-preserve
+           {% if not defer %}{% htmx_post indicator=indicator %}{% endif %}
+           {% if disabled %}disabled{% endif %}
+           {% if required %}required{% endif %}>
+</div>
+{# djlint:on #}

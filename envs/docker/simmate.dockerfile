@@ -10,6 +10,8 @@ ENV PATH=/root/simmate/.venv/bin:/root/.local/bin:$PATH \
     VIRTUAL_ENV=/root/simmate/.venv \
     UV_WORKING_DIR=/root/simmate \
     DJANGO_SETTINGS_MODULE="simmate.config.django.settings" \
+    SIMMATE_CONFIG_DIR=/root/simmate-config \
+    SIMMATE__WEBSITE__STATIC_FILE_HASHES="true" \
     DEBUG=False
 
 # =============================================================================
@@ -45,6 +47,7 @@ RUN curl -Ls https://astral.sh/uv/install.sh | sh
 COPY . simmate
 RUN uv sync && \
     uv pip install gunicorn && \
+    simmate dev download-ketcher && \
     django-admin collectstatic --noinput
 
 # =============================================================================
