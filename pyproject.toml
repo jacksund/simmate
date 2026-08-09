@@ -26,7 +26,9 @@ dependencies = [
     "django>=5.2.11,<6.0.0",
     "typer>=0.24.1,<0.25.0",
     "psycopg2-binary>=2.9.11,<3.0.0",
+    # Vector dbs
     "usearch>=2.25.3,<3.0.0",
+    "faiss-cpu>=1.15.0,<2.0.0",
     # Material/Crystal-based dependencies
     "pymatgen>=2025.10.7,<2026.5.5",
     "pymatgen-analysis-diffusion>=2025.11.15,<2025.11.16",
@@ -36,6 +38,7 @@ dependencies = [
     "rdkit>=2025.9.5,<2026.3.4",
     "ipython>=8.22.2,<10.0.0",  # displaying rdkit images
     # Extra (smaller) dependencies & utilities
+    "zstandard>=0.22.0,<1.0.0",
     "django-allauth[socialaccount]>=0.63.3,<65.19.0",
     "django-simple-history>=3.11.0,<3.12.0",
     "pyyaml>=6.0.3,<7.0.0",
