@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .current_time import CurrentTimeComponent
+from .quick_submit import QuickSubmitComponent
 from .results import (
     BandStructureCalcComponent,
     DensityofStatesCalcComponent,

@@ -49,12 +49,14 @@ def test_workflow(tmp_path):
         "run_id",
         "source",
         "structure",
+        "submitted_by_id",
     ]
     assert DummyFlow._parameters_to_register == [
         "directory",
         "run_id",
         "source",
         "status",
+        "submitted_by_id",
     ]
     DummyFlow.show_parameters()  # a print statment w. nothing else to check
 

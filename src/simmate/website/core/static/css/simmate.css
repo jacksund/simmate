@@ -13,6 +13,8 @@
   --bs-primary-darker-rgb: 0, 107, 96;
   --bs-primary-lighter: #00a695;
   --bs-primary-lighter-rgb: 0, 166, 149;
+  --bs-primary-bg-subtle: rgba(var(--bs-primary-rgb), 0.1);
+  --bs-primary-border-subtle: rgba(var(--bs-primary-rgb), 0.25);
   /* SUCCESS */
   --bs-success: #01913b;
   --bs-success-rgb: 0, 145, 59;
@@ -41,6 +43,17 @@ a:focus {
   --bs-btn-hover-border-color: var(--bs-primary-darker);
   --bs-btn-active-bg: var(--bs-primary-lighter);
   --bs-btn-active-border-color: var(--bs-primary-lighter);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--bs-primary);
+  --bs-btn-border-color: var(--bs-primary);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--bs-primary);
+  --bs-btn-hover-border-color: var(--bs-primary);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--bs-primary);
+  --bs-btn-active-border-color: var(--bs-primary);
 }
 
 .btn-success {
@@ -73,8 +86,15 @@ a:focus {
     border-color: var(--bs-dark);
 }
 
-.nav-tabs .nav-link:not(.active) {
+.nav-tabs .nav-link:not(.active),
+.nav-pills .nav-link:not(.active) {
   color: var(--bs-secondary);
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+  background-color: var(--bs-primary);
+  color: #fff;
 }
 
 /* -------------------------------------------------------------------------- */

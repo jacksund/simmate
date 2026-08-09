@@ -13,6 +13,7 @@ ENV OMP_NUM_THREADS=1 \
     VIRTUAL_ENV=/root/simmate/.venv \
     UV_WORKING_DIR=/root/simmate \
     DJANGO_SETTINGS_MODULE="simmate.config.django.settings" \
+    SIMMATE_CONFIG_DIR=/root/simmate-config \
     DEBUG=False
 
 # =============================================================================
@@ -70,9 +71,7 @@ RUN curl -Ls https://astral.sh/uv/install.sh | sh
 
 # Copy source and install Python dependencies
 COPY . simmate
-RUN uv sync && \
-    uv pip install gunicorn && \
-    django-admin collectstatic --noinput
+RUN uv sync
 
 # Download and setup SSSP pseudopotentials
 RUN simmate-qe setup sssp

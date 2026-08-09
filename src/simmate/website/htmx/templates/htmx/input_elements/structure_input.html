@@ -44,13 +44,10 @@
                 <b>Refresh the page to restart the form</b>
             </div>
         {% else %}
-            <div class="row">
-                <div class="col-8">
-                    <div style="height: 400px;">{% draw_structure structure div_id=viewer_id dynamic=True %}</div>
-                </div>
-                <div class="col-4">
-                    {% alert theme="success" message="Structure successfully loaded!" %}
-                    {% htmx_button method_name="unset_structure" label="Clear Structure" theme="secondary" icon="x-circle" input_name=name %}
+            <div class="position-relative">
+                <div style="height: 400px;">{% draw_structure structure div_id=viewer_id dynamic=True %}</div>
+                <div class="position-absolute top-0 end-0 p-2" style="z-index: 10;">
+                    {% htmx_button method_name="unset_structure" label="Reset" show_label=False theme="secondary" icon="trash" small=True input_name=name %}
                 </div>
             </div>
         {% endif %}

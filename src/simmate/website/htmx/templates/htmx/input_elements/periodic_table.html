@@ -1,0 +1,989 @@
+<style>
+    /* Setting box format for each element spot */
+    [class*="element-"] {
+        width: 5%;
+        padding: 0.2%;
+        margin: 0.2%;
+    }
+
+    [class*="-filled"], .element-placeholder {
+        border: 1px solid black;
+        border-radius: 4px;
+        text-align: center;
+        font-weight: bold;
+        color: black;
+    }
+
+    [class*="-empty"] {
+        background-color: transparent;
+    }
+
+    /* Setting format on hover */
+    [class*="-filled"]:hover {
+        color: white;
+        background-color: black;
+        cursor: pointer;
+    }
+
+    /* Coloring each element box and its text */
+    .nonmetal {
+        background-color: lightyellow;
+    }
+
+    .alkalimetal {
+        background-color: lightpink;
+    }
+
+    .alkaliearthmetal {
+        background-color: lavender;
+    }
+
+    .transitionmetal {
+        background-color: lightblue;
+    }
+
+    .metal {
+        background-color: lightgreen;
+    }
+
+    .metalloid {
+        background-color: yellowgreen;
+    }
+
+    .halogen {
+        background-color: lightyellow;
+    }
+
+    .noblegas {
+        background-color: lightsalmon;
+    }
+
+    .lanthanide {
+        background-color: lightskyblue;
+    }
+
+    .actinide {
+        background-color: lightseagreen;
+    }
+
+    /* Setting text format inside of each element */
+    .enumber {
+        margin: 0;
+        font-size: 65%;
+        text-align: left;
+    }
+
+    .symbol {
+        margin-top: -8px;
+        font-size: 130%;
+    }
+
+    .name {
+        margin-top: -5px;
+        font-size: 50%;
+        font-style: italic;
+    }
+
+    /* Setting format on selected (onclick javascript needed here too)  */
+    .selected {
+        color: white;
+        background-color: black;
+    }
+</style>
+<div class="container p-4">
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-filled nonmetal {% if 'H' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "H", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">1</div>
+            <div class="symbol d-none d-md-block">H</div>
+            <div class="name d-none d-lg-block text-truncate">Hydrogen</div>
+        </div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-filled noblegas {% if 'He' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "He", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">2</div>
+            <div class="symbol d-none d-md-block">He</div>
+            <div class="name d-none d-lg-block text-truncate">Helium</div>
+        </div>
+    </div>
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-filled alkalimetal {% if 'Li' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Li", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">3</div>
+            <div class="symbol d-none d-md-block">Li</div>
+            <div class="name d-none d-lg-block text-truncate">Lithium</div>
+        </div>
+        <div class="element-filled alkaliearthmetal {% if 'Be' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Be", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">4</div>
+            <div class="symbol d-none d-md-block">Be</div>
+            <div class="name d-none d-lg-block text-truncate">Beryllium</div>
+        </div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-filled metalloid {% if 'B' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "B", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">5</div>
+            <div class="symbol d-none d-md-block">B</div>
+            <div class="name d-none d-lg-block text-truncate">Boron</div>
+        </div>
+        <div class="element-filled nonmetal {% if 'C' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "C", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">6</div>
+            <div class="symbol d-none d-md-block">C</div>
+            <div class="name d-none d-lg-block text-truncate">Carbon</div>
+        </div>
+        <div class="element-filled nonmetal {% if 'N' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "N", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">7</div>
+            <div class="symbol d-none d-md-block">N</div>
+            <div class="name d-none d-lg-block text-truncate">Nitrogen</div>
+        </div>
+        <div class="element-filled nonmetal {% if 'O' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "O", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">8</div>
+            <div class="symbol d-none d-md-block">O</div>
+            <div class="name d-none d-lg-block text-truncate">Oxygen</div>
+        </div>
+        <div class="element-filled halogen {% if 'F' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "F", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">9</div>
+            <div class="symbol d-none d-md-block">F</div>
+            <div class="name d-none d-lg-block text-truncate">Fluorine</div>
+        </div>
+        <div class="element-filled noblegas {% if 'Ne' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ne", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">10</div>
+            <div class="symbol d-none d-md-block">Ne</div>
+            <div class="name d-none d-lg-block text-truncate">Neon</div>
+        </div>
+    </div>
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-filled alkalimetal {% if 'Na' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Na", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">11</div>
+            <div class="symbol d-none d-md-block">Na</div>
+            <div class="name d-none d-lg-block text-truncate">Sodium</div>
+        </div>
+        <div class="element-filled alkaliearthmetal {% if 'Mg' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Mg", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">12</div>
+            <div class="symbol d-none d-md-block">Mg</div>
+            <div class="name d-none d-lg-block text-truncate">Magnesium</div>
+        </div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-filled metal {% if 'Al' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Al", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">13</div>
+            <div class="symbol d-none d-md-block">Al</div>
+            <div class="name d-none d-lg-block text-truncate">Aluminium</div>
+        </div>
+        <div class="element-filled metalloid {% if 'Si' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Si", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">14</div>
+            <div class="symbol d-none d-md-block">Si</div>
+            <div class="name d-none d-lg-block text-truncate">Silicon</div>
+        </div>
+        <div class="element-filled nonmetal {% if 'P' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "P", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">15</div>
+            <div class="symbol d-none d-md-block">P</div>
+            <div class="name d-none d-lg-block text-truncate">Phosphorus</div>
+        </div>
+        <div class="element-filled nonmetal {% if 'S' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "S", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">16</div>
+            <div class="symbol d-none d-md-block">S</div>
+            <div class="name d-none d-lg-block text-truncate">Sulfur</div>
+        </div>
+        <div class="element-filled halogen {% if 'Cl' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Cl", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">17</div>
+            <div class="symbol d-none d-md-block">Cl</div>
+            <div class="name d-none d-lg-block text-truncate">Chlorine</div>
+        </div>
+        <div class="element-filled noblegas {% if 'Ar' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ar", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">18</div>
+            <div class="symbol d-none d-md-block">Ar</div>
+            <div class="name d-none d-lg-block text-truncate">Argon</div>
+        </div>
+    </div>
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-filled alkalimetal {% if 'K' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "K", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">19</div>
+            <div class="symbol d-none d-md-block">K</div>
+            <div class="name d-none d-lg-block text-truncate">Potassium</div>
+        </div>
+        <div class="element-filled alkaliearthmetal {% if 'Ca' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ca", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">20</div>
+            <div class="symbol d-none d-md-block">Ca</div>
+            <div class="name d-none d-lg-block text-truncate">Calcium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Sc' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Sc", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">21</div>
+            <div class="symbol d-none d-md-block">Sc</div>
+            <div class="name d-none d-lg-block text-truncate">Scandium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Ti' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ti", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">22</div>
+            <div class="symbol d-none d-md-block">Ti</div>
+            <div class="name d-none d-lg-block text-truncate">Titanium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'V' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "V", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">23</div>
+            <div class="symbol d-none d-md-block">V</div>
+            <div class="name d-none d-lg-block text-truncate">Vanadium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Cr' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Cr", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">24</div>
+            <div class="symbol d-none d-md-block">Cr</div>
+            <div class="name d-none d-lg-block text-truncate">Chromium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Mn' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Mn", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">25</div>
+            <div class="symbol d-none d-md-block">Mn</div>
+            <div class="name d-none d-lg-block text-truncate">Manganese</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Fe' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Fe", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">26</div>
+            <div class="symbol d-none d-md-block">Fe</div>
+            <div class="name d-none d-lg-block text-truncate">Iron</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Co' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Co", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">27</div>
+            <div class="symbol d-none d-md-block">Co</div>
+            <div class="name d-none d-lg-block text-truncate">Cobalt</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Ni' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ni", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">28</div>
+            <div class="symbol d-none d-md-block">Ni</div>
+            <div class="name d-none d-lg-block text-truncate">Nickel</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Cu' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Cu", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">29</div>
+            <div class="symbol d-none d-md-block">Cu</div>
+            <div class="name d-none d-lg-block text-truncate">Copper</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Zn' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Zn", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">30</div>
+            <div class="symbol d-none d-md-block">Zn</div>
+            <div class="name d-none d-lg-block text-truncate">Zinc</div>
+        </div>
+        <div class="element-filled metal {% if 'Ga' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ga", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">31</div>
+            <div class="symbol d-none d-md-block">Ga</div>
+            <div class="name d-none d-lg-block text-truncate">Gallium</div>
+        </div>
+        <div class="element-filled metalloid {% if 'Ge' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ge", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">32</div>
+            <div class="symbol d-none d-md-block">Ge</div>
+            <div class="name d-none d-lg-block text-truncate">Germanium</div>
+        </div>
+        <div class="element-filled metalloid {% if 'As' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "As", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">33</div>
+            <div class="symbol d-none d-md-block">As</div>
+            <div class="name d-none d-lg-block text-truncate">Arsenic</div>
+        </div>
+        <div class="element-filled nonmetal {% if 'Se' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Se", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">34</div>
+            <div class="symbol d-none d-md-block">Se</div>
+            <div class="name d-none d-lg-block text-truncate">Selenium</div>
+        </div>
+        <div class="element-filled halogen {% if 'Br' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Br", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">35</div>
+            <div class="symbol d-none d-md-block">Br</div>
+            <div class="name d-none d-lg-block text-truncate">Bromine</div>
+        </div>
+        <div class="element-filled noblegas {% if 'Kr' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Kr", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">36</div>
+            <div class="symbol d-none d-md-block">Kr</div>
+            <div class="name d-none d-lg-block text-truncate">Krypton</div>
+        </div>
+    </div>
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-filled alkalimetal {% if 'Rb' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Rb", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">37</div>
+            <div class="symbol d-none d-md-block">Rb</div>
+            <div class="name d-none d-lg-block text-truncate">Rubidium</div>
+        </div>
+        <div class="element-filled alkaliearthmetal {% if 'Sr' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Sr", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">38</div>
+            <div class="symbol d-none d-md-block">Sr</div>
+            <div class="name d-none d-lg-block text-truncate">Strontium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Y' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Y", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">39</div>
+            <div class="symbol d-none d-md-block">Y</div>
+            <div class="name d-none d-lg-block text-truncate">Yttrium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Zr' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Zr", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">40</div>
+            <div class="symbol d-none d-md-block">Zr</div>
+            <div class="name d-none d-lg-block text-truncate">Zirconium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Nb' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Nb", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">41</div>
+            <div class="symbol d-none d-md-block">Nb</div>
+            <div class="name d-none d-lg-block text-truncate">Niobium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Mo' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Mo", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">42</div>
+            <div class="symbol d-none d-md-block">Mo</div>
+            <div class="name d-none d-lg-block text-truncate">Molybdenum</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Tc' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Tc", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">43</div>
+            <div class="symbol d-none d-md-block">Tc</div>
+            <div class="name d-none d-lg-block text-truncate">Technetium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Ru' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ru", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">44</div>
+            <div class="symbol d-none d-md-block">Ru</div>
+            <div class="name d-none d-lg-block text-truncate">Ruthenium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Rh' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Rh", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">45</div>
+            <div class="symbol d-none d-md-block">Rh</div>
+            <div class="name d-none d-lg-block text-truncate">Rhodium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Pd' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Pd", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">46</div>
+            <div class="symbol d-none d-md-block">Pd</div>
+            <div class="name d-none d-lg-block text-truncate">Palladium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Ag' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ag", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">47</div>
+            <div class="symbol d-none d-md-block">Ag</div>
+            <div class="name d-none d-lg-block text-truncate">Silver</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Cd' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Cd", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">48</div>
+            <div class="symbol d-none d-md-block">Cd</div>
+            <div class="name d-none d-lg-block text-truncate">Cadmium</div>
+        </div>
+        <div class="element-filled metal {% if 'In' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "In", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">49</div>
+            <div class="symbol d-none d-md-block">In</div>
+            <div class="name d-none d-lg-block text-truncate">Indium</div>
+        </div>
+        <div class="element-filled metal {% if 'Sn' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Sn", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">50</div>
+            <div class="symbol d-none d-md-block">Sn</div>
+            <div class="name d-none d-lg-block text-truncate">Tin</div>
+        </div>
+        <div class="element-filled metalloid {% if 'Sb' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Sb", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">51</div>
+            <div class="symbol d-none d-md-block">Sb</div>
+            <div class="name d-none d-lg-block text-truncate">Antimony</div>
+        </div>
+        <div class="element-filled metalloid {% if 'Te' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Te", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">52</div>
+            <div class="symbol d-none d-md-block">Te</div>
+            <div class="name d-none d-lg-block text-truncate">Tellurium</div>
+        </div>
+        <div class="element-filled halogen {% if 'I' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "I", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">53</div>
+            <div class="symbol d-none d-md-block">I</div>
+            <div class="name d-none d-lg-block text-truncate">Iodine</div>
+        </div>
+        <div class="element-filled noblegas {% if 'Xe' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Xe", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">54</div>
+            <div class="symbol d-none d-md-block">Xe</div>
+            <div class="name d-none d-lg-block text-truncate">Xenon</div>
+        </div>
+    </div>
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-filled alkalimetal {% if 'Cs' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Cs", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">55</div>
+            <div class="symbol d-none d-md-block">Cs</div>
+            <div class="name d-none d-lg-block text-truncate">Caesium</div>
+        </div>
+        <div class="element-filled alkaliearthmetal {% if 'Ba' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ba", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">56</div>
+            <div class="symbol d-none d-md-block">Ba</div>
+            <div class="name d-none d-lg-block text-truncate">Barium</div>
+        </div>
+        <div class="element-placeholder lanthanide">
+            <div class="enumber d-none d-md-block">57-71</div>
+            <div class="symbol d-none d-md-block"></div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Hf' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Hf", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">72</div>
+            <div class="symbol d-none d-md-block">Hf</div>
+            <div class="name d-none d-lg-block text-truncate">Hafnium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Ta' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ta", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">73</div>
+            <div class="symbol d-none d-md-block">Ta</div>
+            <div class="name d-none d-lg-block text-truncate">Tantalum</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'W' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "W", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">74</div>
+            <div class="symbol d-none d-md-block">W</div>
+            <div class="name d-none d-lg-block text-truncate">Tungsten</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Re' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Re", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">75</div>
+            <div class="symbol d-none d-md-block">Re</div>
+            <div class="name d-none d-lg-block text-truncate">Rhenium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Os' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Os", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">76</div>
+            <div class="symbol d-none d-md-block">Os</div>
+            <div class="name d-none d-lg-block text-truncate">Osmium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Ir' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ir", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">77</div>
+            <div class="symbol d-none d-md-block">Ir</div>
+            <div class="name d-none d-lg-block text-truncate">Iridium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Pt' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Pt", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">78</div>
+            <div class="symbol d-none d-md-block">Pt</div>
+            <div class="name d-none d-lg-block text-truncate">Platinum</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Au' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Au", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">79</div>
+            <div class="symbol d-none d-md-block">Au</div>
+            <div class="name d-none d-lg-block text-truncate">Gold</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Hg' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Hg", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">80</div>
+            <div class="symbol d-none d-md-block">Hg</div>
+            <div class="name d-none d-lg-block text-truncate">Mercury</div>
+        </div>
+        <div class="element-filled metal {% if 'Tl' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Tl", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">81</div>
+            <div class="symbol d-none d-md-block">Tl</div>
+            <div class="name d-none d-lg-block text-truncate">Thallium</div>
+        </div>
+        <div class="element-filled metal {% if 'Pb' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Pb", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">82</div>
+            <div class="symbol d-none d-md-block">Pb</div>
+            <div class="name d-none d-lg-block text-truncate">Lead</div>
+        </div>
+        <div class="element-filled metal {% if 'Bi' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Bi", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">83</div>
+            <div class="symbol d-none d-md-block">Bi</div>
+            <div class="name d-none d-lg-block text-truncate">Bismuth</div>
+        </div>
+        <div class="element-filled metalloid {% if 'Po' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Po", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">84</div>
+            <div class="symbol d-none d-md-block">Po</div>
+            <div class="name d-none d-lg-block text-truncate">Polonium</div>
+        </div>
+        <div class="element-filled halogen {% if 'At' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "At", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">85</div>
+            <div class="symbol d-none d-md-block">At</div>
+            <div class="name d-none d-lg-block text-truncate">Astatine</div>
+        </div>
+        <div class="element-filled noblegas {% if 'Rn' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Rn", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">86</div>
+            <div class="symbol d-none d-md-block">Rn</div>
+            <div class="name d-none d-lg-block text-truncate">Radon</div>
+        </div>
+    </div>
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-filled alkalimetal {% if 'Fr' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Fr", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">87</div>
+            <div class="symbol d-none d-md-block">Fr</div>
+            <div class="name d-none d-lg-block text-truncate">Francium</div>
+        </div>
+        <div class="element-filled alkaliearthmetal {% if 'Ra' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ra", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">88</div>
+            <div class="symbol d-none d-md-block">Ra</div>
+            <div class="name d-none d-lg-block text-truncate">Radium</div>
+        </div>
+        <div class="element-placeholder actinide">
+            <div class="enumber d-none d-md-block">89-103</div>
+            <div class="symbol d-none d-md-block"></div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Rf' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Rf", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">104</div>
+            <div class="symbol d-none d-md-block">Rf</div>
+            <div class="name d-none d-lg-block text-truncate" style="font-size: 7px">Rutherfordium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Db' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Db", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">105</div>
+            <div class="symbol d-none d-md-block">Db</div>
+            <div class="name d-none d-lg-block text-truncate">Dubnium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Sg' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Sg", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">106</div>
+            <div class="symbol d-none d-md-block">Sg</div>
+            <div class="name d-none d-lg-block text-truncate">Seaborgium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Bh' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Bh", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">107</div>
+            <div class="symbol d-none d-md-block">Bh</div>
+            <div class="name d-none d-lg-block text-truncate">Bohrium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Hs' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Hs", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">108</div>
+            <div class="symbol d-none d-md-block">Hs</div>
+            <div class="name d-none d-lg-block text-truncate">Hassium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Mt' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Mt", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">109</div>
+            <div class="symbol d-none d-md-block">Mt</div>
+            <div class="name d-none d-lg-block text-truncate">Meitnerium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Ds' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ds", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">110</div>
+            <div class="symbol d-none d-md-block">Ds</div>
+            <div class="name d-none d-lg-block text-truncate" style="font-size: 7px">Darmstadtium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Rg' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Rg", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">111</div>
+            <div class="symbol d-none d-md-block">Rg</div>
+            <div class="name d-none d-lg-block text-truncate">Roentgenium</div>
+        </div>
+        <div class="element-filled transitionmetal {% if 'Cn' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Cn", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">112</div>
+            <div class="symbol d-none d-md-block">Cn</div>
+            <div class="name d-none d-lg-block text-truncate">Copernicium</div>
+        </div>
+        <div class="element-filled metal {% if 'Nh' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Nh", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">113</div>
+            <div class="symbol d-none d-md-block">Nh</div>
+            <div class="name d-none d-lg-block text-truncate">Nihonium</div>
+        </div>
+        <div class="element-filled metal {% if 'Fl' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Fl", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">114</div>
+            <div class="symbol d-none d-md-block">Fl</div>
+            <div class="name d-none d-lg-block text-truncate">Flerovium</div>
+        </div>
+        <div class="element-filled metal {% if 'Mc' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Mc", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">115</div>
+            <div class="symbol d-none d-md-block">Mc</div>
+            <div class="name d-none d-lg-block text-truncate">Moscovium</div>
+        </div>
+        <div class="element-filled metal {% if 'Lv' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Lv", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">116</div>
+            <div class="symbol d-none d-md-block">Lv</div>
+            <div class="name d-none d-lg-block text-truncate">Livermorium</div>
+        </div>
+        <div class="element-filled halogen {% if 'Ts' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ts", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">117</div>
+            <div class="symbol d-none d-md-block">Ts</div>
+            <div class="name d-none d-lg-block text-truncate">Tennessine</div>
+        </div>
+        <div class="element-filled noblegas {% if 'Og' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Og", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">118</div>
+            <div class="symbol d-none d-md-block">Og</div>
+            <div class="name d-none d-lg-block text-truncate">Oganesson</div>
+        </div>
+    </div>
+    <div class="row" style="padding: 0.6%;"></div>
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-filled lanthanide {% if 'La' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "La", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">57</div>
+            <div class="symbol d-none d-md-block">La</div>
+            <div class="name d-none d-lg-block text-truncate">Lanthanum</div>
+        </div>
+        <div class="element-filled lanthanide {% if 'Ce' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ce", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">58</div>
+            <div class="symbol d-none d-md-block">Ce</div>
+            <div class="name d-none d-lg-block text-truncate">Cerium</div>
+        </div>
+        <div class="element-filled lanthanide {% if 'Pr' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Pr", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">59</div>
+            <div class="symbol d-none d-md-block">Pr</div>
+            <div class="name d-none d-lg-block text-truncate" style="font-size: 7px">Praseodymium</div>
+        </div>
+        <div class="element-filled lanthanide {% if 'Nd' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Nd", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">60</div>
+            <div class="symbol d-none d-md-block">Nd</div>
+            <div class="name d-none d-lg-block text-truncate">Neodymium</div>
+        </div>
+        <div class="element-filled lanthanide {% if 'Pm' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Pm", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">61</div>
+            <div class="symbol d-none d-md-block">Pm</div>
+            <div class="name d-none d-lg-block text-truncate">Promethium</div>
+        </div>
+        <div class="element-filled lanthanide {% if 'Sm' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Sm", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">62</div>
+            <div class="symbol d-none d-md-block">Sm</div>
+            <div class="name d-none d-lg-block text-truncate">Samarium</div>
+        </div>
+        <div class="element-filled lanthanide {% if 'Eu' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Eu", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">63</div>
+            <div class="symbol d-none d-md-block">Eu</div>
+            <div class="name d-none d-lg-block text-truncate">Europium</div>
+        </div>
+        <div class="element-filled lanthanide {% if 'Gd' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Gd", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">64</div>
+            <div class="symbol d-none d-md-block">Gd</div>
+            <div class="name d-none d-lg-block text-truncate">Gadolinium</div>
+        </div>
+        <div class="element-filled lanthanide {% if 'Tb' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Tb", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">65</div>
+            <div class="symbol d-none d-md-block">Tb</div>
+            <div class="name d-none d-lg-block text-truncate">Terbium</div>
+        </div>
+        <div class="element-filled lanthanide {% if 'Dy' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Dy", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">66</div>
+            <div class="symbol d-none d-md-block">Dy</div>
+            <div class="name d-none d-lg-block text-truncate">Dysprosium</div>
+        </div>
+        <div class="element-filled lanthanide {% if 'Ho' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ho", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">67</div>
+            <div class="symbol d-none d-md-block">Ho</div>
+            <div class="name d-none d-lg-block text-truncate">Holmium</div>
+        </div>
+        <div class="element-filled lanthanide {% if 'Er' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Er", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">68</div>
+            <div class="symbol d-none d-md-block">Er</div>
+            <div class="name d-none d-lg-block text-truncate">Erbium</div>
+        </div>
+        <div class="element-filled lanthanide {% if 'Tm' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Tm", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">69</div>
+            <div class="symbol d-none d-md-block">Tm</div>
+            <div class="name d-none d-lg-block text-truncate">Thulium</div>
+        </div>
+        <div class="element-filled lanthanide {% if 'Yb' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Yb", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">70</div>
+            <div class="symbol d-none d-md-block">Yb</div>
+            <div class="name d-none d-lg-block text-truncate">Ytterbium</div>
+        </div>
+        <div class="element-filled lanthanide {% if 'Lu' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Lu", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">71</div>
+            <div class="symbol d-none d-md-block">Lu</div>
+            <div class="name d-none d-lg-block text-truncate">Lutetium</div>
+        </div>
+        <div class="element-empty"></div>
+    </div>
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-filled actinide {% if 'Ac' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Ac", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">89</div>
+            <div class="symbol d-none d-md-block">Ac</div>
+            <div class="name d-none d-lg-block text-truncate">Actinium</div>
+        </div>
+        <div class="element-filled actinide {% if 'Th' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Th", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">90</div>
+            <div class="symbol d-none d-md-block">Th</div>
+            <div class="name d-none d-lg-block text-truncate">Thorium</div>
+        </div>
+        <div class="element-filled actinide {% if 'Pa' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Pa", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">91</div>
+            <div class="symbol d-none d-md-block">Pa</div>
+            <div class="name d-none d-lg-block text-truncate">Protactinium</div>
+        </div>
+        <div class="element-filled actinide {% if 'U' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "U", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">92</div>
+            <div class="symbol d-none d-md-block">U</div>
+            <div class="name d-none d-lg-block text-truncate">Uranium</div>
+        </div>
+        <div class="element-filled actinide {% if 'Np' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Np", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">93</div>
+            <div class="symbol d-none d-md-block">Np</div>
+            <div class="name d-none d-lg-block text-truncate">Neptunium</div>
+        </div>
+        <div class="element-filled actinide {% if 'Pu' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Pu", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">94</div>
+            <div class="symbol d-none d-md-block">Pu</div>
+            <div class="name d-none d-lg-block text-truncate">Plutonium</div>
+        </div>
+        <div class="element-filled actinide {% if 'Am' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Am", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">95</div>
+            <div class="symbol d-none d-md-block">Am</div>
+            <div class="name d-none d-lg-block text-truncate">Americium</div>
+        </div>
+        <div class="element-filled actinide {% if 'Cm' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Cm", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">96</div>
+            <div class="symbol d-none d-md-block">Cm</div>
+            <div class="name d-none d-lg-block text-truncate">Curium</div>
+        </div>
+        <div class="element-filled actinide {% if 'Bk' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Bk", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">97</div>
+            <div class="symbol d-none d-md-block">Bk</div>
+            <div class="name d-none d-lg-block text-truncate">Berkelium</div>
+        </div>
+        <div class="element-filled actinide {% if 'Cf' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Cf", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">98</div>
+            <div class="symbol d-none d-md-block">Cf</div>
+            <div class="name d-none d-lg-block text-truncate">Californium</div>
+        </div>
+        <div class="element-filled actinide {% if 'Es' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Es", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">99</div>
+            <div class="symbol d-none d-md-block">Es</div>
+            <div class="name d-none d-lg-block text-truncate">Einsteinium</div>
+        </div>
+        <div class="element-filled actinide {% if 'Fm' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Fm", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">100</div>
+            <div class="symbol d-none d-md-block">Fm</div>
+            <div class="name d-none d-lg-block text-truncate">Fermium</div>
+        </div>
+        <div class="element-filled actinide {% if 'Md' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Md", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">101</div>
+            <div class="symbol d-none d-md-block">Md</div>
+            <div class="name d-none d-lg-block text-truncate">Mendelevium</div>
+        </div>
+        <div class="element-filled actinide {% if 'No' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "No", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">102</div>
+            <div class="symbol d-none d-md-block">No</div>
+            <div class="name d-none d-lg-block text-truncate">Nobelium</div>
+        </div>
+        <div class="element-filled actinide {% if 'Lr' in selected_elements %}selected{% endif %}"
+             hx-vals='{"element": "Lr", "input_name": "{{ name }}"}'
+             {% htmx_post method_name="toggle_element" trigger="click" indicator="#loading-spinner-corner" %}>
+            <div class="enumber">103</div>
+            <div class="symbol d-none d-md-block">Lr</div>
+            <div class="name d-none d-lg-block text-truncate">Lawrencium</div>
+        </div>
+        <div class="element-empty"></div>
+    </div>
+</div>
