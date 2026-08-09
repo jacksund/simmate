@@ -2,6 +2,7 @@
 
 from simmate.database.core import table_column
 from simmate.database.mixins import Structure, ThirdPartyData
+from simmate.database.utils import batch_bulk_create
 
 
 class AflowPrototype(ThirdPartyData, Structure):
@@ -40,7 +41,7 @@ class AflowPrototype(ThirdPartyData, Structure):
 
     # -------------------------------------------------------------------------
 
-    remote_archive_link = "https://archives.simmate.org/AflowPrototype-2023-07-06.zip"
+    remote_archive_link = "https://assets.simmate.org/AflowPrototype-2023-07-06.zip"
     archive_fields = [
         "mineral_name",
         "aflow_id",
@@ -101,6 +102,7 @@ class AflowPrototype(ThirdPartyData, Structure):
     # -------------------------------------------------------------------------
 
     @classmethod
+    @batch_bulk_create(batch_size=1_000)
     def load_source_data(cls):
         """
         This method is for pulling AFLOW data into the Simmate database.
@@ -118,8 +120,6 @@ class AflowPrototype(ThirdPartyData, Structure):
         from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
         from rich.progress import track
 
-        # create database objects but don't save them to the database yet
-        db_objects = []
         for prototype_data in track(AFLOW_PROTOTYPE_LIBRARY):
             # first let's grab the structure
             structure = prototype_data["snl"].structure
@@ -129,7 +129,7 @@ class AflowPrototype(ThirdPartyData, Structure):
             structure_sym = SpacegroupAnalyzer(structure).get_symmetrized_structure()
 
             # Organize the data into our database format
-            new_prototype = cls.from_toolkit(
+            yield cls.from_toolkit(
                 structure=structure,
                 mineral_name=prototype_data["tags"]["mineral"],
                 aflow_id=prototype_data["tags"]["aflow"],
@@ -137,11 +137,3 @@ class AflowPrototype(ThirdPartyData, Structure):
                 strukturbericht_symbol=prototype_data["tags"]["strukturbericht"],
                 nsites_wyckoff=len(structure_sym.wyckoff_symbols),
             )
-            db_objects.append(new_prototype)
-
-        # and save it to our database
-        cls.objects.bulk_create(
-            db_objects,
-            batch_size=15000,
-            ignore_conflicts=True,
-        )

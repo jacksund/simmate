@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simmate-datastore-deployment
+  labels:
+    app: simmate-datastore
+spec:
+  selector:
+    matchLabels:
+      app: simmate-datastore
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: simmate-datastore
+        # bug-fix: https://stackoverflow.com/questions/46336852/
+        date: "{{ now | unixEpoch }}"
+    spec:
+      containers:
+        - name: simmate-datastore
+          image: jacksund/simmate:{{ .Values.version }}
+          imagePullPolicy: Always
+          command: ["sleep", "infinity"]
+          env:
+            {{- include "simmate.env_config" . | indent 12 }}
+          volumeMounts:
+            - mountPath: /root/simmate-config/
+              name: simmate-datastore-data
+          resources:
+            requests:
+              memory: {{ .Values.datastore.memory.request }}
+              cpu: {{ .Values.datastore.cpu.request }}
+              ephemeral-storage: {{ .Values.datastore.ephemeral.request }}
+            limits:
+              memory: {{ .Values.datastore.memory.limit }}
+              cpu: {{ .Values.datastore.cpu.limit }}
+              ephemeral-storage: {{ .Values.datastore.ephemeral.limit }}
+      volumes:
+        - name: simmate-datastore-data
+          persistentVolumeClaim:
+            claimName: simmate-datastore-data

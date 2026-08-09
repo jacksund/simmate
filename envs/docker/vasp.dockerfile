@@ -5,7 +5,7 @@
 # -----------------------------------------------------------------------------
 
 # NOTE: The VASP source files are private assets and must be obtained 
-# from https://archives.simmate.org/vasp_5.4.4.zip
+# from https://assets.simmate.org/vasp_5.4.4.zip
 # Access to this file is restricted to licensed VASP users.
 
 # -----------------------------------------------------------------------------
@@ -45,7 +45,7 @@ WORKDIR /opt/vasp
 
 # Download and unpack VASP source bundle
 # Note: This is a private asset.
-RUN wget https://archives.simmate.org/vasp_5.4.4.zip -O vasp_bundle.zip && \
+RUN wget https://assets.simmate.org/vasp_5.4.4.zip -O vasp_bundle.zip && \
     unzip vasp_bundle.zip && \
     rm vasp_bundle.zip
 

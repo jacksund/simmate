@@ -11,6 +11,7 @@ import pandas
 from rich.progress import track
 
 from simmate.config import settings
+from simmate.utils import dispatch
 
 
 class ArchiveMixin:
@@ -91,13 +92,33 @@ class ArchiveMixin:
     `load_remote_archive` method.
     """
 
+    @classmethod
+    def _load_single_entry(cls, entry):
+        """
+        Quick utility function that loads a single entry to the database.
+        """
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+
+            # BUG: some columns don't properly convert to python objects, but
+            # it seems inconsistent when this is done... For now I just manually
+            # convert JSON columns
+            json_parsing_columns = ["site_forces", "lattice_stress"]
+            for column in json_parsing_columns:
+                if column in entry:
+                    if entry[column]:  # sometimes it has a value of None
+                        entry[column] = json.loads(entry[column])
+            # OPTIMIZE: consider applying this to the df column for faster loading
+
+            return cls.from_toolkit(**entry)
+
     # @transaction.atomic  # We can't have an atomic transaction if we use Dask
     @classmethod
     def load_archive(
         cls,
         filename: str | Path = None,
         delete_on_completion: bool = False,
-        parallel: bool = False,
+        parallel: bool | str = False,
     ):
         """
         Reads a compressed zip file made by `objects.to_archive` and loads the data
@@ -120,10 +141,8 @@ class ArchiveMixin:
             database. Defaults to False
 
         - `parallel`:
-            Whether to load the data in parallel. If true, this will start
-            a local Dask cluster and each data row will be submitted as a task
-            to the cluster. This provides substansial speed-ups for loading
-            large datasets into the dataset. Default is False.
+            How to dispatch the data loading. False will load one by one.
+            True or "core" will start a ProcessPoolExecutor.
         """
 
         # We disable warnings while loading archives because pymatgen prints
@@ -176,49 +195,13 @@ class ArchiveMixin:
             # through.
             entries = df.to_dict(orient="records")
 
-            # to enable parallelization, we define a function to load a single
-            # entry (or row) of data. This allows us to submit the function to Dask.
-            def load_single_entry(entry):
-                """
-                Quick utility function that load a single entry to the database.
-                We have this as a internal function in order to allow submitting
-                this function to Dask (for parallelization).
-                """
-                # We disable warnings while loading archives because pymatgen prints
-                # a lot of them (for things like rounding or electronegativity alerts).
-                # This is especially important for parallel workers which may not
-                # inherit the warning filter from the main process.
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-
-                    # BUG: some columns don't properly convert to python objects, but
-                    # it seems inconsistent when this is done... For now I just manually
-                    # convert JSON columns
-                    json_parsing_columns = ["site_forces", "lattice_stress"]
-                    for column in json_parsing_columns:
-                        if column in entry:
-                            if entry[column]:  # sometimes it has a value of None
-                                entry[column] = json.loads(entry[column])
-                    # OPTIMIZE: consider applying this to the df column for faster loading
-
-                    return cls.from_toolkit(**entry)
-
             # now iterate through all entries to save them to the database
-            if not parallel:
-                # If user doesn't want parallelization, we run these in the main
-                # thread and monitor progress
-                db_objects = [load_single_entry(entry) for entry in track(entries)]
-
-            # otherwise we use dask to submit these in batches!
-            else:
-
-                from simmate.config.dask import batch_submit
-
-                db_objects = batch_submit(
-                    function=load_single_entry,
-                    args_list=entries,
-                    batch_size=15000,
-                )
+            db_objects = dispatch(
+                entries,
+                cls._load_single_entry,
+                parallel=parallel,
+                batch_size=15000,
+            )
 
             cls.objects.bulk_create(
                 db_objects,
@@ -235,7 +218,7 @@ class ArchiveMixin:
     def load_remote_archive(
         cls,
         remote_archive_link: str = None,
-        parallel: bool = False,
+        parallel: bool | str = False,
     ):
         """
         Downloads a compressed zip file made by `objects.to_archive` and loads
@@ -252,10 +235,8 @@ class ArchiveMixin:
             it will default to the table's remote_archive_link attribute.
 
         - `parallel`:
-            Whether to load the data in parallel. If true, this will start
-            a local Dask cluster and each data row will be submitted as a task
-            to the cluster. This provides substansial speed-ups for loading
-            large datasets into the dataset. Default is False.
+            How to dispatch the data loading. False will load one by one.
+            True or "core" will start a ProcessPoolExecutor.
         """
 
         # confirm that we have a link to download from

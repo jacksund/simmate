@@ -75,6 +75,14 @@
 - name: SIMMATE__WEBSITE__DEBUG
   value: {{ .Values.simmate.website.debug | quote }}
 {{- end }}
+{{- if and .Values.simmate.website (hasKey .Values.simmate.website "static_file_hashes") }}
+- name: SIMMATE__WEBSITE__STATIC_FILE_HASHES
+  value: {{ .Values.simmate.website.static_file_hashes | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.secret_key }}
+- name: SIMMATE__WEBSITE__SECRET_KEY
+  value: {{ .Values.simmate.website.secret_key | quote }}
+{{- end }}
 {{- if and .Values.simmate.website .Values.simmate.website.email .Values.simmate.website.email.from_email }}
 - name: SIMMATE__WEBSITE__EMAIL__FROM_EMAIL
   value: {{ .Values.simmate.website.email.from_email | quote }}
@@ -103,7 +111,7 @@
 - name: SIMMATE__WEBSITE__PROFILE_VIEW
   value: {{ .Values.simmate.website.profile_view | quote }}
 {{- end }}
-{{- if and .Values.simmate.website .Values.simmate.website.require_login }}
+{{- if and .Values.simmate.website (hasKey .Values.simmate.website "require_login") }}
 - name: SIMMATE__WEBSITE__REQUIRE_LOGIN
   value: {{ .Values.simmate.website.require_login | quote }}
 {{- end }}
@@ -111,7 +119,7 @@
 - name: SIMMATE__WEBSITE__REQUIRE_LOGIN_EXCEPTIONS
   value: {{ join " " .Values.simmate.website.require_login_exceptions | quote }}
 {{- end }}
-{{- if and .Values.simmate.website .Values.simmate.website.require_login_internal }}
+{{- if and .Values.simmate.website (hasKey .Values.simmate.website "require_login_internal") }}
 - name: SIMMATE__WEBSITE__REQUIRE_LOGIN_INTERNAL
   value: {{ .Values.simmate.website.require_login_internal | quote }}
 {{- end }}
@@ -123,6 +131,26 @@
 - name: SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__SECRET
   value: {{ .Values.simmate.website.social_oauth.microsoft.secret | quote }}
 {{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.social_oauth .Values.simmate.website.social_oauth.microsoft .Values.simmate.website.social_oauth.microsoft.tenant }}
+- name: SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__TENANT
+  value: {{ .Values.simmate.website.social_oauth.microsoft.tenant | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.social_oauth .Values.simmate.website.social_oauth.google .Values.simmate.website.social_oauth.google.client_id }}
+- name: SIMMATE__WEBSITE__SOCIAL_OAUTH__GOOGLE__CLIENT_ID
+  value: {{ .Values.simmate.website.social_oauth.google.client_id | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.social_oauth .Values.simmate.website.social_oauth.google .Values.simmate.website.social_oauth.google.secret }}
+- name: SIMMATE__WEBSITE__SOCIAL_OAUTH__GOOGLE__SECRET
+  value: {{ .Values.simmate.website.social_oauth.google.secret | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.social_oauth .Values.simmate.website.social_oauth.github .Values.simmate.website.social_oauth.github.client_id }}
+- name: SIMMATE__WEBSITE__SOCIAL_OAUTH__GITHUB__CLIENT_ID
+  value: {{ .Values.simmate.website.social_oauth.github.client_id | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.social_oauth .Values.simmate.website.social_oauth.github .Values.simmate.website.social_oauth.github.secret }}
+- name: SIMMATE__WEBSITE__SOCIAL_OAUTH__GITHUB__SECRET
+  value: {{ .Values.simmate.website.social_oauth.github.secret | quote }}
+{{- end }}
 {{- if and .Values.simmate.website .Values.simmate.website.chemdraw_js }}
 - name: SIMMATE__WEBSITE__CHEMDRAW_JS
   value: {{ .Values.simmate.website.chemdraw_js | quote }}
@@ -130,6 +158,10 @@
 {{- if and .Values.simmate.website .Values.simmate.website.user_format }}
 - name: SIMMATE__WEBSITE__USER_FORMAT
   value: {{ .Values.simmate.website.user_format | quote }}
+{{- end }}
+{{- if and .Values.simmate.website (hasKey .Values.simmate.website "max_filter_joins") }}
+- name: SIMMATE__WEBSITE__MAX_FILTER_JOINS
+  value: {{ .Values.simmate.website.max_filter_joins | quote }}
 {{- end }}
 {{- if and .Values.simmate.chemspace .Values.simmate.chemspace.mode }}
 - name: SIMMATE__CHEMSPACE__MODE

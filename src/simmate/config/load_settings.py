@@ -20,11 +20,6 @@ class SimmateSettings:
     Configures Simmate settings
     """
 
-    # TODO: consider using pydantic instead. I don't do this yet because of some
-    # default values are dynamic and co-dependent, but I should revisit in the
-    # future:
-    #   https://github.com/pydantic/pydantic/issues/866
-
     # -------------------------------------------------------------------------
 
     @cached_property
@@ -32,36 +27,10 @@ class SimmateSettings:
         """
         The final settings built from user-supplied settings and all defaults
         """
-        settings = deep_update(
+        return deep_update(
             default_dict=self.default_settings.copy(),
             override_dict=self.user_settings.copy(),
         )
-
-        # clean variables
-        # TODO: handle database.url input
-        # TODO: use_docker inputs
-        # CSRF_TRUSTED_ORIGINS = .split(",")
-        # ALLOWED_HOSTS = .split(",")
-
-        # REQUIRE_LOGIN = os.getenv("REQUIRE_LOGIN", "False") == "True"
-        # # when setting REQUIRE_INTERNAL_LOGIN, set it to the allauth provider type
-        # # (such as "microsoft")
-        # REQUIRE_LOGIN_INTERNAL = os.getenv("REQUIRE_LOGIN_INTERNAL", "False")
-        # if REQUIRE_LOGIN_INTERNAL == "False":
-        #     REQUIRE_LOGIN_INTERNAL = False
-        # else:
-        #     assert REQUIRE_LOGIN_INTERNAL in ["microsoft", "google"]
-        #     REQUIRE_LOGIN = True
-        # # example: r'/apps/spotfire(.*)$'
-        # REQUIRE_LOGIN_EXCEPTIONS = [
-        #     e for e in os.getenv("REQUIRE_LOGIN_EXCEPTIONS", "").split(";") if e
-        # ]
-        # LOGIN_MESSAGE = os.getenv("LOGIN_MESSAGE", "")
-
-        # Run compatibility checks (e.g. use_docker requires a 'docker run' cmd)
-        # TODO
-
-        return settings
 
     def __getattr__(self, name: str):
         """
@@ -186,6 +155,7 @@ class SimmateSettings:
                 "simmate.apps.configs.EvolutionConfig",
                 "simmate.apps.configs.InventoryManagementConfig",
                 "simmate.apps.configs.JarvisConfig",
+                "simmate.apps.configs.LabAutomationConfig",
                 "simmate.apps.configs.MaterialsProjectConfig",
                 "simmate.apps.configs.OqmdConfig",
                 "simmate.apps.configs.PdbConfig",
@@ -211,7 +181,11 @@ class SimmateSettings:
                 "login_message": None,
                 "social_oauth": {
                     "google": {"client_id": None, "secret": None},
-                    "microsoft": {"client_id": None, "secret": None},
+                    "microsoft": {
+                        "client_id": None,
+                        "secret": None,
+                        "tenant": "organizations",
+                    },
                     "github": {"client_id": None, "secret": None},
                 },
                 # These allow server maintainers to override the homepage and profile views, which
@@ -225,8 +199,6 @@ class SimmateSettings:
                     "Project Management": [
                         "simmate.apps.project_management.components.ProjectComponent",
                         "simmate.apps.project_management.components.TagComponent",
-                        "simmate.apps.project_management.components.WalletComponent",
-                        "simmate.apps.project_management.components.TransactionComponent",
                     ],
                     "Inventory Management": [
                         "simmate.apps.inventory_management.components.SubstanceComponent",
@@ -255,6 +227,7 @@ class SimmateSettings:
                         "simmate.apps.ppdb.components.PpdbMoleculeComponent",
                     ],
                     "Workflow Results": [
+                        "simmate.website.workflow_explorer.components.StagedRelaxStaticComponent",
                         "simmate.website.workflow_explorer.components.StaticEnergyComponent",
                         "simmate.website.workflow_explorer.components.RelaxationComponent",
                         "simmate.website.workflow_explorer.components.PopulationAnalysisComponent",
@@ -268,6 +241,8 @@ class SimmateSettings:
                     ],
                     "Business and Finance": [
                         "simmate.apps.price_catalog.components.PricedItemComponent",
+                        "simmate.apps.project_management.components.WalletComponent",
+                        "simmate.apps.project_management.components.TransactionComponent",
                         "simmate.apps.ethereum.components.EthereumWalletComponent",
                         "simmate.apps.ethereum.components.EthereumTransactionComponent",
                     ],
@@ -277,7 +252,7 @@ class SimmateSettings:
                     ],
                     "Other": [
                         "simmate.apps.eppo_gd.components.EppoCodeComponent",
-                        "simmate.database.mixins.components.SpacegroupComponent",
+                        "simmate.website.core.components.SpacegroupComponent",
                     ],
                     "HIDDEN": [
                         "simmate.website.core.components.WebsitePageVisitComponent",
@@ -292,8 +267,6 @@ class SimmateSettings:
                         "simmate.website.workflow_explorer.components.DynamicsIonicStepComponent",
                     ],
                 },
-                # django extras
-                "log_sql": False,
                 # django extras
                 "log_sql": False,
                 "debug": False,
@@ -417,7 +390,7 @@ class SimmateSettings:
             },
             "quantum_espresso": {
                 "default_command": "pw.x < pwscf.in > pw-scf.out",
-                "psuedo_dir": self.config_directory / "quantum_espresso" / "potentials",
+                "pseudo_dir": self.config_directory / "quantum_espresso" / "potentials",
                 "docker": {
                     "enable": False,
                     "image": f"jacksund/quantum_espresso:v{simmate.__version__}",
@@ -602,8 +575,6 @@ class SimmateSettings:
 
         return final_dict
 
-    # OPTIMIZE: this is only used in the _get_env_settings method and should
-    # depreciated in favor of type-inspecting
     _input_mappings: dict = {
         "SIMMATE__APPS": list[str],
         "SIMMATE__DATABASE__ENGINE": str,
@@ -616,6 +587,8 @@ class SimmateSettings:
         "SIMMATE__WEBSITE__CSRF_TRUSTED_ORIGINS": list[str],
         "SIMMATE__WEBSITE__DATA": dict,
         "SIMMATE__WEBSITE__DEBUG": bool,
+        "SIMMATE__WEBSITE__SECRET_KEY": str,
+        "SIMMATE__WEBSITE__STATIC_FILE_HASHES": bool,
         "SIMMATE__WEBSITE__EMAIL__FROM_EMAIL": str,
         "SIMMATE__WEBSITE__EMAIL__HOST": str,
         "SIMMATE__WEBSITE__EMAIL__PORT": int,
@@ -629,8 +602,14 @@ class SimmateSettings:
         "SIMMATE__WEBSITE__SHOW_FINANCES": bool,
         "SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__CLIENT_ID": str,
         "SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__SECRET": str,
+        "SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__TENANT": str,
+        "SIMMATE__WEBSITE__SOCIAL_OAUTH__GOOGLE__CLIENT_ID": str,
+        "SIMMATE__WEBSITE__SOCIAL_OAUTH__GOOGLE__SECRET": str,
+        "SIMMATE__WEBSITE__SOCIAL_OAUTH__GITHUB__CLIENT_ID": str,
+        "SIMMATE__WEBSITE__SOCIAL_OAUTH__GITHUB__SECRET": str,
         "SIMMATE__WEBSITE__CHEMDRAW_JS": bool,
         "SIMMATE__WEBSITE__USER_FORMAT": str,
+        "SIMMATE__WEBSITE__MAX_FILTER_JOINS": int,
         "SIMMATE__BADER__DOCKER__ENABLE": bool,
         "SIMMATE__QUANTUM_ESPRESSO__DOCKER__ENABLE": bool,
         "SIMMATE__VASP__DOCKER__ENABLE": bool,

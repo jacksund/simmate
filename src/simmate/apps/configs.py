@@ -27,6 +27,10 @@ class BcpcConfig(AppConfig):
     name = "simmate.apps.bcpc"
 
 
+class BlenderConfig(AppConfig):
+    name = "simmate.apps.blender"
+
+
 class BioviaCosmoConfig(AppConfig):
     name = "simmate.apps.biovia_cosmo"
 
@@ -94,6 +98,8 @@ class JarvisConfig(AppConfig):
 
 class LabAutomationConfig(AppConfig):
     name = "simmate.apps.lab_automation"
+    verbose_name = "Lab Automation"
+    description_short = "A dashboard for controling and monitoring sensors/devices"
 
 
 class MaterialsProjectConfig(AppConfig):

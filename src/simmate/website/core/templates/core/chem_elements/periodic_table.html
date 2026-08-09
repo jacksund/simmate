@@ -6,7 +6,7 @@
         margin: 0.2%;
     }
 
-    [class*="-filled"] {
+    [class*="-filled"], .element-placeholder {
         border: 1px solid black;
         border-radius: 4px;
         text-align: center;
@@ -91,10 +91,20 @@
 </style>
 <script>
     function selectElement(element) {
-        element.classList.add("selected")
+        element.classList.toggle("selected");
+        
+        let selectedNodes = document.querySelectorAll('.selected .symbol');
+        let elements = Array.from(selectedNodes).map(node => node.innerText.trim());
+        let composition = elements.join('-');
+        
+        let searchInput = document.getElementById('quick-search-input');
+        if (searchInput) {
+            searchInput.value = composition;
+            searchInput.dispatchEvent(new Event('change', { 'bubbles': true }));
+        }
     }
 </script>
-<div class="container p-4 bg-light border">
+<div class="container p-4">
     <div class="row" style="flex-wrap: nowrap;">
         <div class="element-filled nonmetal" onclick="selectElement(this)">
             <div class="enumber">1</div>
@@ -132,7 +142,7 @@
         <div class="element-filled alkaliearthmetal" onclick="selectElement(this)">
             <div class="enumber">4</div>
             <div class="symbol d-none d-md-block">Be</div>
-            <div class="name d-none d-lg-block text-truncate">Berylium</div>
+            <div class="name d-none d-lg-block text-truncate">Beryllium</div>
         </div>
         <div class="element-empty"></div>
         <div class="element-empty"></div>
@@ -199,7 +209,7 @@
         <div class="element-filled metal" onclick="selectElement(this)">
             <div class="enumber">13</div>
             <div class="symbol d-none d-md-block">Al</div>
-            <div class="name d-none d-lg-block text-truncate">Aluminum</div>
+            <div class="name d-none d-lg-block text-truncate">Aluminium</div>
         </div>
         <div class="element-filled metalloid" onclick="selectElement(this)">
             <div class="enumber">14</div>
@@ -415,14 +425,14 @@
         <div class="element-filled alkalimetal" onclick="selectElement(this)">
             <div class="enumber">55</div>
             <div class="symbol d-none d-md-block">Cs</div>
-            <div class="name d-none d-lg-block text-truncate">Cesium</div>
+            <div class="name d-none d-lg-block text-truncate">Caesium</div>
         </div>
         <div class="element-filled alkaliearthmetal" onclick="selectElement(this)">
             <div class="enumber">56</div>
             <div class="symbol d-none d-md-block">Ba</div>
             <div class="name d-none d-lg-block text-truncate">Barium</div>
         </div>
-        <div class="element-filled lanthanide">
+        <div class="element-placeholder lanthanide">
             <div class="enumber d-none d-md-block">57-71</div>
             <div class="symbol d-none d-md-block"></div>
         </div>
@@ -513,7 +523,7 @@
             <div class="symbol d-none d-md-block">Ra</div>
             <div class="name d-none d-lg-block text-truncate">Radium</div>
         </div>
-        <div class="element-filled actinide">
+        <div class="element-placeholder actinide">
             <div class="enumber d-none d-md-block">89-103</div>
             <div class="symbol d-none d-md-block"></div>
         </div>
@@ -555,7 +565,7 @@
         <div class="element-filled transitionmetal" onclick="selectElement(this)">
             <div class="enumber">111</div>
             <div class="symbol d-none d-md-block">Rg</div>
-            <div class="name d-none d-lg-block text-truncate">Roetgenium</div>
+            <div class="name d-none d-lg-block text-truncate">Roentgenium</div>
         </div>
         <div class="element-filled transitionmetal" onclick="selectElement(this)">
             <div class="enumber">112</div>
@@ -600,7 +610,7 @@
         <div class="element-filled lanthanide" onclick="selectElement(this)">
             <div class="enumber">57</div>
             <div class="symbol d-none d-md-block">La</div>
-            <div class="name d-none d-lg-block text-truncate">Lanthanium</div>
+            <div class="name d-none d-lg-block text-truncate">Lanthanum</div>
         </div>
         <div class="element-filled lanthanide" onclick="selectElement(this)">
             <div class="enumber">58</div>
@@ -680,7 +690,7 @@
         <div class="element-filled actinide" onclick="selectElement(this)">
             <div class="enumber">89</div>
             <div class="symbol d-none d-md-block">Ac</div>
-            <div class="name d-none d-lg-block text-truncate">Actinum</div>
+            <div class="name d-none d-lg-block text-truncate">Actinium</div>
         </div>
         <div class="element-filled actinide" onclick="selectElement(this)">
             <div class="enumber">90</div>
@@ -690,7 +700,7 @@
         <div class="element-filled actinide" onclick="selectElement(this)">
             <div class="enumber">91</div>
             <div class="symbol d-none d-md-block">Pa</div>
-            <div class="name d-none d-lg-block text-truncate">Protectinium</div>
+            <div class="name d-none d-lg-block text-truncate">Protactinium</div>
         </div>
         <div class="element-filled actinide" onclick="selectElement(this)">
             <div class="enumber">92</div>
@@ -740,7 +750,7 @@
         <div class="element-filled actinide" onclick="selectElement(this)">
             <div class="enumber">101</div>
             <div class="symbol d-none d-md-block">Md</div>
-            <div class="name d-none d-lg-block text-truncate">Mendekevium</div>
+            <div class="name d-none d-lg-block text-truncate">Mendelevium</div>
         </div>
         <div class="element-filled actinide" onclick="selectElement(this)">
             <div class="enumber">102</div>

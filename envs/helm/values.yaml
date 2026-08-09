@@ -66,6 +66,18 @@ workers:
     request: 1Gi
     limit: 2Gi
 
+datastore:
+  storage: 20Gi
+  memory:
+    request: 2Gi
+    limit: 4Gi
+  cpu:
+    request: 1
+    limit: 1
+  ephemeral:
+    request: 1Gi
+    limit: 2Gi
+
 postgres:
   password: example_password_123
   external_service: false
@@ -79,6 +91,9 @@ postgres:
   ephemeral:
     request: 1Gi
     limit: 2Gi
+
+cloudflare:
+  tunnel_token: null
 
 service_account:
   enabled: false

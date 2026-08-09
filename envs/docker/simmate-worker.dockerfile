@@ -8,10 +8,12 @@ WORKDIR /root/
 # Environment Variables
 # =============================================================================
 
-ENV PATH=/root/simmate/.venv/bin:/root/.local/bin:$PATH \
+ENV OMP_NUM_THREADS=1 \
+    PATH=/root/simmate/.venv/bin:/root/.local/bin:$PATH \
     VIRTUAL_ENV=/root/simmate/.venv \
     UV_WORKING_DIR=/root/simmate \
     DJANGO_SETTINGS_MODULE="simmate.config.django.settings" \
+    SIMMATE_CONFIG_DIR=/root/simmate-config \
     DEBUG=False
 
 # =============================================================================
@@ -46,7 +48,7 @@ RUN apt-get update && \
 
 # Downloads are pulled from Simmate's CDN. All steps are in a single RUN
 # statement to avoid persisting transient source/tar files in intermediate layers.
-RUN wget https://archives.simmate.org/qe-7.2-ReleasePack.tar.gz -O qe-7.2.tar.gz && \
+RUN wget https://assets.simmate.org/qe-7.2-ReleasePack.tar.gz -O qe-7.2.tar.gz && \
     tar -xzf qe-7.2.tar.gz && \
     rm qe-7.2.tar.gz && \
     cd qe-7.2 && \
@@ -69,9 +71,7 @@ RUN curl -Ls https://astral.sh/uv/install.sh | sh
 
 # Copy source and install Python dependencies
 COPY . simmate
-RUN uv sync && \
-    uv pip install gunicorn && \
-    django-admin collectstatic --noinput
+RUN uv sync
 
 # Download and setup SSSP pseudopotentials
 RUN simmate-qe setup sssp

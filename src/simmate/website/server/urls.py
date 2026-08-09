@@ -2,6 +2,7 @@
 
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic import RedirectView
 
 from simmate.config import settings
 from simmate.utils import get_app_submodule
@@ -49,6 +50,14 @@ urlpatterns = [
     #
     # This is the path to the homepage (just simmate.org)
     path(route="", view=views.home, name="home"),
+    #
+    # Redirect root favicon requests to the static SVG icon
+    path(
+        route="favicon.ico",
+        view=RedirectView.as_view(
+            url="/static/images/simmate-icon.svg", permanent=True
+        ),
+    ),
     #
     # Disabled urls (such as the account signup form), must come first. The only
     # page that can't be disabled is the home page.

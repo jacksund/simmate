@@ -9,8 +9,11 @@ from pathlib import Path
 
 from pymatgen.core import Lattice
 
-from simmate.apps.quantum_espresso.inputs.k_points import Kpoints
-from simmate.apps.quantum_espresso.inputs.pwscf_in_modifiers import (
+from simmate.toolkit import Structure
+from simmate.utils import str_to_datatype
+
+from .k_points import Kpoints
+from .pwscf_in_modifiers import (
     keyword_modifier_ecutrho,
     keyword_modifier_ecutwfc,
     keyword_modifier_nat,
@@ -18,8 +21,6 @@ from simmate.apps.quantum_espresso.inputs.pwscf_in_modifiers import (
     keyword_modifier_pseudo_dir,
     keyword_modifier_smart_smear,
 )
-from simmate.toolkit import Structure
-from simmate.utils import str_to_datatype
 
 
 class PwscfInput:
@@ -203,7 +204,7 @@ class PwscfInput:
         self,
         structure: Structure,
         kpoints: Kpoints,
-        psuedo_mappings: dict = {},
+        pseudo_mappings: dict = {},
         control: dict = {},
         system: dict = {},
         electrons: dict = {},
@@ -216,10 +217,10 @@ class PwscfInput:
         Initializes a PWSCF input file.
         """
 
-        # check for psuedo mappings:
-        if not psuedo_mappings:
+        # check for pseudo mappings:
+        if not pseudo_mappings:
             logging.warning(
-                "No psuedopotential mappings were provided. If you are trying to "
+                "No pseudopotential mappings were provided. If you are trying to "
                 "use the Simmate defaults (from SSSP), then make sure you have "
                 "ran 'simmate-qe setup sssp' to download the files for you. "
                 "Otherwise, make sure you provide a mapping and that the "
@@ -228,7 +229,7 @@ class PwscfInput:
 
         self.structure = structure
         self.kpoints = kpoints
-        self.psuedo_mappings = psuedo_mappings
+        self.pseudo_mappings = pseudo_mappings
 
         self.control = control
         self.system = system
@@ -328,12 +329,12 @@ class PwscfInput:
                 #   Si  28.086  Si.pz-vbc.UPF
                 # Note: mass is only used for MD calcs.
                 for line in lines:
-                    element, mass, psuedo_file = line.strip().split()
+                    element, mass, pseudo_file = line.strip().split()
                     # TODO: use an Element base class...?
                     specie = {
                         "element": element.strip(),
                         "mass": mass.strip(),
-                        "psuedo_file": psuedo_file.strip(),
+                        "pseudo_file": pseudo_file.strip(),
                     }
                     section_data.append(specie)
 
@@ -578,10 +579,17 @@ class PwscfInput:
 
         # ----------------------
 
+        # reconstruct pseudo mappings
+        atomic_species = data.get("atomic_species", [])
+        pseudo_mappings = {}
+        for specie in atomic_species:
+            pseudo_mappings[specie["element"]] = {"filename": specie["pseudo_file"]}
+
         return cls(
             structure=structure,
             kpoints=kpoints,
-            control=data.get("control", {}),  # !!! should I pop psuedo_file?
+            pseudo_mappings=pseudo_mappings,
+            control=data.get("control", {}),  # !!! should I pop pseudo_file?
             system=data.get("system", {}),
             electrons=data.get("electrons", {}),
             ions=data.get("ions", {}),
@@ -635,9 +643,9 @@ class PwscfInput:
         # specie info
         final_str += "ATOMIC_SPECIES\n"
         for element in self.structure.composition:
-            psuedo_name = self.psuedo_mappings[element.symbol]["filename"]
+            pseudo_name = self.pseudo_mappings[element.symbol]["filename"]
             final_str += (
-                f" {element.symbol}  {float(element.atomic_mass)}  {psuedo_name}\n"
+                f" {element.symbol}  {float(element.atomic_mass)}  {pseudo_name}\n"
             )
         final_str += "\n"  # extra empty line after final specie
 

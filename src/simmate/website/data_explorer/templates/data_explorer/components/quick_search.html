@@ -1,0 +1,160 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    <div class="quick-search-component pt-5 pb-2">
+        <!-- Search Bar -->
+        <div class="input-group input-group-lg mb-3 shadow-sm rounded-pill overflow-hidden border border-secondary-subtle w-75 mx-auto">
+            <input type="text"
+                   class="form-control border-0 px-4"
+                   name="search_query"
+                   id="quick-search-input"
+                   placeholder="Search by description, formula, or SMILES..."
+                   value="{{ component.search_query }}"
+                   {% htmx_post indicator="#loading-spinner-corner" %}>
+            <button class="btn btn-primary px-4 fw-bold shadow-none"
+                    type="button"
+                    {% htmx_post method_name="run_search" trigger="click" indicator="#loading-spinner-corner" %}>
+                <i class="bi bi-search me-1"></i> Search
+            </button>
+        </div>
+        <!-- Toggle Navigation -->
+        <div class="d-flex justify-content-center {% if component.active_panel == 'periodic_table' %}mb-2{% else %}mb-4{% endif %}">
+            <ul class="nav nav-pills p-1 rounded-pill">
+                <li class="nav-item">
+                    <button type="button"
+                            class="nav-link rounded-pill px-4 {% if component.active_panel == 'examples' %}active{% else %}text-secondary{% endif %}"
+                            hx-vals='{"panel": "examples"}'
+                            {% htmx_post method_name="toggle_panel" trigger="click" indicator="#loading-spinner-corner" %}>
+                        <i class="bi bi-lightbulb me-1"></i> Examples
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button"
+                            class="nav-link rounded-pill px-4 {% if component.active_panel == 'periodic_table' %}active{% else %}text-secondary{% endif %}"
+                            hx-vals='{"panel": "periodic_table"}'
+                            {% htmx_post method_name="toggle_panel" trigger="click" indicator="#loading-spinner-corner" %}>
+                        <i class="bi bi-grid-3x3 me-1"></i> Elements
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button"
+                            class="nav-link rounded-pill px-4 {% if component.active_panel == 'sketcher' %}active{% else %}text-secondary{% endif %}"
+                            hx-vals='{"panel": "sketcher"}'
+                            {% htmx_post method_name="toggle_panel" trigger="click" indicator="#loading-spinner-corner" %}>
+                        <i class="bi bi-hexagon me-1"></i> Sketcher
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button"
+                            class="nav-link rounded-pill px-4 {% if component.active_panel == 'upload' %}active{% else %}text-secondary{% endif %}"
+                            hx-vals='{"panel": "upload"}'
+                            {% htmx_post method_name="toggle_panel" trigger="click" indicator="#loading-spinner-corner" %}>
+                        <i class="bi bi-upload me-1"></i> Upload
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <!-- Dynamic Panel Content -->
+        <div class="panel-content {% if component.active_panel != 'periodic_table' %}mx-auto border rounded-4 p-4 bg-white shadow-sm {% if component.active_panel == 'sketcher' %}col-12{% else %}col-md-10 col-lg-8{% endif %}{% endif %}"
+             {% if not component.active_panel or component.active_panel == 'search_results' %}style="display: none;"{% endif %}>
+            {% if component.active_panel == 'periodic_table' %}
+                {% htmx_periodic_table_input name="search_query" %}
+            {% elif component.active_panel == 'sketcher' %}
+                {% htmx_molecule_input name="molecule" label="Draw Molecule" %}
+            {% elif component.active_panel == 'upload' %}
+                {% htmx_structure_input name="structure" label="Upload Structure" allow_database_input=False %}
+            {% elif component.active_panel == 'examples' %}
+                <div class="mb-4">
+                    <h6 class="fw-bold text-dark">
+                        <i class="bi bi-chat-text me-2 text-primary"></i>Natural Language
+                    </h6>
+                    <p class="text-muted small mb-2">
+                        Search using plain english descriptions to find materials with specific properties.
+                    </p>
+                    <button type="button"
+                            class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                            hx-vals='{"query": "Find all band gaps greater than 2 eV"}'
+                            {% htmx_post method_name="set_example" trigger="click" indicator="#loading-spinner-corner" %}>
+                        Find all band gaps > 2 eV
+                    </button>
+                    <button type="button"
+                            class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                            hx-vals='{"query": "Density less than 5 g/cm3"}'
+                            {% htmx_post method_name="set_example" trigger="click" indicator="#loading-spinner-corner" %}>
+                        Density less than 5 g/cm³
+                    </button>
+                </div>
+                <div class="mb-4">
+                    <h6 class="fw-bold text-dark">
+                        <i class="bi bi-funnel me-2 text-primary"></i>Formulas & Systems
+                    </h6>
+                    <p class="text-muted small mb-2">Search for specific chemical formulas or combinations of elements.</p>
+                    <button type="button"
+                            class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                            hx-vals='{"query": "Li-Co-O"}'
+                            {% htmx_post method_name="set_example" trigger="click" indicator="#loading-spinner-corner" %}>
+                        Li-Co-O
+                    </button>
+                </div>
+                <div>
+                    <h6 class="fw-bold text-dark">
+                        <i class="bi bi-hexagon me-2 text-primary"></i>SMILES Strings
+                    </h6>
+                    <p class="text-muted small mb-2">Search for specific molecules using their SMILES representation.</p>
+                    <button type="button"
+                            class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                            hx-vals='{"query": "CCO"}'
+                            {% htmx_post method_name="set_example" trigger="click" indicator="#loading-spinner-corner" %}>
+                        CCO (Ethanol)
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+        {% if component.search_results is not None %}
+            <div class="search-results-container mt-4">
+                {% if not component.search_results %}
+                    <div class="alert alert-secondary text-center">
+                        <i class="bi bi-search"></i> No results found for "{{ component.search_query }}".
+                    </div>
+                {% else %}
+                    {% for table_name, data in component.search_results.items %}
+                        <div class="card mb-4 border-0">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
+                                <h5 class="mb-0 fw-bold">
+                                    <i class="bi bi-database me-2 text-primary"></i>{{ data.display_name }}
+                                </h5>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped align-middle mb-0">
+                                    <thead class="table-primary">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Formula</th>
+                                            <th>Spacegroup</th>
+                                            {% if data.has_ehull %}<th>E above Hull (eV/atom)</th>{% endif %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for entry in data.entries %}
+                                            <tr>
+                                                <td>{% foreign_key_link entry %}</td>
+                                                <td>{{ entry.formula_reduced|chemical_formula }}</td>
+                                                <td>{% foreign_key_link entry.spacegroup "symbol" %}</td>
+                                                {% if data.has_ehull %}<td>{{ entry.energy_above_hull|floatformat:3 }}</td>{% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="card-footer bg-white text-center">
+                                <a href="/data/{{ data.url_name }}/?{% if '-' in component.search_query %}chemical_system{% else %}formula_reduced{% endif %}={{ data.url_query }}"
+                                   class="text-decoration-none fw-bold">
+                                    See all {{ data.total_count }} results in {{ data.display_name }} <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

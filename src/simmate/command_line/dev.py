@@ -12,7 +12,11 @@ from pathlib import Path
 
 import typer
 
+from .k8s import k8s_app
+
 dev_app = typer.Typer(rich_markup_mode="markdown")
+
+dev_app.add_typer(k8s_app, name="k8s")
 
 
 @dev_app.callback(no_args_is_help=True)
@@ -126,3 +130,13 @@ def prebuild():
     from simmate.database.utils import create_prebuild
 
     create_prebuild()
+
+
+@dev_app.command()
+def download_ketcher():
+    """
+    Downloads and extracts the Ketcher standalone zip to the static directory.
+    """
+    from simmate.website.core.utils import download_ketcher as _download_ketcher
+
+    _download_ketcher()

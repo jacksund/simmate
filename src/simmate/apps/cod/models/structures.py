@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import contextlib
 import logging
+import urllib.request
 import warnings
+import zipfile
 from pathlib import Path
 
 from pymatgen.io.cif import CifParser
@@ -10,7 +13,7 @@ from rich.progress import track
 from simmate.config import settings
 from simmate.database.core import table_column
 from simmate.database.mixins import Structure, ThirdPartyData
-from simmate.utils.other import chunk_list
+from simmate.database.utils import batch_bulk_create
 
 
 class CodStructure(ThirdPartyData, Structure):
@@ -41,7 +44,7 @@ class CodStructure(ThirdPartyData, Structure):
 
     # -------------------------------------------------------------------------
 
-    remote_archive_link = "https://archives.simmate.org/CodStructure-2026-03-20.zip"
+    remote_archive_link = "https://assets.simmate.org/CodStructure-2026-03-20.zip"
     archive_fields = ["is_ordered", "has_implicit_hydrogens"]
 
     # -------------------------------------------------------------------------
@@ -62,98 +65,104 @@ class CodStructure(ThirdPartyData, Structure):
     # -------------------------------------------------------------------------
 
     @classmethod
+    @batch_bulk_create(batch_size=1_000)
     def load_source_data(
         cls,
         base_directory: str | Path = None,
         only_add_new_cifs: bool = True,
-        chunk_size: int = 5000,
     ):
-        """
-        This method pulls COD data into the Simmate database.
-        """
+        """This method pulls COD data into the Simmate database."""
 
-        # 1. Determine the base directory
-        if not base_directory:
-            cod_dir = settings.config_directory / "cod"
-            potential_dirs = sorted([d for d in cod_dir.glob("cod-*") if d.is_dir()])
-            base_directory = (
-                (potential_dirs[-1] / "cif")
-                if potential_dirs
-                else (Path.cwd() / "cod" / "cif")
-            )
+        base_directory = Path(
+            base_directory or settings.config_directory / "cod" / "raw"
+        )
+        base_directory.mkdir(parents=True, exist_ok=True)
 
-        base_directory = Path(base_directory)
-        if not base_directory.exists():
-            raise FileNotFoundError(f"COD data not found at {base_directory}")
+        filename = "cod-rev297631-2025.02.07.zip"
+        file_path = base_directory / filename
 
-        # 2. Gather all CIF files
-        logging.info(f"Gathering CIF files from {base_directory}...")
-        all_cifs = list(base_directory.rglob("*.cif"))
+        cif_files = list(base_directory.rglob("*.cif"))
 
-        # 3. Filter for new entries if requested
-        if only_add_new_cifs:
-            logging.info("Filtering for new entries...")
-            existing_ids = set(cls.objects.values_list("id", flat=True))
-            all_cifs = [f for f in track(all_cifs) if int(f.stem) not in existing_ids]
-            logging.info(f"Adding {len(all_cifs)} new entries...")
-
-        # 4. Run the import in chunks
-        nchunks_total = (len(all_cifs) // chunk_size) + 1
-
-        # we want to suppress the overwhelming amount of warnings that the
-        # CifParser and from_toolkit prints out.
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-
-            for i, cif_chunk in enumerate(chunk_list(all_cifs, chunk_size)):
-                logging.info(f"Processing chunk {i+1} of {nchunks_total}...")
-                db_objs = []
-                for cif_file in track(cif_chunk):
-                    try:
-                        db_obj = cls._from_cif(cif_file)
-                        db_objs.append(db_obj)
-                    except Exception:
-                        logging.warning(f"Failed to parse CIF: {cif_file}")
-
-                logging.info(f"Saving {len(db_objs)} objects to database...")
-                cls.objects.bulk_create(
-                    db_objs,
-                    batch_size=1000,
-                    ignore_conflicts=True,
+        # Download zip if no CIFs are present and zip doesn't exist
+        if not cif_files and not file_path.exists():
+            logging.info(f"Downloading {filename}...")
+            url = f"https://www.crystallography.net/archives/2025/data/{filename}"
+            try:
+                urllib.request.urlretrieve(url, file_path)
+            except Exception as e:
+                raise Exception(
+                    f"Failed to download {filename}. Please manually download it "
+                    f"from {url} "
+                    f"to {base_directory}.\nError: {e}"
                 )
 
+        existing_ids = (
+            set(cls.objects.values_list("id", flat=True))
+            if only_add_new_cifs
+            else set()
+        )
+
+        with contextlib.ExitStack() as stack, warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+
+            targets = []
+            if cif_files:
+                for path in cif_files:
+                    cif_id = int(path.stem)
+                    if cif_id not in existing_ids:
+                        targets.append((cif_id, path))
+            else:
+                z = stack.enter_context(zipfile.ZipFile(file_path))
+                for info in z.infolist():
+                    if info.filename.endswith(".cif"):
+                        cif_id = int(Path(info.filename).stem)
+                        if cif_id not in existing_ids:
+                            targets.append((cif_id, info))
+
+            logging.info(f"Adding {len(targets)} new entries...")
+
+            for cif_id, target in track(targets, description="Parsing CIFs..."):
+                try:
+                    cif_string = (
+                        target.read_text()
+                        if isinstance(target, Path)
+                        else z.read(target).decode("utf-8")
+                    )
+                    yield cls._from_cif(cif_string=cif_string, cif_id=cif_id)
+                except Exception:
+                    logging.warning(f"Failed to parse CIF: {cif_id}")
+
     @classmethod
-    def _from_cif(cls, cif_filepath: str | Path):
-        """
-        Converts a COD cif into a Simmate database object.
-        """
-
-        cif_path = Path(cif_filepath)
-
+    def _from_cif(cls, cif_string: str, cif_id: int):
+        """Converts a COD cif into a Simmate database object."""
         try:
-            cif = CifParser(cif_path, occupancy_tolerance=float("inf"))
+            cif = CifParser.from_str(cif_string, occupancy_tolerance=float("inf"))
             structure = cif.get_structures()[0]
+
             # Mark overly complex structures as invalid to avoid database blowup
-            if len(structure) > 500 or len(structure.composition) > 10:
+            if (
+                len(structure) > 500
+                or len(structure.composition.chemical_system) > 25
+                or len(structure.composition.formula) > 50
+                or len(structure.composition.reduced_formula) > 50
+                or len(structure.composition.anonymized_formula) > 50
+            ):
                 raise ValueError("Structure too complex")
-            is_invalid_structure = False
+
+            return cls.from_toolkit(
+                id=cif_id,
+                structure=structure,
+                is_ordered=structure.is_ordered,
+                has_implicit_hydrogens=(
+                    "Structure has implicit hydrogens defined" in "".join(cif.warnings)
+                ),
+                is_invalid_structure=False,
+            )
         except Exception:
-            structure = None
-            is_invalid_structure = True
-
-        has_implicit_hydrogens = (
-            "Structure has implicit hydrogens defined" in "".join(cif.warnings)
-            if structure
-            else None
-        )
-        is_ordered = structure.is_ordered if structure else None
-
-        # Convert the entry to a database object
-        structure_db = cls.from_toolkit(
-            id=int(cif_path.stem),
-            structure=structure,
-            is_ordered=is_ordered,
-            has_implicit_hydrogens=has_implicit_hydrogens,
-            is_invalid_structure=is_invalid_structure,
-        )
-        return structure_db
+            return cls.from_toolkit(
+                id=cif_id,
+                structure=None,
+                is_ordered=None,
+                has_implicit_hydrogens=None,
+                is_invalid_structure=True,
+            )

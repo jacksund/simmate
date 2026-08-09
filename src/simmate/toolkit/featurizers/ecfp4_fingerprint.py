@@ -19,10 +19,14 @@ class Ecfp4Fingerprint(Featurizer):
     def featurize(
         molecule: Molecule,
         vector_type: str = "numpy",
+        radius: int = 2,
         size: int = 2048,
         **kwargs,
     ):
         rdkit_fp = AllChem.GetMorganFingerprintAsBitVect(
-            molecule.rdkit_molecule, radius=2, nBits=size, **kwargs
+            molecule.rdkit_molecule,
+            radius=radius,
+            nBits=size,
+            **kwargs,
         )
         return convert_rdkit_fingerprint(rdkit_fp, vector_type)

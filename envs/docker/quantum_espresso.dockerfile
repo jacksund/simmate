@@ -5,6 +5,9 @@ FROM ubuntu:22.04
 # Avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Note: containerized versions of QE runs are faster in serial
+ENV OMP_NUM_THREADS=1
+
 # =============================================================================
 # OS Dependencies
 # =============================================================================
@@ -31,7 +34,7 @@ RUN apt-get update && \
 
 # Downloads are pulled from Simmate's CDN. All steps are in a single RUN
 # statement to avoid persisting transient source/tar files in intermediate layers.
-RUN wget https://archives.simmate.org/qe-7.2-ReleasePack.tar.gz -O qe-7.2.tar.gz && \
+RUN wget https://assets.simmate.org/qe-7.2-ReleasePack.tar.gz -O qe-7.2.tar.gz && \
     tar -xzf qe-7.2.tar.gz && \
     rm qe-7.2.tar.gz && \
     cd qe-7.2 && \

@@ -387,3 +387,28 @@ class HtmxComponent:
         pass
 
     # -------------------------------------------------------------------------
+
+    def stream_plotly_data(self, **kwargs):
+        """
+        HTMX endpoint to retrieve the latest data and return a JSON action
+        to extend the plotly trace on the client side.
+        """
+        fetch_method = kwargs.get("fetch_method")
+        div_id = kwargs.get("div_id")
+        max_points = int(kwargs.get("max_points", 10000))
+
+        method = getattr(self, fetch_method)
+        new_data = method()
+
+        action = {
+            "extendPlotlyTrace": [
+                div_id,
+                new_data.get("x", []),
+                new_data.get("y", []),
+                max_points,
+            ]
+        }
+
+        return JsonResponse([action], safe=False)
+
+    # -------------------------------------------------------------------------

@@ -6,12 +6,12 @@ import importlib
 import inspect
 import json
 import logging
-import os
-import sys
 import textwrap
 from functools import wraps
 
+import cloudpickle
 import requests
+from rich.progress import track
 
 import simmate
 
@@ -358,34 +358,6 @@ def deep_update(default_dict: dict, override_dict: dict) -> dict:
     return final_dict
 
 
-def get_docker_command(
-    image: str,
-    inner_command: str = None,
-    volumes: list[str] = [],
-) -> str:
-    """
-    Given common input parameters, this util builds a `docker run` command
-    and returns it as a string.We then let other functionality
-    (such as S3Workflows) handle running the command.
-
-    For advanced docker cases, use the `docker-py` package instead.
-    """
-    command = "docker run "
-
-    for volume in volumes:
-        command += f"--volume {volume} "
-
-    command += image
-
-    if inner_command:
-        # This is a little hack to pass the command since "docker run" can't
-        # pass multi-part commands. We use "sh -c" to wrap the command that
-        # should be call when the image starts
-        command += f' sh -c "{inner_command}"'
-
-    return command
-
-
 def get_attributes_doc(cls: type, dedent_and_strip: bool = True) -> dict[str, str]:
     """
     Grabs a dictionary of attribute names to docstrings for the given class.
@@ -456,17 +428,62 @@ def get_chunk_key(string_id: str, num_chunks: int) -> int:
     return int.from_bytes(h, "big") % num_chunks
 
 
-def dispatch(items, fn, parallel: bool, tags: list = None, **kwargs) -> None:
+def _run_cloudpickled_chunk(payload: bytes) -> list:
     """
-    Runs fn(item, **kwargs) for each item in items, either serially or via
-    SimmateExecutor for parallel execution.
+    Unpacks a cloudpickle payload and runs fn over a chunk of items.
+
+    This must stay module-level so that `ProcessPoolExecutor` can pickle it
+    by reference. The real callable (which is often a closure or lambda, and
+    therefore unpicklable by the stdlib) travels inside `payload` instead.
     """
-    if parallel:
+    fn, chunk_items, kwargs = cloudpickle.loads(payload)
+    return [fn(item, **kwargs) for item in chunk_items]
+
+
+def dispatch(
+    items,
+    fn,
+    parallel: bool | str = False,
+    tags: list = None,
+    batch_size: int = 1000,
+    max_workers: int = None,
+    **kwargs,
+) -> list:
+    """
+    Runs fn(item, **kwargs) for each item in items based on the requested
+    parallel mode.
+    """
+    if parallel == "job":
         from simmate.database import connect  # isort:skip
         from simmate.compute import SimmateExecutor  # isort:skip
 
-        for item in items:
-            SimmateExecutor.submit(fn, item, tags=tags or ["simmate"], **kwargs)
+        results = []
+        for item in track(items):
+            result = SimmateExecutor.submit(
+                fn, item, tags=tags or ["simmate"], **kwargs
+            )
+            results.append(result)
+        return results
+
+    elif parallel is True or parallel == "core":
+        from concurrent.futures import ProcessPoolExecutor
+
+        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+            futures = [
+                executor.submit(
+                    _run_cloudpickled_chunk,
+                    cloudpickle.dumps((fn, chunk, kwargs)),
+                )
+                for chunk in chunk_list(full_list=items, chunk_size=batch_size)
+            ]
+            # flatten results before returning
+            return [item for future in track(futures) for item in future.result()]
+
+    elif not parallel or parallel == "single":
+        results = []
+        for item in track(items):
+            results.append(fn(item, **kwargs))
+        return results
+
     else:
-        for item in items:
-            fn(item, **kwargs)
+        raise Exception(f"Unknown parallel mode: {parallel}")

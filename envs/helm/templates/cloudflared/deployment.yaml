@@ -1,0 +1,35 @@
+{{- if and (eq .Values.platform "k3s") .Values.cloudflare.tunnel_token }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simmate-cloudflared-deployment
+  labels:
+    app: simmate-cloudflared
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simmate-cloudflared
+  template:
+    metadata:
+      labels:
+        app: simmate-cloudflared
+    spec:
+      containers:
+        - name: simmate-cloudflared
+          image: cloudflare/cloudflared:latest
+          args:
+            - tunnel
+            - --no-autoupdate
+            - run
+          env:
+            - name: TUNNEL_TOKEN
+              value: {{ .Values.cloudflare.tunnel_token | quote }}
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+{{- end }}

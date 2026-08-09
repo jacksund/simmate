@@ -6,76 +6,200 @@
     <section class="jumbotron text-center py-3">
         <div class="container">
             <h1 class="jumbotron-heading">Data Explorer</h1>
-            <p class="lead text-muted">Each option below corresponds to a single table in our database. Select one to explore.</p>
+            <p class="lead text-muted">Explore datasets, search across elements, or view leaderboards.</p>
         </div>
     </section>
-    <div class="container-fluid mt-4">
-        {# Main loop for sections #}
-        {% for section_name, datasets in data_config.items %}
-            {% if datasets and section_name != "HIDDEN" %}
-                {# Section Heading #}
-                <h4 class="mt-4 pb-2">{{ section_name }}</h4>
-                {# Start of the table for the current section #}
-                <div class="table-responsive mb-5">
-                    <table class="table table-striped align-middle">
-                        <thead class="table-primary">
-                            <tr>
-                                <th scope="col" style="width: 25%">Dataset</th>
-                                <th scope="col" style="width: 15%">Entries (#)</th>
-                                <th scope="col" style="width: 60%">Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for dataset in datasets %}
-                                {% with dataset.table as table %}
-                                    <tr>
-                                        <td>
-                                            {% if table.is_redistribution_allowed != False or not LOCK_DATA_REDISTRIBUTION %}
-                                                <a href="{% url 'data_explorer:table' table.table_name %}"
-                                                   style="display: block;
-                                                          width: 100%;
-                                                          height: 100%;
-                                                          padding: 0;
-                                                          text-decoration: none">
-                                                    {{ dataset.display_name }} <i class="bi bi-box-arrow-in-right"></i>
-                                                </a>
-                                            {% else %}
-                                                <button type="button"
-                                                        class="text-danger text-start border-0 p-0 m-0"
-                                                        style="display: block;
-                                                               width: 100%;
-                                                               height: 100%;
-                                                               padding: 0;
-                                                               background-color: transparent;
-                                                               text-decoration: none"
-                                                        data-bs-toggle="popover"
-                                                        data-bs-placement="right"
-                                                        data-bs-title="Unavailable in Public Website"
-                                                        data-bs-content="Simmate does not have permission to redistribute data from this provider. However, you can still use our python package to download the data *directly* from the third-party source. In other words, we can't give you their data ourselves, so you must get the data from the provider and then use simmate locally to work with it. The original data's Terms & Conditions will still apply.">
-                                                    {{ dataset.display_name }} <i class="bi bi-exclamation-triangle"></i>
-                                                </button>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% with dataset.num_rows_cache as row_count %}
-                                                {% if row_count is not None %}
-                                                    {{ row_count|floatformat:0|intcomma }}
-                                                {% else %}
-                                                    <span class="text-muted fst-italic">---</span>
-                                                {% endif %}
-                                            {% endwith %}
-                                        </td>
-                                        <td>
-                                            <small>{{ dataset.description_short }}</small>
-                                        </td>
-                                    </tr>
-                                {% endwith %}
+    <ul class="nav nav-tabs nav-bordered mb-3">
+        <li class="nav-item">
+            <a href="#quick-search-section"
+               data-bs-toggle="tab"
+               aria-expanded="true"
+               class="nav-link active">
+                <i class="bi bi-search d-md-none d-block"></i>
+                <span class="d-none d-md-block"><i class="bi bi-search"></i> Quick Search</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="#leaderboards-section"
+               data-bs-toggle="tab"
+               aria-expanded="false"
+               class="nav-link">
+                <i class="bi bi-trophy-fill d-md-none d-block"></i>
+                <span class="d-none d-md-block"><i class="bi bi-trophy-fill"></i> Leaderboards</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="#all-datasets-section"
+               data-bs-toggle="tab"
+               aria-expanded="false"
+               class="nav-link">
+                <i class="bi bi-database-fill d-md-none d-block"></i>
+                <span class="d-none d-md-block"><i class="bi bi-database-fill"></i> All Datasets</span>
+            </a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane show active" id="quick-search-section">
+            <div class="container-fluid mt-3">{% htmx_component component_name="quick-search-component" %}</div>
+        </div>
+        <div class="tab-pane" id="leaderboards-section">
+            <div class="container-fluid mt-5 mb-5 text-center">
+                <h3>
+                    <i class="bi bi-cone-striped text-warning"></i> Under Construction
+                </h3>
+                <p class="text-muted">Leaderboards are coming soon!</p>
+            </div>
+        </div>
+        <div class="tab-pane" id="all-datasets-section">
+            <div class="container-fluid mt-4">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="nav flex-column nav-pills me-3"
+                             id="v-pills-tab"
+                             role="tablist"
+                             aria-orientation="vertical">
+                            <button class="nav-link active text-start mb-1"
+                                    id="v-pills-favorites-tab"
+                                    data-bs-toggle="pill"
+                                    data-bs-target="#favorites-section"
+                                    type="button"
+                                    role="tab"
+                                    aria-controls="favorites-section"
+                                    aria-selected="true">
+                                <i class="bi bi-star-fill text-warning me-2"></i> Favorites
+                            </button>
+                            {% for section in sections %}
+                                <button class="nav-link text-start mb-1"
+                                        id="v-pills-{{ section.name|slugify }}-tab"
+                                        data-bs-toggle="pill"
+                                        data-bs-target="#{{ section.name|slugify }}-section"
+                                        type="button"
+                                        role="tab"
+                                        aria-controls="{{ section.name|slugify }}-section"
+                                        aria-selected="false">
+                                    <i class="bi {{ section.icon }} me-2"></i> {{ section.name }}
+                                </button>
                             {% endfor %}
-                        </tbody>
-                    </table>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="tab-content" id="v-pills-tabContent">
+                            <div class="tab-pane fade show active"
+                                 id="favorites-section"
+                                 role="tabpanel"
+                                 aria-labelledby="v-pills-favorites-tab">
+                                <div class="table-responsive mb-5">
+                                    <table class="table table-striped align-middle">
+                                        <thead class="table-primary">
+                                            <tr>
+                                                <th scope="col" style="width: 30%">Dataset</th>
+                                                <th scope="col" style="width: 70%">Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for section in sections %}
+                                                {% for dataset in section.datasets %}
+                                                    {% if dataset.display_name == 'Projects' or dataset.display_name == 'Workers' or dataset.display_name == 'Market Data & Price Catalog' or dataset.display_name == 'Chemical Substances' %}
+                                                        {% with dataset.table as table %}
+                                                            <tr>
+                                                                <td>
+                                                                    {% if table.is_redistribution_allowed != False or not LOCK_DATA_REDISTRIBUTION %}
+                                                                        <a href="{% url 'data_explorer:table' table.table_name %}"
+                                                                           style="display: block;
+                                                                                  width: 100%;
+                                                                                  height: 100%;
+                                                                                  padding: 0;
+                                                                                  text-decoration: none">
+                                                                            {{ dataset.display_name }} <i class="bi bi-box-arrow-in-right"></i>
+                                                                        </a>
+                                                                    {% else %}
+                                                                        <button type="button"
+                                                                                class="text-danger text-start border-0 p-0 m-0"
+                                                                                style="display: block;
+                                                                                       width: 100%;
+                                                                                       height: 100%;
+                                                                                       padding: 0;
+                                                                                       background-color: transparent;
+                                                                                       text-decoration: none"
+                                                                                data-bs-toggle="popover"
+                                                                                data-bs-placement="right"
+                                                                                data-bs-title="Unavailable in Public Website"
+                                                                                data-bs-content="Simmate does not have permission to redistribute data from this provider. However, you can still use our python package to download the data *directly* from the third-party source. In other words, we can't give you their data ourselves, so you must get the data from the provider and then use simmate locally to work with it. The original data's Terms & Conditions will still apply.">
+                                                                            {{ dataset.display_name }} <i class="bi bi-exclamation-triangle"></i>
+                                                                        </button>
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td>
+                                                                    <small>{{ dataset.description_short }}</small>
+                                                                </td>
+                                                            </tr>
+                                                        {% endwith %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% for section in sections %}
+                                <div class="tab-pane fade"
+                                     id="{{ section.name|slugify }}-section"
+                                     role="tabpanel"
+                                     aria-labelledby="v-pills-{{ section.name|slugify }}-tab">
+                                    <div class="table-responsive mb-5">
+                                        <table class="table table-striped align-middle">
+                                            <thead class="table-primary">
+                                                <tr>
+                                                    <th scope="col" style="width: 30%">Dataset</th>
+                                                    <th scope="col" style="width: 70%">Description</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for dataset in section.datasets %}
+                                                    {% with dataset.table as table %}
+                                                        <tr>
+                                                            <td>
+                                                                {% if table.is_redistribution_allowed != False or not LOCK_DATA_REDISTRIBUTION %}
+                                                                    <a href="{% url 'data_explorer:table' table.table_name %}"
+                                                                       style="display: block;
+                                                                              width: 100%;
+                                                                              height: 100%;
+                                                                              padding: 0;
+                                                                              text-decoration: none">
+                                                                        {{ dataset.display_name }} <i class="bi bi-box-arrow-in-right"></i>
+                                                                    </a>
+                                                                {% else %}
+                                                                    <button type="button"
+                                                                            class="text-danger text-start border-0 p-0 m-0"
+                                                                            style="display: block;
+                                                                                   width: 100%;
+                                                                                   height: 100%;
+                                                                                   padding: 0;
+                                                                                   background-color: transparent;
+                                                                                   text-decoration: none"
+                                                                            data-bs-toggle="popover"
+                                                                            data-bs-placement="right"
+                                                                            data-bs-title="Unavailable in Public Website"
+                                                                            data-bs-content="Simmate does not have permission to redistribute data from this provider. However, you can still use our python package to download the data *directly* from the third-party source. In other words, we can't give you their data ourselves, so you must get the data from the provider and then use simmate locally to work with it. The original data's Terms & Conditions will still apply.">
+                                                                        {{ dataset.display_name }} <i class="bi bi-exclamation-triangle"></i>
+                                                                    </button>
+                                                                {% endif %}
+                                                            </td>
+                                                            <td>
+                                                                <small>{{ dataset.description_short }}</small>
+                                                            </td>
+                                                        </tr>
+                                                    {% endwith %}
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
-                {# End of the table for the current section #}
-            {% endif %}
-        {% endfor %}
+            </div>
+        </div>
     </div>
 {% endblock %}

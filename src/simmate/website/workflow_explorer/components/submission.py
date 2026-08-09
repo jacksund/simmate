@@ -24,7 +24,6 @@ class WorkflowSubmissionComponent(HtmxComponent, StructureInput):
         # TODO: consider pulling dynamically to include tables of past workflow results
     ]
 
-    is_structure_confirmed: bool = False
     is_pricing_confirmed: bool = False
     is_submission_confirmed: bool = False
 
@@ -33,17 +32,14 @@ class WorkflowSubmissionComponent(HtmxComponent, StructureInput):
         self.workflow_name = self.request.resolver_match.kwargs["workflow_name"]
         self.workflow = get_workflow(self.workflow_name)
         self.form_data["submitted_by_id"] = self.request.user.id
+        if not settings.website.show_finances:
+            self.is_pricing_confirmed = True
 
     def submit(self):
         # just refresh the current page to get the updated balance
         return HttpResponseRedirect(self.initial_context.request.path_info)
 
     # -------------------------------------------------------------------------
-
-    def confirm_structure(self):
-        self.is_structure_confirmed = True
-        if not settings.website.show_finances:
-            self.is_pricing_confirmed = True
 
     def confirm_pricing(self):
         self.is_pricing_confirmed = True
