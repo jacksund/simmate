@@ -25,7 +25,7 @@ class FaissIvfPqIndex(VectorIndex):
     index_suffix: str = "faiss"
     train_size: int = 250_000
     add_batch_size: int = 250_000
-    max_training_files: int = 64
+    max_training_files: int = 100
 
     def __init__(
         self,
@@ -64,6 +64,17 @@ class FaissIvfPqIndex(VectorIndex):
             self.vectors_directory(datastore_cls) / f"{self.column_name}.template.faiss"
         )
 
+    def _training_set_file(self, datastore_cls) -> Path:
+        """
+        Path of the parquet file holding training vectors. If this file exists
+        it is used as-is; otherwise vectors are sampled from the data chunks
+        and saved here for reproducibility.
+        """
+        return (
+            self.vectors_directory(datastore_cls)
+            / f"{self.column_name}.training.parquet"
+        )
+
     def _faiss_template(self, datastore_cls):
         """
         The trained-but-empty template index, read from disk once per process.
@@ -95,7 +106,11 @@ class FaissIvfPqIndex(VectorIndex):
             f"nlist={self.nlist}, m={self.m}, nbits={self.nbits}"
         )
         index = faiss.IndexIVFPQ(
-            faiss.IndexFlatL2(self.ndim), self.ndim, self.nlist, self.m, self.nbits
+            faiss.IndexFlatL2(self.ndim),
+            self.ndim,
+            self.nlist,
+            self.m,
+            self.nbits,
         )
         index.train(vectors)
 
@@ -105,29 +120,26 @@ class FaissIvfPqIndex(VectorIndex):
         return template_file
 
     def _sample_training_vectors(self, datastore_cls) -> numpy.ndarray:
+        training_file = self._training_set_file(datastore_cls)
+        if training_file.exists():
+            logging.info(f"Loading training set from {training_file}")
+            df = polars.read_parquet(training_file)
+            return self._unpacked_vectors(datastore_cls, df)
+
         chunk_files = datastore_cls.chunk_files
-        if not chunk_files:
-            raise FileNotFoundError(
-                f"No parquet files found in {datastore_cls.live_directory}. "
-                "Nothing to train an index on."
-            )
-
         if len(chunk_files) > self.max_training_files:
-            step = len(chunk_files) / self.max_training_files
-            chunk_files = [
-                chunk_files[int(i * step)] for i in range(self.max_training_files)
-            ]
+            chunk_files = chunk_files[: self.max_training_files]
 
-        rows_per_file = max(1, self.train_size // len(chunk_files))
+        rows_per_file = self.train_size // len(chunk_files)
         frames = []
         for file in chunk_files:
-            df = polars.read_parquet(
-                file, columns=[self.column_name], n_rows=rows_per_file
-            )
-            if len(df) > 0:
-                frames.append(df)
+            df = polars.read_parquet(file, columns=[self.column_name])
+            frames.append(df.sample(n=rows_per_file))
 
-        return self._unpacked_vectors(datastore_cls, polars.concat(frames))
+        combined = polars.concat(frames)
+        combined.write_parquet(training_file)
+        logging.info(f"Saved {len(combined):,} training vectors → {training_file}")
+        return self._unpacked_vectors(datastore_cls, combined)
 
     def build(self, datastore_cls, parallel_job: bool = False) -> None:
         batches_to_process = self._get_pending_batches(datastore_cls)
