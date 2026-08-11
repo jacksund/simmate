@@ -169,6 +169,10 @@ class SimmateSettings:
             "database": self._default_database,
             "postgres_rdkit_extension": False,
             "scratch_dir": Path.cwd(),
+            "api": {
+                "url": "http://127.0.0.1:8000",
+                "key": None,
+            },
             "website": {
                 # Sometimes we lock down the website to registered/approved users.
                 # By default, we allow anonymous users to explore because this makes things like
@@ -588,6 +592,8 @@ class SimmateSettings:
         "SIMMATE__DATABASE__USER": str,
         "SIMMATE__DATABASE__PASSWORD": str,
         "SIMMATE__DATABASE__PORT": int,
+        "SIMMATE__API__URL": str,
+        "SIMMATE__API__KEY": str,
         "SIMMATE__WEBSITE__ALLOWED_HOSTS": list[str],
         "SIMMATE__WEBSITE__CSRF_TRUSTED_ORIGINS": list[str],
         "SIMMATE__WEBSITE__DATA": dict,

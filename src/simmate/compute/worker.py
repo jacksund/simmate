@@ -385,24 +385,6 @@ class SimmateWorker(DatabaseTable):
         )
         return queue_size
 
-    @classmethod
-    def run_singleflow_worker(cls):
-        """
-        A convenience method for running a worker that...
-        1. shuts down immediately if the queue is empty
-        2. shuts down after a single workflow run
-
-        Because this type of worker is frequently used for HPC clusters, we
-        make a convenience method for it.
-        """
-        worker = cls(
-            nitems_max=1,
-            close_on_empty_queue=True,
-            waittime_on_empty_queue=5,
-            tags=["simmate"],
-        )
-        worker.start()
-
 
 # -----------------------------------------------------------------------------
 

@@ -54,7 +54,7 @@ simmate compute start-cluster 3 --type slurm
     ```bash
     #!/bin/bash
     # (Your SBATCH settings here...)
-    simmate compute start-singleflow-worker
+    simmate compute start-worker --nitems-max 1 --close-on-empty-queue
     ```
 
 ### 6. Monitor Your Jobs

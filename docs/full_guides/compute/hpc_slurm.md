@@ -32,10 +32,9 @@ You can create a standard SLURM `submit.sh` script that launches a Simmate worke
 module load vasp
 
 # Start a worker that runs one job and then exits.
-# NOTE: This uses the default tag 'simmate'.
-simmate compute start-singleflow-worker
+simmate compute start-worker --nitems-max 1 --close-on-empty-queue
 
-# To use custom tags, use the full start-worker flags:
+# To use custom tags, append the tag option:
 # simmate compute start-worker --tag my-tag --nitems-max 1 --close-on-empty-queue
 ```
 
