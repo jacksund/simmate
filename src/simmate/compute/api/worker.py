@@ -70,6 +70,7 @@ class ApiWorker:
 
             time_start = time.time()
             self.nitems_completed = 0
+            empty_queue_streak = 0
 
             logging.info("Worker is ready & listening for WorkItems via API")
 
@@ -92,6 +93,7 @@ class ApiWorker:
                     response = self.session.post(
                         f"{self.server_url}/compute/work_items/next/",
                         json={"tags": self.tags},
+                        timeout=10,
                     )
                     response.raise_for_status()
                 except requests.exceptions.RequestException as exc:
@@ -103,11 +105,14 @@ class ApiWorker:
 
                 if response.status_code == 204:
                     # Queue is empty
-                    if self.close_on_empty_queue:
+                    empty_queue_streak += 1
+                    time.sleep(self.waittime_on_empty_queue)
+                    if self.close_on_empty_queue and empty_queue_streak >= 2:
                         logging.info("The task queue is empty. Shutting down.")
                         return
-                    time.sleep(self.waittime_on_empty_queue)
                     continue
+                else:
+                    empty_queue_streak = 0
 
                 workitem_data = response.json()
                 workitem_id = workitem_data["id"]
@@ -120,11 +125,6 @@ class ApiWorker:
                     kwargs = cloudpickle.loads(
                         base64.b64decode(workitem_data["kwargs"])
                     )
-                except Exception as exc:
-                    logging.error(f"Failed to unpickle WorkItem {workitem_id}: {exc}")
-                    continue
-
-                try:
                     result = fxn(*args, **kwargs)
                     status = "F"
                 except Exception as exception:
