@@ -285,53 +285,6 @@ class SimmateWorker(DatabaseTable):
                         "this is a bug:\n https://github.com/jacksund/simmate/issues/\n\n"
                     )
 
-                    # local import to prevent circular import issues
-                    from simmate.workflows.common.s3 import (
-                        CommandNotFoundError,
-                    )
-
-                    # The most common error (by far) is a command-not-found issue.
-                    # We want to handle this separately -- whereas other exceptions
-                    # we just pass on to the results.
-                    if isinstance(exception, CommandNotFoundError):
-                        logging.warning(
-                            "This WorkItem failed with a 'command not found' error. "
-                            "This worker is likely improperly configured or "
-                            "you have a typo in your command."
-                        )
-
-                        with transaction.atomic():
-                            nfailures = workitem.command_not_found_failures + 1
-
-                            # Check if this task is problematic. If this error happened
-                            # with another worker, we likely have a problematic task
-                            if nfailures == 2:
-                                logging.warning(
-                                    "This is the 2nd occurrence with this task causing "
-                                    "a 'command not found' problem. In case this a typo "
-                                    "in your command, we are marking the task as CANCELLED "
-                                    "to prevent it from shutting down other workers."
-                                )
-                                workitem.status = "C"
-                                workitem.save()
-                                # the result will be set below
-
-                            # Otherwise the user likely just forgot to use module load
-                            else:
-                                logging.info(
-                                    f"Resetting WorkItem {workitem.id} to 'Pending' so "
-                                    "another worker can retry."
-                                )
-
-                                workitem.command_not_found_failures = nfailures
-                                workitem.status = "P"  # marked as PENDING to retry
-                                workitem.save()
-
-                        logging.info("Shutting down to prevent repeated issues.")
-                        self.status = "Stopped"
-                        self.save(update_fields=["status", "updated_at"])
-                        return
-
                     # will be saved to database instead of raised
                     result = exception
 

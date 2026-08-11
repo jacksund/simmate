@@ -124,7 +124,6 @@ class ApiWorker:
                     logging.error(f"Failed to unpickle WorkItem {workitem_id}: {exc}")
                     continue
 
-                command_not_found = False
                 try:
                     result = fxn(*args, **kwargs)
                     status = "F"
@@ -139,16 +138,6 @@ class ApiWorker:
                         "Please open a new issue on our github page if you believe "
                         "this is a bug:\n https://github.com/jacksund/simmate/issues/\n\n"
                     )
-
-                    from simmate.workflows.common.s3 import CommandNotFoundError
-
-                    if isinstance(exception, CommandNotFoundError):
-                        logging.warning(
-                            "This WorkItem failed with a 'command not found' error. "
-                            "This worker is likely improperly configured or "
-                            "you have a typo in your command."
-                        )
-                        command_not_found = True
 
                     result = exception
                     status = "E"
@@ -168,7 +157,6 @@ class ApiWorker:
                         json={
                             "status": status,
                             "result": result_b64,
-                            "command_not_found": command_not_found,
                         },
                     )
                     update_response.raise_for_status()
@@ -179,12 +167,6 @@ class ApiWorker:
 
                 logging.info("Completed WorkItem")
                 self.nitems_completed += 1
-
-                if command_not_found:
-                    logging.info(
-                        "Shutting down to prevent repeated issues due to CommandNotFoundError."
-                    )
-                    return
 
         except KeyboardInterrupt:
             logging.info("Stop signal recieved. Shutting down.")

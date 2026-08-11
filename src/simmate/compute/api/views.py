@@ -65,8 +65,7 @@ def update_work_item(request, work_item_id):
     Expects JSON data:
     {
         "status": "F" or "E" or "P",
-        "result": "<base64_encoded_pickled_result>",
-        "command_not_found": true/false
+        "result": "<base64_encoded_pickled_result>"
     }
     """
     if request.method != "POST":
@@ -79,7 +78,6 @@ def update_work_item(request, work_item_id):
 
     status = data.get("status")
     result_b64 = data.get("result")
-    command_not_found = data.get("command_not_found", False)
 
     if not status or not result_b64:
         return JsonResponse({"detail": "Missing status or result data."}, status=400)
@@ -94,18 +92,6 @@ def update_work_item(request, work_item_id):
             workitem = WorkItem.objects.select_for_update().get(pk=work_item_id)
         except WorkItem.DoesNotExist:
             return JsonResponse({"detail": "WorkItem not found."}, status=404)
-
-        if command_not_found:
-            nfailures = workitem.command_not_found_failures + 1
-            if nfailures == 2:
-                workitem.status = "C"
-                workitem.result_binary = result_binary
-                workitem.save()
-            else:
-                workitem.command_not_found_failures = nfailures
-                workitem.status = "P"  # marked as PENDING to retry
-                workitem.save()
-            return JsonResponse({"detail": "Command not found handled."}, status=200)
 
         workitem.result_binary = result_binary
         workitem.status = status
