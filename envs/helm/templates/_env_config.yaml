@@ -35,6 +35,14 @@
   {{- else }}
   value: "http://127.0.0.1:8000"
   {{- end }}
+{{- if and .Values.simmate.client .Values.simmate.client.host }}
+- name: SIMMATE__CLIENT__HOST
+  value: {{ .Values.simmate.client.host | quote }}
+{{- end }}
+{{- if and .Values.simmate.client .Values.simmate.client.api_key }}
+- name: SIMMATE__CLIENT__API_KEY
+  value: {{ .Values.simmate.client.api_key | quote }}
+{{- end }}
 {{- if .Values.simmate.apps }}
 - name: SIMMATE__APPS
   value: {{ join " " .Values.simmate.apps | quote }}
@@ -70,6 +78,10 @@
 {{- if and .Values.simmate.website .Values.simmate.website.data }}
 - name: SIMMATE__WEBSITE__DATA
   value: '{{ .Values.simmate.website.data | toJson }}'
+{{- end }}
+{{- if and .Values.simmate.website (hasKey .Values.simmate.website "enable_api_workers") }}
+- name: SIMMATE__WEBSITE__ENABLE_API_WORKERS
+  value: {{ .Values.simmate.website.enable_api_workers | quote }}
 {{- end }}
 {{- if and .Values.simmate.website .Values.simmate.website.debug }}
 - name: SIMMATE__WEBSITE__DEBUG

@@ -1,31 +1,50 @@
 # -*- coding: utf-8 -*-
 
 import base64
-import json
 
 import cloudpickle
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 
 from simmate.compute.work_item import WorkItem
+from simmate.config import settings
+from simmate.website.utils import api_view
 
 
-@csrf_exempt
+def check_worker_permissions(user) -> bool:
+    """
+    Checks if the user is allowed to act as an API worker based on simmate settings.
+    Future implementations will query the project_management app and evaluate
+    methods involving collateral_balance to decide if a user is allowed.
+    """
+    allowed = settings.website.enable_api_workers
+
+    if not allowed or allowed in ["False", "false"]:
+        return False
+    elif allowed == "superuser-only":
+        return user.is_superuser
+    elif allowed == "staff-only":
+        return user.is_staff or user.is_superuser
+    elif allowed == "all-users":
+        return True
+
+    return False
+
+
+@api_view(["POST"])
+@login_required
 def get_next_work_item(request):
     """
     API endpoint for remote workers to pull the next pending WorkItem.
     Expects JSON data: {"tags": ["simmate", "custom"]}
     """
-    if request.method != "POST":
-        return JsonResponse({"detail": "Method not allowed."}, status=405)
+    tags = request.data.get("tags", ["simmate"])
 
-    try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        data = {}
-
-    tags = data.get("tags", ["simmate"])
+    if not check_worker_permissions(request.user):
+        return JsonResponse(
+            {"detail": "You do not have permission to run API workers."}, status=403
+        )
 
     with transaction.atomic():
         # Query for PENDING WorkItems, lock it for editing, and update status
@@ -58,7 +77,8 @@ def get_next_work_item(request):
     return JsonResponse(response_data)
 
 
-@csrf_exempt
+@api_view(["POST"])
+@login_required
 def update_work_item(request, work_item_id):
     """
     API endpoint for remote workers to submit the result of a WorkItem.
@@ -68,19 +88,16 @@ def update_work_item(request, work_item_id):
         "result": "<base64_encoded_pickled_result>"
     }
     """
-    if request.method != "POST":
-        return JsonResponse({"detail": "Method not allowed."}, status=405)
-
-    try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({"detail": "Invalid JSON."}, status=400)
-
-    status = data.get("status")
-    result_b64 = data.get("result")
+    status = request.data.get("status")
+    result_b64 = request.data.get("result")
 
     if not status or not result_b64:
         return JsonResponse({"detail": "Missing status or result data."}, status=400)
+
+    if not check_worker_permissions(request.user):
+        return JsonResponse(
+            {"detail": "You do not have permission to run API workers."}, status=403
+        )
 
     try:
         result_binary = base64.b64decode(result_b64)

@@ -38,7 +38,7 @@ class ApiWorker:
         waittime_on_empty_queue: float = 15,
         startup_method: str = None,
     ):
-        self.server_url = settings.api.url.rstrip("/")
+        self.server_url = settings.client.host.rstrip("/")
         self.tags = tags or ["simmate"]
         self.nitems_max = nitems_max if nitems_max else float("inf")
         self.timeout = timeout if timeout else float("inf")
@@ -47,8 +47,10 @@ class ApiWorker:
         self.startup_method = startup_method
 
         self.session = requests.Session()
-        if settings.api.key:
-            self.session.headers.update({"Authorization": f"Token {settings.api.key}"})
+        if settings.client.api_key:
+            self.session.headers.update(
+                {"Authorization": f"Token {settings.client.api_key}"}
+            )
 
         self.nitems_completed = 0
 
