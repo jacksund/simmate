@@ -6,7 +6,11 @@ import numpy
 import polars
 
 from simmate.toolkit import Molecule
-from simmate.toolkit.datastores.vector_indexes import FaissIvfPqIndex, UsearchHnswIndex
+from simmate.toolkit.datastores.vector_indexes import (
+    FaissIvfPqIndex,
+    UsearchHnswIndex,
+    VectorIndex,
+)
 from simmate.utils import filter_polars_df
 
 from ..dataframes import MoleculeDataFrame
@@ -224,6 +228,7 @@ class MoleculeDatastore(Datastore):
     # for billion-scale fingerprint similarity searches
 
     vector_indexes: dict = {
+        # these are unbound templates -- use get_vector_index() to grab one
         "maccs": UsearchHnswIndex(
             column_name="maccs",
             ndim=168,
@@ -259,11 +264,27 @@ class MoleculeDatastore(Datastore):
         "ecfp4_1024_faiss": FaissIvfPqIndex(
             column_name="ecfp4_1024",
             ndim=1024,
-            metric_fn=tanimoto_ecfp4_1024,
             featurizer=Ecfp4Fingerprint,
             featurizer_kwargs={"size": 1024},
+            load_mode="view",
         ),
     }
+
+    @classmethod
+    def get_vector_index(cls, name: str) -> VectorIndex:
+        """
+        The named vector index, bound to this datastore.
+
+        Memoized per class so that loaded shards persist across searches.
+        """
+        # keyed off cls.__dict__ so subclasses get their own bound copies
+        # rather than inheriting the parent's
+        if "_bound_vector_indexes" not in cls.__dict__:
+            cls._bound_vector_indexes = {}
+        if name not in cls._bound_vector_indexes:
+            index = cls.vector_indexes[name].for_datastore(cls)
+            cls._bound_vector_indexes[name] = index
+        return cls._bound_vector_indexes[name]
 
     @update_table()
     def add_fingerprints(
@@ -312,7 +333,7 @@ class MoleculeDatastore(Datastore):
             )
 
         elif fingerprint_type in cls.vector_indexes:
-            index = cls.vector_indexes[fingerprint_type]
+            index = cls.get_vector_index(fingerprint_type)
             fp_list = index.featurizer.featurize_many(
                 df["smiles"].to_list(),
                 parallel=True,
@@ -346,7 +367,7 @@ class MoleculeDatastore(Datastore):
         if isinstance(query, str):
             query = Molecule.from_smiles(query)
 
-        index = cls.vector_indexes[similarity_type]
+        index = cls.get_vector_index(similarity_type)
         fp_bytes = index.featurizer.featurize(
             query,
             vector_type="numpy_packbits_bytes",
@@ -354,7 +375,7 @@ class MoleculeDatastore(Datastore):
         )
         vec = numpy.frombuffer(fp_bytes, dtype=numpy.uint8).copy()
 
-        return index.search(cls, vec, count)
+        return index.search(vec, count)
 
     @classmethod
     def build_fingerprint_index(
@@ -363,14 +384,12 @@ class MoleculeDatastore(Datastore):
         parallel_job: bool = False,
     ) -> None:
         """Builds similarity search indexes from the chunk parquet files."""
-        index = cls.vector_indexes[fp_type]
-        index.build(cls, parallel_job)
+        cls.get_vector_index(fp_type).build(parallel_job)
 
     @classmethod
     def load_fingerprint_index(cls, fp_type: str = "ecfp4") -> None:
         """Loads index files for the specified fingerprint type."""
-        index = cls.vector_indexes[fp_type]
-        index.load(cls)
+        cls.get_vector_index(fp_type).load()
 
 
 # top-level (not a method) so it is picklable for multiprocessing
