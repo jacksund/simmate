@@ -2,103 +2,132 @@
 
 import logging
 from pathlib import Path
+from typing import Callable
 
 import faiss
 import numpy
 import polars
 
 from simmate.toolkit.similarity import Tanimoto
-from simmate.utils import dispatch
 
-from .base import VectorIndex, get_hits_dataframe
+from .base import VectorIndex
 
 
 class FaissIvfPqIndex(VectorIndex):
     """
-    IVF coarse clustering + product quantization. Each
-    vector compresses to ``m`` bytes, so indexes are far
-    smaller than HNSW, at the cost of approximate recall. Returned distances
-    are still exact Tanimoto (candidates get reranked). Requires the optional
-    ``faiss-cpu`` package.
+    IVF coarse clustering + product quantization. Each vector compresses to
+    ``m`` bytes, so indexes are far smaller than HNSW, at the cost of
+    approximate recall. Returned distances are still exact Tanimoto
+    (candidates get reranked). Requires the optional ``faiss-cpu`` package.
     """
 
     index_suffix: str = "faiss"
+    cache_attrs: list[str] = [*VectorIndex.cache_attrs, "_cached_template"]
+
     train_size: int = 250_000
+    """Number of vectors sampled to train the shared IVF+PQ template."""
+
     add_batch_size: int = 250_000
+    """Number of rows unpacked into RAM at a time while filling a shard."""
+
     max_training_files: int = 100
+    """Cap on how many chunk files the training set is sampled from."""
+
+    rerank_multiplier: int = 4
+    """
+    How many extra candidates each search pulls per requested hit, before they
+    are reranked on their exact Tanimoto distance. Higher = better recall,
+    but more full vectors read back out of the datastore.
+    """
 
     def __init__(
         self,
         column_name: str,
         ndim: int,
-        metric_fn,
         featurizer,
+        metric_fn: Callable = None,
         featurizer_kwargs: dict = None,
         batch_size: int = 200,
         load_mode: str = "memory",
+        compress: bool = False,
         nlist: int = 4096,
         m: int = 8,
         nbits: int = 8,
         nprobe: int = 16,
     ):
+        """
+        Args:
+            nlist: Number of IVF clusters (coarse centroids) per shard.
+            m: Number of sub-vectors each vector is quantized into, which is
+                also its compressed size in bytes. Must divide `ndim`.
+            nbits: Bits per sub-vector code (8 gives 256 centroids each).
+            nprobe: Number of clusters visited per query. Higher = better
+                recall, slower search.
+
+        See `VectorIndex` for the remaining arguments. Note that `metric_fn` is
+        unused here, because the quantized codes are searched by faiss itself.
+        """
         super().__init__(
             column_name=column_name,
             ndim=ndim,
-            metric_fn=metric_fn,
             featurizer=featurizer,
+            metric_fn=metric_fn,
             featurizer_kwargs=featurizer_kwargs,
             batch_size=batch_size,
             load_mode=load_mode,
+            compress=compress,
         )
         self.nlist = nlist
         self.m = m
         self.nbits = nbits
         self.nprobe = nprobe
-        self._faiss_template_obj = None
+        self._cached_template = None
 
-    def _faiss_template_file(self, datastore_cls) -> Path:
+    def _unpacked_vectors(self, df: polars.DataFrame) -> numpy.ndarray:
         """
-        Path of the trained-but-empty IVF+PQ index shared by all shards.
+        Converts the packed-bytes vector column into a float32
+        (n_rows, ndim) matrix of 1s and 0s, which is the format faiss expects.
         """
-        return (
-            self.vectors_directory(datastore_cls) / f"{self.column_name}.template.faiss"
-        )
+        return numpy.unpackbits(self._packed_vectors(df), axis=1).astype(numpy.float32)
 
-    def _training_set_file(self, datastore_cls) -> Path:
-        """
-        Path of the parquet file holding training vectors. If this file exists
-        it is used as-is; otherwise vectors are sampled from the data chunks
-        and saved here for reproducibility.
-        """
-        return (
-            self.vectors_directory(datastore_cls)
-            / f"{self.column_name}.training.parquet"
-        )
+    # -------------------------------------------------------------------------
 
-    def _faiss_template(self, datastore_cls):
-        """
-        The trained-but-empty template index, read from disk once per process.
-        """
-        if self._faiss_template_obj is None:
-            path = self._faiss_template_file(datastore_cls)
-            self._faiss_template_obj = faiss.read_index(str(path))
-        return self._faiss_template_obj
+    # training the template index shared by all shards
 
-    def train_faiss_template(self, datastore_cls, rebuild: bool = False):
-        template_file = self._faiss_template_file(datastore_cls)
+    def _template_file(self) -> Path:
+        """Path of the trained-but-empty IVF+PQ index shared by all shards."""
+        return self.vectors_directory() / f"{self.column_name}.template.faiss"
+
+    def _training_set_file(self) -> Path:
+        """
+        Path of the parquet file holding the training vectors. If this file
+        exists it is used as-is; otherwise vectors are sampled from the data
+        chunks and saved here for reproducibility.
+        """
+        return self.vectors_directory() / f"{self.column_name}.training.parquet"
+
+    def _template(self):
+        """The trained-but-empty template index, read from disk once per process."""
+        if self._cached_template is None:
+            self._cached_template = faiss.read_index(str(self._template_file()))
+        return self._cached_template
+
+    def train_template(self, rebuild: bool = False) -> Path:
+        """Trains (and saves) the template index, unless one already exists."""
+        template_file = self._template_file()
         if template_file.exists() and not rebuild:
             return template_file
 
         if self.ndim % self.m != 0:
             raise ValueError(
-                f"faiss_settings['m'] ({self.m}) must divide the {self.column_name} ndim ({self.ndim})."
+                f"m ({self.m}) must divide the {self.column_name} ndim ({self.ndim})."
             )
 
-        vectors = self._sample_training_vectors(datastore_cls)
+        vectors = self._sample_training_vectors()
         if len(vectors) < 39 * self.nlist:
             logging.warning(
                 f"Only {len(vectors):,} training vectors for nlist={self.nlist} "
-                f"(faiss wants >= {39 * self.nlist:,}). Lower nlist in faiss_settings."
+                f"(faiss wants >= {39 * self.nlist:,}). Consider lowering nlist."
             )
 
         logging.info(
@@ -115,137 +144,158 @@ class FaissIvfPqIndex(VectorIndex):
         index.train(vectors)
 
         faiss.write_index(index, str(template_file))
-        self._faiss_template_obj = None
+        # dropped so that `build` can pickle this object (and its bound
+        # `_build_batch`) out to parallel workers -- a faiss index cannot be
+        # pickled, and each worker reads the template from disk anyway
+        self._cached_template = None
         logging.info(f"Saved training template → {template_file}")
         return template_file
 
-    def _sample_training_vectors(self, datastore_cls) -> numpy.ndarray:
-        training_file = self._training_set_file(datastore_cls)
+    def _sample_training_vectors(self) -> numpy.ndarray:
+        """
+        Loads the saved training set, or creates one by sampling vectors evenly
+        across the datastore's chunk files.
+        """
+        training_file = self._training_set_file()
         if training_file.exists():
             logging.info(f"Loading training set from {training_file}")
-            df = polars.read_parquet(training_file)
-            return self._unpacked_vectors(datastore_cls, df)
+            return self._unpacked_vectors(polars.read_parquet(training_file))
 
-        chunk_files = datastore_cls.chunk_files
-        if len(chunk_files) > self.max_training_files:
-            chunk_files = chunk_files[: self.max_training_files]
-
-        rows_per_file = self.train_size // len(chunk_files)
-        frames = []
+        chunk_files = self.datastore.chunk_files[: self.max_training_files]
+        if not chunk_files:
+            raise FileNotFoundError(
+                f"{self.datastore.datastore_name} has no chunk files to sample "
+                f"{self.column_name} training vectors from."
+            )
+        rows_per_file = max(self.train_size // len(chunk_files), 1)
+        samples = []
         for file in chunk_files:
             df = polars.read_parquet(file, columns=[self.column_name])
-            frames.append(df.sample(n=rows_per_file))
+            # small chunk files may not have enough rows to give a full sample
+            samples.append(df.sample(n=min(rows_per_file, len(df))))
+        training_df = polars.concat(samples)
 
-        combined = polars.concat(frames)
-        combined.write_parquet(training_file)
-        logging.info(f"Saved {len(combined):,} training vectors → {training_file}")
-        return self._unpacked_vectors(datastore_cls, combined)
+        training_df.write_parquet(training_file)
+        logging.info(f"Saved {len(training_df):,} training vectors → {training_file}")
+        return self._unpacked_vectors(training_df)
 
-    def build(self, datastore_cls, parallel_job: bool = False) -> None:
-        batches_to_process = self._get_pending_batches(datastore_cls)
+    # -------------------------------------------------------------------------
 
-        if batches_to_process:
-            self.train_faiss_template(datastore_cls)
+    # building shards
 
-        dispatch(
-            batches_to_process,
-            self._build_batch,
-            parallel="job" if parallel_job else "single",
-            datastore_cls=datastore_cls,
-        )
-        logging.info("faiss-ivfpq index build complete!")
+    def _prepare_build(self, batches: list[list[int]]) -> None:
+        self.train_template()
 
-    def _build_batch(self, batch: list[int], datastore_cls):
-        uncompressed_path, index_path = self._shard_paths(datastore_cls, batch)
+    def _build_batch(self, batch: list[int]) -> None:
+        index_path = self._final_shard_path(batch)
         logging.info(
             f"Building {self.column_name} batch {batch[0]}-{batch[-1]} → {index_path}"
         )
 
-        index = faiss.clone_index(self._faiss_template(datastore_cls))
-
+        index = faiss.clone_index(self._template())
         for chunk_key in batch:
             logging.info(f"  {self.column_name} chunk_key={chunk_key}")
-            lazy_df = self._chunk_vectors(datastore_cls, chunk_key)
-            offset = 0
-            while True:
-                df = lazy_df.slice(offset, self.add_batch_size).collect()
-                if len(df) == 0:
-                    break
+            num_added = 0
+            for df in self._iter_row_batches(chunk_key):
                 index.add_with_ids(
-                    self._unpacked_vectors(datastore_cls, df),
+                    self._unpacked_vectors(df),
                     df["datastore_id"].to_numpy().astype(numpy.int64),
                 )
-                offset += len(df)
-            logging.info(f"  Added {offset:,} | Vectors: {index.ntotal:,}")
+                num_added += len(df)
+            logging.info(f"  Added {num_added:,} | Vectors: {index.ntotal:,}")
 
-        temp_path = self._add_suffix(uncompressed_path, ".partial")
-        if self.use_zstd:
-            raw = faiss.serialize_index(index).tobytes()
-            self._write_bytes(raw, temp_path, use_zstd=True)
+        # written to a temp file first so that an interrupted write is never
+        # mistaken for a completed shard
+        temp_path = self._shard_path(batch, ".partial")
+        if self.compress:
+            self._write_zstd(faiss.serialize_index(index).tobytes(), temp_path)
         else:
             faiss.write_index(index, str(temp_path))
         temp_path.replace(index_path)
         logging.info(f"  Saved {index.ntotal:,} vectors → {index_path}")
 
-    def _load_payload(self, index_files: list[Path], n_files_str: str):
-        if self.load_mode == "memory":
-            logging.info(f"Loading {n_files_str} into RAM...")
-            payload = [self._read_index(p) for p in index_files]
-            n_vectors = sum(i.ntotal for i in payload)
-            logging.info(f"Loaded {n_vectors:,} vectors.")
-        else:
-            logging.info(f"Registering {n_files_str} for scan-mode search.")
-            payload = index_files
-        return payload
+    def _iter_row_batches(self, chunk_key: int):
+        """
+        Yields one chunk's rows in dataframes of at most `add_batch_size` rows,
+        so that a full chunk never has to be unpacked into RAM at once.
+        """
+        lazy_df = self._chunk_vectors(chunk_key)
+        offset = 0
+        while True:
+            df = lazy_df.slice(offset, self.add_batch_size).collect()
+            if df.is_empty():
+                return
+            yield df
+            offset += len(df)
+
+    # -------------------------------------------------------------------------
+
+    # loading + searching shards
 
     def _read_index(self, path: Path):
-        is_zstd = path.suffix == ".zst"
-        if is_zstd:
+        if path.suffix == ".zst":
             raw = self._read_bytes(path)
             index = faiss.deserialize_index(numpy.frombuffer(raw, dtype=numpy.uint8))
         else:
             index = faiss.read_index(str(path), faiss.IO_FLAG_READ_ONLY)
-
         index.nprobe = self.nprobe
         return index
 
-    def _iter_indexes(self):
-        if self._cached_mode == "memory":
-            return self._cached_payload
-        return (self._read_index(path) for path in self._cached_payload)
+    @staticmethod
+    def _num_vectors(index) -> int:
+        return index.ntotal
 
-    def search(self, datastore_cls, vec: numpy.ndarray, count: int = 50):
-        self.load(datastore_cls)
-
-        n_candidates = count * 4
+    def _search(
+        self,
+        vec: numpy.ndarray,
+        count: int,
+    ) -> polars.DataFrame:
+        """
+        IVF+PQ distances are approximate, so extra candidates are pulled from
+        each shard and then reranked on their exact Tanimoto distance.
+        """
+        num_candidates = count * self.rerank_multiplier
         query_vector = numpy.unpackbits(vec).astype(numpy.float32)[None, :]
 
-        keys, pq_distances = [], []
-        for index in self._iter_indexes():
-            shard_distances, shard_keys = index.search(query_vector, n_candidates)
-            keys.append(shard_keys[0])
-            pq_distances.append(shard_distances[0])
-
-        keys = numpy.concatenate(keys)
-        pq_distances = numpy.concatenate(pq_distances)
-
-        found = keys != -1
-        keys, pq_distances = keys[found], pq_distances[found]
+        keys = self._candidate_keys(query_vector, num_candidates)
         if len(keys) == 0:
-            return get_hits_dataframe([], [], count)
+            return self._hits_dataframe([], [], count)
 
-        if len(keys) > n_candidates:
-            closest = numpy.argpartition(pq_distances, n_candidates)[:n_candidates]
-            keys = keys[closest]
-
-        candidate_ids = numpy.unique(keys)
         df = (
-            datastore_cls.filter(datastore_id__in=candidate_ids.tolist())
+            self.datastore.filter(datastore_id__in=numpy.unique(keys).tolist())
             .select("datastore_id", self.column_name)
             .collect()
         )
-        return get_hits_dataframe(
+        return self._hits_dataframe(
             df["datastore_id"].to_numpy().astype(numpy.int64),
-            Tanimoto.get_distance_packed(vec, self._packed_vectors(datastore_cls, df)),
+            Tanimoto.get_distance_packed(vec, self._packed_vectors(df)),
             count,
         )
+
+    def _candidate_keys(
+        self,
+        query_vector: numpy.ndarray,
+        num_candidates: int,
+    ) -> numpy.ndarray:
+        """
+        The `num_candidates` datastore_ids closest to `query_vector` by their
+        approximate (quantized) distance, gathered from every shard.
+        """
+        keys, pq_distances = [], []
+        for index in self._iter_indexes():
+            shard_distances, shard_keys = index.search(query_vector, num_candidates)
+            keys.append(shard_keys[0])
+            pq_distances.append(shard_distances[0])
+        keys = numpy.concatenate(keys)
+        pq_distances = numpy.concatenate(pq_distances)
+
+        # shards pad their results with -1 when they have too few vectors
+        found = keys != -1
+        keys, pq_distances = keys[found], pq_distances[found]
+
+        # trim to the best candidates across all shards before the rerank,
+        # which needs to read each candidate's full vector back out
+        if len(keys) > num_candidates:
+            closest = numpy.argpartition(pq_distances, num_candidates)[:num_candidates]
+            keys = keys[closest]
+        return keys

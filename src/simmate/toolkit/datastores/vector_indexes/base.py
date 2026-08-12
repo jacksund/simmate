@@ -1,176 +1,336 @@
 # -*- coding: utf-8 -*-
 
+import copy
 import logging
 from pathlib import Path
+from typing import Callable
 
 import numpy
 import polars
 import pyarrow
 import zstandard as zstd
 
-from simmate.utils import chunk_list, get_directory
+from simmate.utils import chunk_list, dispatch, get_directory
 
 
 class VectorIndex:
     """
     Base class for configuring and managing a vector index backend
     for a datastore column.
+
+    Vectors live as packed bits in a datastore column, and the index is split
+    into "shards" -- one index file per batch of datastore chunks. Sharding
+    keeps each build step small enough to run (and resume) independently.
+
+    Indexes are declared as shared class attributes (see
+    `MoleculeDatastore.vector_indexes`), so a declaration is a *template* that
+    must be bound to a datastore before use. `for_datastore` does the binding,
+    and `MyDatastore.get_vector_index(name)` is the normal way to get one.
+
+    Subclasses supply the engine-specific pieces: `_build_batch`,
+    `_read_index`, `_num_vectors`, and `_search`.
     """
 
-    index_suffix: str = ""  # Set by subclasses
-    valid_load_modes: list[str] = ["memory", "scan", "scan-zstd"]  # Set by subclasses
+    index_suffix: str = ""
+    """
+    File extension used for this backend's shards (also the engine's name).
+    Set by subclasses.
+    """
+
+    valid_load_modes: list[str] = ["memory", "scan"]
+    """
+    Load modes this backend accepts. `memory` holds all shards in RAM, while
+    `scan` reads (and releases) one shard at a time during each search.
+    Subclasses can add engine-specific modes.
+    """
+
+    cache_attrs: list[str] = ["_shard_paths", "_loaded_indexes", "_loaded_mode"]
+    """
+    Attributes holding datastore-specific caches, which `for_datastore` resets
+    so that a bound copy never inherits the template's. Subclasses extend this
+    with any caches of their own.
+    """
 
     def __init__(
         self,
         column_name: str,
         ndim: int,
-        metric_fn,
         featurizer,
+        metric_fn: Callable = None,
         featurizer_kwargs: dict = None,
         batch_size: int = 1,
         load_mode: str = "memory",
+        compress: bool = False,
     ):
+        """
+        Args:
+            column_name: Datastore column holding the packed-bit vectors.
+            ndim: Number of bits in each vector.
+            featurizer: Featurizer class that generates the column's vectors.
+            metric_fn: Compiled (numba) distance function. Required by engines
+                that search the packed bits directly (such as usearch), and
+                unused by engines that quantize the vectors first (such as faiss).
+            featurizer_kwargs: Extra kwargs passed to the featurizer.
+            batch_size: Number of datastore chunks packed into each shard.
+            load_mode: How shards are loaded for search. See `valid_load_modes`.
+            compress: Whether `build` writes shards zstd-compressed, which
+                trades disk space for decompressing each shard as it is read.
+        """
+        if load_mode not in self.valid_load_modes:
+            raise ValueError(
+                f"Unknown load_mode: {load_mode!r}. "
+                f"Use one of {self.valid_load_modes}."
+            )
+
         self.column_name = column_name
         self.ndim = ndim
         self.stored_bytes = ndim // 8
-        self.metric_fn = metric_fn
         self.featurizer = featurizer
+        self.metric_fn = metric_fn
         self.featurizer_kwargs = featurizer_kwargs or {}
         self.batch_size = batch_size
         self.load_mode = load_mode
+        self.compress = compress
 
-        self._cached_payload = None
-        self._cached_mode = None
+        self._datastore = None  # set by for_datastore()
+        self._shard_paths = None
+        self._loaded_indexes = None
+        self._loaded_mode = None
 
-    def vectors_directory(self, datastore_cls) -> Path:
-        """Directory holding the fingerprint index shards."""
-        return get_directory(datastore_cls.base_directory / "vectors")
+    # -------------------------------------------------------------------------
+
+    # binding to a datastore
 
     @property
-    def use_zstd(self) -> bool:
-        """Whether shards are written zstd-compressed."""
-        return self.load_mode == "scan-zstd"
+    def datastore(self):
+        """The datastore this index reads from. Set via `for_datastore`."""
+        if self._datastore is None:
+            raise AttributeError(
+                f"This {type(self).__name__} is not bound to a datastore. "
+                "Use `MyDatastore.get_vector_index(name)` rather than reading "
+                "`vector_indexes` directly."
+            )
+        return self._datastore
 
-    def _shard_paths(self, datastore_cls, batch: list[int]) -> tuple[Path, Path]:
+    def for_datastore(self, datastore_cls) -> "VectorIndex":
         """
-        The ``(uncompressed, final)`` shard paths for one batch of chunk_keys.
+        A copy of this index bound to `datastore_cls`.
+
+        Binding copies rather than mutates, since one declaration is shared by
+        every datastore that inherits it -- otherwise two datastores would
+        fight over the same `cache_attrs`.
         """
-        uncompressed = self.vectors_directory(datastore_cls) / self._shard_name(batch)
-        if not self.use_zstd:
-            return uncompressed, uncompressed
-        return uncompressed, self._add_suffix(uncompressed, ".zst")
+        bound = copy.copy(self)
+        bound._datastore = datastore_cls
+        for attr in self.cache_attrs:
+            setattr(bound, attr, None)
+        return bound
 
-    def _shard_name(self, batch: list[int]) -> str:
-        """Filename of one batch's uncompressed shard."""
-        return f"{self.column_name}-{batch[0]}-{batch[-1]}.{self.index_suffix}"
+    # -------------------------------------------------------------------------
 
-    @staticmethod
-    def _add_suffix(path: Path, suffix: str) -> Path:
-        """Appends a suffix rather than replacing the existing one."""
-        return path.with_suffix(path.suffix + suffix)
+    # shard file naming + discovery
 
-    def _built_shard_names(self, datastore_cls) -> set[str]:
-        """Names of every shard already on disk, for resume checks."""
-        return {
-            p.name
-            for p in self.vectors_directory(datastore_cls).glob(f"{self.column_name}-*")
-        }
+    def vectors_directory(self) -> Path:
+        """Directory holding the index shards."""
+        return get_directory(self.datastore.base_directory / "vectors")
 
-    def _get_pending_batches(self, datastore_cls) -> list[list[int]]:
-        """Calculates which batches of chunks still need to be built."""
-        chunk_keys = list(range(datastore_cls.num_chunks))
-        batches = [list(b) for b in chunk_list(chunk_keys, self.batch_size)]
+    def _shard_path(self, batch: list[int], suffix: str = "") -> Path:
+        """
+        Where one batch's shard is written. `suffix` is appended to the
+        filename, and is used for the in-progress (`.partial`) and
+        compressed (`.zst`) variants.
+        """
+        name = f"{self.column_name}-{batch[0]}-{batch[-1]}.{self.index_suffix}"
+        return self.vectors_directory() / (name + suffix)
 
-        built = self._built_shard_names(datastore_cls)
-        batches_to_process = [
-            b
-            for b in batches
-            if self._shard_name(b) not in built
-            and f"{self._shard_name(b)}.zst" not in built
-        ]
+    def _final_shard_path(self, batch: list[int]) -> Path:
+        """Where a finished shard lands, which is `.zst` when compression is on."""
+        return self._shard_path(batch, ".zst" if self.compress else "")
 
-        logging.info(
-            f"{len(batches) - len(batches_to_process)} batches already done, "
-            f"{len(batches_to_process)} to process"
-        )
-        return batches_to_process
+    def _shard_exists(self, batch: list[int]) -> bool:
+        """Whether a batch's shard is built, in either its plain or `.zst` form."""
+        return any(self._shard_path(batch, suffix).exists() for suffix in ["", ".zst"])
 
-    def _index_files(self, datastore_cls) -> list[Path]:
-        """Sorted index shard files for the active engine."""
+    def _index_files(self) -> list[Path]:
+        """Sorted shard files for the active engine, ignoring partial writes."""
         pattern = f"{self.column_name}-*.{self.index_suffix}*"
         return sorted(
             p
-            for p in self.vectors_directory(datastore_cls).glob(pattern)
+            for p in self.vectors_directory().glob(pattern)
             if p.is_file() and p.suffix != ".partial"
         )
 
-    def _chunk_vectors(self, datastore_cls, chunk_key: int) -> polars.LazyFrame:
-        """Lazy frame of just the id + fingerprint columns for one chunk_key."""
-        partition_dir = datastore_cls.live_directory / f"chunk_key={chunk_key}"
+    # -------------------------------------------------------------------------
+
+    # pulling vectors back out of the datastore
+
+    def _chunk_vectors(self, chunk_key: int) -> polars.LazyFrame:
+        """Lazy frame of just the id + vector columns for one chunk_key."""
+        partition_dir = self.datastore.live_directory / f"chunk_key={chunk_key}"
         if partition_dir.is_dir():
             lazy_df = polars.scan_parquet(partition_dir / "*.parquet")
         else:
-            lazy_df = datastore_cls.lf.filter(polars.col("chunk_key") == chunk_key)
+            lazy_df = self.datastore.lf.filter(polars.col("chunk_key") == chunk_key)
         return lazy_df.select("datastore_id", self.column_name)
 
-    def _packed_vectors(self, datastore_cls, df: polars.DataFrame) -> numpy.ndarray:
+    def _packed_vectors(self, df: polars.DataFrame) -> numpy.ndarray:
         """
-        Converts a fingerprint column of packed bytes into a uint8
+        Converts the packed-bytes vector column into a uint8
         (n_rows, stored_bytes) matrix.
         """
-        fps = (
+        vectors = (
             df.to_arrow()
             .column(self.column_name)
             .cast(pyarrow.binary(self.stored_bytes))
             .combine_chunks()
         )
-        values = numpy.frombuffer(fps.buffers()[1], dtype=numpy.uint8)
-        start = fps.offset * self.stored_bytes
-        return values[start : start + len(fps) * self.stored_bytes].reshape(
-            -1, self.stored_bytes
-        )
+        # read the arrow buffer directly (zero-copy) and trim to this column's
+        # slice of it, which may start partway in if the frame was sliced
+        values = numpy.frombuffer(vectors.buffers()[1], dtype=numpy.uint8)
+        start = vectors.offset * self.stored_bytes
+        end = start + len(vectors) * self.stored_bytes
+        return values[start:end].reshape(-1, self.stored_bytes)
 
-    def _unpacked_vectors(self, datastore_cls, df: polars.DataFrame) -> numpy.ndarray:
+    # -------------------------------------------------------------------------
+
+    # building shards
+
+    def build(self, parallel_job: bool = False) -> None:
         """
-        Converts a fingerprint column of packed bytes into the float32
-        (n_rows, ndim) matrix that faiss expects.
+        Builds every shard that isn't on disk yet, so interrupted builds can
+        simply be re-run to pick up where they left off.
         """
-        packed = self._packed_vectors(datastore_cls, df)
-        return numpy.unpackbits(packed, axis=1).astype(numpy.float32)
-
-    def build(self, datastore_cls, parallel_job: bool = False):
-        raise NotImplementedError
-
-    def _load_payload(self, index_files: list[Path], n_files_str: str):
-        """Loads index files using subclass-specific logic."""
-        raise NotImplementedError
-
-    def load(self, datastore_cls) -> None:
-        if self._cached_payload is not None and self._cached_mode == self.load_mode:
+        batches = self._pending_batches()
+        if not batches:
+            logging.info(f"{self.index_suffix} index is already built!")
             return
 
-        mode = self.load_mode
-        if mode not in self.valid_load_modes:
-            raise ValueError(
-                f"Unknown load_mode: {mode!r}. " f"Use one of {self.valid_load_modes}."
-            )
+        self._prepare_build(batches)
+        dispatch(
+            batches,
+            self._build_batch,
+            parallel="job" if parallel_job else "single",
+        )
+        # "job" mode only submits the work to the executor
+        status = "submitted" if parallel_job else "complete"
+        logging.info(f"{self.index_suffix} index build {status}!")
 
-        index_files = self._index_files(datastore_cls)
+    def _pending_batches(self) -> list[list[int]]:
+        """Determines which batches of chunk_keys still need a shard built."""
+        chunk_keys = list(range(self.datastore.num_chunks))
+        batches = [list(b) for b in chunk_list(chunk_keys, self.batch_size)]
+        pending = [b for b in batches if not self._shard_exists(b)]
+
+        logging.info(
+            f"{len(batches) - len(pending)} batches already done, "
+            f"{len(pending)} to process"
+        )
+        return pending
+
+    def _prepare_build(self, batches: list[list[int]]) -> None:
+        """
+        Hook for one-time setup needed before any shard is built (such as
+        training). Only called when there are shards left to build.
+        """
+        pass  # nothing needed by default
+
+    def _build_batch(self, batch: list[int]) -> None:
+        """Builds and saves the single shard covering `batch` of chunk_keys."""
+        raise NotImplementedError("Subclasses must implement _build_batch")
+
+    # -------------------------------------------------------------------------
+
+    # loading + searching shards
+
+    def load(self) -> None:
+        """
+        Prepares the shards for searching, per `load_mode`. Results are cached
+        on this object, so repeat calls are free until `load_mode` changes.
+        """
+        if self._shard_paths is not None and self._loaded_mode == self.load_mode:
+            return
+
+        index_files = self._index_files()
         if not index_files:
             raise FileNotFoundError(
                 f"No {self.column_name} {self.index_suffix} index files found in "
-                f"{self.vectors_directory(datastore_cls)}. "
-                "Run build() first."
+                f"{self.vectors_directory()}. Run build() first."
             )
 
-        n_files_str = (
-            f"{len(index_files)} {self.column_name} {self.index_suffix} index file(s)"
+        logging.info(
+            f"Loading {len(index_files)} {self.column_name} {self.index_suffix} "
+            f"shard(s) in {self.load_mode!r} mode..."
         )
-        self._cached_payload = self._load_payload(index_files, n_files_str)
-        self._cached_mode = mode
+        self._shard_paths = index_files
+        if self.load_mode == "scan":
+            # scan mode defers reading until each shard is actually searched
+            self._loaded_indexes = None
+        else:
+            self._loaded_indexes = self._load_indexes(index_files)
+            num_vectors = sum(self._num_vectors(i) for i in self._loaded_indexes)
+            logging.info(f"Loaded {num_vectors:,} vectors.")
+        # only used to invalidate the cache above when load_mode changes
+        self._loaded_mode = self.load_mode
 
-    def search(self, datastore_cls, vec: numpy.ndarray, count: int):
-        raise NotImplementedError
+    def _load_indexes(self, index_files: list[Path]) -> list:
+        """Reads the shard files into the index objects that `search` will use."""
+        return [self._read_index(path) for path in index_files]
+
+    def _read_index(self, path: Path):
+        """Reads a single shard from disk into an engine index object."""
+        raise NotImplementedError("Subclasses must implement _read_index")
+
+    @staticmethod
+    def _num_vectors(index) -> int:
+        """Number of vectors held by one loaded shard."""
+        raise NotImplementedError("Subclasses must implement _num_vectors")
+
+    def _iter_indexes(self):
+        """
+        Yields each shard to search. In `scan` mode, shards are read from disk
+        one at a time and released instead of being kept in RAM.
+        """
+        if self._loaded_indexes is not None:
+            return self._loaded_indexes
+        return (self._read_index(path) for path in self._shard_paths)
+
+    def search(
+        self,
+        vec: numpy.ndarray,
+        count: int = 50,
+    ) -> polars.DataFrame:
+        """
+        Finds the `count` closest vectors to `vec`.
+
+        Returns:
+            A `datastore_id` + `distance` dataframe, sorted closest-first.
+        """
+        self.load()
+        return self._search(vec, count)
+
+    def _search(
+        self,
+        vec: numpy.ndarray,
+        count: int,
+    ) -> polars.DataFrame:
+        """Engine-specific half of `search`, called once the shards are loaded."""
+        raise NotImplementedError("Subclasses must implement _search")
+
+    @staticmethod
+    def _hits_dataframe(datastore_ids, distances, count: int) -> polars.DataFrame:
+        """The shared return shape of `search`: top-k hits sorted by distance."""
+        return (
+            polars.DataFrame(
+                {"datastore_id": datastore_ids, "distance": distances},
+                schema={"datastore_id": polars.Int64, "distance": polars.Float32},
+            )
+            .sort("distance")
+            .head(count)
+        )
+
+    # -------------------------------------------------------------------------
+
+    # (de)compression helpers
 
     @staticmethod
     def _read_bytes(path: Path) -> bytes:
@@ -180,21 +340,6 @@ class VectorIndex:
         return path.read_bytes()
 
     @staticmethod
-    def _write_bytes(data: bytes, path: Path, use_zstd: bool = False):
-        """Writes bytes to a file, optionally compressing with zstd."""
-        if use_zstd:
-            path.write_bytes(zstd.ZstdCompressor().compress(data))
-        else:
-            path.write_bytes(data)
-
-
-def get_hits_dataframe(datastore_ids, distances, count: int) -> polars.DataFrame:
-    """The shared return shape of every search method: top-k hits sorted by distance."""
-    return (
-        polars.DataFrame(
-            {"datastore_id": datastore_ids, "distance": distances},
-            schema={"datastore_id": polars.Int64, "distance": polars.Float32},
-        )
-        .sort("distance")
-        .head(count)
-    )
+    def _write_zstd(data: bytes, path: Path) -> None:
+        """Writes bytes to a file, compressed with zstd."""
+        path.write_bytes(zstd.ZstdCompressor().compress(data))

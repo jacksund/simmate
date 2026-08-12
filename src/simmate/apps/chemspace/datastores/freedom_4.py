@@ -42,7 +42,7 @@ class ChemspaceFreedom4(MoleculeDatastore):
         cf4.add_fingerprints()
         cf4.promote_staging()
         # -----------------------------------
-        cf4.build_usearch_index()
+        cf4.build_fingerprint_index(fp_type="ecfp4")
         ```
     """
 
@@ -50,8 +50,6 @@ class ChemspaceFreedom4(MoleculeDatastore):
     datastore_name = "freedom_4"
 
     num_chunks = 20_000
-    index_batch_size = 8
-    index_load_mode = "scan-zstd"
 
     @classmethod
     def convert_source_to_parquet(cls, parallel_job: bool = False) -> Path:

@@ -3,6 +3,8 @@
 import logging
 from pathlib import Path
 
+import numpy
+import polars
 from usearch.index import (
     CompiledMetric,
     Index,
@@ -12,9 +14,7 @@ from usearch.index import (
     ScalarKind,
 )
 
-from simmate.utils import dispatch
-
-from .base import VectorIndex, get_hits_dataframe
+from .base import VectorIndex
 
 
 class UsearchHnswIndex(VectorIndex):
@@ -24,25 +24,28 @@ class UsearchHnswIndex(VectorIndex):
     """
 
     index_suffix: str = "usearch"
-    valid_load_modes: list[str] = ["memory", "view", "scan", "scan-zstd"]
+    valid_load_modes: list[str] = [*VectorIndex.valid_load_modes, "view"]
+    """
+    Adds `view` to the base modes, which memory-maps every shard at once and
+    lets usearch search them together.
+    """
 
-    def build(self, datastore_cls, parallel_job: bool = False) -> None:
-        batches_to_process = self._get_pending_batches(datastore_cls)
+    def _build_batch(self, batch: list[int]) -> None:
+        if self.metric_fn is None:
+            raise ValueError(
+                f"{type(self).__name__} needs a `metric_fn` to build its graph, "
+                "because the HNSW search runs on the packed bits directly."
+            )
 
-        dispatch(
-            batches_to_process,
-            self._build_batch,
-            parallel="job" if parallel_job else "single",
-            datastore_cls=datastore_cls,
-        )
-        logging.info("usearch index build complete!")
-
-    def _build_batch(self, batch: list[int], datastore_cls):
-        uncompressed_path, index_path = self._shard_paths(datastore_cls, batch)
+        # usearch builds into a plain file, which is then renamed (or
+        # compressed) into place once the whole batch is done
+        working_path = self._shard_path(batch, ".partial")
+        index_path = self._final_shard_path(batch)
         logging.info(
             f"Building {self.column_name} batch {batch[0]}-{batch[-1]} → {index_path}"
         )
 
+        # picks up an existing .partial, so an interrupted batch resumes here
         index = Index(
             ndim=self.ndim,
             dtype=ScalarKind.B1,
@@ -51,13 +54,13 @@ class UsearchHnswIndex(VectorIndex):
                 kind=MetricKind.Tanimoto,
                 signature=MetricSignature.ArrayArray,
             ),
-            path=str(uncompressed_path),
+            path=str(working_path),
         )
 
         for chunk_key in batch:
             logging.info(f"  {self.column_name} chunk_key={chunk_key}")
-            df = self._chunk_vectors(datastore_cls, chunk_key).collect()
-            if len(df) == 0:
+            df = self._chunk_vectors(chunk_key).collect()
+            if df.is_empty():
                 continue
 
             keys = df["datastore_id"].to_numpy()
@@ -65,59 +68,63 @@ class UsearchHnswIndex(VectorIndex):
                 logging.info(f"  Skipping chunk_key={chunk_key} - already indexed.")
                 continue
 
-            index.add(keys, self._packed_vectors(datastore_cls, df))
-            index.save(str(uncompressed_path))
+            index.add(keys, self._packed_vectors(df))
 
-            if self.use_zstd:
-                self._write_bytes(
-                    uncompressed_path.read_bytes(), index_path, use_zstd=True
-                )
-
+            # saved after every chunk so an interrupted batch resumes mid-way
+            index.save(str(working_path))
             logging.info(f"  Saved progress | Vectors: {len(index):,}")
 
-        if self.use_zstd:
-            uncompressed_path.unlink(missing_ok=True)
+        if not working_path.exists():
+            # every chunk was empty, so the loop above never saved anything
+            index.save(str(working_path))
 
-    def _load_payload(self, index_files: list[Path], n_files_str: str):
-        if self.load_mode == "memory":
-            logging.info(f"Loading {n_files_str} into RAM...")
-            payload = [self._read_index(p, into_memory=True) for p in index_files]
-            n_vectors = sum(len(i) for i in payload)
-            logging.info(f"Loaded {n_vectors:,} vectors.")
-        elif self.load_mode == "view":
-            logging.info(f"Opening {n_files_str} as memory-mapped views...")
-            payload = Indexes(paths=[str(p) for p in index_files], view=True)
+        if self.compress:
+            # compressed into another temp file first, so that an interrupted
+            # write is never mistaken for a completed shard
+            compressed_path = self._shard_path(batch, ".zst.partial")
+            self._write_zstd(working_path.read_bytes(), compressed_path)
+            compressed_path.replace(index_path)
+            working_path.unlink()
         else:
-            logging.info(f"Registering {n_files_str} for scan-mode search.")
-            payload = index_files
-        return payload
+            working_path.replace(index_path)
+        logging.info(f"  Saved {len(index):,} vectors → {index_path}")
 
-    def _read_index(self, path: Path, into_memory: bool = False):
-        is_zstd = path.suffix == ".zst"
+    def _load_indexes(self, index_files: list[Path]) -> list:
+        if self.load_mode == "view":
+            if any(path.suffix == ".zst" for path in index_files):
+                raise ValueError(
+                    f"The {self.column_name} shards are zstd-compressed, which "
+                    "cannot be memory-mapped. Use load_mode 'memory' or 'scan'."
+                )
+            # a single Indexes object memory-maps and searches all shards for us
+            return [Indexes(paths=[str(p) for p in index_files], view=True)]
+        return super()._load_indexes(index_files)
 
-        if is_zstd:
-            raw = self._read_bytes(path)
-            return Index.restore(raw)
-        if into_memory:
-            return Index.restore(str(path))
-        return Indexes(paths=[str(path)], view=True)
+    def _read_index(self, path: Path):
+        """
+        Opens a single shard -- memory-mapped in `scan` mode, or copied into RAM
+        otherwise. Compressed shards must always be decompressed into RAM.
+        """
+        if path.suffix == ".zst":
+            return Index.restore(self._read_bytes(path))
+        if self.load_mode == "scan":
+            return Indexes(paths=[str(path)], view=True)
+        return Index.restore(str(path))
 
-    def _iter_indexes(self):
-        if self._cached_mode == "memory":
-            return self._cached_payload
-        return (self._read_index(path) for path in self._cached_payload)
+    @staticmethod
+    def _num_vectors(index) -> int:
+        return len(index)
 
-    def search(self, datastore_cls, vec, count: int = 50):
-        self.load(datastore_cls)
-
-        if self._cached_mode == "view":
-            matches = self._cached_payload.search(vec, count)
-            keys, distances = matches.keys.tolist(), matches.distances.tolist()
-            return get_hits_dataframe(keys, distances, count)
-
-        all_keys, all_distances = [], []
+    def _search(
+        self,
+        vec: numpy.ndarray,
+        count: int,
+    ) -> polars.DataFrame:
+        # distances are exact, so shard results can be merged as-is
+        keys, distances = [], []
         for index in self._iter_indexes():
             matches = index.search(vec, count)
-            all_keys.extend(matches.keys.tolist())
-            all_distances.extend(matches.distances.tolist())
-        return get_hits_dataframe(all_keys, all_distances, count)
+            keys.extend(matches.keys.tolist())
+            distances.extend(matches.distances.tolist())
+
+        return self._hits_dataframe(keys, distances, count)
