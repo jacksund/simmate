@@ -266,6 +266,7 @@ class MoleculeDatastore(Datastore):
             ndim=1024,
             featurizer=Ecfp4Fingerprint,
             featurizer_kwargs={"size": 1024},
+            load_mode="view",
         ),
     }
 

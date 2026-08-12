@@ -53,11 +53,11 @@ class FaissIvfPqIndex(VectorIndex):
 
     use_mapped_reader: bool = True
     """
-    Whether mapped reads go through faiss's `MappedFileIOReader`
-    (`IO_FLAG_MMAP_IFC`) rather than its older `IO_FLAG_MMAP` path. The mapped
-    reader also maps the coarse centroids, and is the only one of the two
-    compiled into the Windows faiss wheels. `IO_FLAG_MMAP` maps just the
-    inverted lists, and is the longer-standing option on linux.
+    Whether mapped reads use faiss's `IO_FLAG_MMAP_IFC` rather than its older
+    `IO_FLAG_MMAP`. `IO_FLAG_MMAP_IFC` also maps the coarse centroids, and is
+    the only one of the two supported by the Windows faiss wheels (`IO_FLAG_MMAP`
+    needs `OnDiskInvertedLists`, which they do not compile). `IO_FLAG_MMAP` maps
+    just the inverted lists, and is the longer-standing option on linux.
     """
 
     skip_precompute_table: bool = False
@@ -259,16 +259,14 @@ class FaissIvfPqIndex(VectorIndex):
         flags = faiss.IO_FLAG_READ_ONLY
         if self.skip_precompute_table:
             flags |= faiss.IO_FLAG_SKIP_PRECOMPUTE_TABLE
-
-        if self.use_mapped_reader:
-            owner = faiss.MmappedFileMappingOwner(str(path))
-            reader = faiss.MappedFileIOReader(owner)
-            index = faiss.read_index(reader, flags | faiss.IO_FLAG_MMAP_IFC)
-            # the index holds views into the mapping rather than its own copy,
-            # so the mapping has to outlive it
-            index._mapping_refs = (owner, reader)
-        else:
-            index = faiss.read_index(str(path), flags | faiss.IO_FLAG_MMAP)
+        # the mapping is set up by faiss on this filename path, which also keeps
+        # it alive for as long as the index views it. Building the reader here
+        # instead is not an option -- faiss's `MappedFileIOReader` takes a
+        # shared_ptr that its swig bindings have no typemap for.
+        flags |= (
+            faiss.IO_FLAG_MMAP_IFC if self.use_mapped_reader else faiss.IO_FLAG_MMAP
+        )
+        index = faiss.read_index(str(path), flags)
 
         if self.skip_precompute_table:
             # the shard was trained with the table on, so its "use the table"
@@ -308,6 +306,10 @@ class FaissIvfPqIndex(VectorIndex):
             count,
         )
 
+    # TODO: search fans out over every shard, scanning
+    # `nprobe / nlist * num_vectors` codes per query. Merging the shards into a
+    # single on-disk index (faiss.contrib.ondisk) would collapse that to one
+    # IVF traversal.
     def _candidate_keys(
         self,
         query_vector: numpy.ndarray,
