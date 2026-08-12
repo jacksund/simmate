@@ -7,6 +7,8 @@ from pathlib import Path
 import polars
 
 from simmate.toolkit.datastores import MoleculeDatastore
+from simmate.toolkit.datastores.vector_indexes import FaissIvfPqIndex
+from simmate.toolkit.featurizers import Ecfp4Fingerprint
 from simmate.utils import dispatch, get_hash_key
 
 
@@ -39,10 +41,10 @@ class ChemspaceFreedom4(MoleculeDatastore):
         cf4.add_datastore_id_column()
         cf4.promote_staging()
         # -----------------------------------
-        cf4.add_fingerprints()
+        cf4.add_fingerprints(fingerprint_type="ecfp4_1024_faiss")
         cf4.promote_staging()
         # -----------------------------------
-        cf4.build_fingerprint_index(fp_type="ecfp4")
+        cf4.build_fingerprint_index(fp_type="ecfp4_1024_faiss")
         ```
     """
 
@@ -50,6 +52,30 @@ class ChemspaceFreedom4(MoleculeDatastore):
     datastore_name = "freedom_4"
 
     num_chunks = 20_000
+
+    vector_indexes: dict = {
+        **MoleculeDatastore.vector_indexes,
+        # This dataset is far too large for the HNSW graphs that the inherited
+        # indexes use, so IVF+PQ is the only practical option here. With the
+        # settings below, the 20,000 chunks pack into 100 shards of ~900
+        # million vectors each, and at 8 bytes of PQ code + 8 bytes of id per
+        # vector, that is ~1.4 TB of shards -- hence `view` mode, which maps
+        # them rather than reading them in. Roughly 3.5 GB stays resident,
+        # almost all of it the shards' precomputed distance tables (set
+        # `skip_precompute_table` to trade search speed for that).
+        #
+        # TODO: search still fans out over all 100 shards, scanning
+        # ~350 million codes per query (nprobe / nlist * num_vectors). Merging
+        # the shards into a single on-disk index (faiss.contrib.ondisk) would
+        # collapse that to one IVF traversal.
+        "ecfp4_1024_faiss": FaissIvfPqIndex(
+            column_name="ecfp4_1024",
+            ndim=1024,
+            featurizer=Ecfp4Fingerprint,
+            featurizer_kwargs={"size": 1024},
+            load_mode="view",
+        ),
+    }
 
     @classmethod
     def convert_source_to_parquet(cls, parallel_job: bool = False) -> Path:

@@ -37,11 +37,22 @@ class VectorIndex:
     Set by subclasses.
     """
 
-    valid_load_modes: list[str] = ["memory", "scan"]
+    valid_load_modes: list[str] = ["memory", "scan", "view"]
     """
-    Load modes this backend accepts. `memory` holds all shards in RAM, while
-    `scan` reads (and releases) one shard at a time during each search.
-    Subclasses can add engine-specific modes.
+    Load modes this backend accepts. `memory` holds all shards in RAM, `scan`
+    reads (and releases) one shard at a time during each search, and `view`
+    memory-maps the shards so that only the pages a search actually touches are
+    ever read in. Subclasses can narrow or extend this list.
+    """
+
+    batch_size: int = 1
+    """Number of datastore chunks packed into each shard."""
+
+    requires_metric_fn: bool = False
+    """
+    Whether this backend needs a `metric_fn`. True for engines that search the
+    packed bits directly (such as usearch), and False for engines that quantize
+    the vectors first (such as faiss).
     """
 
     def __init__(
@@ -51,7 +62,6 @@ class VectorIndex:
         featurizer,
         metric_fn: Callable = None,
         featurizer_kwargs: dict = None,
-        batch_size: int = 1,
         load_mode: str = "memory",
         compress: bool = False,
     ):
@@ -64,7 +74,6 @@ class VectorIndex:
                 that search the packed bits directly (such as usearch), and
                 unused by engines that quantize the vectors first (such as faiss).
             featurizer_kwargs: Extra kwargs passed to the featurizer.
-            batch_size: Number of datastore chunks packed into each shard.
             load_mode: How shards are loaded for search. See `valid_load_modes`.
             compress: Whether `build` writes shards zstd-compressed, which
                 trades disk space for decompressing each shard as it is read.
@@ -74,6 +83,11 @@ class VectorIndex:
                 f"Unknown load_mode: {load_mode!r}. "
                 f"Use one of {self.valid_load_modes}."
             )
+        if self.requires_metric_fn and metric_fn is None:
+            raise ValueError(
+                f"{type(self).__name__} needs a `metric_fn`, because its search "
+                "runs on the packed bits directly."
+            )
 
         self.column_name = column_name
         self.ndim = ndim
@@ -81,7 +95,6 @@ class VectorIndex:
         self.featurizer = featurizer
         self.metric_fn = metric_fn
         self.featurizer_kwargs = featurizer_kwargs or {}
-        self.batch_size = batch_size
         self.load_mode = load_mode
         self.compress = compress
 
@@ -151,7 +164,7 @@ class VectorIndex:
         """Whether a batch's shard is built, in either its plain or `.zst` form."""
         return any(self._shard_path(batch, suffix).exists() for suffix in ["", ".zst"])
 
-    def _index_files(self) -> list[Path]:
+    def _find_shards(self) -> list[Path]:
         """Sorted shard files for the active engine, ignoring partial writes."""
         pattern = f"{self.column_name}-*.{self.index_suffix}*"
         return sorted(
@@ -241,6 +254,23 @@ class VectorIndex:
         """Builds and saves the single shard covering `batch` of chunk_keys."""
         raise NotImplementedError("Subclasses must implement _build_batch")
 
+    def _finalize_shard(self, batch: list[int], working_path: Path) -> Path:
+        """
+        Moves a finished `.partial` shard into place, compressing it first when
+        `compress` is on. The compressed copy goes to another temp file so that
+        an interrupted write is never mistaken for a completed shard.
+        """
+        index_path = self._final_shard_path(batch)
+        if not self.compress:
+            working_path.replace(index_path)
+            return index_path
+
+        compressed_path = self._shard_path(batch, ".zst.partial")
+        self._write_zstd(working_path.read_bytes(), compressed_path)
+        compressed_path.replace(index_path)
+        working_path.unlink()
+        return index_path
+
     # -------------------------------------------------------------------------
 
     # loading + searching shards
@@ -253,31 +283,37 @@ class VectorIndex:
         if self._loaded_mode == self.load_mode:
             return
 
-        index_files = self._index_files()
-        if not index_files:
+        shard_files = self._find_shards()
+        if not shard_files:
             raise FileNotFoundError(
-                f"No {self.column_name} {self.index_suffix} index files found in "
+                f"No {self.column_name} {self.index_suffix} shard files found in "
                 f"{self.vectors_directory()}. Run build() first."
+            )
+        if self.load_mode == "view" and any(p.suffix == ".zst" for p in shard_files):
+            raise ValueError(
+                f"The {self.column_name} shards are zstd-compressed, which cannot "
+                "be memory-mapped. Use load_mode 'memory' or 'scan'."
             )
 
         logging.info(
-            f"Loading {len(index_files)} {self.column_name} {self.index_suffix} "
+            f"Loading {len(shard_files)} {self.column_name} {self.index_suffix} "
             f"shard(s) in {self.load_mode!r} mode..."
         )
-        self._shard_paths = index_files
+        self._shard_paths = shard_files
         if self.load_mode == "scan":
-            # scan mode defers reading until each shard is actually searched
+            # scan defers reading until each shard is actually searched, and so
+            # also drops any shards an earlier load_mode left in RAM
             self._loaded_indexes = None
         else:
-            self._loaded_indexes = self._load_indexes(index_files)
+            self._loaded_indexes = self._load_indexes(shard_files)
             num_vectors = sum(self._num_vectors(i) for i in self._loaded_indexes)
             logging.info(f"Loaded {num_vectors:,} vectors.")
         # set last, so a failed load is never mistaken for a cached one
         self._loaded_mode = self.load_mode
 
-    def _load_indexes(self, index_files: list[Path]) -> list:
+    def _load_indexes(self, shard_files: list[Path]) -> list:
         """Reads the shard files into the index objects that `search` will use."""
-        return [self._read_index(path) for path in index_files]
+        return [self._read_index(path) for path in shard_files]
 
     def _read_index(self, path: Path):
         """Reads a single shard from disk into an engine index object."""
@@ -293,9 +329,11 @@ class VectorIndex:
         Yields each shard to search. In `scan` mode, shards are read from disk
         one at a time and released instead of being kept in RAM.
         """
-        if self._loaded_indexes is not None:
-            return self._loaded_indexes
-        return (self._read_index(path) for path in self._shard_paths)
+        if self.load_mode == "scan":
+            for path in self._shard_paths:
+                yield self._read_index(path)
+        else:
+            yield from self._loaded_indexes
 
     def search(
         self,

@@ -2,7 +2,6 @@
 
 import logging
 from pathlib import Path
-from typing import Callable
 
 import faiss
 import numpy
@@ -18,10 +17,56 @@ class FaissIvfPqIndex(VectorIndex):
     IVF coarse clustering + product quantization. Each vector compresses to
     ``m`` bytes, so indexes are far smaller than HNSW, at the cost of
     approximate recall. Returned distances are still exact Tanimoto
-    (candidates get reranked).
+    (candidates get reranked). Note that `metric_fn` is unused here, because the
+    quantized codes are searched by faiss itself.
+
+    For trillion-scale datastores the shards outgrow RAM long before they
+    outgrow disk, so `view` mode maps them instead of copying them in. What
+    stays resident is then only the per-shard IVF overhead (the coarse
+    centroids, the PQ codebook, and the precomputed distance table), rather
+    than the ``m + 8`` bytes of codes and ids held for every vector.
     """
 
     index_suffix: str = "faiss"
+
+    batch_size: int = 200
+    """
+    Number of datastore chunks packed into each shard. Larger than the base
+    default because each vector compresses to only `m` bytes, so a shard can
+    absorb far more chunks before it gets unwieldy.
+    """
+
+    nlist: int = 4096
+    """Number of IVF clusters (coarse centroids) per shard."""
+
+    m: int = 8
+    """
+    Number of sub-vectors each vector is quantized into, which is also its
+    compressed size in bytes. Must divide `ndim`.
+    """
+
+    nbits: int = 8
+    """Bits per sub-vector code (8 gives 256 centroids each)."""
+
+    nprobe: int = 16
+    """Number of clusters visited per query. Higher = better recall, slower search."""
+
+    use_mapped_reader: bool = True
+    """
+    Whether mapped reads go through faiss's `MappedFileIOReader`
+    (`IO_FLAG_MMAP_IFC`) rather than its older `IO_FLAG_MMAP` path. The mapped
+    reader also maps the coarse centroids, and is the only one of the two
+    compiled into the Windows faiss wheels. `IO_FLAG_MMAP` maps just the
+    inverted lists, and is the longer-standing option on linux.
+    """
+
+    skip_precompute_table: bool = False
+    """
+    Whether to skip building the IVF+PQ precomputed distance table when a shard
+    is read. The table is `nlist * m * 2**nbits * 4` bytes of *resident* RAM per
+    shard, which is what dominates `view` mode's memory use, so skipping it
+    trades search speed for a much smaller footprint.
+    """
 
     train_size: int = 250_000
     """Number of vectors sampled to train the shared IVF+PQ template."""
@@ -38,48 +83,6 @@ class FaissIvfPqIndex(VectorIndex):
     are reranked on their exact Tanimoto distance. Higher = better recall,
     but more full vectors read back out of the datastore.
     """
-
-    def __init__(
-        self,
-        column_name: str,
-        ndim: int,
-        featurizer,
-        metric_fn: Callable = None,
-        featurizer_kwargs: dict = None,
-        batch_size: int = 200,
-        load_mode: str = "memory",
-        compress: bool = False,
-        nlist: int = 4096,
-        m: int = 8,
-        nbits: int = 8,
-        nprobe: int = 16,
-    ):
-        """
-        Args:
-            nlist: Number of IVF clusters (coarse centroids) per shard.
-            m: Number of sub-vectors each vector is quantized into, which is
-                also its compressed size in bytes. Must divide `ndim`.
-            nbits: Bits per sub-vector code (8 gives 256 centroids each).
-            nprobe: Number of clusters visited per query. Higher = better
-                recall, slower search.
-
-        See `VectorIndex` for the remaining arguments. Note that `metric_fn` is
-        unused here, because the quantized codes are searched by faiss itself.
-        """
-        super().__init__(
-            column_name=column_name,
-            ndim=ndim,
-            featurizer=featurizer,
-            metric_fn=metric_fn,
-            featurizer_kwargs=featurizer_kwargs,
-            batch_size=batch_size,
-            load_mode=load_mode,
-            compress=compress,
-        )
-        self.nlist = nlist
-        self.m = m
-        self.nbits = nbits
-        self.nprobe = nprobe
 
     def _reset_caches(self) -> None:
         super()._reset_caches()
@@ -189,9 +192,9 @@ class FaissIvfPqIndex(VectorIndex):
         self.train_template()
 
     def _build_batch(self, batch: list[int]) -> None:
-        index_path = self._final_shard_path(batch)
         logging.info(
-            f"Building {self.column_name} batch {batch[0]}-{batch[-1]} → {index_path}"
+            f"Building {self.column_name} batch {batch[0]}-{batch[-1]} → "
+            f"{self._final_shard_path(batch)}"
         )
 
         index = faiss.clone_index(self._template())
@@ -209,11 +212,8 @@ class FaissIvfPqIndex(VectorIndex):
         # written to a temp file first so that an interrupted write is never
         # mistaken for a completed shard
         temp_path = self._shard_path(batch, ".partial")
-        if self.compress:
-            self._write_zstd(faiss.serialize_index(index).tobytes(), temp_path)
-        else:
-            faiss.write_index(index, str(temp_path))
-        temp_path.replace(index_path)
+        faiss.write_index(index, str(temp_path))
+        index_path = self._finalize_shard(batch, temp_path)
         logging.info(f"  Saved {index.ntotal:,} vectors → {index_path}")
 
     def _iter_row_batches(self, chunk_key: int):
@@ -235,12 +235,46 @@ class FaissIvfPqIndex(VectorIndex):
     # loading + searching shards
 
     def _read_index(self, path: Path):
+        """
+        Opens a single shard -- memory-mapped in `view` and `scan` modes, or
+        copied into RAM otherwise. Compressed shards must always be
+        decompressed into RAM.
+        """
         if path.suffix == ".zst":
             raw = self._read_bytes(path)
             index = faiss.deserialize_index(numpy.frombuffer(raw, dtype=numpy.uint8))
+        elif self.load_mode in ["view", "scan"]:
+            index = self._read_index_mapped(path)
         else:
             index = faiss.read_index(str(path), faiss.IO_FLAG_READ_ONLY)
         index.nprobe = self.nprobe
+        return index
+
+    def _read_index_mapped(self, path: Path):
+        """
+        Reads a shard without copying it into RAM. faiss maps the file and
+        points the index's code and id arrays straight at the mapping, so only
+        the pages a search actually touches are ever paged in.
+        """
+        flags = faiss.IO_FLAG_READ_ONLY
+        if self.skip_precompute_table:
+            flags |= faiss.IO_FLAG_SKIP_PRECOMPUTE_TABLE
+
+        if self.use_mapped_reader:
+            owner = faiss.MmappedFileMappingOwner(str(path))
+            reader = faiss.MappedFileIOReader(owner)
+            index = faiss.read_index(reader, flags | faiss.IO_FLAG_MMAP_IFC)
+            # the index holds views into the mapping rather than its own copy,
+            # so the mapping has to outlive it
+            index._mapping_refs = (owner, reader)
+        else:
+            index = faiss.read_index(str(path), flags | faiss.IO_FLAG_MMAP)
+
+        if self.skip_precompute_table:
+            # the shard was trained with the table on, so its "use the table"
+            # flag is saved as set. Without clearing it, the search would index
+            # into a table that was never filled in.
+            index.use_precomputed_table = 0
         return index
 
     @staticmethod
