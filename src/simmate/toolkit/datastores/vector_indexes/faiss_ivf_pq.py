@@ -18,11 +18,10 @@ class FaissIvfPqIndex(VectorIndex):
     IVF coarse clustering + product quantization. Each vector compresses to
     ``m`` bytes, so indexes are far smaller than HNSW, at the cost of
     approximate recall. Returned distances are still exact Tanimoto
-    (candidates get reranked). Requires the optional ``faiss-cpu`` package.
+    (candidates get reranked).
     """
 
     index_suffix: str = "faiss"
-    cache_attrs: list[str] = [*VectorIndex.cache_attrs, "_cached_template"]
 
     train_size: int = 250_000
     """Number of vectors sampled to train the shared IVF+PQ template."""
@@ -81,6 +80,9 @@ class FaissIvfPqIndex(VectorIndex):
         self.m = m
         self.nbits = nbits
         self.nprobe = nprobe
+
+    def _reset_caches(self) -> None:
+        super()._reset_caches()
         self._cached_template = None
 
     def _unpacked_vectors(self, df: polars.DataFrame) -> numpy.ndarray:
@@ -183,7 +185,7 @@ class FaissIvfPqIndex(VectorIndex):
 
     # building shards
 
-    def _prepare_build(self, batches: list[list[int]]) -> None:
+    def _prepare_build(self) -> None:
         self.train_template()
 
     def _build_batch(self, batch: list[int]) -> None:

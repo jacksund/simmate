@@ -44,13 +44,6 @@ class VectorIndex:
     Subclasses can add engine-specific modes.
     """
 
-    cache_attrs: list[str] = ["_shard_paths", "_loaded_indexes", "_loaded_mode"]
-    """
-    Attributes holding datastore-specific caches, which `for_datastore` resets
-    so that a bound copy never inherits the template's. Subclasses extend this
-    with any caches of their own.
-    """
-
     def __init__(
         self,
         column_name: str,
@@ -93,9 +86,7 @@ class VectorIndex:
         self.compress = compress
 
         self._datastore = None  # set by for_datastore()
-        self._shard_paths = None
-        self._loaded_indexes = None
-        self._loaded_mode = None
+        self._reset_caches()
 
     # -------------------------------------------------------------------------
 
@@ -118,13 +109,22 @@ class VectorIndex:
 
         Binding copies rather than mutates, since one declaration is shared by
         every datastore that inherits it -- otherwise two datastores would
-        fight over the same `cache_attrs`.
+        fight over the same caches.
         """
         bound = copy.copy(self)
         bound._datastore = datastore_cls
-        for attr in self.cache_attrs:
-            setattr(bound, attr, None)
+        bound._reset_caches()
         return bound
+
+    def _reset_caches(self) -> None:
+        """
+        Clears the datastore-specific caches, so that a newly bound copy never
+        inherits the template's, and a rebuilt index is loaded fresh.
+        Subclasses extend this with any caches of their own.
+        """
+        self._shard_paths = None
+        self._loaded_indexes = None
+        self._loaded_mode = None
 
     # -------------------------------------------------------------------------
 
@@ -205,12 +205,15 @@ class VectorIndex:
             logging.info(f"{self.index_suffix} index is already built!")
             return
 
-        self._prepare_build(batches)
+        self._prepare_build()
         dispatch(
             batches,
             self._build_batch,
             parallel="job" if parallel_job else "single",
         )
+        # any shards loaded earlier are now stale, so the next search reloads
+        self._reset_caches()
+
         # "job" mode only submits the work to the executor
         status = "submitted" if parallel_job else "complete"
         logging.info(f"{self.index_suffix} index build {status}!")
@@ -227,7 +230,7 @@ class VectorIndex:
         )
         return pending
 
-    def _prepare_build(self, batches: list[list[int]]) -> None:
+    def _prepare_build(self) -> None:
         """
         Hook for one-time setup needed before any shard is built (such as
         training). Only called when there are shards left to build.
@@ -247,7 +250,7 @@ class VectorIndex:
         Prepares the shards for searching, per `load_mode`. Results are cached
         on this object, so repeat calls are free until `load_mode` changes.
         """
-        if self._shard_paths is not None and self._loaded_mode == self.load_mode:
+        if self._loaded_mode == self.load_mode:
             return
 
         index_files = self._index_files()
@@ -269,7 +272,7 @@ class VectorIndex:
             self._loaded_indexes = self._load_indexes(index_files)
             num_vectors = sum(self._num_vectors(i) for i in self._loaded_indexes)
             logging.info(f"Loaded {num_vectors:,} vectors.")
-        # only used to invalidate the cache above when load_mode changes
+        # set last, so a failed load is never mistaken for a cached one
         self._loaded_mode = self.load_mode
 
     def _load_indexes(self, index_files: list[Path]) -> list:
