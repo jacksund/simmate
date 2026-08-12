@@ -60,15 +60,6 @@ class WorkItem(DatabaseTable):
     the status/state of the workitem
     """
 
-    command_not_found_failures = table_column.IntegerField(default=0)
-    """
-    Keeps track of the special-case "CommandNotFound" error that is hidden by
-    workers. This keeps a tally of how many Workers that this task is triggering
-    to shut down. This is important because it helps prevent total cluster
-    shutdown from a single typo in a command. By default, workers will label
-    a task as problematic if 2 workers give CommandNotFound errors.
-    """
-
     # -------------------------------------------------------------------------
 
     # For serialization, I just use the pickle module, but in the future, I may
@@ -243,8 +234,7 @@ class WorkItem(DatabaseTable):
             elif status == "C":  # CANCELED
                 raise CancelledError(
                     "This item was cancelled and has no result. If this is unexpected, "
-                    "be sure to check your worker logs. Misconfiguration or a `command "
-                    "not found` error can be the cause of your job getting cancelled."
+                    "be sure to check your worker logs."
                 )
 
             elif status == "P" or status == "R":  # PENDING or RUNNING

@@ -127,6 +127,12 @@ urlpatterns = [
         name="htmx",
     ),
     #
+    # Core API urls
+    path(
+        route="",
+        view=include("simmate.website.core.urls"),
+    ),
+    #
     # Custom Simmate apps (if present)
     path(route="apps/", view=views.apps, name="apps"),
     *get_app_urls(),

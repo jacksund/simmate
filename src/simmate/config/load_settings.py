@@ -169,6 +169,10 @@ class SimmateSettings:
             "database": self._default_database,
             "postgres_rdkit_extension": False,
             "scratch_dir": Path.cwd(),
+            "client": {
+                "host": "http://127.0.0.1:8000",
+                "api_key": None,
+            },
             "website": {
                 # Sometimes we lock down the website to registered/approved users.
                 # By default, we allow anonymous users to explore because this makes things like
@@ -312,6 +316,9 @@ class SimmateSettings:
                 # Example: `user__first_name__isnull` has 2 double-underscores.
                 # `a__b__c__d` has 3. A value of None means no limit.
                 "max_filter_joins": None,
+                # Whether to allow API workers to pickup and carry out jobs
+                # options: False, 'superuser-only', 'staff-only', 'all-users'
+                "enable_api_workers": False,
             },
             # app-specific configs
             # TODO: consider moving these to the respective apps
@@ -588,10 +595,13 @@ class SimmateSettings:
         "SIMMATE__DATABASE__USER": str,
         "SIMMATE__DATABASE__PASSWORD": str,
         "SIMMATE__DATABASE__PORT": int,
+        "SIMMATE__CLIENT__HOST": str,
+        "SIMMATE__CLIENT__API_KEY": str,
         "SIMMATE__WEBSITE__ALLOWED_HOSTS": list[str],
         "SIMMATE__WEBSITE__CSRF_TRUSTED_ORIGINS": list[str],
         "SIMMATE__WEBSITE__DATA": dict,
         "SIMMATE__WEBSITE__DEBUG": bool,
+        "SIMMATE__WEBSITE__ENABLE_API_WORKERS": str,
         "SIMMATE__WEBSITE__SECRET_KEY": str,
         "SIMMATE__WEBSITE__STATIC_FILE_HASHES": bool,
         "SIMMATE__WEBSITE__EMAIL__FROM_EMAIL": str,

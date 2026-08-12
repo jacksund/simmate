@@ -97,14 +97,9 @@ A persistent worker will stay alive and continue to check for new jobs indefinit
 simmate compute start-worker
 ```
 
-### Starting a Single-Flow Worker
-A "single-flow" worker will pull **one** job from the queue, execute it, and then shut down. If the queue is empty, it shuts down immediately. This is highly recommended for HPC clusters where you submit many individual jobs to a scheduler like SLURM.
+### Starting a "Single-Flow" Worker
+A "single-flow" worker will pull **one** job from the queue, execute it, and then shut down. If the queue is empty, it shuts down immediately. This is highly recommended as a best practice for HPC clusters where you submit many individual jobs to a scheduler like SLURM.
 
-```bash
-simmate compute start-singleflow-worker
-```
-
-This is equivalent to:
 ```bash
 simmate compute start-worker --nitems-max 1 --close-on-empty-queue
 ```

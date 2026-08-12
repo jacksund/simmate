@@ -59,6 +59,11 @@ def start_worker(
         None,
         help="The method used to start the worker (e.g. for multiprocessing).",
     ),
+    is_api_worker: bool = typer.Option(
+        False,
+        "--api",
+        help="If provided, an API worker will be started using the URL specified in your simmate settings.",
+    ),
 ):
     """
     Starts a Simmate Worker to execute jobs from the queue.
@@ -68,32 +73,31 @@ def start_worker(
     """
 
     from simmate.database import connect  # isort:skip
-    from simmate.compute import SimmateWorker
 
-    worker = SimmateWorker(
-        nitems_max=nitems_max,
-        timeout=timeout,
-        close_on_empty_queue=close_on_empty_queue,
-        waittime_on_empty_queue=waittime_on_empty_queue,
-        tags=tag,  # this is actually "tags" --> a list of strings
-        startup_method=startup_method,
-    )
+    if is_api_worker:
+        from simmate.compute import ApiWorker
+
+        worker = ApiWorker(
+            nitems_max=nitems_max,
+            timeout=timeout,
+            close_on_empty_queue=close_on_empty_queue,
+            waittime_on_empty_queue=waittime_on_empty_queue,
+            tags=tag,
+            startup_method=startup_method,
+        )
+    else:
+        from simmate.compute import SimmateWorker
+
+        worker = SimmateWorker(
+            nitems_max=nitems_max,
+            timeout=timeout,
+            close_on_empty_queue=close_on_empty_queue,
+            waittime_on_empty_queue=waittime_on_empty_queue,
+            tags=tag,  # this is actually "tags" --> a list of strings
+            startup_method=startup_method,
+        )
+
     worker.start()
-
-
-@compute_app.command()
-def start_singleflow_worker():
-    """
-    Starts a Simmate Worker that executes exactly one job and then shuts down.
-
-    This is a convenience command equivalent to:
-    `simmate compute start-worker --nitems-max 1 --close-on-empty-queue`
-    """
-
-    from simmate.database import connect  # isort:skip
-    from simmate.compute import SimmateWorker
-
-    SimmateWorker.run_singleflow_worker()
 
 
 @compute_app.command()
