@@ -453,13 +453,18 @@ class SimmateSettings:
         and settings files being used.
         """
 
-        # 1. check if using environment variables
+        # 1. Check if we are running the test suite. If so, we ignore user settings
+        # (both env vars and yaml) to ensure identical behavior to the github CI.
+        if os.getenv("DJANGO_SETTINGS_MODULE") == "simmate.config.django.settings_test":
+            return None
+
+        # 2. check if using environment variables
         prefix = "SIMMATE__"
         env_vars = dict(os.environ)
         if any(var.startswith(prefix) for var in env_vars.keys()):
             return "environment variables"
 
-        # 2. settings.yaml file
+        # 3. settings.yaml file
         settings_file = self.config_directory / "settings.yaml"
         if settings_file.exists():
             return settings_file
