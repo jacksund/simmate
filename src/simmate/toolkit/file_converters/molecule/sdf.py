@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+import re
 from pathlib import Path
 
 from rdkit.Chem import AllChem
@@ -9,6 +11,11 @@ from simmate.toolkit import Molecule
 
 
 class SdfAdapter:
+
+    # Property tags are written as `>  <My Key>` but the number of spaces
+    # varies between programs (e.g. ChemDraw uses two, others use one)
+    property_key_pattern = re.compile(r"^>\s*<(.+?)>")
+
     @staticmethod
     def get_toolkit_from_sdf_str(
         sdf: str,
@@ -27,23 +34,49 @@ class SdfAdapter:
 
         # workup metadata
         if read_metadata:
-            metadata_lines = sdf.split("END")[-1].strip().split("\n\n")
-            for line in metadata_lines:
-                if not line:
-                    continue
-                line_objs = line.split("\n")
-                # Check for bug where there's a key but no value given
-                if len(line_objs) == 2:
-                    key, value = line_objs
-                # rdkit doesn't let us set key=None, so we skip it
-                else:
-                    continue
-                # clean key format
-                key = key[4:-1]
-                # then add to rdkit mol
+            metadata = SdfAdapter.get_metadata_from_sdf_str(sdf)
+            for key, value in metadata.items():
                 rdkit_molecule.SetProp(key, value)
 
         return Molecule(rdkit_molecule)
+
+    @staticmethod
+    def get_metadata_from_sdf_str(sdf: str) -> dict:
+        """
+        Grabs the property block (i.e. the metadata) out of a single SDF record.
+
+        Note, we scan the record line-by-line rather than splitting the string
+        on the molfile terminator. Property *values* often contain the substring
+        "END" (e.g. company names such as "Ascend Performance Materials"), which
+        would otherwise silently throw away every property before it.
+        """
+        metadata = {}
+        key = None
+        values = []
+        in_properties = False
+
+        for line in sdf.split("\n"):
+            # everything before the molfile terminator is the structure
+            if not in_properties:
+                if line.strip() == "M  END":
+                    in_properties = True
+                continue
+
+            key_match = SdfAdapter.property_key_pattern.match(line)
+            if key_match:
+                if key:
+                    metadata[key] = "\n".join(values).strip()
+                key = key_match.group(1)
+                values = []
+            elif key is not None:
+                # values can span several lines
+                values.append(line)
+
+        if key:
+            metadata[key] = "\n".join(values).strip()
+
+        # rdkit doesn't let us set an empty value, so we drop those keys
+        return {k: v for k, v in metadata.items() if v}
 
     @staticmethod
     def get_toolkits_from_sdf_strs(sdfs: list[str]) -> list[Molecule]:
@@ -64,7 +97,7 @@ class SdfAdapter:
             lines = file.read()
 
         molecules = []
-        for sdf_str in lines.split("$$$$"):
+        for record_number, sdf_str in enumerate(lines.split("$$$$"), start=1):
             # make sure we don't have an empty string
             sdf_str = sdf_str.strip()
             if not sdf_str:
@@ -81,6 +114,10 @@ class SdfAdapter:
                 molecule = Molecule.from_sdf(sdf_str, **kwargs)
             except Exception as error:
                 if skip_failed:
+                    logging.warning(
+                        f"Failed to load SDF record {record_number} "
+                        f"of {filename.name}: {error}"
+                    )
                     continue
                 else:
                     raise error
