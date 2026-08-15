@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from ase.ga.soft_mutation import SoftMutation as ASESoftMutation
-from ase.ga.utilities import closest_distances_generator
+from ase_ga.soft_mutation import SoftMutation as ASESoftMutation
+from ase_ga.utilities import closest_distances_generator
 from pymatgen.io.ase import AseAtomsAdaptor
 
 from simmate.toolkit import Structure
@@ -31,7 +31,7 @@ class SoftMutation(Transformation):
     # I have found that ASE has a version of this function written already
     # https://wiki.fysik.dtu.dk/ase/tutorials/ga/ga_bulk.html
     # https://gitlab.com/ase/ase/-/tree/master/ase/ga
-    # from ase.ga.bulk_mutations import SoftMutation
+    # from ase_ga.bulk_mutations import SoftMutation
 
     name = "from_ase.SoftMutation"
     io_scale = "one_to_one"
