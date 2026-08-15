@@ -403,6 +403,15 @@ class SimmateSettings:
                     "image": f"jacksund/quantum_espresso:v{simmate.__version__}",
                 },
             },
+            "s3": {
+                "bucket": None,
+                "access_key": None,
+                "secret_key": None,
+                "endpoint_url": None,
+                "region": None,
+                "verify": True,
+                "signature_version": None,
+            },
         }
 
     @cached_property
@@ -646,6 +655,13 @@ class SimmateSettings:
         "SIMMATE__CHEMSPACE__FTP__HOST": str,
         "SIMMATE__CHEMSPACE__FTP__USER": str,
         "SIMMATE__CHEMSPACE__FTP__PASSWORD": str,
+        "SIMMATE__S3__BUCKET": str,
+        "SIMMATE__S3__ACCESS_KEY": str,
+        "SIMMATE__S3__SECRET_KEY": str,
+        "SIMMATE__S3__ENDPOINT_URL": str,
+        "SIMMATE__S3__REGION": str,
+        "SIMMATE__S3__VERIFY": bool,
+        "SIMMATE__S3__SIGNATURE_VERSION": str,
     }
 
 

@@ -13,10 +13,12 @@ from pathlib import Path
 import typer
 
 from .k8s import k8s_app
+from .s3 import s3_app
 
 dev_app = typer.Typer(rich_markup_mode="markdown")
 
 dev_app.add_typer(k8s_app, name="k8s")
+dev_app.add_typer(s3_app, name="s3")
 
 
 @dev_app.callback(no_args_is_help=True)

@@ -7,6 +7,8 @@ import boto3
 from botocore.config import Config
 from rich.progress import track
 
+from simmate.config import settings
+
 
 class S3Bucket:
     """
@@ -243,3 +245,24 @@ class S3Bucket:
                 client.download_file(cls.bucket, s3_key, str(local_path))
 
         return local_dir
+
+
+class SimmateS3Bucket(S3Bucket):
+    """
+    An S3Bucket configured from the user's ``settings.s3`` block.
+
+    Configure it in your ``settings.yaml`` and then use directly::
+
+        from simmate.database.external_connectors.s3 import SimmateS3Bucket
+
+        SimmateS3Bucket.upload_directory("./my_data", "experiments/run1")
+        SimmateS3Bucket.sync_directory("./local_copy", "experiments/run1")
+    """
+
+    bucket = settings.s3.bucket
+    access_key = settings.s3.access_key
+    secret_key = settings.s3.secret_key
+    endpoint_url = settings.s3.endpoint_url
+    region = settings.s3.region
+    verify = settings.s3.verify
+    signature_version = settings.s3.signature_version
