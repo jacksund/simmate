@@ -163,6 +163,7 @@ class DatabaseAdapter:
                 structure_string,
                 occupancy_tolerance=float("inf"),
             )
-            structure = parser.get_structures()[0]
+            pymatgen_structure = parser.get_structures()[0]
+            structure = ToolkitStructure.from_sites(pymatgen_structure.sites)
 
         return structure

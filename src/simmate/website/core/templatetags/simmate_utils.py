@@ -99,6 +99,9 @@ def formula_to_html(formula_str):
     so that it looks nice in a webpage
     """
 
+    if not formula_str:
+        return ""
+
     # start with an empty string that we build off of
     new_formula_str = ""
 

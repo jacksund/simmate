@@ -195,7 +195,10 @@ class Structure(PymatgenStructure):
             raise Exception(f"Unknown color map: {color_map}")
 
         render_structure = self.get_sanitized_structure() if sanitize else self.copy()
-        render_structure.add_oxidation_state_by_guess()
+        try:
+            render_structure.add_oxidation_state_by_guess()
+        except ValueError:
+            pass  # Fails for disordered structures or when balance is impossible
         if supercell:
             render_structure.make_supercell(supercell)
 
@@ -220,15 +223,33 @@ class Structure(PymatgenStructure):
 
             # Grab the base info that is the same for all site images here.
 
-            element = site.specie.symbol
+            try:
+                prominent_species = site.specie
+            except AttributeError:
+                # Handle disordered structures by picking the most prominent species
+                prominent_species = max(
+                    site.species.elements,
+                    key=lambda e: site.species.get_el_amt_dict().get(e.symbol, 0),
+                )
+
+            element = prominent_species.symbol
+
             if isinstance(radius_mode, float):
                 radius = radius_mode
             elif radius_mode == "ionic":
-                radius = site.specie.ionic_radius
+                try:
+                    radius = prominent_species.ionic_radius
+                except AttributeError:
+                    # fallback to atomic radius if ionic is not available
+                    radius = prominent_species.atomic_radius
+
+                # Some elements don't have atomic_radius defined (e.g. some noble gases)
+                if not radius:
+                    radius = 1.0
             else:
                 raise Exception(f"Unknown radius mode: {radius_mode}")
 
-            # TODO: handle unordered structures (self.is_ordered=False)
+            # TODO: handle unordered structures completely (self.is_ordered=False)
 
             # first store this base site to our site collection.
             sites_to_draw.append((color_map[element], radius, site.coords.tolist()))
