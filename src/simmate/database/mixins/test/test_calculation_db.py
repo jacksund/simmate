@@ -33,7 +33,7 @@ def test_calculation_table():
 
 
 @pytest.mark.django_db
-def test_calculation_archives():
+def test_calculation_archives(tmp_path):
     calc_db = TestCalculation.from_run_context(
         run_id=uuid.uuid4(),
         workflow_name="example.test.workflow",
@@ -47,8 +47,10 @@ def test_calculation_archives():
     )
     calc_db2.save()
 
-    TestCalculation.objects.to_archive()
+    archive_filename = tmp_path / "test_calc.zip"
+    TestCalculation.objects.to_archive(filename=archive_filename)
 
     TestCalculation.load_archive(
+        filename=archive_filename,
         delete_on_completion=True,
     )

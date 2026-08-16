@@ -164,6 +164,24 @@ class S3Bucket:
         return {"folders": folders, "files": files}
 
     @classmethod
+    def upload_file(
+        cls,
+        local_path: Path | str,
+        s3_key: str,
+    ) -> None:
+        """
+        Uploads a single local file to the S3 bucket.
+
+        #### Parameters
+
+        - `local_path`:
+            Path to the local file to upload.
+        - `s3_key`:
+            The S3 object key (e.g. "cod/archive/CodStructure-2026-08-16.csv.zip").
+        """
+        cls.client.upload_file(str(local_path), cls.bucket, s3_key)
+
+    @classmethod
     def upload_directory(
         cls,
         local_dir: Path | str,

@@ -194,69 +194,96 @@ class SearchResults(models.QuerySet):
         # pymatgen objects as a list
         return [obj.to_toolkit() for obj in self]
 
-    def to_archive(self, filename: Path | str = None):
+    def to_archive(
+        self,
+        filename: Path | str = None,
+        format: str = "csv",
+        columns: str | list[str] = "minimal",
+    ):
         """
-        Writes a compressed zip file using the table's `archive_fieldset`
-        attribute. Underneath, the file is written in a csv format.
+        Writes a compressed zip file of the queryset data.
 
-        This is useful for small making archive files and reloading fixtures
-        to a separate database.
+        Supports both CSV and Parquet formats, and flexible column selection
+        (minimal archive fields, all columns, or a custom list).
 
-        This method is attached to the table manager for scenarios to allow
-        queryset filtering before dumping data.
+        This method is attached to the table manager to allow queryset
+        filtering before dumping data.
 
         To load this database dump into a new database, use the class's
-        `from_archive` method.
+        `load_archive` method.
 
         #### Parameters
 
         - `filename`:
-            The filename to write the zip file to. By defualt, None will make
-            a filename named MyExampleTableName-2022-01-25.zip, where the date
-            will be the current day (for versioning).
+            The filename to write the zip file to. By default, None will make
+            a filename named MyExampleTableName-2022-01-25.zip (for CSV) or
+            MyExampleTableName-2022-01-25.parquet.zip (for Parquet), where the
+            date will be the current day (for versioning).
+
+        - `format`:
+            The file format to export. Options are "csv" (default) or "parquet".
+
+        - `columns`:
+            Which columns to include. Options are:
+            - "minimal": Only the archive_fieldset columns (default)
+            - "full": All columns in the table
+            - A custom list of column names (e.g. ["id", "structure", "energy"])
         """
+
+        # Resolve which columns to export
+        if columns == "minimal":
+            column_list = self.model.archive_fieldset
+            columns_label = "minimal"
+        elif columns == "full":
+            column_list = self.model.get_column_names()
+            columns_label = "full"
+        else:
+            column_list = columns
+            columns_label = "custom"
 
         # Generate the file name if one wasn't given.
         if not filename:
-            # This is automatically the name of the table plus the date, where
-            # the date is for versioning. For example...
-            #   MyExampleTable-2022-01-25
             today = datetime.today()
             filename_base = "-".join(
                 [
                     self.model.table_name,
+                    columns_label,
                     str(today.year),
                     str(today.month).zfill(2),
                     str(today.day).zfill(2),
                 ]
             )
-            filename = filename_base + ".zip"
+            filename = filename_base + f".{format}.zip"
 
-        # convert to path obj
         filename = Path(filename)
 
-        # now convert these objects to a pandas dataframe, using just
-        # the archive columns that are being stored
-        df = self.to_dataframe(columns=self.model.archive_fieldset)
+        # Convert the queryset to a dataframe
+        # We use pandas for CSV because polars doesn't natively support nested data in CSVs
+        engine = "polars" if format == "parquet" else "pandas"
+        df = self.to_dataframe(columns=column_list, engine=engine)
 
-        # Write the data to a csv file
-        # OPTIMIZE: is there a better format that pandas can write to?
-        csv_filename = filename.with_suffix(".csv")
-        df.to_csv(csv_filename, index=False)
+        # Write the inner data file and compress to zip
+        if format == "csv":
+            inner_filename = filename.with_suffix(".csv")
+            df.to_csv(inner_filename, index=False)
+        elif format == "parquet":
+            # For "Table-date.parquet.zip", .with_suffix("") gives "Table-date.parquet"
+            inner_filename = filename.with_suffix("")
+            df.write_parquet(inner_filename)
+        else:
+            raise ValueError(
+                f"Unsupported archive format: {format}. Use 'csv' or 'parquet'."
+            )
 
-        # now convert the dump file to a compressed zip. In the complex, os
-        # functions below we are just grabbing the filename without the
-        # zip ending. We are also grabbing the directory that the csv is
-        # located in
         shutil.make_archive(
-            base_name=filename.with_suffix(""),  # removes .zip ending
+            base_name=str(filename.with_suffix("")),
             format="zip",
-            root_dir=csv_filename.absolute().parent,
-            base_dir=csv_filename.name,
+            root_dir=str(inner_filename.absolute().parent),
+            base_dir=inner_filename.name,
         )
 
-        # we can now delete the csv file
-        csv_filename.unlink()
+        # Clean up the uncompressed file
+        inner_filename.unlink()
 
     def to_api_dict(
         self, next_url: str = None, previous_url: str = None, **kwargs

@@ -43,27 +43,26 @@ def test_from_toolkit():
 
 
 @pytest.mark.django_db
-def test_archive():
-    # BUG: This test does not save archives within a tmp_path -- but instead the
-    # working directory. Therefore, these tests cannot be split up and ran
-    # in parallel (with pytest-xdist).
-
+def test_archive(tmp_path):
     # add sample rows
     x = TestDatabaseTable(column1=True, column2=3.14)
     x.save()
     y = TestDatabaseTable(column1=False, column2=-3.14)
     y.save()
 
+    archive_filename = tmp_path / "test_table.zip"
+
     # Also try to load an archive that doesn't exist yet
-    with pytest.raises(FileNotFoundError):
-        TestDatabaseTable.load_archive()
+    with pytest.raises(Exception):
+        TestDatabaseTable.load_archive(filename=archive_filename)
 
     # write to a file
-    TestDatabaseTable.objects.to_archive()
+    TestDatabaseTable.objects.to_archive(filename=archive_filename)
 
     # reload the archive. This is also our last test so we can
     # delete the archive when we're done
     TestDatabaseTable.load_archive(
+        filename=archive_filename,
         delete_on_completion=True,
     )
 

@@ -38,8 +38,10 @@ def test_structure_queries():
 
 
 @pytest.mark.django_db
-def test_structure_archives():
-    TestStructure.objects.to_archive()
+def test_structure_archives(tmp_path):
+    archive_filename = tmp_path / "test_structure.zip"
+    TestStructure.objects.to_archive(filename=archive_filename)
     TestStructure.load_archive(
+        filename=archive_filename,
         delete_on_completion=True,
     )
