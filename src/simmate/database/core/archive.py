@@ -7,8 +7,7 @@ import urllib
 import warnings
 from pathlib import Path
 
-import pandas
-from rich.progress import track
+import polars
 
 from simmate.config import settings
 from simmate.utils import dispatch
@@ -35,13 +34,28 @@ class ArchiveMixin:
     """
 
     @classmethod
-    def to_archive(cls, filename: Path | str = None):
+    def to_archive(
+        cls,
+        filename: Path | str = None,
+        format: str = "csv",
+        columns: str | list[str] = "minimal",
+    ):
         """
         Writes the entire database table to an archive file. If you prefer
         a subset of entries for the archive, use the to_archive method
         on your SearchResults instead (e.g. MyTable.objects.filter(...).to_archive())
+
+        #### Parameters
+
+        - `filename`:
+            The filename to write the zip file to. Auto-generated if not provided.
+        - `format`:
+            The file format to export. Options are "csv" (default) or "parquet".
+        - `columns`:
+            Which columns to include. Options are "minimal" (archive_fieldset),
+            "full" (all columns), or a custom list of column names.
         """
-        cls.objects.all().to_archive(filename)
+        cls.objects.all().to_archive(filename, format=format, columns=columns)
 
     @classmethod
     @property
@@ -181,19 +195,22 @@ class ArchiveMixin:
                 extract_dir=filename.parent,
             )
 
-            # We will now have a csv file of the same name, which we load into
-            # a pandas dataframe
-            csv_filename = filename.with_suffix(".csv")  # was ".zip"
-            df = pandas.read_csv(csv_filename)
-
-            # BUG: NaN values throw errors when read into SQL databases, so we
-            # convert all NaN entries to None. This hacky line was taken from
-            #   https://stackoverflow.com/questions/39279824/
-            df = df.astype(object).where(df.notna(), None)
+            # Determine the inner file format. For old-style archives
+            # (Table-date.zip), the inner file is Table-date.csv. For new-style
+            # archives (Table-date.parquet.zip), stripping .zip gives
+            # Table-date.parquet directly.
+            inner_filename = filename.with_suffix("")  # strips .zip
+            if inner_filename.suffix == ".parquet":
+                # New-style: "Table-date.parquet.zip" → "Table-date.parquet"
+                df = polars.read_parquet(inner_filename)
+            else:
+                # Old-style: "Table-date.zip" → look for "Table-date.csv"
+                inner_filename = inner_filename.with_suffix(".csv")
+                df = polars.read_csv(inner_filename)
 
             # convert the dataframe to a list of dictionaries that we will iterate
-            # through.
-            entries = df.to_dict(orient="records")
+            # through. Polars natively converts nulls to None when calling to_dicts.
+            entries = df.to_dicts()
 
             # now iterate through all entries to save them to the database
             db_objects = dispatch(
@@ -210,7 +227,7 @@ class ArchiveMixin:
             )
 
             # We can now delete the files. The zip file is only deleted if requested.
-            csv_filename.unlink()
+            inner_filename.unlink()
             if delete_on_completion:
                 filename.unlink()  # the zip archive
 
@@ -288,3 +305,84 @@ class ArchiveMixin:
             parallel=parallel,
         )
         logging.info("Done.")
+
+    # -------------------------------------------------------------------------
+    # Methods that handle building and uploading archives
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def export_and_upload(
+        cls,
+        formats: list[str] = None,
+        columns: str | list[str] = "full",
+        s3_bucket: type = None,
+    ):
+        """
+        Exports the database table to archive files and uploads them to S3.
+
+        This is the primary utility for building the downloadable files
+        shown on the data explorer homepage. By default, it exports all
+        columns in both CSV and Parquet formats.
+
+        #### Parameters
+
+        - `formats`:
+            List of export formats. Defaults to ["csv", "parquet"].
+
+        - `columns`:
+            Which columns to include. Options are:
+            - "full": All columns in the table (default)
+            - "minimal": Only the archive_fieldset columns
+            - A custom list of column names
+
+        - `s3_bucket`:
+            The S3Bucket class to upload to. Defaults to SimmateS3Bucket.
+
+        #### Example
+
+            ```python
+            from simmate.apps.cod.models import CodStructure
+            CodStructure.export_and_upload()
+            ```
+        """
+        from simmate.database.external_connectors.s3 import SimmateS3Bucket
+
+        if s3_bucket is None:
+            s3_bucket = SimmateS3Bucket
+        if formats is None:
+            formats = ["csv", "parquet"]
+
+        app_label = cls._meta.app_label
+        s3_prefix = f"{app_label}/archive"
+
+        for fmt in formats:
+            logging.info(f"Exporting {cls.table_name} as {fmt}...")
+
+            # Use to_archive to build the file locally
+            cls.to_archive(format=fmt, columns=columns)
+
+            # Find the file that was just created (most recent match)
+            matching_files = sorted(
+                [
+                    f
+                    for f in Path.cwd().iterdir()
+                    if f.name.startswith(cls.table_name) and f.suffix == ".zip"
+                ],
+                reverse=True,
+            )
+            if not matching_files:
+                raise FileNotFoundError(
+                    f"Expected archive file for {cls.table_name} but none found."
+                )
+            archive_file = matching_files[0]
+
+            # Upload to S3
+            s3_key = f"{s3_prefix}/{archive_file.name}"
+            logging.info(f"Uploading {archive_file.name} to s3://{s3_key}...")
+            s3_bucket.upload_file(archive_file, s3_key)
+            logging.info(f"Uploaded {archive_file.name}")
+
+            # Clean up local file
+            archive_file.unlink()
+
+        logging.info(f"Export and upload complete for {cls.table_name}.")

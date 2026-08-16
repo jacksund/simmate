@@ -6,7 +6,7 @@
     <section class="jumbotron text-center py-3">
         <div class="container">
             <h1 class="jumbotron-heading">Data Explorer</h1>
-            <p class="lead text-muted">Explore datasets, search across elements, or view leaderboards.</p>
+            <p class="lead text-muted">Explore datasets, search across elements, or download data.</p>
         </div>
     </section>
     <ul class="nav nav-tabs nav-bordered mb-3">
@@ -20,15 +20,6 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="#leaderboards-section"
-               data-bs-toggle="tab"
-               aria-expanded="false"
-               class="nav-link">
-                <i class="bi bi-trophy-fill d-md-none d-block"></i>
-                <span class="d-none d-md-block"><i class="bi bi-trophy-fill"></i> Leaderboards</span>
-            </a>
-        </li>
-        <li class="nav-item">
             <a href="#all-datasets-section"
                data-bs-toggle="tab"
                aria-expanded="false"
@@ -37,18 +28,19 @@
                 <span class="d-none d-md-block"><i class="bi bi-database-fill"></i> All Datasets</span>
             </a>
         </li>
+        <li class="nav-item">
+            <a href="#downloads-section"
+               data-bs-toggle="tab"
+               aria-expanded="false"
+               class="nav-link">
+                <i class="bi bi-download d-md-none d-block"></i>
+                <span class="d-none d-md-block"><i class="bi bi-download"></i> Downloads</span>
+            </a>
+        </li>
     </ul>
     <div class="tab-content">
         <div class="tab-pane show active" id="quick-search-section">
             <div class="container-fluid mt-3">{% htmx_component component_name="quick-search-component" %}</div>
-        </div>
-        <div class="tab-pane" id="leaderboards-section">
-            <div class="container-fluid mt-5 mb-5 text-center">
-                <h3>
-                    <i class="bi bi-cone-striped text-warning"></i> Under Construction
-                </h3>
-                <p class="text-muted">Leaderboards are coming soon!</p>
-            </div>
         </div>
         <div class="tab-pane" id="all-datasets-section">
             <div class="container-fluid mt-4">
@@ -196,6 +188,145 @@
                                     </div>
                                 </div>
                             {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane" id="downloads-section">
+            <div class="container-fluid mt-5 mb-5">
+                <div class="row justify-content-center mb-4">
+                    <div class="col-md-10">
+                        <div class="alert alert-warning shadow-sm d-flex align-items-center text-start mb-3"
+                             role="alert">
+                            <i class="bi bi-exclamation-triangle-fill fs-3 me-3"></i>
+                            <div>
+                                <strong>Please cite original sources!</strong>
+                                <br>
+                                The datasets provided here are compiled from third-party catalogs. Simmate is not affiliated with these organizations. Please ensure you cite the original authors and publications when using this data in your research.
+                            </div>
+                        </div>
+                        <div class="alert alert-info shadow-sm d-flex align-items-center text-start"
+                             role="alert">
+                            <i class="bi bi-info-circle-fill fs-3 me-3"></i>
+                            <div>
+                                <strong>Looking for more data?</strong>
+                                <br>
+                                The downloads below are static snapshots (not live data) and include only our most popular chemical catalogs. For other datasets, navigate to the <b>All Datasets</b> tab to access individual tables. We also highly recommend using the <a href="https://jacksund.github.io/simmate/getting_started/"
+    class="alert-link">Simmate Python Client</a> for the best experience downloading and working with data locally.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-md-10">
+                        <h4 class="mt-4">
+                            <i class="bi bi-gem"></i> Crystalline Catalogs
+                        </h4>
+                        <div class="table-responsive mb-5">
+                            <table class="table table-striped align-middle">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th scope="col" style="width: 35%">Dataset</th>
+                                        <th scope="col" style="width: 15%">Total Rows</th>
+                                        <th scope="col" style="width: 15%">Size</th>
+                                        <th scope="col" style="width: 15%">Last Updated</th>
+                                        <th scope="col" style="width: 20%">Download</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>AFLOW Prototypes</td>
+                                        <td>~60,000</td>
+                                        <td>0.4 GB</td>
+                                        <td>2023-07-06</td>
+                                        <td>
+                                            <a href="https://assets.simmate.org/AflowPrototype-2023-07-06.csv.zip"
+                                               class="btn btn-sm btn-primary me-1"><i class="bi bi-download"></i> CSV</a>
+                                            <a href="https://assets.simmate.org/AflowPrototype-2023-07-06.parquet.zip"
+                                               class="btn btn-sm btn-primary"><i class="bi bi-download"></i> Parquet</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Crystallography Open Database (COD)</td>
+                                        <td>~500,000</td>
+                                        <td>3.5 GB</td>
+                                        <td>2026-03-20</td>
+                                        <td>
+                                            <a href="https://assets.simmate.org/CodStructure-2026-03-20.csv.zip"
+                                               class="btn btn-sm btn-primary me-1"><i class="bi bi-download"></i> CSV</a>
+                                            <a href="https://assets.simmate.org/CodStructure-2026-03-20.parquet.zip"
+                                               class="btn btn-sm btn-primary"><i class="bi bi-download"></i> Parquet</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>JARVIS</td>
+                                        <td>~80,000</td>
+                                        <td>0.8 GB</td>
+                                        <td>2026-03-20</td>
+                                        <td>
+                                            <a href="https://assets.simmate.org/JarvisStructure-2026-03-20.csv.zip"
+                                               class="btn btn-sm btn-primary me-1"><i class="bi bi-download"></i> CSV</a>
+                                            <a href="https://assets.simmate.org/JarvisStructure-2026-03-20.parquet.zip"
+                                               class="btn btn-sm btn-primary"><i class="bi bi-download"></i> Parquet</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Materials Project</td>
+                                        <td>~154,000</td>
+                                        <td>1.2 GB</td>
+                                        <td>2026-03-20</td>
+                                        <td>
+                                            <a href="https://assets.simmate.org/MatprojStructure-2026-03-20.csv.zip"
+                                               class="btn btn-sm btn-primary me-1"><i class="bi bi-download"></i> CSV</a>
+                                            <a href="https://assets.simmate.org/MatprojStructure-2026-03-20.parquet.zip"
+                                               class="btn btn-sm btn-primary"><i class="bi bi-download"></i> Parquet</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Open Quantum Materials Database (OQMD)</td>
+                                        <td>~1,000,000</td>
+                                        <td>8.1 GB</td>
+                                        <td>2026-03-29</td>
+                                        <td>
+                                            <a href="https://assets.simmate.org/OqmdStructure-2026-03-29.csv.zip"
+                                               class="btn btn-sm btn-primary me-1"><i class="bi bi-download"></i> CSV</a>
+                                            <a href="https://assets.simmate.org/OqmdStructure-2026-03-29.parquet.zip"
+                                               class="btn btn-sm btn-primary"><i class="bi bi-download"></i> Parquet</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h4 class="mt-4">
+                            <i class="bi bi-nut"></i> Molecular Catalogs
+                        </h4>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-striped align-middle">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th scope="col" style="width: 35%">Dataset</th>
+                                        <th scope="col" style="width: 15%">Total Rows</th>
+                                        <th scope="col" style="width: 15%">Size</th>
+                                        <th scope="col" style="width: 15%">Last Updated</th>
+                                        <th scope="col" style="width: 20%">Download</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>ChEMBL</td>
+                                        <td>~2,400,000</td>
+                                        <td>4.5 GB</td>
+                                        <td>2026-03-22</td>
+                                        <td>
+                                            <a href="https://assets.simmate.org/ChemblMolecule-2026-03-22.csv.zip"
+                                               class="btn btn-sm btn-primary me-1"><i class="bi bi-download"></i> CSV</a>
+                                            <a href="https://assets.simmate.org/ChemblMolecule-2026-03-22.parquet.zip"
+                                               class="btn btn-sm btn-primary"><i class="bi bi-download"></i> Parquet</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

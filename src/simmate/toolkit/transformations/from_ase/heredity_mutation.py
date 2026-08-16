@@ -2,8 +2,8 @@
 
 import numpy
 from ase import Atoms
-from ase.ga.cutandsplicepairing import CutAndSplicePairing
-from ase.ga.utilities import CellBounds, closest_distances_generator
+from ase_ga.cutandsplicepairing import CutAndSplicePairing
+from ase_ga.utilities import CellBounds, closest_distances_generator
 from pymatgen.io.ase import AseAtomsAdaptor
 
 from simmate.toolkit import Structure

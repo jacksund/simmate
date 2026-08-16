@@ -31,14 +31,14 @@ class ChemblClient:
         """
         target_dir = get_directory(settings.config_directory / "chembl")
 
-        version = 36
+        version = 37
         db_name = f"chembl_{version}"
         db_filename = target_dir / f"{db_name}.db"
 
         if db_filename.exists():
             return db_filename
 
-        base_url = "https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/"
+        base_url = f"https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{version}/"
         filename = f"{db_name}_sqlite.tar.gz"
         download_filename = target_dir / filename
 

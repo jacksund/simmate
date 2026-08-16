@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from ase.ga.standardmutations import MirrorMutation as ASEMirrorMutation
-from ase.ga.utilities import closest_distances_generator
+from ase_ga.standardmutations import MirrorMutation as ASEMirrorMutation
+from ase_ga.utilities import closest_distances_generator
 from pymatgen.io.ase import AseAtomsAdaptor
 
 from simmate.toolkit import Structure

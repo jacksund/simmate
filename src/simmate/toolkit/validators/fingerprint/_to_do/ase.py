@@ -20,7 +20,7 @@ class ASEFingerprint:
 
         # we can assume the user has ASE installed because it is a dependency of PyMatgen
         #!!! it looks like the ase.ga module is actively changing so version may introduce errors
-        from ase.ga.ofp_comparator import OFPComparator
+        from ase_ga.ofp_comparator import OFPComparator
 
         self.featurizer = OFPComparator(  # n_top=None, # atoms to optimize. None is all of them
             # dE=1.0, # energy difference to be considered different (not used here b/c we dont have a app)

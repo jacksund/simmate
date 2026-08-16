@@ -43,7 +43,7 @@ class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
 
     # -------------------------------------------------------------------------
 
-    remote_archive_link = "https://assets.simmate.org/MatprojStructure-2026-03-20.zip"
+    remote_archive_link = "https://assets.simmate.org/materials_project/archive/MatprojStructure-minimal-2026-03-20.csv.zip"
     archive_fields = [
         "energy_uncorrected",
         "band_gap",

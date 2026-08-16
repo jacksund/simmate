@@ -207,4 +207,60 @@
 - name: SIMMATE__CHEMSPACE__FTP__PASSWORD
   value: {{ .Values.simmate.chemspace.ftp.password | quote }}
 {{- end }}
+{{- if and .Values.simmate.website (hasKey .Values.simmate.website "show_finances") }}
+- name: SIMMATE__WEBSITE__SHOW_FINANCES
+  value: {{ .Values.simmate.website.show_finances | quote }}
+{{- end }}
+{{- if and .Values.simmate.chemspace .Values.simmate.chemspace.datastore_dir }}
+- name: SIMMATE__CHEMSPACE__DATASTORE_DIR
+  value: {{ .Values.simmate.chemspace.datastore_dir | quote }}
+{{- end }}
+{{- if and .Values.simmate.materials_project .Values.simmate.materials_project.api_key }}
+- name: SIMMATE__MATERIALS_PROJECT__API_KEY
+  value: {{ .Values.simmate.materials_project.api_key | quote }}
+{{- end }}
+{{- if .Values.simmate.scratch_dir }}
+- name: SIMMATE__SCRATCH_DIR
+  value: {{ .Values.simmate.scratch_dir | quote }}
+{{- end }}
+{{- if and .Values.simmate.bader .Values.simmate.bader.docker (hasKey .Values.simmate.bader.docker "enable") }}
+- name: SIMMATE__BADER__DOCKER__ENABLE
+  value: {{ .Values.simmate.bader.docker.enable | quote }}
+{{- end }}
+{{- if and .Values.simmate.quantum_espresso .Values.simmate.quantum_espresso.docker (hasKey .Values.simmate.quantum_espresso.docker "enable") }}
+- name: SIMMATE__QUANTUM_ESPRESSO__DOCKER__ENABLE
+  value: {{ .Values.simmate.quantum_espresso.docker.enable | quote }}
+{{- end }}
+{{- if and .Values.simmate.vasp .Values.simmate.vasp.docker (hasKey .Values.simmate.vasp.docker "enable") }}
+- name: SIMMATE__VASP__DOCKER__ENABLE
+  value: {{ .Values.simmate.vasp.docker.enable | quote }}
+{{- end }}
+{{- if and .Values.simmate.s3 .Values.simmate.s3.bucket }}
+- name: SIMMATE__S3__BUCKET
+  value: {{ .Values.simmate.s3.bucket | quote }}
+{{- end }}
+{{- if and .Values.simmate.s3 .Values.simmate.s3.access_key }}
+- name: SIMMATE__S3__ACCESS_KEY
+  value: {{ .Values.simmate.s3.access_key | quote }}
+{{- end }}
+{{- if and .Values.simmate.s3 .Values.simmate.s3.secret_key }}
+- name: SIMMATE__S3__SECRET_KEY
+  value: {{ .Values.simmate.s3.secret_key | quote }}
+{{- end }}
+{{- if and .Values.simmate.s3 .Values.simmate.s3.endpoint_url }}
+- name: SIMMATE__S3__ENDPOINT_URL
+  value: {{ .Values.simmate.s3.endpoint_url | quote }}
+{{- end }}
+{{- if and .Values.simmate.s3 .Values.simmate.s3.region }}
+- name: SIMMATE__S3__REGION
+  value: {{ .Values.simmate.s3.region | quote }}
+{{- end }}
+{{- if and .Values.simmate.s3 (hasKey .Values.simmate.s3 "verify") }}
+- name: SIMMATE__S3__VERIFY
+  value: {{ .Values.simmate.s3.verify | quote }}
+{{- end }}
+{{- if and .Values.simmate.s3 .Values.simmate.s3.signature_version }}
+- name: SIMMATE__S3__SIGNATURE_VERSION
+  value: {{ .Values.simmate.s3.signature_version | quote }}
+{{- end }}
 {{- end }}

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from ase import Atoms
-from ase.ga.startgenerator import StartGenerator
-from ase.ga.utilities import CellBounds, closest_distances_generator
+from ase_ga.startgenerator import StartGenerator
+from ase_ga.utilities import CellBounds, closest_distances_generator
 from pymatgen.io.ase import AseAtomsAdaptor
 
 from simmate.toolkit import Composition, Structure
