@@ -29,7 +29,7 @@ class ChemblClient:
         Returns:
             Path: The path to the downloaded ChEMBL SQLite database file.
         """
-        target_dir = get_directory(settings.config_directory / "chembl")
+        target_dir = get_directory(settings.config_directory / "chembl" / "raw")
 
         version = 37
         db_name = f"chembl_{version}"

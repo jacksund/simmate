@@ -59,6 +59,19 @@ class ArchiveMixin:
 
     @classmethod
     @property
+    def archive_exclude_fieldset(cls) -> list[str]:
+        exclude_fields = []
+        for mixin in cls.get_mixins():
+            for field in getattr(mixin, "archive_fields", []):
+                if field.startswith("--"):
+                    exclude_fields.append(field.removeprefix("--"))
+        for field in getattr(cls, "archive_fields", []):
+            if field.startswith("--"):
+                exclude_fields.append(field.removeprefix("--"))
+        return list(set(exclude_fields))
+
+    @classmethod
+    @property
     def archive_fieldset(cls) -> list[str]:
         all_fields = ["id", "updated_at", "created_at", "source"]
 
@@ -69,19 +82,19 @@ class ArchiveMixin:
 
         # Otherwise we need to go through the mix-ins and add their fields to
         # the list
-        all_fields += [
-            field for mixin in cls.get_mixins() for field in mixin.archive_fields
-        ]
+        for mixin in cls.get_mixins():
+            for field in getattr(mixin, "archive_fields", []):
+                if not field.startswith("--"):
+                    all_fields.append(field)
 
-        # Sometimes a column will be disabled by adding "--" in front of the
-        # column name. For example, "--band_gap" would exclude storing the band
-        # gap in the archive. We look for any columns that start with this
-        # and then remove them
-        for field in cls.archive_fields:
-            if field.startswith("--"):
-                all_fields.remove(field.removeprefix("--"))
-            else:
+        # Gather fields from cls itself
+        for field in getattr(cls, "archive_fields", []):
+            if not field.startswith("--"):
                 all_fields.append(field)
+
+        # Remove explicitly excluded fields
+        exclude_fields = cls.archive_exclude_fieldset
+        all_fields = [f for f in all_fields if f not in exclude_fields]
 
         # Some tables delete the columns that a mixin or base table provides.
         # For example, the "source" column is deleted sometimes because
@@ -174,7 +187,8 @@ class ArchiveMixin:
                 matching_files = [
                     file
                     for file in Path.cwd().iterdir()
-                    if file.name.startswith(cls.table_name) and file.suffix == ".zip"
+                    if file.name.startswith(cls.table_name)
+                    and file.suffix in (".zip", ".parquet")
                 ]
                 # make sure there is at least one file
                 if not matching_files:
@@ -189,24 +203,19 @@ class ArchiveMixin:
             # manipulations easier below.
             filename = Path(filename).absolute()
 
-            # uncompress the zip file to the same directory that it is located in
-            shutil.unpack_archive(
-                filename,
-                extract_dir=filename.parent,
-            )
-
-            # Determine the inner file format. For old-style archives
-            # (Table-date.zip), the inner file is Table-date.csv. For new-style
-            # archives (Table-date.parquet.zip), stripping .zip gives
-            # Table-date.parquet directly.
-            inner_filename = filename.with_suffix("")  # strips .zip
-            if inner_filename.suffix == ".parquet":
-                # New-style: "Table-date.parquet.zip" → "Table-date.parquet"
-                df = polars.read_parquet(inner_filename)
+            if filename.suffix == ".parquet":
+                # Parquet files are read directly (no zip wrapper)
+                df = polars.read_parquet(filename)
             else:
-                # Old-style: "Table-date.zip" → look for "Table-date.csv"
-                inner_filename = inner_filename.with_suffix(".csv")
+                # CSV zip archive — extract and read
+                shutil.unpack_archive(
+                    filename,
+                    extract_dir=filename.parent,
+                )
+                # Handle both new (Table.csv.zip) and old (Table.zip) styles
+                inner_filename = filename.with_suffix("").with_suffix(".csv")
                 df = polars.read_csv(inner_filename)
+                inner_filename.unlink()
 
             # convert the dataframe to a list of dictionaries that we will iterate
             # through. Polars natively converts nulls to None when calling to_dicts.
@@ -226,10 +235,9 @@ class ArchiveMixin:
                 ignore_conflicts=True,
             )
 
-            # We can now delete the files. The zip file is only deleted if requested.
-            inner_filename.unlink()
+            # Delete the archive file if requested
             if delete_on_completion:
-                filename.unlink()  # the zip archive
+                filename.unlink()
 
     @classmethod
     def load_remote_archive(
@@ -313,21 +321,23 @@ class ArchiveMixin:
     @classmethod
     def export_and_upload(
         cls,
-        formats: list[str] = None,
+        format: str = "csv",
         columns: str | list[str] = "full",
         s3_bucket: type = None,
     ):
         """
-        Exports the database table to archive files and uploads them to S3.
+        Exports the database table to an archive file and uploads it to S3.
+
+        The archive is written to the local config directory at
+        `<simmate-config>/<app>/archive/<file>` and is kept after upload.
 
         This is the primary utility for building the downloadable files
-        shown on the data explorer homepage. By default, it exports all
-        columns in both CSV and Parquet formats.
+        shown on the data explorer homepage.
 
         #### Parameters
 
-        - `formats`:
-            List of export formats. Defaults to ["csv", "parquet"].
+        - `format`:
+            The export format to use. Defaults to "csv".
 
         - `columns`:
             Which columns to include. Options are:
@@ -349,40 +359,48 @@ class ArchiveMixin:
 
         if s3_bucket is None:
             s3_bucket = SimmateS3Bucket
-        if formats is None:
-            formats = ["csv", "parquet"]
 
         app_label = cls._meta.app_label
         s3_prefix = f"{app_label}/archive"
 
-        for fmt in formats:
-            logging.info(f"Exporting {cls.table_name} as {fmt}...")
+        # Determine the local archive directory
+        archive_dir = settings.config_directory / app_label / "archive"
+        archive_dir.mkdir(parents=True, exist_ok=True)
 
-            # Use to_archive to build the file locally
-            cls.to_archive(format=fmt, columns=columns)
+        logging.info(f"Exporting {cls.table_name} as {format}...")
 
-            # Find the file that was just created (most recent match)
-            matching_files = sorted(
-                [
-                    f
-                    for f in Path.cwd().iterdir()
-                    if f.name.startswith(cls.table_name) and f.suffix == ".zip"
-                ],
-                reverse=True,
-            )
-            if not matching_files:
-                raise FileNotFoundError(
-                    f"Expected archive file for {cls.table_name} but none found."
-                )
-            archive_file = matching_files[0]
+        # Use to_archive to build the file locally in the archive directory.
+        # We pass a filename so it writes to the correct location.
+        from datetime import datetime
 
-            # Upload to S3
-            s3_key = f"{s3_prefix}/{archive_file.name}"
-            logging.info(f"Uploading {archive_file.name} to s3://{s3_key}...")
-            s3_bucket.upload_file(archive_file, s3_key)
-            logging.info(f"Uploaded {archive_file.name}")
+        today = datetime.today()
+        columns_label = (
+            "full"
+            if columns == "full"
+            else "minimal" if columns == "minimal" else "custom"
+        )
+        filename_base = "-".join(
+            [
+                cls.table_name,
+                columns_label,
+                str(today.year),
+                str(today.month).zfill(2),
+                str(today.day).zfill(2),
+            ]
+        )
+        if format == "parquet":
+            archive_file = archive_dir / f"{filename_base}.parquet"
+        elif format == "csv":
+            archive_file = archive_dir / f"{filename_base}.csv.zip"
+        else:
+            raise ValueError(f"Unknown input format: {format}")
 
-            # Clean up local file
-            archive_file.unlink()
+        cls.to_archive(filename=archive_file, format=format, columns=columns)
+
+        # Upload to S3
+        s3_key = f"{s3_prefix}/{archive_file.name}"
+        logging.info(f"Uploading {archive_file.name} to s3://{s3_key}...")
+        s3_bucket.upload_file(archive_file, s3_key)
+        logging.info(f"Uploaded {archive_file.name}")
 
         logging.info(f"Export and upload complete for {cls.table_name}.")

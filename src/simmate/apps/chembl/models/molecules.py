@@ -39,7 +39,7 @@ class ChemblMolecule(ThirdPartyData, Molecule):
     source_doi = "https://doi.org/10.1093/nar/gky1075"
     is_redistribution_allowed = True
 
-    remote_archive_link = "https://assets.simmate.org/chembl/archive/ChemblMolecule-minimal-2026-03-22.csv.zip"
+    remote_archive_link = "https://assets.simmate.org/chembl/archive/ChemblMolecule-minimal-2026-08-17.csv.zip"
     archive_fields = [
         "chembl_id",
         "is_invalid_molecule",
@@ -51,6 +51,13 @@ class ChemblMolecule(ThirdPartyData, Molecule):
         "num_h_acceptors_lipinski",
         "num_h_donors_lipinski",
         "natural_product_likeness",
+        # to keep size down
+        "--created_at",
+        "--updated_at",
+        "--molecule",
+        "--molecule_original",
+        "--inchi",
+        "--is_3d",
     ]
 
     # Note: 'id' is set to the 'molregno' from the ChEMBL database.

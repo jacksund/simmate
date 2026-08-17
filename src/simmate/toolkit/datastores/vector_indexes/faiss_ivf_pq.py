@@ -3,6 +3,9 @@
 import logging
 from pathlib import Path
 
+# Silence noisy initialization logs from faiss (AVX2 fallback etc)
+logging.getLogger("faiss.loader").setLevel(logging.ERROR)
+
 import faiss
 import numpy
 import polars
