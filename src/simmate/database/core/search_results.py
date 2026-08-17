@@ -217,7 +217,7 @@ class SearchResults(models.QuerySet):
         - `filename`:
             The filename to write the zip file to. By default, None will make
             a filename named MyExampleTableName-2022-01-25.zip (for CSV) or
-            MyExampleTableName-2022-01-25.parquet.zip (for Parquet), where the
+            MyExampleTableName-2022-01-25.parquet (for Parquet), where the
             date will be the current day (for versioning).
 
         - `format`:
@@ -236,6 +236,9 @@ class SearchResults(models.QuerySet):
             columns_label = "minimal"
         elif columns == "full":
             column_list = self.model.get_column_names()
+            if hasattr(self.model, "archive_exclude_fieldset"):
+                exclude_fields = self.model.archive_exclude_fieldset
+                column_list = [c for c in column_list if c not in exclude_fields]
             columns_label = "full"
         else:
             column_list = columns

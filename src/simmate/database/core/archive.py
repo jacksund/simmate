@@ -59,6 +59,19 @@ class ArchiveMixin:
 
     @classmethod
     @property
+    def archive_exclude_fieldset(cls) -> list[str]:
+        exclude_fields = []
+        for mixin in cls.get_mixins():
+            for field in getattr(mixin, "archive_fields", []):
+                if field.startswith("--"):
+                    exclude_fields.append(field.removeprefix("--"))
+        for field in getattr(cls, "archive_fields", []):
+            if field.startswith("--"):
+                exclude_fields.append(field.removeprefix("--"))
+        return list(set(exclude_fields))
+
+    @classmethod
+    @property
     def archive_fieldset(cls) -> list[str]:
         all_fields = ["id", "updated_at", "created_at", "source"]
 
@@ -69,19 +82,19 @@ class ArchiveMixin:
 
         # Otherwise we need to go through the mix-ins and add their fields to
         # the list
-        all_fields += [
-            field for mixin in cls.get_mixins() for field in mixin.archive_fields
-        ]
+        for mixin in cls.get_mixins():
+            for field in getattr(mixin, "archive_fields", []):
+                if not field.startswith("--"):
+                    all_fields.append(field)
 
-        # Sometimes a column will be disabled by adding "--" in front of the
-        # column name. For example, "--band_gap" would exclude storing the band
-        # gap in the archive. We look for any columns that start with this
-        # and then remove them
-        for field in cls.archive_fields:
-            if field.startswith("--"):
-                all_fields.remove(field.removeprefix("--"))
-            else:
+        # Gather fields from cls itself
+        for field in getattr(cls, "archive_fields", []):
+            if not field.startswith("--"):
                 all_fields.append(field)
+
+        # Remove explicitly excluded fields
+        exclude_fields = cls.archive_exclude_fieldset
+        all_fields = [f for f in all_fields if f not in exclude_fields]
 
         # Some tables delete the columns that a mixin or base table provides.
         # For example, the "source" column is deleted sometimes because

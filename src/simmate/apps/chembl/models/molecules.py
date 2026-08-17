@@ -51,6 +51,13 @@ class ChemblMolecule(ThirdPartyData, Molecule):
         "num_h_acceptors_lipinski",
         "num_h_donors_lipinski",
         "natural_product_likeness",
+        # to keep size down
+        "--created_at",
+        "--updated_at",
+        "--molecule",
+        "--molecule_original",
+        "--inchi",
+        "--is_3d",
     ]
 
     # Note: 'id' is set to the 'molregno' from the ChEMBL database.

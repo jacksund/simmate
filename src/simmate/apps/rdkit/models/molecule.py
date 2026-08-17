@@ -115,7 +115,13 @@ class Molecule(DatabaseTable):
         )
 
     exclude_from_summary = ["molecule"]
-    archive_fields = ["molecule", "molecule_original"]
+    archive_fields = [
+        "molecule",
+        "molecule_original",
+        "--rdkit_mol",
+        "--fingerprint_morganbv",
+        "--functional_groups",
+    ]
 
     # -------------------------------- MANAGER --------------------------------
 
