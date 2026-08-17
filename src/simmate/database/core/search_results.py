@@ -253,37 +253,36 @@ class SearchResults(models.QuerySet):
                     str(today.day).zfill(2),
                 ]
             )
-            filename = filename_base + f".{format}.zip"
+            if format == "parquet":
+                filename = filename_base + ".parquet"
+            else:
+                filename = filename_base + f".{format}.zip"
 
         filename = Path(filename)
 
-        # Convert the queryset to a dataframe
-        # We use pandas for CSV because polars doesn't natively support nested data in CSVs
-        engine = "polars" if format == "parquet" else "pandas"
-        df = self.to_dataframe(columns=column_list, engine=engine)
-
-        # Write the inner data file and compress to zip
         if format == "csv":
-            inner_filename = filename.with_suffix(".csv")
+            # Convert to pandas and write CSV, then zip compress
+            df = self.to_dataframe(columns=column_list, engine="pandas")
+            inner_filename = filename.with_suffix("").with_suffix(".csv")
             df.to_csv(inner_filename, index=False)
+            shutil.make_archive(
+                base_name=str(filename.with_suffix("")),
+                format="zip",
+                root_dir=inner_filename.parent,
+                base_dir=inner_filename.name,
+            )
+            inner_filename.unlink()
+
         elif format == "parquet":
-            # For "Table-date.parquet.zip", .with_suffix("") gives "Table-date.parquet"
-            inner_filename = filename.with_suffix("")
-            df.write_parquet(inner_filename)
+            # Write parquet directly — no zip wrapper since parquet has
+            # built-in compression.
+            df = self.to_dataframe(columns=column_list, engine="polars")
+            df.write_parquet(filename)
+
         else:
             raise ValueError(
                 f"Unsupported archive format: {format}. Use 'csv' or 'parquet'."
             )
-
-        shutil.make_archive(
-            base_name=str(filename.with_suffix("")),
-            format="zip",
-            root_dir=str(inner_filename.absolute().parent),
-            base_dir=inner_filename.name,
-        )
-
-        # Clean up the uncompressed file
-        inner_filename.unlink()
 
     def to_api_dict(
         self, next_url: str = None, previous_url: str = None, **kwargs

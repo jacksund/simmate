@@ -174,7 +174,8 @@ class ArchiveMixin:
                 matching_files = [
                     file
                     for file in Path.cwd().iterdir()
-                    if file.name.startswith(cls.table_name) and file.suffix == ".zip"
+                    if file.name.startswith(cls.table_name)
+                    and file.suffix in (".zip", ".parquet")
                 ]
                 # make sure there is at least one file
                 if not matching_files:
@@ -189,24 +190,19 @@ class ArchiveMixin:
             # manipulations easier below.
             filename = Path(filename).absolute()
 
-            # uncompress the zip file to the same directory that it is located in
-            shutil.unpack_archive(
-                filename,
-                extract_dir=filename.parent,
-            )
-
-            # Determine the inner file format. For old-style archives
-            # (Table-date.zip), the inner file is Table-date.csv. For new-style
-            # archives (Table-date.parquet.zip), stripping .zip gives
-            # Table-date.parquet directly.
-            inner_filename = filename.with_suffix("")  # strips .zip
-            if inner_filename.suffix == ".parquet":
-                # New-style: "Table-date.parquet.zip" → "Table-date.parquet"
-                df = polars.read_parquet(inner_filename)
+            if filename.suffix == ".parquet":
+                # Parquet files are read directly (no zip wrapper)
+                df = polars.read_parquet(filename)
             else:
-                # Old-style: "Table-date.zip" → look for "Table-date.csv"
-                inner_filename = inner_filename.with_suffix(".csv")
+                # CSV zip archive — extract and read
+                shutil.unpack_archive(
+                    filename,
+                    extract_dir=filename.parent,
+                )
+                # Handle both new (Table.csv.zip) and old (Table.zip) styles
+                inner_filename = filename.with_suffix("").with_suffix(".csv")
                 df = polars.read_csv(inner_filename)
+                inner_filename.unlink()
 
             # convert the dataframe to a list of dictionaries that we will iterate
             # through. Polars natively converts nulls to None when calling to_dicts.
@@ -226,10 +222,9 @@ class ArchiveMixin:
                 ignore_conflicts=True,
             )
 
-            # We can now delete the files. The zip file is only deleted if requested.
-            inner_filename.unlink()
+            # Delete the archive file if requested
             if delete_on_completion:
-                filename.unlink()  # the zip archive
+                filename.unlink()
 
     @classmethod
     def load_remote_archive(
@@ -380,7 +375,12 @@ class ArchiveMixin:
                 str(today.day).zfill(2),
             ]
         )
-        archive_file = archive_dir / f"{filename_base}.{format}.zip"
+        if format == "parquet":
+            archive_file = archive_dir / f"{filename_base}.parquet"
+        elif format == "csv":
+            archive_file = archive_dir / f"{filename_base}.csv.zip"
+        else:
+            raise ValueError(f"Unknown input format: {format}")
 
         cls.to_archive(filename=archive_file, format=format, columns=columns)
 
