@@ -38,7 +38,7 @@ class JarvisStructure(ThirdPartyData, Structure):
 
     # -------------------------------------------------------------------------
 
-    remote_archive_link = "https://assets.simmate.org/jarvis/archive/JarvisStructure-minimal-2026-03-20.csv.zip"
+    remote_archive_link = "https://assets.simmate.org/jarvis/archive/JarvisStructure-minimal-2026-08-17.csv.zip"
     archive_fields = ["energy_above_hull"]
 
     # -------------------------------------------------------------------------

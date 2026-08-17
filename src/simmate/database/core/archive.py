@@ -313,21 +313,23 @@ class ArchiveMixin:
     @classmethod
     def export_and_upload(
         cls,
-        formats: list[str] = None,
+        format: str = "csv",
         columns: str | list[str] = "full",
         s3_bucket: type = None,
     ):
         """
-        Exports the database table to archive files and uploads them to S3.
+        Exports the database table to an archive file and uploads it to S3.
+
+        The archive is written to the local config directory at
+        `<simmate-config>/<app>/archive/<file>` and is kept after upload.
 
         This is the primary utility for building the downloadable files
-        shown on the data explorer homepage. By default, it exports all
-        columns in both CSV and Parquet formats.
+        shown on the data explorer homepage.
 
         #### Parameters
 
-        - `formats`:
-            List of export formats. Defaults to ["csv", "parquet"].
+        - `format`:
+            The export format to use. Defaults to "csv".
 
         - `columns`:
             Which columns to include. Options are:
@@ -349,40 +351,43 @@ class ArchiveMixin:
 
         if s3_bucket is None:
             s3_bucket = SimmateS3Bucket
-        if formats is None:
-            formats = ["csv", "parquet"]
 
         app_label = cls._meta.app_label
         s3_prefix = f"{app_label}/archive"
 
-        for fmt in formats:
-            logging.info(f"Exporting {cls.table_name} as {fmt}...")
+        # Determine the local archive directory
+        archive_dir = settings.config_directory / app_label / "archive"
+        archive_dir.mkdir(parents=True, exist_ok=True)
 
-            # Use to_archive to build the file locally
-            cls.to_archive(format=fmt, columns=columns)
+        logging.info(f"Exporting {cls.table_name} as {format}...")
 
-            # Find the file that was just created (most recent match)
-            matching_files = sorted(
-                [
-                    f
-                    for f in Path.cwd().iterdir()
-                    if f.name.startswith(cls.table_name) and f.suffix == ".zip"
-                ],
-                reverse=True,
-            )
-            if not matching_files:
-                raise FileNotFoundError(
-                    f"Expected archive file for {cls.table_name} but none found."
-                )
-            archive_file = matching_files[0]
+        # Use to_archive to build the file locally in the archive directory.
+        # We pass a filename so it writes to the correct location.
+        from datetime import datetime
 
-            # Upload to S3
-            s3_key = f"{s3_prefix}/{archive_file.name}"
-            logging.info(f"Uploading {archive_file.name} to s3://{s3_key}...")
-            s3_bucket.upload_file(archive_file, s3_key)
-            logging.info(f"Uploaded {archive_file.name}")
+        today = datetime.today()
+        columns_label = (
+            "full"
+            if columns == "full"
+            else "minimal" if columns == "minimal" else "custom"
+        )
+        filename_base = "-".join(
+            [
+                cls.table_name,
+                columns_label,
+                str(today.year),
+                str(today.month).zfill(2),
+                str(today.day).zfill(2),
+            ]
+        )
+        archive_file = archive_dir / f"{filename_base}.{format}.zip"
 
-            # Clean up local file
-            archive_file.unlink()
+        cls.to_archive(filename=archive_file, format=format, columns=columns)
+
+        # Upload to S3
+        s3_key = f"{s3_prefix}/{archive_file.name}"
+        logging.info(f"Uploading {archive_file.name} to s3://{s3_key}...")
+        s3_bucket.upload_file(archive_file, s3_key)
+        logging.info(f"Uploaded {archive_file.name}")
 
         logging.info(f"Export and upload complete for {cls.table_name}.")
