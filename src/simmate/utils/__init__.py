@@ -2,7 +2,6 @@
 
 from .dataframes import filter_pandas_df, filter_polars_df
 from .files import (
-    archive_old_runs,
     chunk_read,
     copy_directory,
     copy_files_from_directory,
@@ -10,7 +9,6 @@ from .files import (
     empty_directory,
     get_directory,
     make_archive,
-    make_error_archive,
 )
 from .other import (
     bypass_nones,

@@ -349,3 +349,26 @@ def run_cloud(
     from simmate.workflows import Workflow
 
     Workflow.run_cloud_from_file(filename)
+
+
+@workflows_app.command()
+def archive_old_runs(
+    directory: Path = typer.Option(
+        Path.cwd(),
+        help="The directory to search for old simulation folders.",
+    ),
+    time_cutoff: float = typer.Option(
+        3 * 7 * 24 * 60 * 60,  # equal to 3 weeks
+        help="The minimum age (in seconds) of a folder before it is considered 'old' and archived. Defaults to 3 weeks.",
+    ),
+):
+    """
+    Compresses old simulation folders (matching `simmate-task-*`) into ZIP archives.
+
+    This helps keep your project directory clean while preserving data from
+    older runs.
+    """
+
+    from simmate.workflows.utils import archive_old_runs as archive_utility
+
+    archive_utility(directory, time_cutoff)
