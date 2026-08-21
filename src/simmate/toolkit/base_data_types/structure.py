@@ -178,7 +178,7 @@ class Structure(PymatgenStructure):
     def to_threejs_json(
         self,
         add_edge_elements: bool = True,
-        bonding_method: str = "CrystalNN",
+        bonding_method: str = "none",
         sanitize: bool = False,
         supercell: int = None,
         radius_mode: str | float = 1.00,  # number means all atoms fixed
@@ -195,10 +195,14 @@ class Structure(PymatgenStructure):
             raise Exception(f"Unknown color map: {color_map}")
 
         render_structure = self.get_sanitized_structure() if sanitize else self.copy()
-        try:
-            render_structure.add_oxidation_state_by_guess()
-        except ValueError:
-            pass  # Fails for disordered structures or when balance is impossible
+
+        # We only need oxidation states if we are rendering ionic radii
+        if radius_mode == "ionic":
+            try:
+                render_structure.add_oxidation_state_by_guess()
+            except ValueError:
+                pass  # Fails for disordered structures or when balance is impossible
+
         if supercell:
             render_structure.make_supercell(supercell)
 
@@ -332,42 +336,50 @@ class Structure(PymatgenStructure):
         # looks bad and actually only want to see "extended" bonded atoms
         # via a supercell. So we don't add them.
 
+        bonds = []
+
         # Now we have sites_to_draw (and jimage reference) and can generate
         # bonds that occur between this list of sites
-        if bonding_method == "CrystalNN":
-            # OPTIMIZE: this is very slow for >30 atoms
-            bond_engine = CrystalNN()
-        else:
-            raise Exception(f"Unknown bonding_method given: {bonding_method}")
-        structure_graph = bond_engine.get_bonded_structure(render_structure)
+        if bonding_method and bonding_method.lower() != "none":
+            if bonding_method == "CrystalNN":
+                # OPTIMIZE: this is very slow for >30 atoms
+                bond_engine = CrystalNN()
+                # Use on_disorder="take_max_species" if possible for disordered structures
+                try:
+                    structure_graph = bond_engine.get_bonded_structure(
+                        render_structure, on_disorder="take_max_species"
+                    )
+                except TypeError:
+                    structure_graph = bond_engine.get_bonded_structure(render_structure)
+            else:
+                raise Exception(f"Unknown bonding_method given: {bonding_method}")
 
-        bonds = []
-        jimage_keys = list(jimage_ref.keys())
+            seen_bonds = set()
 
-        # Or should I iterate all of them? gives 27 unique vectors
-        # for jimage_vector in itertools.product([-1, 0, 1], repeat=3)
-        jimage_vector = (0, 0, 0)
-        for site_index in range(len(structure_graph.structure)):
+            # Or should I iterate all of them? gives 27 unique vectors
+            # for jimage_vector in itertools.product([-1, 0, 1], repeat=3)
+            jimage_vector = (0, 0, 0)
+            for site_index in range(len(structure_graph.structure)):
 
-            # we only care about bonds/atoms if they are in our sites_to_draw
-            ref_key = f"{site_index}-{jimage_vector}"
-            if ref_key not in jimage_keys:
-                continue
+                # we only care about bonds/atoms if they are in our sites_to_draw
+                ref_key = f"{site_index}-{jimage_vector}"
+                if ref_key not in jimage_ref:
+                    continue
 
-            connected_sites = structure_graph.get_connected_sites(site_index)
-            for connected_site in connected_sites:
+                connected_sites = structure_graph.get_connected_sites(site_index)
+                for connected_site in connected_sites:
 
-                ref_key2 = f"{connected_site.index}-{connected_site.jimage}"
-                # same as above, we only want bonds when connected site is
-                # also in our sites_to_draw
-                if ref_key2 in jimage_keys:
-                    bond = [
-                        jimage_ref[ref_key],
-                        jimage_ref[ref_key2],
-                    ]
-                    bond.sort()
-                    if bond not in bonds:
-                        bonds.append(bond)
+                    ref_key2 = f"{connected_site.index}-{connected_site.jimage}"
+                    # same as above, we only want bonds when connected site is
+                    # also in our sites_to_draw
+                    if ref_key2 in jimage_ref:
+                        b1 = jimage_ref[ref_key]
+                        b2 = jimage_ref[ref_key2]
+                        bond_tuple = (b1, b2) if b1 < b2 else (b2, b1)
+
+                        if bond_tuple not in seen_bonds:
+                            seen_bonds.add(bond_tuple)
+                            bonds.append(list(bond_tuple))
 
         data = {
             "lattice": render_structure.lattice.matrix.tolist(),

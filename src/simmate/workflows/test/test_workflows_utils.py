@@ -293,3 +293,37 @@ def test_load_results_from_directories(tmp_path):
     )
 
     load_results_from_directories(base_directory=tmp_path)
+
+
+def test_archive_old_runs(tmp_path):
+    from pathlib import Path
+
+    from simmate.workflows.utils import archive_old_runs
+
+    copy_test_files(
+        tmp_path,
+        test_directory=Path(__file__).parents[2] / "utils" / "test" / "test_files.py",
+        test_folder="to_archive",
+    )
+
+    archive_old_runs(tmp_path, time_cutoff=0)
+    assert (tmp_path / "simmate-task-1.zip").exists()
+    assert (tmp_path / "simmate-task-2.zip").exists()
+
+
+def test_make_error_archive(tmp_path):
+    from pathlib import Path
+
+    from simmate.workflows.utils import make_error_archive
+
+    copy_test_files(
+        tmp_path,
+        test_directory=Path(__file__).parents[2] / "utils" / "test" / "test_files.py",
+        test_folder="to_archive",
+    )
+
+    make_error_archive(tmp_path)
+    assert (tmp_path / "simmate_attempt_01.zip").exists()
+
+    make_error_archive(tmp_path)
+    assert (tmp_path / "simmate_attempt_02.zip").exists()

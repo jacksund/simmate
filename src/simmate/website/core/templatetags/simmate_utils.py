@@ -160,9 +160,13 @@ def draw_structure(
         div_id = uuid.uuid4().hex
 
     if isinstance(structure, DatabaseStructure):
+        if not getattr(structure, "structure", None):
+            return {"error": "Structure data is missing."}
         structure = structure.to_toolkit()
     elif isinstance(structure, ToolkitStructure):
         pass  # already good to go with toolkit
+    elif not structure:
+        return {"error": "No structure provided."}
     else:
         raise Exception(f"Unknown structure type provided: {type(structure)}")
 

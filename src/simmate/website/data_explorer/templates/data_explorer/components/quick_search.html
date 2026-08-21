@@ -10,6 +10,14 @@
                    placeholder="Search by description, formula, or SMILES..."
                    value="{{ component.search_query }}"
                    {% htmx_post indicator="#loading-spinner-corner" %}>
+            {% if component.search_query %}
+                <button class="btn btn-outline-secondary px-3 shadow-none border-0 bg-white"
+                        type="button"
+                        title="Clear search"
+                        {% htmx_post method_name="reset_search" trigger="click" indicator="#loading-spinner-corner" %}>
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            {% endif %}
             <button class="btn btn-primary px-4 fw-bold shadow-none"
                     type="button"
                     {% htmx_post method_name="run_search" trigger="click" indicator="#loading-spinner-corner" %}>
@@ -43,14 +51,6 @@
                         <i class="bi bi-hexagon me-1"></i> Sketcher
                     </button>
                 </li>
-                <li class="nav-item">
-                    <button type="button"
-                            class="nav-link rounded-pill px-4 {% if component.active_panel == 'upload' %}active{% else %}text-secondary{% endif %}"
-                            hx-vals='{"panel": "upload"}'
-                            {% htmx_post method_name="toggle_panel" trigger="click" indicator="#loading-spinner-corner" %}>
-                        <i class="bi bi-upload me-1"></i> Upload
-                    </button>
-                </li>
             </ul>
         </div>
         <!-- Dynamic Panel Content -->
@@ -60,8 +60,6 @@
                 {% htmx_periodic_table_input name="search_query" %}
             {% elif component.active_panel == 'sketcher' %}
                 {% htmx_molecule_input name="molecule" label="Draw Molecule" %}
-            {% elif component.active_panel == 'upload' %}
-                {% htmx_structure_input name="structure" label="Upload Structure" allow_database_input=False %}
             {% elif component.active_panel == 'examples' %}
                 <div class="mb-4">
                     <h6 class="fw-bold text-dark">

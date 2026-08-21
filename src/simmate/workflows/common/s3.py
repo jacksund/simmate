@@ -10,7 +10,8 @@ from pathlib import Path
 
 import pandas
 
-from simmate.utils import get_directory, make_error_archive
+from simmate.utils import get_directory
+from simmate.workflows.utils import make_error_archive
 
 from ..core import ErrorHandler, Workflow
 

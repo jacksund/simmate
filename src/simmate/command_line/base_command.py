@@ -13,7 +13,6 @@ from simmate.command_line.compute import compute_app
 from simmate.command_line.config import config_app
 from simmate.command_line.database import database_app
 from simmate.command_line.dev import dev_app
-from simmate.command_line.utils import utils_app
 from simmate.command_line.workflows import workflows_app
 
 simmate_app = typer.Typer(
@@ -124,4 +123,3 @@ simmate_app.add_typer(database_app, name="database")
 simmate_app.add_typer(dev_app, name="dev")
 simmate_app.add_typer(compute_app, name="compute")
 simmate_app.add_typer(workflows_app, name="workflows")
-simmate_app.add_typer(utils_app, name="utils")

@@ -7,21 +7,19 @@ from simmate.website.htmx.components import HtmxComponent
 from simmate.website.htmx.components.mixins import (
     MoleculeInput,
     PeriodicTableInput,
-    StructureInput,
 )
 
 
 class QuickSearchComponent(
     HtmxComponent,
     MoleculeInput,
-    StructureInput,
     PeriodicTableInput,
 ):
     template_name = "data_explorer/components/quick_search.html"
 
     # State variables
     active_panel: str = (
-        "periodic_table"  # 'periodic_table', 'sketcher', 'upload', 'examples', None
+        "periodic_table"  # 'periodic_table', 'sketcher', 'examples', None
     )
     search_query: str = ""
     search_results: dict = None
@@ -91,6 +89,12 @@ class QuickSearchComponent(
 
         self.search_results = results
 
+    def reset_search(self, **kwargs):
+        """Clears the search query, results, and restores the default panel."""
+        self.search_query = ""
+        self.search_results = None
+        self.active_panel = "periodic_table"
+
     def toggle_panel(self, **kwargs):
         """Toggles the active input helper panel."""
         panel = self.post_data.get("panel")
@@ -113,9 +117,3 @@ class QuickSearchComponent(
         mol = self.form_data.get("molecule")
         if mol:
             self.search_query = mol.to_smiles()
-
-    def on_change_hook__structure__file(self):
-        self.load_structure("structure")
-        struct = self.form_data.get("structure")
-        if struct:
-            self.search_query = struct.composition.reduced_formula
