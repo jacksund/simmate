@@ -89,6 +89,12 @@ class QuickSearchComponent(
 
         self.search_results = results
 
+    def reset_search(self, **kwargs):
+        """Clears the search query, results, and restores the default panel."""
+        self.search_query = ""
+        self.search_results = None
+        self.active_panel = "periodic_table"
+
     def toggle_panel(self, **kwargs):
         """Toggles the active input helper panel."""
         panel = self.post_data.get("panel")

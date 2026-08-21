@@ -26,6 +26,8 @@ class HtmxComponent:
 
     template_name: str = None
 
+    component_type: str = None
+
     # -------------------------------------------------------------------------
 
     component_id: str = None

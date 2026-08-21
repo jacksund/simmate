@@ -10,6 +10,14 @@
                    placeholder="Search by description, formula, or SMILES..."
                    value="{{ component.search_query }}"
                    {% htmx_post indicator="#loading-spinner-corner" %}>
+            {% if component.search_query %}
+                <button class="btn btn-outline-secondary px-3 shadow-none border-0 bg-white"
+                        type="button"
+                        title="Clear search"
+                        {% htmx_post method_name="reset_search" trigger="click" indicator="#loading-spinner-corner" %}>
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            {% endif %}
             <button class="btn btn-primary px-4 fw-bold shadow-none"
                     type="button"
                     {% htmx_post method_name="run_search" trigger="click" indicator="#loading-spinner-corner" %}>
