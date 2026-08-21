@@ -301,47 +301,6 @@ def reset_database(
     logging.info("Success! Your database has been reset. :sparkles:")
 
 
-def dump_database_to_json(
-    filename: str = "database_dump.json",
-    exclude: list[str] = [],
-):
-    # BUG: https://stackoverflow.com/questions/67616945/
-    # os.environ["PYTHONIOENCODING"] = "utf8"  # DOESNT WORK...
-    # python -Xutf8 manage.py dumpdata > data.json  # WORKS!
-
-    # Begin writing the database to the json file.
-    logging.info("Writing all data to JSON...")
-
-    # execute the following commands to write the database to a json file
-    call_command("dumpdata", output=filename, exclude=exclude)
-
-    # Let the user know everything succeeded
-    logging.info(
-        f"Success! You should now see the file {filename} with all of your data."
-    )
-
-
-def load_database_from_json(filename: str = "database_dump.json"):
-    # Begin writing the database to the json file.
-    logging.info("Loading all data from JSON...")
-
-    # OPTIMIZE: this function is very slow. Consider speed-up options such as
-    # making this function a transaction or manually writing a bulk_create. It
-    # actually looks like django ORM takes up most of the time tough, and the actual
-    # database queries are not the bottleneck...
-
-    # execute the following commands to build the database
-    # BUG: contenttypes gives issues because a migrated database already has these
-    # set. Simply ignore this table and everything works. The contenttypes is
-    # simply a table that lists all of our different models.
-    call_command("loaddata", filename, exclude=["contenttypes"])
-
-    # Let the user know everything succeeded
-    logging.info(
-        f"Success! You now have all the data from {filename} available in your database."
-    )
-
-
 def get_all_table_names() -> list[str]:
     """
     Returns a list of all database table names as they appear in the SQL db

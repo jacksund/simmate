@@ -30,17 +30,3 @@ def test_database_reset(django_db_blocker, command_line_runner):
         #     database, ["reset", "--confirm-delete", "--use_prebuilt=True"]
         # )
         # assert result.exit_code == 0
-
-
-@pytest.mark.django_db
-def test_database_dump_and_load(command_line_runner):
-    # dump the database to json
-    result = command_line_runner.invoke(database_app, ["dump-data"])
-    assert result.exit_code == 0
-
-    # load the database to json
-    result = command_line_runner.invoke(database_app, ["load-data"])
-    assert result.exit_code == 0
-
-    # delete the dump file
-    Path("database_dump.json").unlink()
