@@ -140,6 +140,9 @@ class DatabaseAdapter:
         # dynamically determine format from the string alone.
 
         # convert the stored string to python dictionary.
+        if not structure_string:
+            return None
+
         storage_format = "CIF" if (structure_string[0] == "#") else "POSCAR"
         # OPTIMIZE: see my comment on storing strings in the from_toolkit method above.
         # For now, I need to figure out if I used "CIF" or "POSCAR" and read the structure
