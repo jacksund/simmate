@@ -37,7 +37,7 @@ dependencies = [
     "ase>=3.28.0,<3.29.0",
     "ase-ga>=1.0.3",
     # Molecule-based dependencies
-    "rdkit>=2025.9.5,<2026.3.4",
+    "rdkit>=2025.9.5,<2026.3.6",
     "ipython>=8.22.2,<10.0.0",  # displaying rdkit images
     # Extra (smaller) dependencies & utilities
     "zstandard>=0.22.0,<1.0.0",
