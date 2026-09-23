@@ -28,7 +28,7 @@
     <td>{{ entry.asset }}</td>
     <td>
         {% if entry.asset == "ETH" %}
-            &Xi;{{ entry.amount|floatformat:6 }}
+            Ξ{{ entry.amount|floatformat:6 }}
         {% elif entry.asset == "USDC" %}
             ${{ entry.amount|floatformat:2 }}
         {% else %}

@@ -54,13 +54,12 @@
             </ul>
         </div>
         <!-- Dynamic Panel Content -->
-        <div class="panel-content {% if component.active_panel != 'periodic_table' %}mx-auto border rounded-4 p-4 bg-white shadow-sm {% if component.active_panel == 'sketcher' %}col-12{% else %}col-md-10 col-lg-8{% endif %}{% endif %}"
-             {% if not component.active_panel or component.active_panel == 'search_results' %}style="display: none;"{% endif %}>
-            {% if component.active_panel == 'periodic_table' %}
+        <div class="panel-content {% if component.active_panel != 'periodic_table' %}mx-auto border rounded-4 p-4 bg-white shadow-sm {% if component.active_panel == 'sketcher' %}col-12{% else %}col-md-10 col-lg-8{% endif %}{% endif %}" {% if not component.active_panel or component.active_panel == 'search_results' %}style="display: none;"{% endif %}>
+            {% if component.active_panel == "periodic_table" %}
                 {% htmx_periodic_table_input name="search_query" %}
-            {% elif component.active_panel == 'sketcher' %}
+            {% elif component.active_panel == "sketcher" %}
                 {% htmx_molecule_input name="molecule" label="Draw Molecule" %}
-            {% elif component.active_panel == 'examples' %}
+            {% elif component.active_panel == "examples" %}
                 <div class="mb-4">
                     <h6 class="fw-bold text-dark">
                         <i class="bi bi-chat-text me-2 text-primary"></i>Natural Language

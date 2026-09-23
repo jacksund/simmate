@@ -37,10 +37,12 @@
                         <a class="nav-link" href="{% url 'apps' %}"><i class="bi bi-speedometer2"></i> Apps</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'data_explorer:home' %}"><i class="bi bi-bar-chart"></i> Data</a>
+                        <a class="nav-link"
+                           href="{% url 'data_explorer:home' %}"><i class="bi bi-bar-chart"></i> Data</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'workflow_explorer:home' %}"><i class="bi bi-diagram-3"></i> Workflows</a>
+                        <a class="nav-link"
+                           href="{% url 'workflow_explorer:home' %}"><i class="bi bi-diagram-3"></i> Workflows</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown">
@@ -51,7 +53,8 @@
                                 <h6 class="dropdown-header">General</h6>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{% url 'about' %}"><i class="bi bi-info-circle"></i> About</a>
+                                <a class="dropdown-item"
+                                   href="{% url 'about' %}"><i class="bi bi-info-circle"></i> About</a>
                             </li>
                             <li>
                                 <a class="dropdown-item"
@@ -60,7 +63,8 @@
                             </li>
                             {% if SHOW_FINANCES %}
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'pricing' %}"><i class="bi bi-currency-dollar"></i> Pricing</a>
+                                    <a class="dropdown-item"
+                                       href="{% url 'pricing' %}"><i class="bi bi-currency-dollar"></i> Pricing</a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" href="#"><i class="bi bi-piggy-bank"></i> Finances</a>
@@ -99,7 +103,8 @@
                                 <h6 class="dropdown-header">Help</h6>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{% url 'contact' %}"><i class="bi bi-envelope"></i> Contact</a>
+                                <a class="dropdown-item"
+                                   href="{% url 'contact' %}"><i class="bi bi-envelope"></i> Contact</a>
                             </li>
                             <li>
                                 <a class="dropdown-item"
@@ -107,7 +112,8 @@
                                    target="_blank"><i class="bi bi-bug"></i> Report a Bug</a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{% url 'faqs' %}"><i class="bi bi-question-circle"></i> FAQs</a>
+                                <a class="dropdown-item"
+                                   href="{% url 'faqs' %}"><i class="bi bi-question-circle"></i> FAQs</a>
                             </li>
                         </ul>
                     </li>
@@ -157,10 +163,12 @@
                             <i class="bi bi-door-open"></i>
                         </a>
                     {% else %}
-                        <a class="btn btn-outline-light me-2" href="{% url 'account_login' %}"><i class="bi bi-key-fill"></i> Login</a>
+                        <a class="btn btn-outline-light me-2"
+                           href="{% url 'account_login' %}"><i class="bi bi-key-fill"></i> Login</a>
                         {% simmate_setting "website.require_login_internal" as REQUIRE_LOGIN_INTERNAL %}
                         {% if not REQUIRE_LOGIN_INTERNAL %}
-                            <a class="btn btn-outline-light me-2" href="{% url 'account_signup' %}"><i class="bi bi-person-plus"></i> Sign Up</a>
+                            <a class="btn btn-outline-light me-2"
+                               href="{% url 'account_signup' %}"><i class="bi bi-person-plus"></i> Sign Up</a>
                         {% endif %}
                     {% endif %}
                     {# light/dark mode button. Disabled for now #}

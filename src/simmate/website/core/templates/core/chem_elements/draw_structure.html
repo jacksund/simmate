@@ -27,7 +27,7 @@
              style="width: 100%;
                     height: 100%"></div>
         {% if not dynamic %}
-            <script type="text/javascript">
+            <script>
             const myCrystalData = {{ structure.to_threejs_json|safe }};
         
             window.addEventListener('load', () => {

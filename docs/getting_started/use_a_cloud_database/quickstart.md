@@ -21,7 +21,7 @@
         !!! tip "What is happening under the hood?"
             The command above is a shortcut for:
             ``` bash
-            docker run --name simmate_db -e POSTGRES_PASSWORD=postgres -v ~/simmate/database:/var/lib/postgresql/data -d informaticsmatters/rdkit-cartridge-debian:Release_2025_03_3
+            docker run --name simmate_db -e POSTGRES_PASSWORD=postgres -v ~/simmate/database:/var/lib/postgresql/data -d docker.io/informaticsmatters/rdkit-cartridge-debian:Release_2025_03_3
             ```
 
 3. **Update your Simmate settings.** You can update your settings directly from the command line (replace with your actual details):

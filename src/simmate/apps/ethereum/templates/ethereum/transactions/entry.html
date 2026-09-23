@@ -50,7 +50,7 @@
                                 <td>Amount</td>
                                 <td>
                                     {% if table_entry.asset == "ETH" %}
-                                        &Xi;{{ table_entry.amount|floatformat:6 }}
+                                        Ξ{{ table_entry.amount|floatformat:6 }}
                                     {% elif table_entry.asset == "USDC" %}
                                         ${{ table_entry.amount|floatformat:2 }}
                                     {% else %}

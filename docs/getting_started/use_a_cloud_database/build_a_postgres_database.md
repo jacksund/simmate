@@ -67,7 +67,7 @@ simmate database stop
         -e POSTGRES_PASSWORD=postgres \
         -v ~/simmate/database:/var/lib/postgresql/data \
         -p 5432:5432 \
-        -d informaticsmatters/rdkit-cartridge-debian:Release_2025_03_3
+        -d docker.io/informaticsmatters/rdkit-cartridge-debian:Release_2025_03_3
     ```
 
     *   `docker run`: Tells Docker to start a new container.
