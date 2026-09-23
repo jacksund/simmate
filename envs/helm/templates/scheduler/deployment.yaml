@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: simmate-scheduler
-          image: jacksund/simmate:{{ .Values.version }}
+          image: docker.io/jacksund/simmate:{{ .Values.version }}
           imagePullPolicy: Always
           command: ["simmate", "compute", "start-schedules"]
           env:
