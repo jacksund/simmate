@@ -71,7 +71,7 @@
                                         </ul>
                                     </div>
                                 {% endif %}
-                                <form method="POST" action="{% url 'account_login' %}" novalidate>
+                                <form method="post" action="{% url 'account_login' %}" novalidate>
                                     {% csrf_token %}
                                     <div class="form-floating">
                                         <input type="text"

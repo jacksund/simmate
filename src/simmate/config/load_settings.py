@@ -326,7 +326,7 @@ class SimmateSettings:
                 "default_command": "bader CHGCAR",
                 "docker": {
                     "enable": False,
-                    "image": f"jacksund/bader:v{simmate.__version__}",
+                    "image": f"docker.io/jacksund/bader:v{simmate.__version__}",
                 },
             },
             "cas_registry": {
@@ -400,7 +400,7 @@ class SimmateSettings:
                 "pseudo_dir": self.config_directory / "quantum_espresso" / "potentials",
                 "docker": {
                     "enable": False,
-                    "image": f"jacksund/quantum_espresso:v{simmate.__version__}",
+                    "image": f"docker.io/jacksund/quantum_espresso:v{simmate.__version__}",
                 },
             },
             "s3": {
