@@ -69,7 +69,7 @@ services:
 
   # DATABASE SERVER
   simmate-postgres-service:
-    image: informaticsmatters/rdkit-cartridge-debian:latest
+    image: docker.io/informaticsmatters/rdkit-cartridge-debian:latest
     environment:
       POSTGRES_DB: simmate_prod
       POSTGRES_USER: example_user

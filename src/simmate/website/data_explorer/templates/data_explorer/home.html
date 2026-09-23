@@ -91,7 +91,7 @@
                                         <tbody>
                                             {% for section in sections %}
                                                 {% for dataset in section.datasets %}
-                                                    {% if dataset.display_name == 'Projects' or dataset.display_name == 'Workers' or dataset.display_name == 'Market Data & Price Catalog' or dataset.display_name == 'Chemical Substances' %}
+                                                    {% if dataset.display_name == "Projects" or dataset.display_name == "Workers" or dataset.display_name == "Market Data & Price Catalog" or dataset.display_name == "Chemical Substances" %}
                                                         {% with dataset.table as table %}
                                                             <tr>
                                                                 <td>

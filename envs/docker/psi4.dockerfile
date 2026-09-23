@@ -14,7 +14,7 @@
 
 # -----------------------------------------------------------------------------
 
-FROM ubuntu:22.04
+FROM docker.io/library/ubuntu:22.04
 WORKDIR /root/
 
 ENV PATH=/root/miniforge/bin:$PATH
