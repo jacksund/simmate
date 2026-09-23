@@ -7,6 +7,6 @@
 </td>
 <td id="{{ component.component_id }}-tag-id">
     {% if component.tag_options %}
-        {% htmx_selectbox  name="tags__ids" label="Tags" options=component.tag_options dynamic_options=True multiselect=True show_label=False %}
+        {% htmx_selectbox name="tags__ids" label="Tags" options=component.tag_options dynamic_options=True multiselect=True show_label=False %}
     {% endif %}
 </td>

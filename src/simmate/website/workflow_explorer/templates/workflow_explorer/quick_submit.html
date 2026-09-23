@@ -153,11 +153,11 @@
                             </h5>
                         </div>
                         <div class="bg-white p-4 rounded-4 shadow-sm border mb-4">
-                            {% if component.form_data.primary_input_type == 'structure' %}
+                            {% if component.form_data.primary_input_type == "structure" %}
                                 {% htmx_structure_input name="structure" label="Upload Structure" allow_database_input=True %}
-                            {% elif component.form_data.primary_input_type == 'molecule' %}
+                            {% elif component.form_data.primary_input_type == "molecule" %}
                                 {% htmx_molecule_input name="molecule" label="Draw Molecule" %}
-                            {% elif component.form_data.primary_input_type == 'composition' %}
+                            {% elif component.form_data.primary_input_type == "composition" %}
                                 <div class="mb-2">
                                     <label for="{{ component.component_id }}-composition"
                                            class="form-label fw-bold">Chemical Formula or System</label>
@@ -201,7 +201,7 @@
                                     {% if component.form_data.calculation_types %}<i class="bi bi-check-circle-fill ms-2"></i>{% endif %}
                                 </h5>
                             </div>
-                            {% if component.form_data.primary_input_type == 'molecule' %}
+                            {% if component.form_data.primary_input_type == "molecule" %}
                                 <div class="alert alert-info shadow-sm border-0 d-flex align-items-center">
                                     <i class="bi bi-info-circle-fill fs-4 me-3"></i>
                                     <div>Workflows for molecules are currently under development.</div>

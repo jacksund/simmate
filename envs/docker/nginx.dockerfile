@@ -1,5 +1,5 @@
 
-FROM nginx:stable-alpine
+FROM docker.io/library/nginx:stable-alpine
 
 # Replace default config with our custom one
 RUN rm /etc/nginx/conf.d/default.conf
