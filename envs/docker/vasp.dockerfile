@@ -15,7 +15,7 @@
 
 # -----------------------------------------------------------------------------
 
-FROM ubuntu:22.04
+FROM docker.io/library/ubuntu:22.04
 
 # Avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive

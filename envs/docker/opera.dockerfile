@@ -10,7 +10,7 @@
 
 # -----------------------------------------------------------------------------
 
-FROM ubuntu:18.04
+FROM docker.io/library/ubuntu:18.04
 
 # Install OS dependencies
 RUN apt-get update && \

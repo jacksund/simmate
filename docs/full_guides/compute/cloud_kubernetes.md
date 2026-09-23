@@ -10,7 +10,7 @@ A Simmate worker only needs the Simmate python package and any external scientif
 Simmate provides several example Dockerfiles in the `envs/docker/` directory of the repository. A basic worker Dockerfile looks like this:
 
 ```dockerfile
-FROM python:3.10-slim
+FROM docker.io/library/python:3.10-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y build-essential
