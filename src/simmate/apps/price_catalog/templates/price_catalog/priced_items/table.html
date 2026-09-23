@@ -40,11 +40,11 @@
         <td>
             {% if entry.price_1y_stats.change_inflation_adj > 0 %}
                 <span class="text-success">
-                    <i class="bi bi-caret-up-fill"></i>{{ entry.price_1y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
+                    <i class="bi bi-caret-up-fill"></i>{{ entry.price_1y_stats.change_inflation_adj|floatformat:1|intcomma }}%
                 </span>
             {% elif entry.price_1y_stats.change_inflation_adj < 0 %}
                 <span class="text-danger">
-                    <i class="bi bi-caret-down-fill"></i>{{ entry.price_1y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
+                    <i class="bi bi-caret-down-fill"></i>{{ entry.price_1y_stats.change_inflation_adj|floatformat:1|intcomma }}%
                 </span>
             {% elif entry.price_1y_stats.change_inflation_adj == 0 %}
                 0
@@ -70,11 +70,11 @@
         <td>
             {% if entry.price_10y_stats.change_inflation_adj > 0 %}
                 <span class="text-success">
-                    <i class="bi bi-caret-up-fill"></i>{{ entry.price_10y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
+                    <i class="bi bi-caret-up-fill"></i>{{ entry.price_10y_stats.change_inflation_adj|floatformat:1|intcomma }}%
                 </span>
             {% elif entry.price_10y_stats.change_inflation_adj < 0 %}
                 <span class="text-danger">
-                    <i class="bi bi-caret-down-fill"></i>{{ entry.price_10y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
+                    <i class="bi bi-caret-down-fill"></i>{{ entry.price_10y_stats.change_inflation_adj|floatformat:1|intcomma }}%
                 </span>
             {% elif entry.price_10y_stats.change_inflation_adj == 0 %}
                 0

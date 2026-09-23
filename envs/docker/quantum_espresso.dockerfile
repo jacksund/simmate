@@ -1,6 +1,6 @@
 # Dockerfile to compile and install Quantum Espresso (pw.x) on Ubuntu 22.04.
 
-FROM ubuntu:22.04
+FROM docker.io/library/ubuntu:22.04
 
 # Avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive

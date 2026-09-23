@@ -494,7 +494,7 @@ def start_postgres_docker(
 ):
     """
     Sets up a Postgres database using the image
-    informaticsmatters/rdkit-cartridge-debian:Release_2025_03_3
+    docker.io/informaticsmatters/rdkit-cartridge-debian:Release_2025_03_3
     and mounts the postgres data volume to the config directory database
     (e.g. ~/simmate/database) and exposes the port to localhost.
     """
@@ -526,7 +526,7 @@ def start_postgres_docker(
             f"{db_volume}:/var/lib/postgresql/data",
             "-e",
             f"POSTGRES_PASSWORD={password}",
-            "informaticsmatters/rdkit-cartridge-debian:Release_2025_03_3",
+            "docker.io/informaticsmatters/rdkit-cartridge-debian:Release_2025_03_3",
         ]
 
         # execute the command
