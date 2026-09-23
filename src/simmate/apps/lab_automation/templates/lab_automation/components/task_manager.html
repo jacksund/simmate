@@ -62,17 +62,19 @@
                 <h6 class="mb-2 font-weight-bold">{{ task.name }}</h6>
                 <div class="d-flex justify-content-between align-items-center mt-3">
                     <small class="text-muted"><i class="far fa-clock mr-1"></i>{{ task.duration }}</small>
-                    {% if task.priority == 'high' %}
+                    {% if task.priority == "high" %}
                         <span class="badge badge-danger badge-pill px-2">High</span>
-                    {% elif task.priority == 'medium' %}
+                    {% elif task.priority == "medium" %}
                         <span class="badge badge-warning badge-pill px-2">Med</span>
                     {% else %}
                         <span class="badge badge-light border badge-pill px-2">Low</span>
                     {% endif %}
                 </div>
                 <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                    <small class="text-muted" title="Owner"><i class="fas fa-user-circle mr-1"></i>{{ task.owner }}</small>
-                    <small class="text-muted" title="Equipment"><i class="fas fa-microchip mr-1"></i>{{ task.equipment }}</small>
+                    <small class="text-muted"
+                           title="Owner"><i class="fas fa-user-circle mr-1"></i>{{ task.owner }}</small>
+                    <small class="text-muted"
+                           title="Equipment"><i class="fas fa-microchip mr-1"></i>{{ task.equipment }}</small>
                 </div>
             </div>
         {% empty %}
@@ -94,8 +96,10 @@
                     <i class="fas fa-info-circle mr-1"></i>{{ task.status }}
                 </div>
                 <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                    <small class="text-muted" title="Owner"><i class="fas fa-user-circle mr-1"></i>{{ task.owner }}</small>
-                    <small class="text-muted" title="Equipment"><i class="fas fa-microchip mr-1"></i>{{ task.equipment }}</small>
+                    <small class="text-muted"
+                           title="Owner"><i class="fas fa-user-circle mr-1"></i>{{ task.owner }}</small>
+                    <small class="text-muted"
+                           title="Equipment"><i class="fas fa-microchip mr-1"></i>{{ task.equipment }}</small>
                 </div>
             </div>
         {% empty %}
@@ -123,8 +127,10 @@
                          style="width: {{ task.progress }}%"></div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                    <small class="text-muted" title="Owner"><i class="fas fa-user-circle mr-1"></i>{{ task.owner }}</small>
-                    <small class="text-muted" title="Equipment"><i class="fas fa-microchip mr-1"></i>{{ task.equipment }}</small>
+                    <small class="text-muted"
+                           title="Owner"><i class="fas fa-user-circle mr-1"></i>{{ task.owner }}</small>
+                    <small class="text-muted"
+                           title="Equipment"><i class="fas fa-microchip mr-1"></i>{{ task.equipment }}</small>
                 </div>
             </div>
         {% empty %}
@@ -147,8 +153,10 @@
                     <i class="fas fa-history mr-1"></i>{{ task.time }}
                 </div>
                 <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                    <small class="text-muted" title="Owner"><i class="fas fa-user-circle mr-1"></i>{{ task.owner }}</small>
-                    <small class="text-muted" title="Equipment"><i class="fas fa-microchip mr-1"></i>{{ task.equipment }}</small>
+                    <small class="text-muted"
+                           title="Owner"><i class="fas fa-user-circle mr-1"></i>{{ task.owner }}</small>
+                    <small class="text-muted"
+                           title="Equipment"><i class="fas fa-microchip mr-1"></i>{{ task.equipment }}</small>
                 </div>
             </div>
         {% empty %}
@@ -170,8 +178,10 @@
                     <i class="fas fa-times-circle mr-1"></i>{{ task.reason }}
                 </div>
                 <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                    <small class="text-muted" title="Owner"><i class="fas fa-user-circle mr-1"></i>{{ task.owner }}</small>
-                    <small class="text-muted" title="Equipment"><i class="fas fa-microchip mr-1"></i>{{ task.equipment }}</small>
+                    <small class="text-muted"
+                           title="Owner"><i class="fas fa-user-circle mr-1"></i>{{ task.owner }}</small>
+                    <small class="text-muted"
+                           title="Equipment"><i class="fas fa-microchip mr-1"></i>{{ task.equipment }}</small>
                 </div>
             </div>
         {% empty %}

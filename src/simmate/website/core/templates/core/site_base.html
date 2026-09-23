@@ -6,9 +6,7 @@
         {# Indicate which Character Encoding set the browser should use #}
         <meta charset="utf-8">
         {# Title of the page (located in the tab header) #}
-        <title>
-            {% block tabtitle %}Simmate{% endblock %}
-        </title>
+        <title>{% block tabtitle %}Simmate{% endblock %}</title>
         {# Set the icons to use in the tab header #}
         <link rel="apple-touch-icon"
               sizes="76x76"
@@ -30,13 +28,9 @@
         <link rel="stylesheet"
               href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
         {# Simmate CSS #}
-        <link rel="stylesheet"
-              type="text/css"
-              href='{% static "css/simmate.css" %}'>
+        <link rel="stylesheet" href='{% static "css/simmate.css" %}'>
         {# CodeHilite CSS #}
-        <link rel="stylesheet"
-              type="text/css"
-              href="{% static 'css/codehilite.css' %}">
+        <link rel="stylesheet" href="{% static 'css/codehilite.css' %}">
         {# jQuery Javascript #}
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         {# Bootstrap Javascript #}
@@ -66,18 +60,18 @@
         {% if chemdraw_js %}
             <script src="{% static "chemdrawweb/chemdrawweb.js" %}"></script>
             <script>var ChemDrawLicenseURL = '{% static "licenses/ChemDraw-JS-License.xml" %}';</script>
-            <script type="text/javascript" src="{% static 'js/chemdraw_utils.js' %}"></script>
+            <script src="{% static 'js/chemdraw_utils.js' %}"></script>
         {% else %}
             {# Ketcher is the open-source fallback sketcher #}
-            <script type="text/javascript" src="{% static 'js/ketcher_utils.js' %}"></script>
+            <script src="{% static 'js/ketcher_utils.js' %}"></script>
         {% endif %}
         {# Rest of Custom Simmate Javascript #}
-        <script type="text/javascript" src="{% static 'js/rdkit_utils.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/form_utils.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/progress_bars.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/select2_utils.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/bootstrap_utils.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/htmx_utils.js' %}"></script>
+        <script src="{% static 'js/rdkit_utils.js' %}"></script>
+        <script src="{% static 'js/form_utils.js' %}"></script>
+        <script src="{% static 'js/progress_bars.js' %}"></script>
+        <script src="{% static 'js/select2_utils.js' %}"></script>
+        <script src="{% static 'js/bootstrap_utils.js' %}"></script>
+        <script src="{% static 'js/htmx_utils.js' %}"></script>
         <script type="module" src="{% static 'js/threejs_utils.js' %}"></script>
         {# Some pages may require extra lines in the header such as loading extra libraries #}
         {% block extraheader %}{% endblock %}
