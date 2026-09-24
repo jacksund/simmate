@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <filter id="workflow-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#00666b" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Ambient Workflow Graph Grid & Loop Pathways -->
+  <g stroke-linecap="round" stroke-linejoin="round" opacity="0.65">
+    <!-- Error Handler / Feedback Recovery Loop (Arched Top Pipeline) -->
+    <path d="M 235 120 C 235 70, 165 70, 165 120" fill="none" stroke="#00de59" stroke-width="2" stroke-dasharray="4 4"/>
+    <polygon points="160,118 165,128 170,118" fill="#00de59"/>
+
+    <!-- Primary Execution Bus (Left to Right) -->
+    <line x1="110" y1="150" x2="160" y2="150" stroke="#00aa44" stroke-width="3"/>
+    <polygon points="152,144 162,150 152,156" fill="#00aa44"/>
+
+    <line x1="240" y1="150" x2="290" y2="150" stroke="#008f97" stroke-width="3"/>
+    <polygon points="282,144 292,150 282,156" fill="#008f97"/>
+
+    <!-- Bottom Secondary Branch (Analysis / Archive) -->
+    <path d="M 200 195 L 200 230 L 290 230" fill="none" stroke="#00666b" stroke-width="2" stroke-dasharray="5 5"/>
+    <polygon points="285,225 295,230 285,235" fill="#00666b"/>
+  </g>
+
+  <!-- Stage 1: Structure Input Node (Left) -->
+  <g filter="url(#workflow-glow)">
+    <polygon points="75,115 105,130 105,170 75,185 45,170 45,130" 
+             fill="#ffffff" stroke="#00aa44" stroke-width="2" stroke-linejoin="round"/>
+    <!-- Internal crystalline motif -->
+    <polygon points="75,125 95,138 95,162 75,175 55,162 55,138" fill="#00de59" opacity="0.25"/>
+    <polygon points="75,125 95,138 75,150 55,138" fill="#00de59"/>
+    <polygon points="55,138 75,150 75,175 55,162" fill="#00aa44"/>
+    <polygon points="95,138 75,150 75,175 95,162" fill="#00666b"/>
+  </g>
+
+  <!-- Stage 2: Central Orchestration Engine (Simmate Core Workflow) -->
+  <g filter="url(#workflow-glow)">
+    <!-- Outer Status Orbit Ring -->
+    <circle cx="200" cy="150" r="48" fill="#ffffff" stroke="#00666b" stroke-width="2.5"/>
+    <circle cx="200" cy="150" r="41" fill="none" stroke="#008f97" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.7"/>
+
+    <!-- Central Simmate Polyhedral Facets -->
+    <!-- Top-Left Facet: Spring Green -->
+    <polygon points="200,118 172,148 196,156" fill="#00de59" stroke="#00de59" stroke-width="0.8"/>
+    <!-- Bottom-Left Facet: Emerald Green -->
+    <polygon points="172,148 200,182 196,156" fill="#00aa44" stroke="#00aa44" stroke-width="0.8"/>
+    <!-- Top-Right Facet: Teal -->
+    <polygon points="200,118 228,148 196,156" fill="#008f97" stroke="#008f97" stroke-width="0.8"/>
+    <!-- Bottom-Right Facet: Deep Teal -->
+    <polygon points="228,148 200,182 196,156" fill="#00666b" stroke="#00666b" stroke-width="0.8"/>
+
+    <!-- Workflow Progress Checkpoint Dots -->
+    <circle cx="200" cy="102" r="3.5" fill="#00de59"/>
+    <circle cx="248" cy="150" r="3.5" fill="#008f97"/>
+    <circle cx="200" cy="198" r="3.5" fill="#00666b"/>
+    <circle cx="152" cy="150" r="3.5" fill="#00aa44"/>
+  </g>
+
+  <!-- Stage 3: Simulation Results / Physical Properties (Right) -->
+  <g filter="url(#workflow-glow)">
+    <polygon points="325,115 355,130 355,170 325,185 295,170 295,130" 
+             fill="#ffffff" stroke="#008f97" stroke-width="2" stroke-linejoin="round"/>
+    
+    <!-- Stylized Energy Curve / Band Structure inside results block -->
+    <path d="M 305 160 Q 315 135 325 150 T 345 135" fill="none" stroke="#008f97" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="325" cy="150" r="3" fill="#00de59"/>
+    <circle cx="345" cy="135" r="3" fill="#00aa44"/>
+  </g>
+
+  <!-- Stage 4: Database Sync Node (Bottom Right) -->
+  <g filter="url(#workflow-glow)">
+    <polygon points="310,215 330,225 330,245 310,255 290,245 290,225" 
+             fill="#00666b" stroke="#00666b" stroke-width="1"/>
+    <polygon points="310,215 330,225 310,235 290,225" fill="#008f97"/>
+    <circle cx="310" cy="235" r="2.5" fill="#ffffff"/>
+  </g>
+
+  <!-- Flow Direction Pins & Checkpoints -->
+  <g>
+    <!-- Checkpoint pulse at input -->
+    <circle cx="75" cy="115" r="3" fill="#00de59"/>
+    <circle cx="75" cy="185" r="3" fill="#00aa44"/>
+    <!-- Checkpoint pulse at output -->
+    <circle cx="325" cy="115" r="3" fill="#008f97"/>
+    <circle cx="325" cy="185" r="3" fill="#00666b"/>
+    <!-- Recovery loop indicator dot -->
+    <circle cx="200" cy="74" r="4" fill="#00de59"/>
+    <circle cx="200" cy="74" r="2" fill="#ffffff"/>
+  </g>
+</svg>

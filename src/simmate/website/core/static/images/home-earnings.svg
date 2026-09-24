@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <filter id="coin-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#00666b" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Ambient Computational Flow & Reward Rays -->
+  <g stroke-linecap="round" stroke-linejoin="round" opacity="0.6">
+    <!-- Compute stream lines from left to center -->
+    <path d="M 50 180 L 110 180 L 140 150" fill="none" stroke="#008f97" stroke-width="2"/>
+    <path d="M 60 120 L 110 120 L 140 150" fill="none" stroke="#00de59" stroke-width="2"/>
+    
+    <!-- Transparent Reward Trajectory / Growth Line -->
+    <path d="M 120 220 L 190 190 L 260 140 L 330 90" fill="none" stroke="#00aa44" stroke-width="1.8" stroke-dasharray="5 5" opacity="0.7"/>
+    <polyline points="320,90 330,90 330,100" fill="none" stroke="#00aa44" stroke-width="2"/>
+
+    <!-- Concentric Reward Orbit Ring -->
+    <ellipse cx="230" cy="150" rx="120" ry="60" fill="none" stroke="#008f97" stroke-width="1.2" stroke-dasharray="4 6" opacity="0.4" transform="rotate(-15 230 150)"/>
+  </g>
+
+  <!-- Contributing Compute Node (Left) -->
+  <g filter="url(#coin-glow)">
+    <polygon points="70,130 95,145 70,160 45,145" fill="#00666b" stroke="#00666b" stroke-width="0.8"/>
+    <polygon points="45,145 70,160 70,180 45,165" fill="#008f97" stroke="#008f97" stroke-width="0.8"/>
+    <polygon points="95,145 70,160 70,180 95,165" fill="#00de59" stroke="#00de59" stroke-width="0.8"/>
+    <!-- Activity Node Pulse -->
+    <circle cx="70" cy="130" r="3.5" fill="#00de59"/>
+  </g>
+
+  <!-- Secondary Background Coin (Shadow / Depth) -->
+  <g filter="url(#coin-glow)" opacity="0.6">
+    <ellipse cx="270" cy="120" rx="42" ry="42" fill="#00666b" stroke="#008f97" stroke-width="2"/>
+    <ellipse cx="270" cy="120" rx="34" ry="34" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <polygon points="270,102 258,118 268,122" fill="#ffffff" opacity="0.9"/>
+    <polygon points="258,118 270,138 268,122" fill="#ffffff" opacity="0.9"/>
+    <polygon points="270,102 282,118 268,122" fill="#ffffff" opacity="0.9"/>
+    <polygon points="282,118 270,138 268,122" fill="#ffffff" opacity="0.9"/>
+  </g>
+
+  <!-- Primary Foreground Crystalline Reward Coin (Center-Right) -->
+  <g filter="url(#coin-glow)">
+    <!-- Outer Rim -->
+    <circle cx="215" cy="160" r="62" fill="#00aa44" stroke="#00666b" stroke-width="2.5"/>
+    <circle cx="215" cy="160" r="54" fill="none" stroke="#ffffff" stroke-width="2" stroke-opacity="0.9"/>
+    
+    <!-- Central Polyhedral Crystal Facets (Simmate Logo Emblem) -->
+    <!-- Top-Left Facet: Spring Green -->
+    <polygon points="215,125 180,158 208,166" fill="#00de59" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round"/>
+    <!-- Bottom-Left Facet: Pure White Highlight -->
+    <polygon points="180,158 215,195 208,166" fill="#ffffff" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round"/>
+    <!-- Top-Right Facet: Teal -->
+    <polygon points="215,125 248,158 208,166" fill="#008f97" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round"/>
+    <!-- Bottom-Right Facet: Deep Teal -->
+    <polygon points="248,158 215,195 208,166" fill="#00666b" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Rising Yield / Growth Polyhedral Indicators -->
+  <g filter="url(#coin-glow)">
+    <!-- Small floating crystal shard (reward particle) -->
+    <polygon points="310,75 320,83 310,95 300,85" fill="#00de59" stroke="#00de59" stroke-width="0.8"/>
+    <!-- Micro facet 2 -->
+    <polygon points="150,95 158,102 152,112 144,105" fill="#008f97" opacity="0.85"/>
+    <!-- Micro facet 3 -->
+    <polygon points="335,160 345,168 338,180 328,172" fill="#00aa44" opacity="0.85"/>
+  </g>
+
+  <!-- Distributed Value Nodes (Floating Particles) -->
+  <g>
+    <circle cx="120" cy="180" r="4.5" fill="#00de59"/>
+    <circle cx="120" cy="180" r="2" fill="#ffffff"/>
+    
+    <circle cx="140" cy="150" r="5" fill="#008f97"/>
+    <circle cx="140" cy="150" r="2.5" fill="#ffffff"/>
+
+    <circle cx="260" cy="140" r="4" fill="#00aa44"/>
+    <circle cx="330" cy="90" r="5" fill="#00de59"/>
+    <circle cx="330" cy="90" r="2.5" fill="#ffffff"/>
+  </g>
+</svg>

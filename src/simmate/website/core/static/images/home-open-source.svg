@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <!-- Soft Modern Drop Shadow -->
+    <filter id="clean-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#00666b" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <!-- ==================== GIT NETWORK & BRANCHING TRACKS ==================== -->
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left Branch (Scientific Stack: PyMatGen & RDKit) -->
+    <path d="M 200 250 C 130 250, 85 210, 85 165 L 85 125 C 85 92, 125 92, 145 105" 
+          fill="none" stroke="#00aa44" stroke-width="3"/>
+    
+    <!-- Right Branch (Web & Data Stack: Django, Postgres, HTMX) -->
+    <path d="M 200 250 C 270 250, 315 210, 315 165 L 315 125 C 315 92, 275 92, 255 105" 
+          fill="none" stroke="#008f97" stroke-width="3"/>
+
+    <!-- Main Git Trunk (Center Vertical Base to Core) -->
+    <line x1="200" y1="250" x2="200" y2="200" stroke="#00666b" stroke-width="3.5"/>
+
+    <!-- Pull Request Merge Pointers (Entering Central Core) -->
+    <polygon points="140,100 152,107 140,114" fill="#00aa44"/>
+    <polygon points="260,100 248,107 260,114" fill="#008f97"/>
+    <polygon points="194,206 200,196 206,206" fill="#00666b"/>
+  </g>
+
+  <!-- ==================== OPEN SOURCE CODE GLYPHS </> (TOP) ==================== -->
+  <g stroke-linecap="round" stroke-linejoin="round" filter="url(#clean-shadow)">
+    <!-- < Bracket -->
+    <polyline points="180,44 168,56 180,68" fill="none" stroke="#00aa44" stroke-width="3.2"/>
+    <!-- / Slash -->
+    <line x1="194" y1="70" x2="206" y2="42" stroke="#008f97" stroke-width="3.2"/>
+    <!-- > Bracket -->
+    <polyline points="220,44 232,56 220,68" fill="none" stroke="#00de59" stroke-width="3.2"/>
+  </g>
+
+  <!-- ==================== SOLID COMMUNITY FOUNDATION BASE (BOTTOM) ==================== -->
+  <g filter="url(#clean-shadow)">
+    <!-- Isometric Repository Base Plate -->
+    <!-- Top Face -->
+    <polygon points="200,240 250,255 200,270 150,255" fill="#008f97" stroke="#00666b" stroke-width="1"/>
+    <!-- Left Face -->
+    <polygon points="150,255 200,270 200,280 150,265" fill="#00666b"/>
+    <!-- Right Face -->
+    <polygon points="250,255 200,270 200,280 250,265" fill="#00484c"/>
+
+    <!-- Main Origin Root Commit Node -->
+    <circle cx="200" cy="255" r="7" fill="#00de59" stroke="#ffffff" stroke-width="2"/>
+  </g>
+
+  <!-- ==================== LEFT MODULAR COMPONENT (SCIENTIFIC ENGINE) ==================== -->
+  <g filter="url(#clean-shadow)">
+    <!-- Isometric Module Cube (PyMatGen & RDKit) -->
+    <!-- Top Face -->
+    <polygon points="85,115 110,100 135,115 110,130" fill="#00de59" stroke="#00de59" stroke-width="0.8"/>
+    <!-- Left Face -->
+    <polygon points="85,115 110,130 110,158 85,143" fill="#00aa44" stroke="#00aa44" stroke-width="0.8"/>
+    <!-- Right Face -->
+    <polygon points="135,115 110,130 110,158 135,143" fill="#00666b" stroke="#00666b" stroke-width="0.8"/>
+    
+    <!-- Crystalline Internal Seam -->
+    <line x1="110" y1="130" x2="110" y2="105" stroke="#ffffff" stroke-width="1.2" stroke-dasharray="2 2" opacity="0.8"/>
+
+    <!-- Molecular satellite node -->
+    <circle cx="65" cy="115" r="7.5" fill="#008f97"/>
+    <circle cx="65" cy="115" r="3.5" fill="#ffffff"/>
+    <line x1="72" y1="115" x2="85" y2="115" stroke="#008f97" stroke-width="2"/>
+  </g>
+
+  <!-- ==================== RIGHT MODULAR COMPONENT (WEB & PLATFORM) ==================== -->
+  <g filter="url(#clean-shadow)">
+    <!-- Isometric Module Cube (Django, Postgres, HTMX) -->
+    <!-- Top Face -->
+    <polygon points="315,115 290,100 265,115 290,130" fill="#008f97" stroke="#008f97" stroke-width="0.8"/>
+    <!-- Left Face -->
+    <polygon points="265,115 290,130 290,158 265,143" fill="#00666b" stroke="#00666b" stroke-width="0.8"/>
+    <!-- Right Face -->
+    <polygon points="315,115 290,130 290,158 315,143" fill="#00de59" stroke="#00de59" stroke-width="0.8"/>
+
+    <!-- Web/Data Satellite Node -->
+    <circle cx="335" cy="115" r="7.5" fill="#00aa44"/>
+    <circle cx="335" cy="115" r="3.5" fill="#ffffff"/>
+    <line x1="328" y1="115" x2="315" y2="115" stroke="#00aa44" stroke-width="2"/>
+  </g>
+
+  <!-- ==================== CENTRAL REPOSITORY SHIELD & CRYSTAL CORE ==================== -->
+  <g filter="url(#clean-shadow)">
+    <!-- Hexagonal Repository Badge -->
+    <polygon points="200,75 248,103 248,167 200,195 152,167 152,103" 
+             fill="#ffffff" stroke="#00666b" stroke-width="2.5" stroke-linejoin="round"/>
+
+    <!-- 4 Iconic Simmate Polyhedral Facets -->
+    <!-- Top-Left Facet: Spring Green -->
+    <polygon points="200,88 162,132 195,142" 
+             fill="#00de59" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/>
+    <!-- Bottom-Left Facet: Emerald Green -->
+    <polygon points="162,132 200,184 195,142" 
+             fill="#00aa44" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/>
+    <!-- Top-Right Facet: Teal -->
+    <polygon points="200,88 238,132 195,142" 
+             fill="#008f97" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/>
+    <!-- Bottom-Right Facet: Deep Teal -->
+    <polygon points="238,132 200,184 195,142" 
+             fill="#00666b" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/>
+  </g>
+
+  <!-- ==================== GIT COMMIT NODES (COMMUNITY CONTRIBUTIONS) ==================== -->
+  <g>
+    <!-- Left branch commits -->
+    <circle cx="85" cy="195" r="5" fill="#00aa44" stroke="#ffffff" stroke-width="1.5"/>
+    <circle cx="85" cy="145" r="5" fill="#00de59" stroke="#ffffff" stroke-width="1.5"/>
+
+    <!-- Right branch commits -->
+    <circle cx="315" cy="195" r="5" fill="#008f97" stroke="#ffffff" stroke-width="1.5"/>
+    <circle cx="315" cy="145" r="5" fill="#00666b" stroke="#ffffff" stroke-width="1.5"/>
+
+    <!-- Trunk commit -->
+    <circle cx="200" cy="225" r="5.5" fill="#00de59" stroke="#ffffff" stroke-width="1.5"/>
+
+    <!-- Accent floating sparkle nodes -->
+    <circle cx="150" cy="50" r="2.5" fill="#00de59" opacity="0.8"/>
+    <circle cx="250" cy="50" r="2.5" fill="#008f97" opacity="0.8"/>
+    <circle cx="115" cy="235" r="3" fill="#00aa44" opacity="0.7"/>
+    <circle cx="285" cy="235" r="3" fill="#008f97" opacity="0.7"/>
+  </g>
+</svg>

@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <filter id="compute-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#00666b" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Distributed Circuit & Mesh Pathways -->
+  <g stroke-linecap="round" stroke-linejoin="round" opacity="0.6">
+    <!-- Center to Cloud HPC (Top-Left) -->
+    <path d="M 170 135 L 120 135 L 100 95" fill="none" stroke="#008f97" stroke-width="2"/>
+    <path d="M 180 120 L 140 85 L 115 85" fill="none" stroke="#008f97" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+    <!-- Center to Cluster Nodes (Top-Right) -->
+    <path d="M 230 135 L 280 135 L 300 95" fill="none" stroke="#00de59" stroke-width="2"/>
+    <path d="M 220 120 L 260 85 L 285 85" fill="none" stroke="#00de59" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+    <!-- Center to Workstation Node (Bottom-Left) -->
+    <path d="M 170 165 L 120 165 L 90 205" fill="none" stroke="#00aa44" stroke-width="2"/>
+    <path d="M 180 180 L 140 215 L 105 215" fill="none" stroke="#00aa44" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+    <!-- Center to Edge/Local Node (Bottom-Right) -->
+    <path d="M 230 165 L 280 165 L 310 205" fill="none" stroke="#00666b" stroke-width="2"/>
+    <path d="M 220 180 L 260 215 L 295 215" fill="none" stroke="#00666b" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+    <!-- Inter-node collaboration mesh (Peripheral ring) -->
+    <path d="M 100 95 L 300 95" fill="none" stroke="#008f97" stroke-width="1" stroke-dasharray="5 5" opacity="0.5"/>
+    <path d="M 90 205 L 310 205" fill="none" stroke="#00aa44" stroke-width="1" stroke-dasharray="5 5" opacity="0.5"/>
+    <path d="M 100 95 L 90 205" fill="none" stroke="#00666b" stroke-width="1" stroke-dasharray="5 5" opacity="0.4"/>
+    <path d="M 300 95 L 310 205" fill="none" stroke="#00de59" stroke-width="1" stroke-dasharray="5 5" opacity="0.4"/>
+  </g>
+
+  <!-- Peripheral Worker Nodes (Faceted Geometric Units) -->
+  <!-- 1. Cloud Server Node (Top Left) -->
+  <g filter="url(#compute-glow)">
+    <polygon points="100,55 125,70 100,85 75,70" fill="#00de59" stroke="#00de59" stroke-width="0.8"/>
+    <polygon points="75,70 100,85 100,95 75,80" fill="#00aa44" stroke="#00aa44" stroke-width="0.8"/>
+    <polygon points="125,70 100,85 100,95 125,80" fill="#008f97" stroke="#008f97" stroke-width="0.8"/>
+    <!-- Second layer stack -->
+    <polygon points="75,85 100,100 100,110 75,95" fill="#00666b" stroke="#00666b" stroke-width="0.8"/>
+    <polygon points="125,85 100,100 100,110 125,95" fill="#008f97" stroke="#008f97" stroke-width="0.8"/>
+  </g>
+
+  <!-- 2. HPC Supercomputer Cluster Node (Top Right) -->
+  <g filter="url(#compute-glow)">
+    <polygon points="300,55 325,70 300,85 275,70" fill="#008f97" stroke="#008f97" stroke-width="0.8"/>
+    <polygon points="275,70 300,85 300,105 275,90" fill="#00666b" stroke="#00666b" stroke-width="0.8"/>
+    <polygon points="325,70 300,85 300,105 325,90" fill="#00aa44" stroke="#00aa44" stroke-width="0.8"/>
+    <!-- Small satellite core -->
+    <polygon points="345,65 355,72 345,79 335,72" fill="#00de59" opacity="0.8"/>
+  </g>
+
+  <!-- 3. Workstation Worker Node (Bottom Left) -->
+  <g filter="url(#compute-glow)">
+    <polygon points="90,185 115,200 90,215 65,200" fill="#00aa44" stroke="#00aa44" stroke-width="0.8"/>
+    <polygon points="65,200 90,215 90,230 65,215" fill="#00666b" stroke="#00666b" stroke-width="0.8"/>
+    <polygon points="115,200 90,215 90,230 115,215" fill="#00de59" stroke="#00de59" stroke-width="0.8"/>
+  </g>
+
+  <!-- 4. Edge / Local PC Node (Bottom Right) -->
+  <g filter="url(#compute-glow)">
+    <polygon points="310,185 335,200 310,215 285,200" fill="#00de59" stroke="#00de59" stroke-width="0.8"/>
+    <polygon points="285,200 310,215 310,230 285,215" fill="#008f97" stroke="#008f97" stroke-width="0.8"/>
+    <polygon points="335,200 310,215 310,230 335,215" fill="#00666b" stroke="#00666b" stroke-width="0.8"/>
+  </g>
+
+  <!-- Central Orchestrator / CPU Hub (Simmate Core Engine) -->
+  <g filter="url(#compute-glow)">
+    <!-- Outer Chip Carrier Frame -->
+    <polygon points="200,95 245,120 245,180 200,205 155,180 155,120" 
+             fill="#ffffff" stroke="#00666b" stroke-width="2.5" stroke-linejoin="round"/>
+    
+    <!-- Central Polyhedral Core (Simmate Facets inside the processor) -->
+    <!-- Top-Left Facet: Spring Green -->
+    <polygon points="200,105 165,145 195,155" fill="#00de59" stroke="#00de59" stroke-width="0.8"/>
+    <!-- Bottom-Left Facet: Emerald Green -->
+    <polygon points="165,145 200,195 195,155" fill="#00aa44" stroke="#00aa44" stroke-width="0.8"/>
+    <!-- Top-Right Facet: Teal -->
+    <polygon points="200,105 235,145 195,155" fill="#008f97" stroke="#008f97" stroke-width="0.8"/>
+    <!-- Bottom-Right Facet: Deep Teal -->
+    <polygon points="235,145 200,195 195,155" fill="#00666b" stroke="#00666b" stroke-width="0.8"/>
+  </g>
+
+  <!-- Dynamic Data Packet Nodes (Diamonds travelling along lines) -->
+  <g>
+    <!-- Packet 1 -->
+    <polygon points="145,135 150,131 155,135 150,139" fill="#00de59"/>
+    <!-- Packet 2 -->
+    <polygon points="255,135 260,131 265,135 260,139" fill="#008f97"/>
+    <!-- Packet 3 -->
+    <polygon points="135,170 140,166 145,170 140,174" fill="#00aa44"/>
+    <!-- Packet 4 -->
+    <polygon points="265,170 270,166 275,170 270,174" fill="#00666b"/>
+    <!-- Bus connection pins on the central chip -->
+    <circle cx="200" cy="95" r="3.5" fill="#00de59"/>
+    <circle cx="245" cy="120" r="3.5" fill="#008f97"/>
+    <circle cx="245" cy="180" r="3.5" fill="#00666b"/>
+    <circle cx="200" cy="205" r="3.5" fill="#00aa44"/>
+    <circle cx="155" cy="180" r="3.5" fill="#00aa44"/>
+    <circle cx="155" cy="120" r="3.5" fill="#008f97"/>
+  </g>
+</svg>
