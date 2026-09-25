@@ -1,35 +1,50 @@
 {% extends "htmx/form_base.html" %}
 {% block form %}
-    <div class="quick-search-component pt-5 pb-2">
+    <style>
+        @media (max-width: 767.98px) {
+            .quick-search-bar {
+                width: 100% !important;
+            }
+            .quick-search-bar .form-control {
+                font-size: 0.9rem;
+            }
+            .quick-search-toggles .nav-link {
+                font-size: 0.85rem;
+                white-space: nowrap;
+            }
+        }
+    </style>
+    <div class="quick-search-component pt-3 pt-md-5 pb-2">
         <!-- Search Bar -->
-        <div class="input-group input-group-lg mb-3 shadow-sm rounded-pill overflow-hidden border border-secondary-subtle w-75 mx-auto">
+        <div class="input-group input-group-lg mb-3 shadow-sm rounded-pill overflow-hidden border border-secondary-subtle w-75 mx-auto quick-search-bar">
             <input type="text"
-                   class="form-control border-0 px-4"
+                   class="form-control border-0 px-3 px-md-4"
                    name="search_query"
                    id="quick-search-input"
                    placeholder="Search by description, formula, or SMILES..."
                    value="{{ component.search_query }}"
                    {% htmx_post indicator="#loading-spinner-corner" %}>
             {% if component.search_query %}
-                <button class="btn btn-outline-secondary px-3 shadow-none border-0 bg-white"
+                <button class="btn btn-outline-secondary px-2 px-md-3 shadow-none border-0 bg-white"
                         type="button"
                         title="Clear search"
                         {% htmx_post method_name="reset_search" trigger="click" indicator="#loading-spinner-corner" %}>
                     <i class="bi bi-x-lg"></i>
                 </button>
             {% endif %}
-            <button class="btn btn-primary px-4 fw-bold shadow-none"
+            <button class="btn btn-primary px-3 px-md-4 fw-bold shadow-none"
                     type="button"
+                    title="Search"
                     {% htmx_post method_name="run_search" trigger="click" indicator="#loading-spinner-corner" %}>
-                <i class="bi bi-search me-1"></i> Search
+                <i class="bi bi-search me-md-1"></i><span class="d-none d-md-inline"> Search</span>
             </button>
         </div>
         <!-- Toggle Navigation -->
         <div class="d-flex justify-content-center {% if component.active_panel == 'periodic_table' %}mb-2{% else %}mb-4{% endif %}">
-            <ul class="nav nav-pills p-1 rounded-pill">
+            <ul class="nav nav-pills flex-nowrap p-1 rounded-pill quick-search-toggles">
                 <li class="nav-item">
                     <button type="button"
-                            class="nav-link rounded-pill px-4 {% if component.active_panel == 'examples' %}active{% else %}text-secondary{% endif %}"
+                            class="nav-link rounded-pill px-2 px-md-4 {% if component.active_panel == 'examples' %}active{% else %}text-secondary{% endif %}"
                             hx-vals='{"panel": "examples"}'
                             {% htmx_post method_name="toggle_panel" trigger="click" indicator="#loading-spinner-corner" %}>
                         <i class="bi bi-lightbulb me-1"></i> Examples
@@ -37,7 +52,7 @@
                 </li>
                 <li class="nav-item">
                     <button type="button"
-                            class="nav-link rounded-pill px-4 {% if component.active_panel == 'periodic_table' %}active{% else %}text-secondary{% endif %}"
+                            class="nav-link rounded-pill px-2 px-md-4 {% if component.active_panel == 'periodic_table' %}active{% else %}text-secondary{% endif %}"
                             hx-vals='{"panel": "periodic_table"}'
                             {% htmx_post method_name="toggle_panel" trigger="click" indicator="#loading-spinner-corner" %}>
                         <i class="bi bi-grid-3x3 me-1"></i> Elements
@@ -45,7 +60,7 @@
                 </li>
                 <li class="nav-item">
                     <button type="button"
-                            class="nav-link rounded-pill px-4 {% if component.active_panel == 'sketcher' %}active{% else %}text-secondary{% endif %}"
+                            class="nav-link rounded-pill px-2 px-md-4 {% if component.active_panel == 'sketcher' %}active{% else %}text-secondary{% endif %}"
                             hx-vals='{"panel": "sketcher"}'
                             {% htmx_post method_name="toggle_panel" trigger="click" indicator="#loading-spinner-corner" %}>
                         <i class="bi bi-hexagon me-1"></i> Sketcher

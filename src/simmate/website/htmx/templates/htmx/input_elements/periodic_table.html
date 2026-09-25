@@ -89,8 +89,21 @@
         color: white;
         background-color: black;
     }
+
+    /* On phones, show the element symbol (at the atomic number's size) instead of the number */
+    @media (max-width: 767.98px) {
+        .periodic-table-input .enumber {
+            display: none;
+        }
+
+        .periodic-table-input .symbol {
+            display: block !important;
+            margin-top: 0;
+            font-size: 65%;
+        }
+    }
 </style>
-<div class="container p-4">
+<div class="container p-4 periodic-table-input">
     <div class="row" style="flex-wrap: nowrap;">
         <div class="element-filled nonmetal {% if 'H' in selected_elements %}selected{% endif %}"
              hx-vals='{"element": "H", "input_name": "{{ name }}"}'

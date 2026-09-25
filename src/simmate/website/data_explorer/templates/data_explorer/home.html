@@ -1,5 +1,20 @@
 {% extends "core/site_base.html" %}
 {% block tabtitle %}Data - Simmate{% endblock %}
+{% block extraheader %}
+    <style>
+        @media (max-width: 767.98px) {
+            .downloads-alert {
+                font-size: 0.8rem;
+            }
+            .downloads-alert .bi {
+                font-size: 1.25rem !important;
+            }
+            .dataset-table {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+{% endblock %}
 {% block body %}
     {% simmate_setting "website.lock_data_redistribution" as LOCK_DATA_REDISTRIBUTION %}
     {# Header #}
@@ -46,7 +61,16 @@
             <div class="container-fluid mt-4">
                 <div class="row">
                     <div class="col-md-3">
-                        <div class="nav flex-column nav-pills me-3"
+                        {# On phones, a dropdown replaces the vertical pills #}
+                        <select class="form-select d-md-none mb-3"
+                                id="dataset-section-select"
+                                aria-label="Dataset category">
+                            <option value="#v-pills-favorites-tab" selected>Favorites</option>
+                            {% for section in sections %}
+                                <option value="#v-pills-{{ section.name|slugify }}-tab">{{ section.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="nav flex-column nav-pills me-3 d-none d-md-flex"
                              id="v-pills-tab"
                              role="tablist"
                              aria-orientation="vertical">
@@ -81,7 +105,7 @@
                                  role="tabpanel"
                                  aria-labelledby="v-pills-favorites-tab">
                                 <div class="table-responsive mb-5">
-                                    <table class="table table-striped align-middle">
+                                    <table class="table table-striped align-middle dataset-table">
                                         <thead class="table-primary">
                                             <tr>
                                                 <th scope="col" style="width: 30%">Dataset</th>
@@ -139,7 +163,7 @@
                                      role="tabpanel"
                                      aria-labelledby="v-pills-{{ section.name|slugify }}-tab">
                                     <div class="table-responsive mb-5">
-                                        <table class="table table-striped align-middle">
+                                        <table class="table table-striped align-middle dataset-table">
                                             <thead class="table-primary">
                                                 <tr>
                                                     <th scope="col" style="width: 30%">Dataset</th>
@@ -197,7 +221,7 @@
             <div class="container-fluid mt-5 mb-5">
                 <div class="row justify-content-center mb-4">
                     <div class="col-md-10">
-                        <div class="alert alert-warning shadow-sm d-flex align-items-center text-start mb-3"
+                        <div class="alert alert-warning downloads-alert shadow-sm d-flex align-items-center text-start mb-3"
                              role="alert">
                             <i class="bi bi-exclamation-triangle-fill fs-3 me-3"></i>
                             <div>
@@ -206,7 +230,7 @@
                                 The datasets provided here are compiled from third-party catalogs. Simmate is not affiliated with these organizations. Please ensure you cite the original authors and publications when using this data in your research.
                             </div>
                         </div>
-                        <div class="alert alert-info shadow-sm d-flex align-items-center text-start"
+                        <div class="alert alert-info downloads-alert shadow-sm d-flex align-items-center text-start"
                              role="alert">
                             <i class="bi bi-info-circle-fill fs-3 me-3"></i>
                             <div>
@@ -224,7 +248,7 @@
                             <i class="bi bi-gem"></i> Crystalline Catalogs
                         </h4>
                         <div class="table-responsive mb-5">
-                            <table class="table table-striped align-middle">
+                            <table class="table table-striped align-middle text-nowrap">
                                 <thead class="table-primary">
                                     <tr>
                                         <th scope="col" style="width: 35%">Dataset</th>
@@ -296,7 +320,7 @@
                             <i class="bi bi-nut"></i> Molecular Catalogs
                         </h4>
                         <div class="table-responsive mb-4">
-                            <table class="table table-striped align-middle">
+                            <table class="table table-striped align-middle text-nowrap">
                                 <thead class="table-primary">
                                     <tr>
                                         <th scope="col" style="width: 35%">Dataset</th>
@@ -325,4 +349,17 @@
             </div>
         </div>
     </div>
+    <script>
+        // Keep the phone dropdown and the desktop pills in sync
+        const datasetSectionSelect = document.getElementById("dataset-section-select");
+        datasetSectionSelect.addEventListener("change", (event) => {
+            const pill = document.querySelector(event.target.value);
+            bootstrap.Tab.getOrCreateInstance(pill).show();
+        });
+        document.querySelectorAll("#v-pills-tab button").forEach((pill) => {
+            pill.addEventListener("shown.bs.tab", () => {
+                datasetSectionSelect.value = `#${pill.id}`;
+            });
+        });
+    </script>
 {% endblock %}
