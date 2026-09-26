@@ -17,15 +17,17 @@
                 <span class="d-none d-md-block"><i class="bi bi-rocket-takeoff-fill"></i> Quick Submit</span>
             </a>
         </li>
-        <li class="nav-item">
-            <a href="#beginner-section"
-               data-bs-toggle="tab"
-               aria-expanded="false"
-               class="nav-link">
-                <i class="bi bi-mortarboard-fill d-md-none d-block"></i>
-                <span class="d-none d-md-block"><i class="bi bi-mortarboard-fill"></i> Tutorials</span>
-            </a>
-        </li>
+        {% comment %}
+            <li class="nav-item">
+                <a href="#beginner-section"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link">
+                    <i class="bi bi-mortarboard-fill d-md-none d-block"></i>
+                    <span class="d-none d-md-block"><i class="bi bi-mortarboard-fill"></i> Tutorials</span>
+                </a>
+            </li>
+        {% endcomment %}
         <li class="nav-item">
             <a href="#all-section"
                data-bs-toggle="tab"
@@ -40,6 +42,7 @@
         <div class="tab-pane show active" id="quick-submit-section">
             <div class="container-fluid mt-3">{% htmx_component "quick-submit-component" %}</div>
         </div>
+        {% comment %}
         <div class="tab-pane" id="beginner-section">
             <div class="container-fluid mt-3">
                 <div class="table-responsive">
@@ -190,6 +193,7 @@
                 </div>
             </div>
         </div>
+        {% endcomment %}
         <div class="tab-pane" id="all-section">
             <div class="container-fluid mt-3">{% htmx_component "workflow-search-component" %}</div>
         </div>

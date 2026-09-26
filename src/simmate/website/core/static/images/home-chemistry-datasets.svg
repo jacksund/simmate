@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <filter id="dataset-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#00666b" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Modular Periodic / Database Grid Background -->
+  <g opacity="0.35" stroke="#008f97" stroke-width="1.2" fill="none">
+    <!-- Hexagonal Catalog Cells -->
+    <polygon points="110,60 140,43 170,60 170,95 140,112 110,95" stroke-dasharray="3 3"/>
+    <polygon points="230,60 260,43 290,60 290,95 260,112 230,95" stroke-dasharray="3 3"/>
+    <polygon points="110,185 140,168 170,185 170,220 140,237 110,220" stroke-dasharray="3 3"/>
+    <polygon points="230,185 260,168 290,185 290,220 260,237 230,220" stroke-dasharray="3 3"/>
+    <!-- Connecting bus lines -->
+    <line x1="60" y1="150" x2="340" y2="150" stroke-dasharray="5 5"/>
+    <line x1="200" y1="40" x2="200" y2="260" stroke-dasharray="5 5"/>
+  </g>
+
+  <!-- Dataset Block 1: Crystalline Unit Cell (Left) -->
+  <g filter="url(#dataset-glow)">
+    <!-- Isometric Cube / Crystal Lattice Node -->
+    <!-- Top Face -->
+    <polygon points="95,115 125,98 155,115 125,132" fill="#00de59" stroke="#00de59" stroke-width="0.8"/>
+    <!-- Left Face -->
+    <polygon points="95,115 125,132 125,168 95,151" fill="#00aa44" stroke="#00aa44" stroke-width="0.8"/>
+    <!-- Right Face -->
+    <polygon points="155,115 125,132 125,168 155,151" fill="#00666b" stroke="#00666b" stroke-width="0.8"/>
+    <!-- Internal lattice lines -->
+    <line x1="125" y1="132" x2="125" y2="100" stroke="#ffffff" stroke-width="1.2" stroke-dasharray="2 2" opacity="0.8"/>
+  </g>
+
+  <!-- Dataset Block 2: Molecular Graph / Chemical Structure (Right) -->
+  <g filter="url(#dataset-glow)">
+    <!-- Molecular hexagon ring -->
+    <polygon points="275,110 305,93 335,110 335,145 305,162 275,145" 
+             fill="#ffffff" stroke="#008f97" stroke-width="2.5" stroke-linejoin="round"/>
+    <!-- Inner double bonds -->
+    <line x1="282" y1="114" x2="305" y2="100" stroke="#008f97" stroke-width="1.8"/>
+    <line x1="328" y1="116" x2="328" y2="140" stroke="#008f97" stroke-width="1.8"/>
+    <line x1="282" y1="141" x2="305" y2="155" stroke="#008f97" stroke-width="1.8"/>
+    
+    <!-- Functional group branch -->
+    <line x1="305" y1="93" x2="305" y2="68" stroke="#00aa44" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="305" cy="68" r="5" fill="#00aa44"/>
+    <circle cx="305" cy="68" r="2" fill="#ffffff"/>
+
+    <line x1="335" y1="145" x2="355" y2="158" stroke="#00de59" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="355" cy="158" r="4.5" fill="#00de59"/>
+  </g>
+
+  <!-- Central Integrated Hub: Standardized Data Core (Simmate Faceted Motif) -->
+  <g filter="url(#dataset-glow)">
+    <!-- Surrounding hexagonal indexing badge -->
+    <polygon points="200,90 240,113 240,167 200,190 160,167 160,113" 
+             fill="#ffffff" stroke="#00666b" stroke-width="2.5" stroke-linejoin="round"/>
+
+    <!-- Central Simmate Crystal Geometry -->
+    <!-- Top-Left Facet: Spring Green -->
+    <polygon points="200,105 170,140 196,150" fill="#00de59" stroke="#00de59" stroke-width="0.8"/>
+    <!-- Bottom-Left Facet: Emerald Green -->
+    <polygon points="170,140 200,180 196,150" fill="#00aa44" stroke="#00aa44" stroke-width="0.8"/>
+    <!-- Top-Right Facet: Teal -->
+    <polygon points="200,105 230,140 196,150" fill="#008f97" stroke="#008f97" stroke-width="0.8"/>
+    <!-- Bottom-Right Facet: Deep Teal -->
+    <polygon points="230,140 200,180 196,150" fill="#00666b" stroke="#00666b" stroke-width="0.8"/>
+  </g>
+
+  <!-- Data Integration Bridges (Connecting disparate datasets into the core) -->
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left to Center bridge -->
+    <path d="M 155,132 L 175,132 L 185,140" fill="none" stroke="#00aa44" stroke-width="2.5"/>
+    <circle cx="165" cy="132" r="3.5" fill="#00de59"/>
+
+    <!-- Right to Center bridge -->
+    <path d="M 275,128 L 255,128 L 245,135" fill="none" stroke="#008f97" stroke-width="2.5"/>
+    <circle cx="265" cy="128" r="3.5" fill="#008f97"/>
+
+    <!-- Bottom Standardized Output Stream -->
+    <path d="M 200,190 L 200,230" fill="none" stroke="#00666b" stroke-width="2.5"/>
+    <polygon points="195,230 200,242 205,230" fill="#00666b"/>
+  </g>
+
+  <!-- Catalog Category Chips (Standardized metadata blocks) -->
+  <g>
+    <!-- Top left chip -->
+    <rect x="70" y="55" width="40" height="12" rx="3" fill="#00aa44" opacity="0.85"/>
+    <rect x="74" y="58" width="18" height="6" rx="1.5" fill="#ffffff" opacity="0.9"/>
+    <!-- Top right chip -->
+    <rect x="290" y="210" width="45" height="12" rx="3" fill="#008f97" opacity="0.85"/>
+    <rect x="294" y="213" width="22" height="6" rx="1.5" fill="#ffffff" opacity="0.9"/>
+    <!-- Micro nodes -->
+    <circle cx="95" cy="115" r="3.5" fill="#00de59"/>
+    <circle cx="155" cy="115" r="3.5" fill="#008f97"/>
+    <circle cx="125" cy="168" r="4" fill="#00666b"/>
+    <circle cx="275" cy="110" r="3.5" fill="#008f97"/>
+    <circle cx="335" cy="110" r="3.5" fill="#00aa44"/>
+    <circle cx="305" cy="162" r="3.5" fill="#00de59"/>
+  </g>
+</svg>

@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <!-- Soft Drop Shadow -->
+    <filter id="clean-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#00666b" flood-opacity="0.14"/>
+    </filter>
+
+    <!-- Upward Open Data Beam Gradient -->
+    <linearGradient id="openBeam" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#00de59" stop-opacity="0.22"/>
+      <stop offset="60%" stop-color="#008f97" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#008f97" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Upward Radiant Light Beam (Data rising freely from storage) -->
+  <polygon points="145,180 100,55 300,55 255,180" fill="url(#openBeam)"/>
+
+  <!-- Background Data Flow & Orbital Pathways -->
+  <g stroke-linecap="round" stroke-linejoin="round" opacity="0.6">
+    <!-- Curved Data Rays -->
+    <path d="M 90 95 C 130 60, 160 45, 200 45" fill="none" stroke="#008f97" stroke-width="1.8" stroke-dasharray="4 5"/>
+    <path d="M 310 95 C 270 60, 240 45, 200 45" fill="none" stroke="#00aa44" stroke-width="1.8" stroke-dasharray="4 5"/>
+    <path d="M 135 100 L 160 100" fill="none" stroke="#00de59" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <path d="M 265 100 L 240 100" fill="none" stroke="#008f97" stroke-width="1.5" stroke-dasharray="3 3"/>
+  </g>
+
+  <!-- ==================== DATABASE VAULT STACK (BOTTOM) ==================== -->
+  <g filter="url(#clean-shadow)">
+    <!-- Base Tier 1 (Bottom Cylinder) -->
+    <!-- Cylinder Side Wall -->
+    <path d="M 120 215 A 80 20 0 0 0 280 215 L 280 242 A 80 20 0 0 1 120 242 Z" 
+          fill="#005256" stroke="#00666b" stroke-width="1"/>
+    <!-- Cylinder Top Face -->
+    <ellipse cx="200" cy="215" rx="80" ry="20" fill="#00666b"/>
+    <!-- Server Status Indicator Nodes -->
+    <circle cx="176" cy="232" r="3" fill="#00de59"/>
+    <circle cx="192" cy="232" r="3" fill="#00de59"/>
+    <circle cx="208" cy="232" r="3" fill="#00aa44"/>
+    <circle cx="224" cy="232" r="3" fill="#008f97"/>
+
+    <!-- Tier 2 (Top Cylinder) -->
+    <!-- Cylinder Side Wall -->
+    <path d="M 120 180 A 80 20 0 0 0 280 180 L 280 207 A 80 20 0 0 1 120 207 Z" 
+          fill="#00666b" stroke="#008f97" stroke-width="1"/>
+    <!-- Cylinder Top Face (Open Chamber) -->
+    <ellipse cx="200" cy="180" rx="80" ry="20" fill="#008f97"/>
+    <ellipse cx="200" cy="180" rx="72" ry="17" fill="#00484c"/>
+    <ellipse cx="200" cy="180" rx="72" ry="17" fill="none" stroke="#00de59" stroke-width="1.8" stroke-dasharray="5 3"/>
+
+    <!-- Unlocked / Open Access Symbol Badge on Database Front -->
+    <g transform="translate(0, 5)">
+      <!-- Badge Backdrop Shield -->
+      <circle cx="200" cy="196" r="15" fill="#ffffff" stroke="#00666b" stroke-width="1.5"/>
+      <!-- Open Shackle -->
+      <path d="M 196 195 V 189 A 4 4 0 0 1 204 189 V 192" 
+            fill="none" stroke="#00aa44" stroke-width="2.2" stroke-linecap="round"/>
+      <!-- Lock Body -->
+      <rect x="193" y="194" width="14" height="10" rx="2" fill="#00aa44"/>
+      <!-- Keyhole -->
+      <circle cx="200" cy="198" r="1.3" fill="#ffffff"/>
+      <line x1="200" y1="199" x2="200" y2="202" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- ==================== CENTRAL SIMMATE CRYSTAL (EMERGING) ==================== -->
+  <g filter="url(#clean-shadow)">
+    <!-- 4 Iconic Simmate Polyhedral Facets with Crisp White Seams -->
+    <!-- Top-Left Facet: Spring Green -->
+    <polygon points="200,45 155,102 195,114" 
+             fill="#00de59" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/>
+    <!-- Bottom-Left Facet: Emerald Green -->
+    <polygon points="155,102 200,158 195,114" 
+             fill="#00aa44" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/>
+    <!-- Top-Right Facet: Teal -->
+    <polygon points="200,45 245,102 195,114" 
+             fill="#008f97" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/>
+    <!-- Bottom-Right Facet: Deep Teal -->
+    <polygon points="245,102 200,158 195,114" 
+             fill="#00666b" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/>
+  </g>
+
+  <!-- ==================== FLOATING CHEMICAL & DATA STRUCTURES ==================== -->
+
+  <!-- Left: Molecular Graph (Chemical Bonds & Atoms) -->
+  <g filter="url(#clean-shadow)">
+    <!-- Covalent Bonds -->
+    <line x1="90" y1="95" x2="58" y2="62" stroke="#008f97" stroke-width="3" stroke-linecap="round"/>
+    <line x1="90" y1="95" x2="62" y2="135" stroke="#008f97" stroke-width="3" stroke-linecap="round"/>
+    <line x1="90" y1="95" x2="128" y2="95" stroke="#008f97" stroke-width="2.5" stroke-linecap="round"/>
+
+    <!-- Central Atom -->
+    <circle cx="90" cy="95" r="9.5" fill="#008f97"/>
+    <circle cx="90" cy="95" r="4.5" fill="#ffffff"/>
+
+    <!-- Terminal Atoms -->
+    <circle cx="58" cy="62" r="7.5" fill="#00de59"/>
+    <circle cx="58" cy="62" r="3" fill="#ffffff"/>
+
+    <circle cx="62" cy="135" r="7.5" fill="#00aa44"/>
+    <circle cx="62" cy="135" r="3" fill="#ffffff"/>
+
+    <!-- Small linking node -->
+    <circle cx="128" cy="95" r="4" fill="#00de59"/>
+  </g>
+
+  <!-- Right: Standardized Crystal Unit Cell / Benzene Hexagon -->
+  <g filter="url(#clean-shadow)">
+    <!-- Hexagonal Ring -->
+    <polygon points="310,65 338,81 338,113 310,129 282,113 282,81" 
+             fill="#ffffff" stroke="#00aa44" stroke-width="2.8" stroke-linejoin="round"/>
+    
+    <!-- Internal Aromatic Double Bonds -->
+    <line x1="330" y1="85" x2="330" y2="109" stroke="#00aa44" stroke-width="2"/>
+    <line x1="305" y1="122" x2="288" y2="112" stroke="#00aa44" stroke-width="2"/>
+    <line x1="289" y1="83" x2="305" y2="73" stroke="#00aa44" stroke-width="2"/>
+
+    <!-- Vertices (Atomic Centers) -->
+    <circle cx="310" cy="65" r="4.5" fill="#00de59"/>
+    <circle cx="338" cy="81" r="4.5" fill="#008f97"/>
+    <circle cx="338" cy="113" r="4.5" fill="#00666b"/>
+    <circle cx="310" cy="129" r="4.5" fill="#00aa44"/>
+    <circle cx="282" cy="113" r="4.5" fill="#00de59"/>
+    <circle cx="282" cy="81" r="4.5" fill="#008f97"/>
+
+    <!-- Small linking node toward center -->
+    <circle cx="265" cy="100" r="4" fill="#008f97"/>
+  </g>
+
+  <!-- ==================== ACCENTS & SPARKLES ==================== -->
+  <g>
+    <!-- Top Sparkle / Radiant Crystal Point -->
+    <polygon points="200,16 204,24 200,32 196,24" fill="#00de59"/>
+    <line x1="192" y1="24" x2="208" y2="24" stroke="#00de59" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="200" cy="24" r="1.5" fill="#ffffff"/>
+
+    <!-- Floating data sparkles -->
+    <circle cx="155" cy="50" r="2.5" fill="#00de59" opacity="0.8"/>
+    <circle cx="245" cy="50" r="2.5" fill="#008f97" opacity="0.8"/>
+    <circle cx="115" cy="145" r="2" fill="#00aa44" opacity="0.7"/>
+    <circle cx="285" cy="145" r="2" fill="#00666b" opacity="0.7"/>
+  </g>
+</svg>

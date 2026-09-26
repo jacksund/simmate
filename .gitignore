@@ -155,6 +155,7 @@ AGENTS.md
 .antigravitycli
 .cursor/
 .claude/
+CLAUDE.md
 .codex/
 gha-creds-*.json
 .github/*/gemini*

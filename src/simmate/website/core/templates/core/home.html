@@ -1,88 +1,114 @@
 {% extends "core/site_base.html" %}
 {% block tabtitle %}Home - Simmate{% endblock %}
+{% block extraheader %}
+    <style>
+        .home-logo {
+            height: 200px;
+            max-width: 100%;
+        }
+        .home-img {
+            max-height: 280px;
+        }
+        @media (max-width: 767.98px) {
+            .home-content h3 {
+                font-size: 1.25rem;
+            }
+            .home-content .lead {
+                font-size: 1rem;
+            }
+            .home-img {
+                max-height: 160px;
+            }
+            .home-logo {
+                height: auto;
+                width: 100%;
+            }
+        }
+    </style>
+{% endblock %}
 {% block body %}
     {% load static %}
-    <div class="row mt-5 mb-3">
-        <img src="{% static 'images/simmate-logo.svg' %}" height="200">
+    <div class="row mt-2 mt-md-5 mb-2 mb-md-3">
+        <div class="col-12 text-center">
+            <img src="{% static 'images/simmate-logo.svg' %}"
+                 class="home-logo"
+                 alt="Simmate">
+        </div>
     </div>
-    <div class="row align-items-center mb-5">
-        <div class="col-12 px-5 text-center">
+    <div class="row align-items-center mb-4 mb-md-5">
+        <div class="col-12 px-2 px-md-5 text-center">
             <h2 class="fs-2 fw-normal lh-1 text-body-secondary">
                 an open collective & full-stack framework for chemistry research
             </h2>
         </div>
     </div>
-    {% simmate_setting "website.show_finances" as SHOW_FINANCES %}
-    <div class="row align-items-center">
-        <div class="col-md-12 px-5">
-            <h3>Our mission</h3>
-            <p class="lead">
-                Simmate's primary goal is to build a community that openly shares chemistry data and infrastructure.
-                We believe that energy is wasted and research is slowed when
-                academics repeatedly perform the same calculations in isolation,
-                so we sought to build a platform
-                for open collaboration. This is why in our
-                public website
-                {% if SHOW_FINANCES %}
-                    you only pay for computational resources that
-                    are not your own, and
-                {% endif %}
-                all workflow results are
-                openly accessible to everyone.
-                However, for the majority of researchers that work with
-                confidential data, we still wish to collaborate
-                through building the chemistry infrastructure together.
-                For this reason, 100% of our codebase is open-source, and it is
-                free to setup you own private server.
-            </p>
-        </div>
-    </div>
-    <hr class="my-5">
-    <div class="row align-items-center">
-        <div class="col-md-5">
-            <img src="https://matplotlib.org/stable/_images/sphx_glr_pyplot_005.png"
-                 height="300">
-        </div>
-        <div class="col-md-7">
-            <h3>
-                <i class="bi bi-database"></i> All data is free & open
-            </h3>
-            <p class="lead">
-                Easy, unrestricted access to data is what enables new ideas and great
-                science. This is because we as researchers must understand what has been
-                done before in order to truly innovate and do something new next.
-            </p>
-        </div>
-    </div>
-    <hr class="my-5">
-    <div class="row align-items-center">
-        <div class="col-md-7">
-            <h3>
-                <i class="bi bi-cpu"></i> Compute is scalable & collaborative
-            </h3>
-            <p class="lead">
-                The type of computational resources that researchers have access to
-                varies greatly depending on if you are in academia, industry, or
-                even just a hobbyist.
-                Our infrastructure scales across the cloud, HPC, &
-                personal computers to carryout calculations together.
-            </p>
-        </div>
-        <div class="col-md-5">
-            <img src="https://matplotlib.org/stable/_images/sphx_glr_pyplot_005.png"
-                 height="300">
-        </div>
-    </div>
-    {% if SHOW_FINANCES %}
-        <hr class="my-5">
+    <div class="home-content px-3 px-md-0">
         <div class="row align-items-center">
-            <div class="col-md-5">
-                <img src="https://matplotlib.org/stable/_images/sphx_glr_pyplot_005.png"
-                     height="300">
+            <div class="col-12 px-md-5">
+                <h3>Our mission</h3>
+                <p class="lead">
+                    Simmate's primary goal is to build a community that openly shares chemistry data and infrastructure.
+                    We believe that energy is wasted and research is slowed when
+                    academics repeatedly perform the same calculations in isolation,
+                    so we sought to build a platform for collaboration.
+                    This is why all data and workflow results are openly accessible
+                    to everyone in our public website.
+                    However, for the majority of researchers that work with
+                    confidential data, we still wish to collaborate
+                    through building the chemistry infrastructure together.
+                    For this reason, 100% of our codebase is open-source, and it is
+                    free to set up your own private server.
+                </p>
+            </div>
+        </div>
+        <hr class="my-4 my-md-5">
+        <div class="row align-items-center">
+            <div class="col-md-5 mb-3 mb-md-0">
+                <img src="{% static 'images/home-open-data.svg' %}"
+                     class="img-fluid mx-auto d-block home-img"
+                     alt="All data is free & open">
             </div>
             <div class="col-md-7">
                 <h3>
-                    <i class="bi bi-coin"></i> Earnings are accessible to anyone*
+                    <i class="bi bi-database"></i> All data is free & open
+                </h3>
+                <p class="lead">
+                    Easy, unrestricted access to data is what enables new ideas and great
+                    science. After all, we can only truly innovate once we understand
+                    what has already been studied by others.
+                </p>
+            </div>
+        </div>
+        <hr class="my-4 my-md-5">
+        <div class="row align-items-center">
+            <div class="col-md-5 order-md-last mb-3 mb-md-0">
+                <img src="{% static 'images/home-scalable-compute.svg' %}"
+                     class="img-fluid mx-auto d-block home-img"
+                     alt="Compute is scalable & collaborative">
+            </div>
+            <div class="col-md-7">
+                <h3>
+                    <i class="bi bi-cpu"></i> Compute is scalable & collaborative
+                </h3>
+                <p class="lead">
+                    The type of computational resources that researchers have access to
+                    varies greatly depending on if you are in academia, industry, or
+                    even just a hobbyist.
+                    Our infrastructure scales across the cloud, HPC, &
+                    personal computers to carryout calculations together.
+                </p>
+            </div>
+        </div>
+        <hr class="my-4 my-md-5">
+        <div class="row align-items-center">
+            <div class="col-md-5 mb-3 mb-md-0">
+                <img src="{% static 'images/home-earnings.svg' %}"
+                     class="img-fluid mx-auto d-block home-img"
+                     alt="Earnings are transparent & shared">
+            </div>
+            <div class="col-md-7">
+                <h3>
+                    <i class="bi bi-coin"></i> Earnings are transparent & shared*
                 </h3>
                 <p class="lead">
                     You can earn when you contribute computer resources for
@@ -97,7 +123,7 @@
                             other users and how much compute you provided.
                             Make sure you read and understand our
                             <a href="#" target="_blank">
-                                pay distribution strategy
+                                finances
                                 <i class="bi bi-box-arrow-up-right"></i>
                             </a>.
                         </em>
@@ -105,88 +131,98 @@
                 </p>
             </div>
         </div>
-    {% endif %}
-    <hr class="my-5">
-    <div class="row align-items-center">
-        <div class="col-md-7">
-            <h3>
-                <i class="bi bi-clipboard2-data"></i> Popular chemistry datasets are built-in
-            </h3>
-            <p class="lead">
-                The most frequently cited datasets in the chemistry community are integrated
-                into Simmate -- meaning Simmate serves as a one-stop-shop for you to
-                search accross all datasets. Easily bring data into larger projects
-                in a clean and standardized way.
-            </p>
-            <p class="lead">
-                <small>
-                    <em>
-                        * We can only redistribute data when the original provider's
-                        licensing allows it. For this reason, some datasets can only be
-                        used by locally installing Simmate & downloading the data
-                        *directly* from the third-party provider.
-                    </em>
-                </small>
-            </p>
-        </div>
-        <div class="col-md-5">
-            <img src="https://matplotlib.org/stable/_images/sphx_glr_pyplot_005.png"
-                 height="300">
-        </div>
-    </div>
-    <hr class="my-5">
-    <div class="row align-items-center">
-        <div class="col-md-5">
-            <img src="https://matplotlib.org/stable/_images/sphx_glr_pyplot_005.png"
-                 height="300">
-        </div>
-        <div class="col-md-7">
-            <h3>
-                <i class="bi bi-diagram-3"></i> Workflows are built on trusted software
-            </h3>
-            <p class="lead">
-                There is an endless list of software to consider for the many types of chemistry
-                calculations out there. Simmate simplifies the use & scaling of other
-                popular applications in computational chemistry literature. Explore
-                our library of workflows or leverage our toolkit to build your own.
-            </p>
-        </div>
-    </div>
-    <hr class="my-5">
-    <div class="row align-items-center">
-        <div class="col-md-7">
-            <h3>
-                <i class="bi bi-github"></i> The codebase is 100% open-source
-            </h3>
-            <p class="lead">
-                Simmate is built on top of other open-source giants like PyMatGen, RDkit,
-                Django, Postgres, and htmx. This makes every part of our software
-                completely free to install and use. Set up your own server or
-                collaborate here with us in the public website.
-            </p>
-        </div>
-        <div class="col-md-5">
-            <img src="https://matplotlib.org/stable/_images/sphx_glr_pyplot_005.png"
-                 height="300">
-        </div>
-    </div>
-    <hr class="my-5">
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="text-center">
-                <p class="mt-2">
-                    To learn more about Simmate's team and history, visit our <a href="{% url 'about' %}">About</a> page.
+        <hr class="my-4 my-md-5">
+        <div class="row align-items-center">
+            <div class="col-md-5 order-md-last mb-3 mb-md-0">
+                <img src="{% static 'images/home-chemistry-datasets.svg' %}"
+                     class="img-fluid mx-auto d-block home-img"
+                     alt="Popular chemistry datasets are built-in">
+            </div>
+            <div class="col-md-7">
+                <h3>
+                    <i class="bi bi-clipboard2-data"></i> Popular chemistry datasets are built-in*
+                </h3>
+                <p class="lead">
+                    Many of the most widely used datasets in chemistry — such as the
+                    Materials Project, COD, and PubChem — are integrated into Simmate,
+                    so you can search across all of them in one place. Data from every
+                    source is cleaned and standardized, making it easy to bring into your
+                    own projects.
+                </p>
+                <p class="lead">
+                    <small>
+                        <em>
+                            * We can only redistribute data when the original provider's
+                            license allows it. Some datasets can therefore only be used by
+                            installing Simmate locally and downloading the data directly
+                            from the provider.
+                        </em>
+                    </small>
                 </p>
             </div>
         </div>
-    </div>
-    <div class="row mb-5">
-        <div class="col-lg-12">
-            <div class="text-center">
-                <p class="mt-2">
-                    To learn more about Simmate's framework and codebase, visit our our <a href="https://jacksund.github.io/simmate/home/"
-    target="_blank">Documentation</a>.
+        <hr class="my-4 my-md-5">
+        <div class="row align-items-center">
+            <div class="col-md-5 mb-3 mb-md-0">
+                <img src="{% static 'images/home-trusted-workflows.svg' %}"
+                     class="img-fluid mx-auto d-block home-img"
+                     alt="Workflows are built on trusted software">
+            </div>
+            <div class="col-md-7">
+                <h3>
+                    <i class="bi bi-diagram-3"></i> Workflows are built on trusted software
+                </h3>
+                <p class="lead">
+                    There is an endless list of software to consider for chemistry
+                    calculations, and each program comes with its own inputs, outputs,
+                    and quirks. Simmate wraps popular, well-established codes — such
+                    as VASP, Quantum ESPRESSO, and Psi4 — into workflows that handle
+                    setup, catch and fix common errors, and scale from your laptop to HPC
+                    clusters. Explore our library of ready-to-use workflows, or build your
+                    own with our toolkit.
                 </p>
+            </div>
+        </div>
+        <hr class="my-4 my-md-5">
+        <div class="row align-items-center">
+            <div class="col-md-5 order-md-last mb-3 mb-md-0">
+                <img src="{% static 'images/home-open-source.svg' %}"
+                     class="img-fluid mx-auto d-block home-img"
+                     alt="The codebase is 100% open-source">
+            </div>
+            <div class="col-md-7">
+                <h3>
+                    <i class="bi bi-github"></i> The codebase is 100% open-source
+                </h3>
+                <p class="lead">
+                    Simmate is built on the shoulders of open-source giants like pymatgen,
+                    RDKit, Django, PostgreSQL, and htmx. Our own code is released under the
+                    permissive BSD 3-Clause license, so every part of Simmate is free to
+                    install, use, and modify — whether for academic or commercial work.
+                    Run your own server, collaborate with us on the public website, or
+                    contribute directly on
+                    <a href="https://github.com/jacksund/simmate" target="_blank">GitHub</a>.
+                </p>
+            </div>
+        </div>
+        <hr class="my-4 my-md-5">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="text-center">
+                    <p class="mt-2">
+                        To learn more about Simmate's team and history, visit our <a href="{% url 'about' %}">About</a> page.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-5">
+            <div class="col-lg-12">
+                <div class="text-center">
+                    <p class="mt-2">
+                        To learn more about Simmate's framework and codebase, visit our <a href="https://jacksund.github.io/simmate/home/"
+    target="_blank">documentation</a>.
+                    </p>
+                </div>
             </div>
         </div>
     </div>

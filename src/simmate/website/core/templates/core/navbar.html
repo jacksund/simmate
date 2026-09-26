@@ -8,11 +8,6 @@
         and limited compute is available.
         <i class="bi bi-cone-striped"></i>
     </div>
-    <div class="bg-danger text-white text-center py-1 small fw-bold d-md-none">
-        <i class="bi bi-exclamation-triangle"></i>
-        For the best experience, please use a larger window. We have not yet optimized the website for phone-based viewing.
-        <i class="bi bi-exclamation-triangle"></i>
-    </div>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary py-1">
         <div class="container">
             {# Simmate Logo / Home button #}
@@ -33,19 +28,22 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        {# todo: add 'active' class to whichever section is active + highlighted #}
-                        <a class="nav-link" href="{% url 'apps' %}"><i class="bi bi-speedometer2"></i> Apps</a>
+                        <a class="nav-link{% if request.path|slice:':6' == '/apps/' %} active{% endif %}"
+                           href="{% url 'apps' %}"><i class="bi bi-speedometer2"></i> Apps</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link"
+                        <a class="nav-link{% if request.path|slice:':6' == '/data/' %} active{% endif %}"
                            href="{% url 'data_explorer:home' %}"><i class="bi bi-bar-chart"></i> Data</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link"
+                        <a class="nav-link{% if request.path|slice:':11' == '/workflows/' %} active{% endif %}"
                            href="{% url 'workflow_explorer:home' %}"><i class="bi bi-diagram-3"></i> Workflows</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link{% if request.resolver_match.url_name == 'about' or request.resolver_match.url_name == 'contact' or request.resolver_match.url_name == 'faqs' or request.resolver_match.url_name == 'pricing' %} active{% endif %}"
+                           href="#"
+                           role="button"
+                           data-bs-toggle="dropdown">
                             <i class="bi bi-three-dots"></i> Extras
                         </a>
                         <ul class="dropdown-menu">
@@ -93,7 +91,7 @@
                             </li>
                             {% if SHOW_FINANCES %}
                                 <li>
-                                    <a class="dropdown-item" href="#"><i class="bi bi-cpu"></i> Contribue & Earn</a>
+                                    <a class="dropdown-item" href="#"><i class="bi bi-cpu"></i> Contribute & Earn</a>
                                 </li>
                             {% endif %}
                             <li>
@@ -197,7 +195,7 @@
     </nav>
 </div>
 <div>
-    {# the popout models need to be kept in this separate div bc they don't behave well inside the navbar when sticky-top is active #}
+    {# the popout modals need to be kept in this separate div bc they don't behave well inside the navbar when sticky-top is active #}
     {% if user.is_authenticated %}
         {% if SHOW_FINANCES %}
             {# USDC modal #}
