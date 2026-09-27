@@ -472,28 +472,24 @@ def dashboard_default_view(request):
             "name": "HPC SLURM Cluster",
             "description": "Distributed node partition for heavy calculations",
             "status": "Operational",
-            "status_badge": "bg-success",
             "metric": "92% Load (120/128 cores)",
         },
         {
             "name": "Cloud Workers (K8s)",
             "description": "Autoscaling cloud pods for workflow tasks",
             "status": "Operational",
-            "status_badge": "bg-success",
             "metric": "64% Capacity (32/48 cores)",
         },
         {
             "name": "PostgreSQL & RDKit",
             "description": "Primary relational database and molecular index",
             "status": "Optimal",
-            "status_badge": "bg-success",
             "metric": "28% Disk (42 GB / 250 GB)",
         },
         {
             "name": "Redis Broker",
             "description": "Message queue and caching layer",
             "status": "Optimal",
-            "status_badge": "bg-success",
             "metric": "1.1 ms Latency",
         },
     ]
@@ -511,10 +507,7 @@ def dashboard_default_view(request):
 
 
 def dashboard(request):
-    if (
-        not hasattr(settings.website, "dashboard_view")
-        or not settings.website.dashboard_view
-    ):
+    if not settings.website.dashboard_view:
         return dashboard_default_view(request)
     else:
         dashboard_module = importlib.import_module(settings.website.dashboard_view)

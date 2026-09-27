@@ -6,31 +6,25 @@
     .git-file-row { transition: background-color 0.1s; }
     .git-file-row:hover { background-color: var(--bs-tertiary-bg); }
     .git-file-row.active { background-color: var(--bs-primary-bg-subtle); }
+    .git-log-row { transition: background-color 0.1s; }
+    .git-log-row:hover { background-color: var(--bs-tertiary-bg); }
+    .git-log-row.active { background-color: var(--bs-primary-bg-subtle); }
+    .git-log-row .badge[data-bs-toggle] { cursor: pointer; }
     .htmx-indicator { display: none !important; }
     .htmx-request .htmx-indicator { display: inline-block !important; }
     </style>
 {% endblock %}
 {% block body %}
-    {# Header & Action Bar #}
-    <div class="row align-items-center mb-4">
-        <div class="col-md-7">
-            <h1 class="h2 mb-1 fw-bold text-dark">
-                <i class="bi bi-tools text-warning"></i> Dev Tools
-            </h1>
-            <p class="text-muted mb-0">Local diagnostics for git, Docker, and Kubernetes — useful for debugging deployments.</p>
-        </div>
-        <div class="col-md-5 text-md-end mt-3 mt-md-0">
-            <span class="badge bg-warning-subtle text-warning border border-warning me-2 px-2 py-2">
-                <i class="bi bi-cone-striped"></i> Developer Use Only
-            </span>
-            <a href="{% url 'apps' %}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-grid-fill"></i> All Apps
-            </a>
-        </div>
+    {# Header #}
+    <div class="text-center pt-3 pb-2 mb-4">
+        <h1 class="h2 fw-bold mb-2">
+            <i class="bi bi-tools me-2"></i>Dev Tools
+        </h1>
+        <p class="text-muted mb-0">Local diagnostics for git, Docker, and Kubernetes — useful for debugging deployments.</p>
     </div>
-    {# Git Status — full width #}
+    {# Git: commit graph, status, and diffs #}
     <div class="row g-3 mb-4">
-        <div class="col-12">{% htmx_component "git-status-component" %}</div>
+        <div class="col-12">{% htmx_component "git-component" %}</div>
     </div>
     {# Docker & Kubernetes row #}
     <div class="row g-3 mb-4">
@@ -183,55 +177,4 @@
             </div>
         </div>
     </div>
-    {# Git Log Graph — full width #}
-    {% if git.available %}
-        <div class="row g-3 mb-4">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-transparent border-0 pt-3 px-3">
-                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-                            <div>
-                                <h5 class="card-title mb-0 fw-semibold">
-                                    <i class="bi bi-diagram-3 text-warning me-1"></i> Git Log
-                                </h5>
-                                <small class="text-muted">git log --graph --all --decorate</small>
-                            </div>
-                            {% if git.branches %}
-                                <div class="d-flex flex-wrap gap-1">
-                                    {% for b in git.branches %}
-                                        {% if b|slice:":2" == "* " or b == git.branch %}
-                                            <span class="badge bg-warning text-dark font-monospace small">
-                                                <i class="bi bi-signpost-fill me-1"></i>{{ b|slice:"2:" }}
-                                            </span>
-                                        {% elif b|slice:":8" == "remotes/" %}
-                                            <span class="badge bg-secondary font-monospace small">
-                                                <i class="bi bi-cloud me-1"></i>{{ b }}
-                                            </span>
-                                        {% else %}
-                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace small">
-                                                <i class="bi bi-git me-1"></i>{{ b }}
-                                            </span>
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="card-body px-3 pb-3">
-                        {% if git.log_lines %}
-                            <div class="bg-dark rounded-3 p-3"
-                                 style="max-height: 300px;
-                                        overflow-y: auto">
-                                {% for line in git.log_lines %}
-                                    <div class="font-monospace small mb-1 {% if '(HEAD' in line %}text-warning fw-semibold {% elif line|slice:':1' == '*' %}text-light {% else %}text-secondary{% endif %}">{{ line }}</div>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <p class="text-muted small">No commits found.</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
 {% endblock %}

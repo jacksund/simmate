@@ -1,47 +1,68 @@
 # -*- coding: utf-8 -*-
 
-from django.http import HttpResponse
+import subprocess
 
 from simmate.website.htmx.components import HtmxComponent
 
 from .views import (
+    GRAPH_LANE_W,
+    GRAPH_ROW_H,
+    _get_branch_refs,
+    _get_commit_detail,
     _get_git_info,
+    _get_git_log,
+    _get_rename_source,
+    _layout_graph,
     _parse_diff,
     _run_cmd,
     _validate_path,
 )
 
 
-class GitStatusComponent(HtmxComponent):
+class GitComponent(HtmxComponent):
+    """
+    A combined git panel: commit graph (log + branches), working tree status
+    (staged/unstaged files + commit box), and a diff viewer. Every action
+    re-renders the whole component, so all panels always stay in sync.
+    """
 
-    template_name = "dev_tools/git_status.html"
+    template_name = "dev_tools/git.html"
 
+    # status + diff state
     selected_file: str = ""
     selected_view: str = "unstaged"
     commit_error: str = ""
     lint_output: str = ""
     lint_error: bool = False
 
+    # log state
+    log_limit: int = 50
+    selected_commit: str = ""
+    action_error: str = ""
+    action_message: str = ""
+
+    # -------------------------------------------------------------------------
+    # Status + diff actions
+    # -------------------------------------------------------------------------
+
     def show_diff(self, file: str = "", view: str = "unstaged"):
         if _validate_path(file):
             self.selected_file = file
             self.selected_view = view
 
-    def stage_file(self, file: str = ""):
+    def _toggle_file_stage(self, file: str, git_cmd: list[str], view: str):
         target = file or self.selected_file
         if target and _validate_path(target):
-            _run_cmd(["git", "add", "--", target])
+            _run_cmd(git_cmd + ["--"] + self._with_rename_source(target))
             self.selected_file = target
-            self.selected_view = "staged"
+            self.selected_view = view
         self.commit_error = ""
 
+    def stage_file(self, file: str = ""):
+        self._toggle_file_stage(file, ["git", "add"], "staged")
+
     def unstage_file(self, file: str = ""):
-        target = file or self.selected_file
-        if target and _validate_path(target):
-            _run_cmd(["git", "restore", "--staged", "--", target])
-            self.selected_file = target
-            self.selected_view = "unstaged"
-        self.commit_error = ""
+        self._toggle_file_stage(file, ["git", "restore", "--staged"], "unstaged")
 
     def stage_all(self):
         _run_cmd(["git", "add", "-A"])
@@ -62,14 +83,12 @@ class GitStatusComponent(HtmxComponent):
         if not ok:
             self.commit_error = output or "Commit failed."
             return
+        self.form_data["commit_message"] = ""
         self.selected_file = ""
         self.commit_error = ""
-        response = HttpResponse()
-        response["HX-Refresh"] = "true"
-        return response
 
     def refresh(self):
-        pass
+        self._clear_messages()
 
     def lint(self):
         ok, output = _run_cmd(["simmate", "dev", "lint"], timeout=60)
@@ -79,17 +98,110 @@ class GitStatusComponent(HtmxComponent):
         self.lint_error = not ok
         self.selected_file = ""
 
+    # -------------------------------------------------------------------------
+    # Log + branch actions
+    # -------------------------------------------------------------------------
+
+    def _clear_messages(self):
+        self.action_error = ""
+        self.action_message = ""
+
+    def load_more(self):
+        self.log_limit += 50
+
+    def select_commit(self, commit: str = ""):
+        commit = str(commit)
+        self.selected_commit = "" if commit == self.selected_commit else commit
+
+    def checkout(self, branch: str = ""):
+        self._clear_messages()
+        branch = str(branch)
+        refs = _get_branch_refs()
+
+        # only allow names that git itself reports (this also guards against
+        # names that could be parsed as command-line options)
+        if branch in refs["local"]:
+            cmd = ["git", "switch", branch]
+        elif branch in refs["remote"]:
+            local_name = branch.split("/", 1)[1]
+            if local_name in refs["local"]:
+                cmd = ["git", "switch", local_name]
+            else:
+                cmd = ["git", "switch", "--track", branch]
+        else:
+            self.action_error = f"Unknown branch: {branch}"
+            return
+
+        # git writes checkout errors to stderr, so we can't use _run_cmd here
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+        except (subprocess.TimeoutExpired, OSError) as error:
+            self.action_error = str(error)
+            return
+        if result.returncode != 0:
+            self.action_error = (result.stderr or result.stdout).strip() or (
+                "Checkout failed."
+            )
+            return
+
+        # the working tree may have changed, so reset any file-specific views
+        self.selected_file = ""
+        self.selected_commit = ""
+        self.action_message = result.stderr.strip() or f"Switched to {branch}"
+
+    def fetch(self):
+        self._clear_messages()
+        try:
+            result = subprocess.run(
+                ["git", "fetch", "--all", "--prune"],
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+        except (subprocess.TimeoutExpired, OSError) as error:
+            self.action_error = str(error)
+            return
+        if result.returncode != 0:
+            self.action_error = result.stderr.strip() or "Fetch failed."
+        else:
+            # git fetch reports progress on stderr, even on success
+            self.action_message = result.stderr.strip() or "Already up to date."
+
+    # -------------------------------------------------------------------------
+    # Rendering
+    # -------------------------------------------------------------------------
+
     def get_context(self):
         ctx = super().get_context()
         git_info = _get_git_info()
         ctx.update(git_info)
+        if not git_info.get("available"):
+            return ctx
 
+        # log panel
+        commits = _get_git_log(self.log_limit)
+        max_lanes = _layout_graph(commits)
+        ctx.update(
+            {
+                "commits": commits,
+                "has_more_commits": len(commits) >= self.log_limit,
+                "graph_width": max_lanes * GRAPH_LANE_W,
+                "row_h": GRAPH_ROW_H,
+                "branches": _get_branch_refs(),
+                "commit_detail": (
+                    _get_commit_detail(self.selected_commit)
+                    if self.selected_commit
+                    else None
+                ),
+            }
+        )
+
+        # diff panel
         diff_lines = []
         show_stage_btn = False
         show_unstage_btn = False
-        if self.selected_file and git_info.get("available"):
+        if self.selected_file:
             diff_lines, show_stage_btn, show_unstage_btn = self._get_diff_context()
-
         ctx["diff_lines"] = diff_lines
         ctx["show_stage_btn"] = show_stage_btn
         ctx["show_unstage_btn"] = show_unstage_btn
@@ -97,11 +209,22 @@ class GitStatusComponent(HtmxComponent):
         ctx["lint_error"] = self.lint_error
         return ctx
 
+    @staticmethod
+    def _with_rename_source(file_path: str) -> list[str]:
+        """
+        Returns the pathspecs needed for git commands on `file_path`. For a
+        staged rename, both the old and new paths are needed so git can pair
+        them (otherwise it only sees an added file, or nothing at all).
+        """
+        orig_path = _get_rename_source(file_path)
+        return [orig_path, file_path] if orig_path else [file_path]
+
     def _get_diff_context(self) -> tuple[list, bool, bool]:
         file_path = self.selected_file
         view = self.selected_view
+        paths = self._with_rename_source(file_path)
 
-        _, status_raw = _run_cmd(["git", "status", "--short", "--", file_path])
+        _, status_raw = _run_cmd(["git", "status", "--short", "--", *paths])
         is_staged = False
         is_untracked = False
         is_unstaged = False
@@ -112,7 +235,7 @@ class GitStatusComponent(HtmxComponent):
             is_unstaged = y not in (" ",) and not is_untracked
 
         if view == "staged" and is_staged:
-            _, diff_text = _run_cmd(["git", "diff", "--cached", "--", file_path])
+            _, diff_text = _run_cmd(["git", "diff", "--cached", "-M", "--", *paths])
         elif is_untracked:
             _, diff_text = _run_cmd(
                 ["git", "diff", "--no-index", "/dev/null", file_path]
@@ -120,7 +243,7 @@ class GitStatusComponent(HtmxComponent):
         else:
             _, diff_text = _run_cmd(["git", "diff", "--", file_path])
             if not diff_text and is_staged:
-                _, diff_text = _run_cmd(["git", "diff", "--cached", "--", file_path])
+                _, diff_text = _run_cmd(["git", "diff", "--cached", "-M", "--", *paths])
 
         show_stage_btn = view == "unstaged" and (is_unstaged or is_untracked)
         show_unstage_btn = view == "staged" and is_staged
