@@ -1,0 +1,263 @@
+{% if not available %}
+    <div class="d-flex align-items-center justify-content-center flex-grow-1 text-muted">
+        <div class="text-center py-4">
+            <i class="bi bi-x-circle fs-3 mb-2 d-block"></i>
+            <small>git not found or not in a repository</small>
+        </div>
+    </div>
+{% else %}
+    {# ── Dirstat ── #}
+    {% if dirstat %}
+        <div class="px-2 pt-1 pb-1 border-bottom flex-shrink-0">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+                <small class="text-uppercase fw-semibold text-muted"
+                       style="font-size: 0.63rem;
+                              letter-spacing: 0.06em">Changed Dirs</small>
+            </div>
+            {% for stat in dirstat %}
+                <div class="d-flex align-items-center gap-2 mb-1" style="line-height: 1;">
+                    <span class="flex-shrink-0 fw-semibold font-monospace"
+                          style="font-size: 0.63rem;
+                                 width: 2.2rem;
+                                 color: var(--bs-warning-text-emphasis)">{{ stat.pct|floatformat:0 }}%</span>
+                    <div class="flex-grow-1" style="min-width: 0;">
+                        <div class="progress rounded-pill" style="height: 3px;">
+                            <div class="progress-bar bg-warning"
+                                 style="width: {{ stat.pct|floatformat:0 }}%"></div>
+                        </div>
+                    </div>
+                    <span class="font-monospace text-muted text-truncate flex-shrink-1"
+                          style="font-size: 0.63rem;
+                                 min-width: 0;
+                                 max-width: 55%"
+                          title="{{ stat.path }}">{{ stat.path }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {# ── Unstaged Changes ── #}
+    <div class="d-flex flex-column" style="flex: 1 1 0; min-height: 0;">
+        <div class="d-flex align-items-center justify-content-between px-2 py-1 flex-shrink-0 border-bottom">
+            <small class="text-uppercase fw-semibold text-muted"
+                   style="font-size: 0.68rem;
+                          letter-spacing: 0.06em">Unstaged</small>
+            <div class="d-flex align-items-center gap-1">
+                <small class="text-muted" style="font-size: 0.7rem;">{{ unstaged_files|length }}</small>
+                {% if unstaged_files %}
+                    <form hx-post="{% url 'dev_tools:git_stage_all' %}"
+                          hx-target="#git-status-panel"
+                          hx-swap="innerHTML"
+                          class="d-inline">
+                        <button type="submit"
+                                class="btn border-0 p-0 px-1"
+                                title="Stage all"
+                                style="line-height: 1;
+                                       color: #3fb950;
+                                       opacity: 0.5;
+                                       font-size: 0.8rem"
+                                onmouseover="this.style.opacity='1'"
+                                onmouseout="this.style.opacity='0.5'">
+                            <i class="bi bi-plus-circle-fill"></i>
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        <div class="flex-grow-1" style="overflow-y: auto; min-height: 0;">
+            {% if unstaged_files %}
+                {% for file in unstaged_files %}
+                    <form hx-post="{% url 'dev_tools:git_stage' %}"
+                          hx-target="#git-status-panel"
+                          hx-swap="innerHTML"
+                          class="d-flex align-items-center gap-1 px-1 py-1 git-file-row"
+                          data-path="{{ file.path }}">
+                        <input type="hidden" name="file" value="{{ file.path }}">
+                        <button type="submit"
+                                class="btn border-0 p-0 px-1 flex-shrink-0"
+                                title="Stage file"
+                                style="line-height: 1;
+                                       color: #3fb950;
+                                       opacity: 0.45;
+                                       font-size: 0.85rem"
+                                onmouseover="this.style.opacity='1'"
+                                onmouseout="this.style.opacity='0.45'">
+                            <i class="bi bi-plus-circle-fill"></i>
+                        </button>
+                        <button type="button"
+                                class="btn p-0 border-0 bg-transparent flex-grow-1 text-start d-flex align-items-center gap-1"
+                                style="min-width: 0"
+                                hx-get="{% url 'dev_tools:git_diff' %}?file={{ file.path|urlencode }}&view=unstaged"
+                                hx-target="#diff-viewer"
+                                hx-swap="innerHTML"
+                                title="{{ file.path }}">
+                            <span class="flex-shrink-0"
+                                  style="width: 0.85rem;
+                                         text-align: center;
+                                         font-size: 0.72rem;
+                                         line-height: 1">
+                                {% if file.status == "A" or file.status == "??" %}
+                                    <i class="bi bi-plus text-success fw-bold"></i>
+                                {% elif file.status == "D" %}
+                                    <i class="bi bi-dash text-danger fw-bold"></i>
+                                {% elif file.status == "R" %}
+                                    <i class="bi bi-arrow-left-right text-info"></i>
+                                {% elif file.status == "C" %}
+                                    <i class="bi bi-files text-info"></i>
+                                {% elif file.status == "U" %}
+                                    <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                                {% else %}
+                                    <i class="bi bi-pencil-fill text-warning"></i>
+                                {% endif %}
+                            </span>
+                            <span class="d-flex flex-grow-1 font-monospace overflow-hidden"
+                                  style="font-size: 0.78rem;
+                                         min-width: 0">
+                                {% if file.dir %}<span class="text-muted"
+      style="overflow: hidden;
+             text-overflow: ellipsis;
+             white-space: nowrap;
+             flex-shrink: 1;
+             min-width: 0">{{ file.dir }}</span>{% endif %}
+                                <span class="text-body"
+                                      style="flex-shrink: 0;
+                                             white-space: nowrap">{{ file.name }}</span>
+                            </span>
+                        </button>
+                    </form>
+                {% endfor %}
+            {% else %}
+                <div class="px-3 py-2">
+                    <small class="text-muted fst-italic" style="font-size: 0.75rem;">No unstaged changes</small>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {# ── Staged Changes ── #}
+    <div class="d-flex flex-column border-top"
+         style="flex: 1 1 0;
+                min-height: 0">
+        <div class="d-flex align-items-center justify-content-between px-2 py-1 flex-shrink-0 border-bottom">
+            <small class="text-uppercase fw-semibold text-muted"
+                   style="font-size: 0.68rem;
+                          letter-spacing: 0.06em">Staged</small>
+            <div class="d-flex align-items-center gap-1">
+                <small class="text-muted" style="font-size: 0.7rem;">{{ staged_files|length }}</small>
+                {% if staged_files %}
+                    <form hx-post="{% url 'dev_tools:git_unstage_all' %}"
+                          hx-target="#git-status-panel"
+                          hx-swap="innerHTML"
+                          class="d-inline">
+                        <button type="submit"
+                                class="btn border-0 p-0 px-1"
+                                title="Unstage all"
+                                style="line-height: 1;
+                                       color: #f85149;
+                                       opacity: 0.5;
+                                       font-size: 0.8rem"
+                                onmouseover="this.style.opacity='1'"
+                                onmouseout="this.style.opacity='0.5'">
+                            <i class="bi bi-dash-circle-fill"></i>
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        <div class="flex-grow-1" style="overflow-y: auto; min-height: 0;">
+            {% if staged_files %}
+                {% for file in staged_files %}
+                    <form hx-post="{% url 'dev_tools:git_unstage' %}"
+                          hx-target="#git-status-panel"
+                          hx-swap="innerHTML"
+                          class="d-flex align-items-center gap-1 px-1 py-1 git-file-row"
+                          data-path="{{ file.path }}">
+                        <input type="hidden" name="file" value="{{ file.path }}">
+                        <button type="submit"
+                                class="btn border-0 p-0 px-1 flex-shrink-0"
+                                title="Unstage file"
+                                style="line-height: 1;
+                                       color: #f85149;
+                                       opacity: 0.45;
+                                       font-size: 0.85rem"
+                                onmouseover="this.style.opacity='1'"
+                                onmouseout="this.style.opacity='0.45'">
+                            <i class="bi bi-dash-circle-fill"></i>
+                        </button>
+                        <button type="button"
+                                class="btn p-0 border-0 bg-transparent flex-grow-1 text-start d-flex align-items-center gap-1"
+                                style="min-width: 0"
+                                hx-get="{% url 'dev_tools:git_diff' %}?file={{ file.path|urlencode }}&view=staged"
+                                hx-target="#diff-viewer"
+                                hx-swap="innerHTML"
+                                title="{{ file.path }}">
+                            <span class="flex-shrink-0"
+                                  style="width: 0.85rem;
+                                         text-align: center;
+                                         font-size: 0.72rem;
+                                         line-height: 1">
+                                {% if file.status == "A" %}
+                                    <i class="bi bi-plus text-success fw-bold"></i>
+                                {% elif file.status == "D" %}
+                                    <i class="bi bi-dash text-danger fw-bold"></i>
+                                {% elif file.status == "R" %}
+                                    <i class="bi bi-arrow-left-right text-info"></i>
+                                {% elif file.status == "C" %}
+                                    <i class="bi bi-files text-info"></i>
+                                {% elif file.status == "U" %}
+                                    <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                                {% else %}
+                                    <i class="bi bi-pencil-fill text-warning"></i>
+                                {% endif %}
+                            </span>
+                            <span class="d-flex flex-grow-1 font-monospace overflow-hidden"
+                                  style="font-size: 0.78rem;
+                                         min-width: 0">
+                                {% if file.dir %}<span class="text-muted"
+      style="overflow: hidden;
+             text-overflow: ellipsis;
+             white-space: nowrap;
+             flex-shrink: 1;
+             min-width: 0">{{ file.dir }}</span>{% endif %}
+                                <span class="text-body"
+                                      style="flex-shrink: 0;
+                                             white-space: nowrap">{{ file.name }}</span>
+                            </span>
+                        </button>
+                    </form>
+                {% endfor %}
+            {% else %}
+                <div class="px-3 py-2">
+                    <small class="text-muted fst-italic" style="font-size: 0.75rem;">No staged changes</small>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {# ── Commit Box ── #}
+    <div class="border-top px-2 py-2 flex-shrink-0">
+        {% if commit_error %}
+            <div class="alert alert-danger py-1 px-2 mb-2 small rounded-1">
+                <i class="bi bi-exclamation-triangle me-1"></i>{{ commit_error }}
+            </div>
+        {% endif %}
+        <form hx-post="{% url 'dev_tools:git_commit' %}"
+              hx-target="#git-status-panel"
+              hx-swap="innerHTML">
+            <div class="d-flex gap-2 align-items-center">
+                <input type="text"
+                       name="message"
+                       class="form-control form-control-sm font-monospace"
+                       style="font-size: 0.78rem"
+                       placeholder="Commit message…"
+                       {% if not has_staged %}disabled{% endif %}
+                       oninput="this.closest('form').querySelector('[type=submit]').disabled = !this.value.trim()"
+                       required>
+                <button type="submit"
+                        class="btn btn-sm btn-success flex-shrink-0"
+                        disabled
+                        title="{% if not has_staged %}Stage files first{% else %}Commit staged files{% endif %}">
+                    <i class="bi bi-check2"></i>
+                    {% if staged_files %}<span class="ms-1">{{ staged_files|length }}</span>{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+{% endif %}

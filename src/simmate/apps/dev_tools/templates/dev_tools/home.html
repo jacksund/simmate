@@ -1,0 +1,237 @@
+{% extends "core/site_base.html" %}
+{% load static htmx %}
+{% block tabtitle %}Dev Tools - Simmate{% endblock %}
+{% block extraheader %}
+    <style>
+    .git-file-row { transition: background-color 0.1s; }
+    .git-file-row:hover { background-color: var(--bs-tertiary-bg); }
+    .git-file-row.active { background-color: var(--bs-primary-bg-subtle); }
+    .htmx-indicator { display: none !important; }
+    .htmx-request .htmx-indicator { display: inline-block !important; }
+    </style>
+{% endblock %}
+{% block body %}
+    {# Header & Action Bar #}
+    <div class="row align-items-center mb-4">
+        <div class="col-md-7">
+            <h1 class="h2 mb-1 fw-bold text-dark">
+                <i class="bi bi-tools text-warning"></i> Dev Tools
+            </h1>
+            <p class="text-muted mb-0">Local diagnostics for git, Docker, and Kubernetes — useful for debugging deployments.</p>
+        </div>
+        <div class="col-md-5 text-md-end mt-3 mt-md-0">
+            <span class="badge bg-warning-subtle text-warning border border-warning me-2 px-2 py-2">
+                <i class="bi bi-cone-striped"></i> Developer Use Only
+            </span>
+            <a href="{% url 'apps' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-grid-fill"></i> All Apps
+            </a>
+        </div>
+    </div>
+    {# Git Status — full width #}
+    <div class="row g-3 mb-4">
+        <div class="col-12">{% htmx_component "git-status-component" %}</div>
+    </div>
+    {# Docker & Kubernetes row #}
+    <div class="row g-3 mb-4">
+        {# Docker #}
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
+                    <div>
+                        <h5 class="card-title mb-0 fw-semibold">
+                            <i class="bi bi-box text-info me-1"></i> Docker Containers
+                        </h5>
+                        <small class="text-muted">docker ps</small>
+                    </div>
+                    {% if docker.available and not docker.error %}
+                        <span class="badge bg-info-subtle text-info border border-info small">{{ docker.containers|length }} running</span>
+                    {% endif %}
+                </div>
+                <div class="card-body p-0">
+                    {% if not docker.available %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-x-circle fs-3 mb-2 d-block"></i>
+                            <small>Docker not installed</small>
+                        </div>
+                    {% elif docker.error %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-exclamation-triangle fs-3 mb-2 d-block text-warning"></i>
+                            <small>{{ docker.error }}</small>
+                        </div>
+                    {% elif not docker.containers %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-3 mb-2 d-block"></i>
+                            <small>No running containers</small>
+                        </div>
+                    {% else %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 small">
+                                <thead class="table-light text-uppercase">
+                                    <tr>
+                                        <th class="ps-3">Name</th>
+                                        <th>Image</th>
+                                        <th>Status</th>
+                                        <th class="pe-3">Ports</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for c in docker.containers %}
+                                        <tr>
+                                            <td class="ps-3 fw-semibold font-monospace">{{ c.name }}</td>
+                                            <td class="text-muted font-monospace">{{ c.image }}</td>
+                                            <td>
+                                                {% if "Up" in c.status %}
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                                        <i class="bi bi-check-circle-fill me-1"></i>{{ c.status }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">{{ c.status }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="pe-3 font-monospace text-muted small">{{ c.ports|default:"-" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {# Kubernetes Pods #}
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
+                    <div>
+                        <h5 class="card-title mb-0 fw-semibold">
+                            <i class="bi bi-hdd-network text-primary me-1"></i> Kubernetes Pods
+                        </h5>
+                        <small class="text-muted">kubectl get pods -A</small>
+                    </div>
+                    {% if kubectl.available and not kubectl.error %}
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle small">
+                            {{ kubectl.pods|length }} pod{{ kubectl.pods|length|pluralize }}
+                        </span>
+                    {% endif %}
+                </div>
+                <div class="card-body p-0">
+                    {% if not kubectl.available %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-x-circle fs-3 mb-2 d-block"></i>
+                            <small>kubectl not installed</small>
+                        </div>
+                    {% elif kubectl.error %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-exclamation-triangle fs-3 mb-2 d-block text-warning"></i>
+                            <small>{{ kubectl.error }}</small>
+                        </div>
+                    {% elif not kubectl.pods %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-3 mb-2 d-block"></i>
+                            <small>No pods found</small>
+                        </div>
+                    {% else %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 small">
+                                <thead class="table-light text-uppercase">
+                                    <tr>
+                                        <th class="ps-3">Namespace</th>
+                                        <th>Pod Name</th>
+                                        <th>Ready</th>
+                                        <th>Status</th>
+                                        <th class="pe-3">Restarts</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pod in kubectl.pods %}
+                                        <tr>
+                                            <td class="ps-3 text-muted">{{ pod.namespace }}</td>
+                                            <td class="fw-semibold font-monospace">{{ pod.name }}</td>
+                                            <td class="text-muted">{{ pod.ready }}</td>
+                                            <td>
+                                                {% if pod.status == "Running" %}
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                                        <span class="spinner-grow spinner-grow-sm me-1"
+                                                              style="width: 0.5rem;
+                                                                     height: 0.5rem"
+                                                              role="status"></span>
+                                                        Running
+                                                    </span>
+                                                {% elif pod.status == "Completed" %}
+                                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                                        <i class="bi bi-check-circle-fill me-1"></i>{{ pod.status }}
+                                                    </span>
+                                                {% elif pod.status == "Pending" %}
+                                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
+                                                        <i class="bi bi-clock-fill me-1"></i>{{ pod.status }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                                        <i class="bi bi-x-circle-fill me-1"></i>{{ pod.status }}
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="pe-3 text-muted">{{ pod.restarts }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {# Git Log Graph — full width #}
+    {% if git.available %}
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0 pt-3 px-3">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                            <div>
+                                <h5 class="card-title mb-0 fw-semibold">
+                                    <i class="bi bi-diagram-3 text-warning me-1"></i> Git Log
+                                </h5>
+                                <small class="text-muted">git log --graph --all --decorate</small>
+                            </div>
+                            {% if git.branches %}
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for b in git.branches %}
+                                        {% if b|slice:":2" == "* " or b == git.branch %}
+                                            <span class="badge bg-warning text-dark font-monospace small">
+                                                <i class="bi bi-signpost-fill me-1"></i>{{ b|slice:"2:" }}
+                                            </span>
+                                        {% elif b|slice:":8" == "remotes/" %}
+                                            <span class="badge bg-secondary font-monospace small">
+                                                <i class="bi bi-cloud me-1"></i>{{ b }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace small">
+                                                <i class="bi bi-git me-1"></i>{{ b }}
+                                            </span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-body px-3 pb-3">
+                        {% if git.log_lines %}
+                            <div class="bg-dark rounded-3 p-3"
+                                 style="max-height: 300px;
+                                        overflow-y: auto">
+                                {% for line in git.log_lines %}
+                                    <div class="font-monospace small mb-1 {% if '(HEAD' in line %}text-warning fw-semibold {% elif line|slice:':1' == '*' %}text-light {% else %}text-secondary{% endif %}">{{ line }}</div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted small">No commits found.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -148,6 +148,8 @@ class SimmateSettings:
                 "simmate.apps.configs.ChemblConfig",
                 "simmate.apps.configs.ChemspaceConfig",
                 "simmate.apps.configs.CodConfig",
+                "simmate.apps.configs.ComputeConfig",
+                "simmate.apps.configs.DevToolsConfig",
                 "simmate.apps.configs.EmoleculesConfig",
                 "simmate.apps.configs.EnamineConfig",
                 "simmate.apps.configs.EppoGdConfig",
@@ -192,10 +194,11 @@ class SimmateSettings:
                     },
                     "github": {"client_id": None, "secret": None},
                 },
-                # These allow server maintainers to override the homepage and profile views, which
+                # These allow server maintainers to override the homepage, profile, and dashboard views, which
                 # is important if they involve loading custom apps/models for their templates.
                 "home_view": None,
                 "profile_view": None,
+                "dashboard_view": None,
                 # Default is for local use, where no redistribution is happening.
                 # Any public server MUST have this set to True.
                 "lock_data_redistribution": True,

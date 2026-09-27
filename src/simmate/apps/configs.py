@@ -64,8 +64,24 @@ class CodConfig(AppConfig):
     name = "simmate.apps.cod"
 
 
+class ComputeConfig(AppConfig):
+    name = "simmate.apps.compute"
+    verbose_name = "Compute Management"
+    description_short = (
+        "A dashboard for monitoring cluster workers, queues, and compute resources"
+    )
+
+
 class DeepmdConfig(AppConfig):
     name = "simmate.apps.deepmd"
+
+
+class DevToolsConfig(AppConfig):
+    name = "simmate.apps.dev_tools"
+    verbose_name = "Dev Tools"
+    description_short = (
+        "Local diagnostics: git status, Docker containers, and Kubernetes pods"
+    )
 
 
 class EmoleculesConfig(AppConfig):
@@ -90,6 +106,8 @@ class EvolutionConfig(AppConfig):
 
 class InventoryManagementConfig(AppConfig):
     name = "simmate.apps.inventory_management"
+    verbose_name = "Inventory Management"
+    description_short = "A dashboard for tracking lab chemicals, containers, batches, and storage locations"
 
 
 class JarvisConfig(AppConfig):

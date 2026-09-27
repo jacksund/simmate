@@ -248,3 +248,275 @@ def faqs(request):
     context = {"breadcrumbs": ["FAQs"]}
     template = "core/faqs.html"
     return render(request, template, context)
+
+
+def dashboard_default_view(request):
+    """
+    Default summary dashboard view providing high-level operational visibility
+    across computational workflows, laboratory automation, chemical inventory,
+    and scientific data catalogs, with links to dedicated app dashboards.
+    """
+    summary_cards = [
+        {
+            "title": "Compute & Workflows",
+            "value": "42 Active",
+            "subtext": "16 workers online (99.4% success)",
+            "badge_text": "SLURM & Cloud",
+            "badge_class": "bg-success-subtle text-success border border-success",
+            "icon": "bi-cpu",
+            "icon_bg": "bg-primary-subtle text-primary",
+            "link": "/apps/compute/",
+        },
+        {
+            "title": "Chemical Inventory",
+            "value": "4,350 Items",
+            "subtext": "1,280 substances in stock",
+            "badge_text": "18 Locations",
+            "badge_class": "bg-info-subtle text-info border border-info",
+            "icon": "bi-box-seam",
+            "icon_bg": "bg-info-subtle text-info",
+            "link": "/apps/inventory_management/",
+        },
+        {
+            "title": "Lab Automation",
+            "value": "4 Devices",
+            "subtext": "1 active protocol running",
+            "badge_text": "Nominal",
+            "badge_class": "bg-success-subtle text-success border border-success",
+            "icon": "bi-robot",
+            "icon_bg": "bg-success-subtle text-success",
+            "link": "/apps/lab_automation/",
+        },
+        {
+            "title": "Data Catalogs",
+            "value": "1.45M Entries",
+            "subtext": "Crystals & molecules across 6 databases",
+            "badge_text": "Synced 10m ago",
+            "badge_class": "bg-secondary-subtle text-secondary border border-secondary",
+            "icon": "bi-database",
+            "icon_bg": "bg-warning-subtle text-warning",
+            "link": "/data/",
+        },
+    ]
+
+    app_dashboards = [
+        {
+            "title": "Compute Management",
+            "badge": "16 Workers &bull; 92% HPC Load",
+            "badge_class": "bg-success-subtle text-success border border-success",
+            "description": (
+                "Real-time monitoring of distributed DFT simulations, SLURM cluster partitions, "
+                "autoscaling cloud workers, and calculation execution throughput."
+            ),
+            "icon": "bi-cpu",
+            "icon_color": "text-primary",
+            "metrics": [
+                ("In-Flight Calculations", "42"),
+                ("Weekly Throughput", "4,240 jobs"),
+                ("Active CPU Cores", "152 cores"),
+            ],
+            "url": "/apps/compute/",
+            "button_text": "Open Compute Dashboard",
+            "button_class": "btn-primary",
+        },
+        {
+            "title": "Laboratory Automation",
+            "badge": "Hotplates Online &bull; Synthesis Active",
+            "badge_class": "bg-success-subtle text-success border border-success",
+            "description": (
+                "Hardware device control and sensor monitoring, stirring hotplate PID feedback, "
+                "ambient lab climate telemetry, and automated synthesis workflows."
+            ),
+            "icon": "bi-robot",
+            "icon_color": "text-danger",
+            "metrics": [
+                ("Hotplate 1 Temp", "150 °C"),
+                ("Ambient Climate", "21.4 °C / 44% RH"),
+                ("Synthesis Status", "Step 2 of 4"),
+            ],
+            "url": "/apps/lab_automation/",
+            "button_text": "Open Lab Automation Dashboard",
+            "button_class": "btn-primary",
+        },
+        {
+            "title": "Inventory Management",
+            "badge": "All Units In Bounds &bull; 3 Low Stock",
+            "badge_class": "bg-info-subtle text-info border border-info",
+            "description": (
+                "Reagent tracking, bottle barcoding, cold storage/glovebox conditions, "
+                "lot formulations, and regulatory usage compliance logs."
+            ),
+            "icon": "bi-box-seam",
+            "icon_color": "text-info",
+            "metrics": [
+                ("Active Containers", "4,350"),
+                ("Tracked Substances", "1,280"),
+                ("Storage Units", "18 locations"),
+            ],
+            "url": "/apps/inventory_management/",
+            "button_text": "Open Inventory Dashboard",
+            "button_class": "btn-primary",
+        },
+        {
+            "title": "Scientific Data Catalogs",
+            "badge": "6 Repositories Connected",
+            "badge_class": "bg-secondary-subtle text-secondary border border-secondary",
+            "description": (
+                "Search and explore crystallographic and molecular datasets aggregated from "
+                "Materials Project, AFLOW, OQMD, COD, JARVIS, and ChEMBL."
+            ),
+            "icon": "bi-database",
+            "icon_color": "text-warning",
+            "metrics": [
+                ("Crystal Structures", "1,452,890"),
+                ("Molecules & Ligands", "450,200"),
+                ("Curated Export", "CSV, JSON, SQL"),
+            ],
+            "url": "/data/",
+            "button_text": "Explore Data Catalogs",
+            "button_class": "btn-outline-primary",
+        },
+        {
+            "title": "Workflows Hub",
+            "badge": "35+ Workflows Configured",
+            "badge_class": "bg-primary-subtle text-primary border border-primary-subtle",
+            "description": (
+                "Automated simulation pipelines for DFT relaxation, electronic band structures, "
+                "population analysis, and molecular dynamics with Quick Submit."
+            ),
+            "icon": "bi-diagram-3",
+            "icon_color": "text-primary",
+            "metrics": [
+                ("Simulation Engines", "VASP & QE"),
+                ("Quick Submit", "Ready"),
+                ("Custom Presets", "Enabled"),
+            ],
+            "url": "/workflows/",
+            "button_text": "Open Workflows Hub",
+            "button_class": "btn-outline-primary",
+        },
+        {
+            "title": "Analysis Dashboard",
+            "badge": "Interactive Plot Studio",
+            "badge_class": "bg-light text-dark border",
+            "description": (
+                "Interactive plotting and data visualization studio for multi-dataset "
+                "property correlation, hull energy analysis, and structure screening."
+            ),
+            "icon": "bi-graph-up",
+            "icon_color": "text-success",
+            "metrics": [
+                ("Plot Types", "Scatter, Bar, Hist"),
+                ("Plot Engine", "Plotly.js"),
+                ("Interactive Filters", "Dynamic"),
+            ],
+            "url": "/apps/analysis_dashboard/",
+            "button_text": "Open Analysis Studio",
+            "button_class": "btn-outline-primary",
+        },
+    ]
+
+    recent_activity = [
+        {
+            "domain": "Compute",
+            "domain_badge": "bg-primary-subtle text-primary border border-primary-subtle",
+            "icon": "bi-cpu",
+            "title": "DFT Relaxation started: LiFePO4",
+            "detail": "Run calc-849201 assigned to slurm-node-03 with 32 cores",
+            "time": "4m ago",
+        },
+        {
+            "domain": "Lab Automation",
+            "domain_badge": "bg-danger-subtle text-danger border border-danger-subtle",
+            "icon": "bi-robot",
+            "title": "Hotplate 1 reached 150 °C target",
+            "detail": "Exp: Synthesis of YBa2Cu3O7 transitioned to Step 2 (Hold 80 °C)",
+            "time": "18m ago",
+        },
+        {
+            "domain": "Inventory",
+            "domain_badge": "bg-info-subtle text-info border border-info-subtle",
+            "icon": "bi-box-seam",
+            "title": "Reagent checkout: Lithium Iron Phosphate (25.0 g)",
+            "detail": "Container CNT-4821 checked out by jacksund from Cabinet B-3",
+            "time": "32m ago",
+        },
+        {
+            "domain": "Compute",
+            "domain_badge": "bg-primary-subtle text-primary border border-primary-subtle",
+            "icon": "bi-cpu",
+            "title": "Band Structure calculation completed: CsPbI3",
+            "detail": "Run calc-849198 finished with status Completed (Band gap: 1.73 eV)",
+            "time": "1h ago",
+        },
+        {
+            "domain": "Inventory",
+            "domain_badge": "bg-info-subtle text-info border border-info-subtle",
+            "icon": "bi-box-seam",
+            "title": "Solvent restocked: DMSO 99.9% (100 mL)",
+            "detail": "Container CNT-1904 logged into Flammables Unit 1",
+            "time": "2h ago",
+        },
+        {
+            "domain": "Data Catalogs",
+            "domain_badge": "bg-warning-subtle text-warning border border-warning-subtle",
+            "icon": "bi-database",
+            "title": "Materials Project dataset synchronized",
+            "detail": "1,420 new crystalline structures indexed and validated",
+            "time": "3h ago",
+        },
+    ]
+
+    system_services = [
+        {
+            "name": "HPC SLURM Cluster",
+            "description": "Distributed node partition for heavy calculations",
+            "status": "Operational",
+            "status_badge": "bg-success",
+            "metric": "92% Load (120/128 cores)",
+        },
+        {
+            "name": "Cloud Workers (K8s)",
+            "description": "Autoscaling cloud pods for workflow tasks",
+            "status": "Operational",
+            "status_badge": "bg-success",
+            "metric": "64% Capacity (32/48 cores)",
+        },
+        {
+            "name": "PostgreSQL & RDKit",
+            "description": "Primary relational database and molecular index",
+            "status": "Optimal",
+            "status_badge": "bg-success",
+            "metric": "28% Disk (42 GB / 250 GB)",
+        },
+        {
+            "name": "Redis Broker",
+            "description": "Message queue and caching layer",
+            "status": "Optimal",
+            "status_badge": "bg-success",
+            "metric": "1.1 ms Latency",
+        },
+    ]
+
+    context = {
+        "page_title": "Operations Dashboard",
+        "breadcrumbs": ["Dashboard"],
+        "summary_cards": summary_cards,
+        "app_dashboards": app_dashboards,
+        "recent_activity": recent_activity,
+        "system_services": system_services,
+    }
+    template = "core/dashboard.html"
+    return render(request, template, context)
+
+
+def dashboard(request):
+    if (
+        not hasattr(settings.website, "dashboard_view")
+        or not settings.website.dashboard_view
+    ):
+        return dashboard_default_view(request)
+    else:
+        dashboard_module = importlib.import_module(settings.website.dashboard_view)
+        dashboard_view = getattr(dashboard_module, "dashboard")
+        return dashboard_view(request)

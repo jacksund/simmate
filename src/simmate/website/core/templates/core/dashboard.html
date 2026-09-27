@@ -1,0 +1,157 @@
+{% extends "core/site_base.html" %}
+{% load static %}
+{% block tabtitle %}Operations Dashboard - Simmate{% endblock %}
+{% block body %}
+    {# Header & Action Bar #}
+    <div class="row align-items-center mb-4">
+        <div class="col-md-7">
+            <h1 class="h2 mb-1 fw-bold text-dark">
+                <i class="bi bi-speedometer2 text-primary"></i> Operations Dashboard
+            </h1>
+            <p class="text-muted mb-0">
+                Executive summary across compute clusters, laboratory automation, chemical inventory, and research datasets.
+            </p>
+        </div>
+        <div class="col-md-5 text-md-end mt-3 mt-md-0">
+            <span class="badge bg-success-subtle text-success border border-success me-2 px-2 py-2">
+                <i class="bi bi-check-circle-fill me-1"></i> All Services Operational
+            </span>
+            <a href="{% url 'apps' %}" class="btn btn-primary btn-sm me-1">
+                <i class="bi bi-grid-fill"></i> View All Apps
+            </a>
+            <a href="https://jacksund.github.io/simmate/home/"
+               target="_blank"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-book"></i> Docs <i class="bi bi-box-arrow-up-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+    {# Top Cross-Platform KPI Metrics #}
+    <div class="row g-3 mb-4">
+        {% for card in summary_cards %}
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a href="{{ card.link }}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 hover-shadow">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-muted small fw-semibold text-uppercase">{{ card.title }}</span>
+                                <span class="badge {{ card.badge_class }} small">{{ card.badge_text }}</span>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div class="fs-2 fw-bold text-dark lh-1 mb-1">{{ card.value }}</div>
+                                    <div class="text-muted small">{{ card.subtext }}</div>
+                                </div>
+                                <div class="rounded-3 p-3 {{ card.icon_bg }}">
+                                    <i class="bi {{ card.icon }} fs-4"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+    {# Section: Specialized Application Dashboards #}
+    <div class="row mb-3">
+        <div class="col-12">
+            <h4 class="fw-bold mb-1">Application Dashboards</h4>
+            <p class="text-muted small mb-0">Jump directly into specialized domain management and instrumentation dashboards.</p>
+        </div>
+    </div>
+    <div class="row g-4 mb-4">
+        {% for app in app_dashboards %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm h-100 d-flex flex-column">
+                    <div class="card-header bg-transparent border-0 pt-3 px-3 pb-0">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex align-items-center">
+                                <i class="bi {{ app.icon }} {{ app.icon_color }} fs-3 me-2"></i>
+                                <h5 class="card-title mb-0 fw-bold text-dark">{{ app.title }}</h5>
+                            </div>
+                        </div>
+                        <span class="badge {{ app.badge_class }} small">{{ app.badge }}</span>
+                    </div>
+                    <div class="card-body px-3 py-2 d-flex flex-column">
+                        <p class="text-muted small mb-3 flex-grow-0">{{ app.description }}</p>
+                        {# Metrics preview #}
+                        <div class="bg-light rounded-3 p-2 mb-3 mt-auto">
+                            <div class="row g-2 text-center">
+                                {% for label, val in app.metrics %}
+                                    <div class="col-4">
+                                        <div class="fw-bold small text-dark lh-1">{{ val }}</div>
+                                        <small class="text-muted" style="font-size: 0.72rem;">{{ label }}</small>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <a href="{{ app.url }}" class="btn {{ app.button_class }} btn-sm w-100">
+                            {{ app.button_text }} <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {# Lower Section: Cross-Platform Live Activity & System Services #}
+    <div class="row g-3 mb-4">
+        {# Left: Unified Activity Timeline #}
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
+                    <div>
+                        <h5 class="card-title mb-0 fw-semibold">Cross-Platform Activity</h5>
+                        <small class="text-muted">Live event stream across simulations, lab hardware, and inventory</small>
+                    </div>
+                    <span class="badge bg-light text-dark border">Real-Time</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for event in recent_activity %}
+                            <div class="list-group-item px-3 py-3 border-0 border-bottom">
+                                <div class="d-flex align-items-start justify-content-between">
+                                    <div class="d-flex align-items-start">
+                                        <span class="badge {{ event.domain_badge }} me-2 mt-1 px-2 py-1">
+                                            <i class="bi {{ event.icon }} me-1"></i> {{ event.domain }}
+                                        </span>
+                                        <div>
+                                            <div class="fw-semibold text-dark small mb-1">{{ event.title }}</div>
+                                            <div class="text-muted small">{{ event.detail }}</div>
+                                        </div>
+                                    </div>
+                                    <small class="text-secondary ps-2 text-nowrap">{{ event.time }}</small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {# Right: Platform Services & Infrastructure Health #}
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pt-3 px-3">
+                    <h5 class="card-title mb-0 fw-semibold">Platform Infrastructure</h5>
+                    <small class="text-muted">Status of compute workers, database, and background services</small>
+                </div>
+                <div class="card-body px-3 pb-3">
+                    {% for service in system_services %}
+                        <div class="border rounded-3 p-3 mb-3 bg-body">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-semibold text-dark">{{ service.name }}</span>
+                                <span class="badge bg-success-subtle text-success small">
+                                    <i class="bi bi-check-circle me-1"></i> {{ service.status }}
+                                </span>
+                            </div>
+                            <p class="text-muted small mb-2">{{ service.description }}</p>
+                            <div class="d-flex justify-content-between small text-secondary">
+                                <span>Health Metric</span>
+                                <span class="fw-medium text-dark">{{ service.metric }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

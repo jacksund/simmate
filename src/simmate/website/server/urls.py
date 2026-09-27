@@ -84,6 +84,9 @@ urlpatterns = [
     # When you sign out, you are sent to LOGOUT_REDIRECT_URL (set in settings.py)
     path(route="accounts/loginstatus/", view=views.loginstatus, name="loginstatus"),
     #
+    # Dashboard endpoint (overview of metrics & workflows)
+    path(route="dashboard/", view=views.dashboard, name="dashboard"),
+    #
     #
     path(
         route="data/",

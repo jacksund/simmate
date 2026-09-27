@@ -1,0 +1,211 @@
+{% extends "core/site_base.html" %}
+{% load static %}
+{% block tabtitle %}Inventory Management - Simmate{% endblock %}
+{% block body %}
+    {# Header & Action Bar #}
+    <div class="row align-items-center mb-4">
+        <div class="col-md-7">
+            <h1 class="h2 mb-1 fw-bold text-dark">
+                <i class="bi bi-box-seam text-primary"></i> Inventory Management
+            </h1>
+            <p class="text-muted mb-0">Track chemical substances, reagent containers, batches, and safety storage locations.</p>
+        </div>
+        <div class="col-md-5 text-md-end mt-3 mt-md-0">
+            <a href="{% url 'data_explorer:table' 'Container' %}"
+               class="btn btn-primary btn-sm me-1">
+                <i class="bi bi-plus-circle"></i> Log Container
+            </a>
+            <a href="{% url 'data_explorer:table' 'UsageLog' %}"
+               class="btn btn-outline-primary btn-sm me-1">
+                <i class="bi bi-clock-history"></i> Usage Logs
+            </a>
+            <a href="{% url 'apps' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-grid-fill"></i> All Apps
+            </a>
+        </div>
+    </div>
+    {# KPI Summary Cards #}
+    <div class="row g-3 mb-4">
+        {% for card in summary_cards %}
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small fw-semibold text-uppercase">{{ card.title }}</span>
+                            <span class="badge {{ card.badge_class }} small">{{ card.badge_text }}</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="fs-2 fw-bold text-dark lh-1 mb-1">{{ card.value }}</div>
+                                <div class="text-muted small">{{ card.subtext }}</div>
+                            </div>
+                            <div class="rounded-3 p-3 {{ card.icon_bg }}">
+                                <i class="bi {{ card.icon }} fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {# Tables Directory Cards #}
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 pt-3 px-3">
+                    <h5 class="card-title mb-0 fw-semibold">Inventory Catalogs</h5>
+                    <small class="text-muted">Direct access to underlying database models</small>
+                </div>
+                <div class="card-body px-3 pb-3">
+                    <div class="row g-3">
+                        <div class="col-md-4 col-sm-6">
+                            <a href="{% url 'data_explorer:table' 'Substance' %}"
+                               class="text-decoration-none">
+                                <div class="p-3 border rounded-3 bg-light hover-shadow h-100">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-flask text-primary fs-4 me-2"></i>
+                                        <h6 class="mb-0 text-dark fw-bold">Substances</h6>
+                                    </div>
+                                    <small class="text-muted">Chemical definitions, CAS registry IDs, and safety data</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <a href="{% url 'data_explorer:table' 'Container' %}"
+                               class="text-decoration-none">
+                                <div class="p-3 border rounded-3 bg-light hover-shadow h-100">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-box-seam text-info fs-4 me-2"></i>
+                                        <h6 class="mb-0 text-dark fw-bold">Containers</h6>
+                                    </div>
+                                    <small class="text-muted">Barcoded physical bottles, remaining amounts, and tare weights</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <a href="{% url 'data_explorer:table' 'StorageLocation' %}"
+                               class="text-decoration-none">
+                                <div class="p-3 border rounded-3 bg-light hover-shadow h-100">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-geo-alt text-success fs-4 me-2"></i>
+                                        <h6 class="mb-0 text-dark fw-bold">Storage Locations</h6>
+                                    </div>
+                                    <small class="text-muted">Rooms, freezers, shelves, desiccators, and glovebox chambers</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <a href="{% url 'data_explorer:table' 'UsageLog' %}"
+                               class="text-decoration-none">
+                                <div class="p-3 border rounded-3 bg-light hover-shadow h-100">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-clock-history text-secondary fs-4 me-2"></i>
+                                        <h6 class="mb-0 text-dark fw-bold">Usage Logs</h6>
+                                    </div>
+                                    <small class="text-muted">Checkout audit history, reagent consumption, and timestamps</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <a href="{% url 'data_explorer:table' 'Batch' %}"
+                               class="text-decoration-none">
+                                <div class="p-3 border rounded-3 bg-light hover-shadow h-100">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-layers text-warning fs-4 me-2"></i>
+                                        <h6 class="mb-0 text-dark fw-bold">Batches</h6>
+                                    </div>
+                                    <small class="text-muted">Lot numbers, synthesis batches, and supplier shipments</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <a href="{% url 'data_explorer:table' 'Mixture' %}"
+                               class="text-decoration-none">
+                                <div class="p-3 border rounded-3 bg-light hover-shadow h-100">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-bezier2 text-danger fs-4 me-2"></i>
+                                        <h6 class="mb-0 text-dark fw-bold">Mixtures</h6>
+                                    </div>
+                                    <small class="text-muted">Formulations, solutions, buffers, and multi-component mixtures</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {# Lower Section: Recent Usage Log & Storage Health #}
+    <div class="row g-3 mb-4">
+        {# Left: Recent Usage Table #}
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
+                    <div>
+                        <h5 class="card-title mb-0 fw-semibold">Recent Usage Activity</h5>
+                        <small class="text-muted">Reagent checkouts and dispensations</small>
+                    </div>
+                    <a href="{% url 'data_explorer:table' 'UsageLog' %}"
+                       class="btn btn-outline-primary btn-sm">
+                        All Logs <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light small text-uppercase">
+                                <tr>
+                                    <th class="ps-3">Substance</th>
+                                    <th>Container</th>
+                                    <th>Amount</th>
+                                    <th>User</th>
+                                    <th>Time</th>
+                                    <th class="pe-3">Location</th>
+                                </tr>
+                            </thead>
+                            <tbody class="small">
+                                {% for log in recent_usage %}
+                                    <tr>
+                                        <td class="ps-3 fw-medium text-dark">{{ log.substance }}</td>
+                                        <td><code class="text-primary">{{ log.container_id }}</code></td>
+                                        <td><span class="badge bg-light text-dark border">{{ log.amount }}</span></td>
+                                        <td class="text-muted">{{ log.user }}</td>
+                                        <td class="text-muted">{{ log.timestamp }}</td>
+                                        <td class="pe-3 text-muted">{{ log.location }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {# Right: Storage Facility & Environmental Safety #}
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pt-3 px-3">
+                    <h5 class="card-title mb-0 fw-semibold">Storage Units Status</h5>
+                    <small class="text-muted">Environmental monitoring and capacity</small>
+                </div>
+                <div class="card-body px-3 pb-3">
+                    {% for unit in storage_locations %}
+                        <div class="border rounded-3 p-3 mb-3 bg-body">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-semibold text-dark">{{ unit.name }}</span>
+                                <span class="badge {{ unit.status_badge }} small">{{ unit.status }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between small text-muted mb-1">
+                                <span>{{ unit.type }}</span>
+                                <span>Condition: {{ unit.temp }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between small text-muted">
+                                <span>Capacity Used</span>
+                                <span>{{ unit.capacity }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
