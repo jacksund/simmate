@@ -1,0 +1,206 @@
+{% extends "htmx/form_base.html" %}
+{% load htmx %}
+{% block form %}
+    <div class="card border-0 shadow-sm">
+        {# Card header: counts and refresh #}
+        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
+            <h5 class="card-title mb-0 fw-semibold">
+                <i class="bi bi-box text-info me-1"></i> Docker Containers
+            </h5>
+            <div class="d-flex align-items-center gap-2">
+                {% if available and not error %}
+                    <span class="badge bg-success-subtle text-success border border-success small">{{ running_count }} running</span>
+                    <span class="badge bg-secondary-subtle text-secondary border border-secondary small">{{ total_count }} total</span>
+                {% endif %}
+                <button type="button"
+                        class="btn btn-sm btn-outline-secondary py-0 flex-shrink-0"
+                        hx-post="{% url 'htmx:component_method' component.component_id 'refresh' %}"
+                        hx-target="#{{ component.component_id }}"
+                        hx-include="#{{ component.component_id }}"
+                        hx-swap="outerHTML settle:0"
+                        title="Refresh containers">
+                    <span class="htmx-indicator spinner-border spinner-border-sm"
+                          role="status"
+                          style="width: 0.7rem;
+                                 height: 0.7rem;
+                                 border-width: 0.1em"></span>
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+        </div>
+        {# Start / stop / delete results #}
+        {% if component.action_error %}
+            <div class="alert alert-danger py-1 px-2 mx-3 mb-2 small rounded-1 font-monospace"
+                 style="white-space: pre-wrap;
+                        font-size: 0.72rem">{{ component.action_error }}</div>
+        {% elif component.action_message %}
+            <div class="alert alert-success py-1 px-2 mx-3 mb-2 small rounded-1 font-monospace"
+                 style="white-space: pre-wrap;
+                        font-size: 0.72rem">{{ component.action_message }}</div>
+        {% endif %}
+        <div class="card-body p-0">
+            {% if not available %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-x-circle fs-3 mb-2 d-block"></i>
+                    <small>Docker not installed</small>
+                </div>
+            {% elif error %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-exclamation-triangle fs-3 mb-2 d-block text-warning"></i>
+                    <small>{{ error }}</small>
+                </div>
+            {% elif not containers %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-inbox fs-3 mb-2 d-block"></i>
+                    <small>No containers</small>
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle mb-0">
+                        <thead class="table-primary">
+                            <tr>
+                                <th class="ps-3">Name</th>
+                                <th>Image</th>
+                                <th>State</th>
+                                <th>Status</th>
+                                <th>Ports</th>
+                                <th class="pe-3 text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in containers %}
+                                <tr>
+                                    <td class="ps-3 fw-semibold font-monospace">{{ c.name }}</td>
+                                    <td class="text-muted font-monospace small">{{ c.image }}</td>
+                                    <td>
+                                        {% if c.state == "running" %}
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                                <i class="bi bi-check-circle-fill me-1"></i>running
+                                            </span>
+                                        {% elif c.state == "paused" or c.state == "restarting" %}
+                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
+                                                <i class="bi bi-pause-circle-fill me-1"></i>{{ c.state }}
+                                            </span>
+                                        {% elif c.state == "dead" %}
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                                <i class="bi bi-x-circle-fill me-1"></i>{{ c.state }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">{{ c.state|default:"unknown" }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-muted small">{{ c.status|default:"-" }}</td>
+                                    <td class="font-monospace text-muted small">{{ c.ports|default:"-" }}</td>
+                                    <td class="pe-3 text-end text-nowrap">
+                                        <div class="d-inline-flex gap-1">
+                                            {% if c.state == "running" %}
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-secondary"
+                                                        hx-post="{% url 'htmx:component_method' component.component_id 'stop' %}?container=%22{{ c.id|urlencode }}%22"
+                                                        hx-target="#{{ component.component_id }}"
+                                                        hx-include="#{{ component.component_id }}"
+                                                        hx-swap="outerHTML settle:0"
+                                                        title="Stop">
+                                                    <i class="bi bi-stop-fill"></i>
+                                                </button>
+                                            {% else %}
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-success"
+                                                        hx-post="{% url 'htmx:component_method' component.component_id 'start' %}?container=%22{{ c.id|urlencode }}%22"
+                                                        hx-target="#{{ component.component_id }}"
+                                                        hx-include="#{{ component.component_id }}"
+                                                        hx-swap="outerHTML settle:0"
+                                                        title="Start">
+                                                    <i class="bi bi-play-fill"></i>
+                                                </button>
+                                            {% endif %}
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-secondary"
+                                                    hx-post="{% url 'htmx:component_method' component.component_id 'show_logs' %}?container=%22{{ c.id|urlencode }}%22"
+                                                    hx-target="#{{ component.component_id }}"
+                                                    hx-include="#{{ component.component_id }}"
+                                                    hx-swap="outerHTML settle:0"
+                                                    title="View logs">
+                                                <i class="bi bi-file-text"></i>
+                                            </button>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    hx-post="{% url 'htmx:component_method' component.component_id 'delete' %}?container=%22{{ c.id|urlencode }}%22"
+                                                    hx-target="#{{ component.component_id }}"
+                                                    hx-include="#{{ component.component_id }}"
+                                                    hx-swap="outerHTML settle:0"
+                                                    hx-confirm="Delete container {{ c.name }}? This cannot be undone."
+                                                    title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+        {# Log viewer for the selected container #}
+        {% if selected %}
+            <div class="border-top">
+                <div class="d-flex justify-content-between align-items-center px-3 py-2">
+                    <small class="fw-semibold">
+                        <i class="bi bi-file-text me-1"></i>Logs:
+                        <span class="font-monospace">{{ selected.name }}</span>
+                        <span class="text-muted fw-normal">(last {{ component.log_tail }} lines)</span>
+                    </small>
+                    <div class="d-flex align-items-center gap-2">
+                        {% if has_more_logs %}
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-secondary py-0"
+                                    hx-post="{% url 'htmx:component_method' component.component_id 'load_more_logs' %}"
+                                    hx-target="#{{ component.component_id }}"
+                                    hx-include="#{{ component.component_id }}"
+                                    hx-swap="outerHTML settle:0">
+                                <i class="bi bi-chevron-double-up me-1"></i>Load more
+                            </button>
+                        {% endif %}
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary py-0"
+                                hx-post="{% url 'htmx:component_method' component.component_id 'refresh' %}"
+                                hx-target="#{{ component.component_id }}"
+                                hx-include="#{{ component.component_id }}"
+                                hx-swap="outerHTML settle:0"
+                                title="Refresh logs">
+                            <span class="htmx-indicator spinner-border spinner-border-sm"
+                                  role="status"
+                                  style="width: 0.7rem;
+                                         height: 0.7rem;
+                                         border-width: 0.1em"></span>
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary py-0"
+                                hx-post="{% url 'htmx:component_method' component.component_id 'show_logs' %}?container=%22{{ selected.id|urlencode }}%22"
+                                hx-target="#{{ component.component_id }}"
+                                hx-include="#{{ component.component_id }}"
+                                hx-swap="outerHTML settle:0"
+                                title="Close logs">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+                <pre id="{{ component.component_id }}-logs"
+                     class="font-monospace small bg-body-tertiary p-3 mb-0"
+                     style="max-height: 500px;
+                            overflow: auto;
+                            white-space: pre-wrap;
+                            font-size: 0.72rem">{{ logs|default:"(no log output)" }}</pre>
+                {# newest lines are at the bottom, so start scrolled to the end #}
+                <script>
+                    (function() {
+                        var el = document.getElementById("{{ component.component_id }}-logs");
+                        if (el) el.scrollTop = el.scrollHeight;
+                    })();
+                </script>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -22,79 +22,18 @@
         </h1>
         <p class="text-muted mb-0">Local diagnostics for git, Docker, and Kubernetes — useful for debugging deployments.</p>
     </div>
+    {# Docker: containers with start/stop/delete and logs #}
+    <div class="row g-3 mb-4">
+        <div class="col-12">{% htmx_component "docker-component" %}</div>
+    </div>
     {# Git: commit graph, status, and diffs #}
     <div class="row g-3 mb-4">
         <div class="col-12">{% htmx_component "git-component" %}</div>
     </div>
-    {# Docker & Kubernetes row #}
+    {# Kubernetes row #}
     <div class="row g-3 mb-4">
-        {# Docker #}
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
-                    <div>
-                        <h5 class="card-title mb-0 fw-semibold">
-                            <i class="bi bi-box text-info me-1"></i> Docker Containers
-                        </h5>
-                        <small class="text-muted">docker ps</small>
-                    </div>
-                    {% if docker.available and not docker.error %}
-                        <span class="badge bg-info-subtle text-info border border-info small">{{ docker.containers|length }} running</span>
-                    {% endif %}
-                </div>
-                <div class="card-body p-0">
-                    {% if not docker.available %}
-                        <div class="text-center text-muted py-4">
-                            <i class="bi bi-x-circle fs-3 mb-2 d-block"></i>
-                            <small>Docker not installed</small>
-                        </div>
-                    {% elif docker.error %}
-                        <div class="text-center text-muted py-4">
-                            <i class="bi bi-exclamation-triangle fs-3 mb-2 d-block text-warning"></i>
-                            <small>{{ docker.error }}</small>
-                        </div>
-                    {% elif not docker.containers %}
-                        <div class="text-center text-muted py-4">
-                            <i class="bi bi-inbox fs-3 mb-2 d-block"></i>
-                            <small>No running containers</small>
-                        </div>
-                    {% else %}
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0 small">
-                                <thead class="table-light text-uppercase">
-                                    <tr>
-                                        <th class="ps-3">Name</th>
-                                        <th>Image</th>
-                                        <th>Status</th>
-                                        <th class="pe-3">Ports</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for c in docker.containers %}
-                                        <tr>
-                                            <td class="ps-3 fw-semibold font-monospace">{{ c.name }}</td>
-                                            <td class="text-muted font-monospace">{{ c.image }}</td>
-                                            <td>
-                                                {% if "Up" in c.status %}
-                                                    <span class="badge bg-success-subtle text-success border border-success-subtle">
-                                                        <i class="bi bi-check-circle-fill me-1"></i>{{ c.status }}
-                                                    </span>
-                                                {% else %}
-                                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">{{ c.status }}</span>
-                                                {% endif %}
-                                            </td>
-                                            <td class="pe-3 font-monospace text-muted small">{{ c.ports|default:"-" }}</td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
         {# Kubernetes Pods #}
-        <div class="col-lg-6">
+        <div class="col-12">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
                     <div>
@@ -127,8 +66,8 @@
                         </div>
                     {% else %}
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0 small">
-                                <thead class="table-light text-uppercase">
+                            <table class="table table-striped align-middle mb-0">
+                                <thead class="table-primary">
                                     <tr>
                                         <th class="ps-3">Namespace</th>
                                         <th>Pod Name</th>

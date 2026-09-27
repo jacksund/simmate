@@ -24,6 +24,33 @@ def _run_cmd(cmd: list[str], timeout: int = 5) -> tuple[bool, str]:
         return False, ""
 
 
+def _run_cmd_full(
+    cmd: list[str],
+    timeout: int = 5,
+    merge_stderr: bool = False,
+) -> tuple[bool, str]:
+    """
+    Like `_run_cmd`, but keeps stderr so error messages can be shown to the
+    user. With `merge_stderr`, stdout and stderr are interleaved into a single
+    output (e.g. `docker logs` writes a container's stderr to stderr).
+    """
+    try:
+        result = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT if merge_stderr else subprocess.PIPE,
+            text=True,
+            timeout=timeout,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired, OSError) as error:
+        return False, str(error)
+    ok = result.returncode == 0
+    output = result.stdout or ""
+    if not ok and not merge_stderr:
+        output = result.stderr or output
+    return ok, output.strip()
+
+
 def _parse_file_status(status_raw: str) -> tuple[list, list]:
     """Splits `git status --short` output into staged and unstaged file lists."""
     staged = []
@@ -358,11 +385,44 @@ def _get_commit_detail(commit_hash: str) -> dict | None:
     }
 
 
+def _format_ports(ports: str | list) -> str:
+    """
+    Docker reports ports as a preformatted string, while podman (and some
+    docker-compatible CLIs) give a list of mappings, such as:
+        [{'host_ip': '', 'container_port': 5432, 'host_port': 5432,
+          'range': 1, 'protocol': 'tcp'}]
+    This converts either into docker's style (e.g. "0.0.0.0:5432->5432/tcp").
+    """
+    if not isinstance(ports, list):
+        return str(ports or "")
+
+    formatted = []
+    for port in ports:
+        if not isinstance(port, dict):
+            formatted.append(str(port))
+            continue
+        container_port = port.get("container_port", "")
+        host_port = port.get("host_port", "")
+        protocol = port.get("protocol", "tcp")
+        size = port.get("range", 1) or 1
+        if size > 1 and container_port != "":
+            container_port = f"{container_port}-{container_port + size - 1}"
+            if host_port != "":
+                host_port = f"{host_port}-{host_port + size - 1}"
+        if host_port != "":
+            host_ip = port.get("host_ip") or "0.0.0.0"
+            formatted.append(f"{host_ip}:{host_port}->{container_port}/{protocol}")
+        else:
+            formatted.append(f"{container_port}/{protocol}")
+    return ", ".join(formatted)
+
+
 def _get_docker_info() -> dict:
     if not shutil.which("docker"):
         return {"available": False}
 
-    ok, output = _run_cmd(["docker", "ps", "--format", "{{json .}}"])
+    # -a includes stopped containers, so they can be started or deleted
+    ok, output = _run_cmd(["docker", "ps", "-a", "--format", "{{json .}}"])
     if not ok:
         return {
             "available": True,
@@ -376,18 +436,31 @@ def _get_docker_info() -> dict:
             continue
         try:
             data = json.loads(line)
+            # podman uses "Id" and gives names as a list (docker: "ID", str)
+            names = data.get("Names", "")
+            if isinstance(names, list):
+                names = ", ".join(names)
             containers.append(
                 {
-                    "name": data.get("Names", ""),
+                    "id": data.get("ID") or data.get("Id", ""),
+                    "name": names,
                     "image": data.get("Image", ""),
+                    "state": data.get("State", "").lower(),
                     "status": data.get("Status", ""),
-                    "ports": data.get("Ports", ""),
+                    "created": data.get("RunningFor", ""),
+                    "ports": _format_ports(data.get("Ports", "")),
                 }
             )
         except json.JSONDecodeError:
             pass
 
-    return {"available": True, "containers": containers, "error": None}
+    return {
+        "available": True,
+        "containers": containers,
+        "running_count": sum(c["state"] == "running" for c in containers),
+        "total_count": len(containers),
+        "error": None,
+    }
 
 
 def _get_kubectl_info() -> dict:
@@ -483,7 +556,6 @@ def home(request):
     context = {
         "page_title": "Dev Tools",
         "breadcrumbs": ["Apps", "Dev Tools"],
-        "docker": _get_docker_info(),
         "kubectl": _get_kubectl_info(),
     }
     return render(request, "dev_tools/home.html", context)
