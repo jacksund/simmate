@@ -17,103 +17,20 @@
 {% block body %}
     {# Header #}
     <div class="text-center pt-3 pb-2 mb-4">
-        <h1 class="h2 fw-bold mb-2">
+        <h1 class="h2 fw-bold mb-0">
             <i class="bi bi-tools me-2"></i>Dev Tools
         </h1>
-        <p class="text-muted mb-0">Local diagnostics for git, Docker, and Kubernetes — useful for debugging deployments.</p>
+    </div>
+    {# Kubernetes: deployments with scaling, pods with logs #}
+    <div class="row g-3 mb-5">
+        <div class="col-12">{% htmx_component "kubernetes-component" %}</div>
     </div>
     {# Docker: containers with start/stop/delete and logs #}
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-5">
         <div class="col-12">{% htmx_component "docker-component" %}</div>
     </div>
     {# Git: commit graph, status, and diffs #}
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-5">
         <div class="col-12">{% htmx_component "git-component" %}</div>
-    </div>
-    {# Kubernetes row #}
-    <div class="row g-3 mb-4">
-        {# Kubernetes Pods #}
-        <div class="col-12">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
-                    <div>
-                        <h5 class="card-title mb-0 fw-semibold">
-                            <i class="bi bi-hdd-network text-primary me-1"></i> Kubernetes Pods
-                        </h5>
-                        <small class="text-muted">kubectl get pods -A</small>
-                    </div>
-                    {% if kubectl.available and not kubectl.error %}
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle small">
-                            {{ kubectl.pods|length }} pod{{ kubectl.pods|length|pluralize }}
-                        </span>
-                    {% endif %}
-                </div>
-                <div class="card-body p-0">
-                    {% if not kubectl.available %}
-                        <div class="text-center text-muted py-4">
-                            <i class="bi bi-x-circle fs-3 mb-2 d-block"></i>
-                            <small>kubectl not installed</small>
-                        </div>
-                    {% elif kubectl.error %}
-                        <div class="text-center text-muted py-4">
-                            <i class="bi bi-exclamation-triangle fs-3 mb-2 d-block text-warning"></i>
-                            <small>{{ kubectl.error }}</small>
-                        </div>
-                    {% elif not kubectl.pods %}
-                        <div class="text-center text-muted py-4">
-                            <i class="bi bi-inbox fs-3 mb-2 d-block"></i>
-                            <small>No pods found</small>
-                        </div>
-                    {% else %}
-                        <div class="table-responsive">
-                            <table class="table table-striped align-middle mb-0">
-                                <thead class="table-primary">
-                                    <tr>
-                                        <th class="ps-3">Namespace</th>
-                                        <th>Pod Name</th>
-                                        <th>Ready</th>
-                                        <th>Status</th>
-                                        <th class="pe-3">Restarts</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for pod in kubectl.pods %}
-                                        <tr>
-                                            <td class="ps-3 text-muted">{{ pod.namespace }}</td>
-                                            <td class="fw-semibold font-monospace">{{ pod.name }}</td>
-                                            <td class="text-muted">{{ pod.ready }}</td>
-                                            <td>
-                                                {% if pod.status == "Running" %}
-                                                    <span class="badge bg-success-subtle text-success border border-success-subtle">
-                                                        <span class="spinner-grow spinner-grow-sm me-1"
-                                                              style="width: 0.5rem;
-                                                                     height: 0.5rem"
-                                                              role="status"></span>
-                                                        Running
-                                                    </span>
-                                                {% elif pod.status == "Completed" %}
-                                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
-                                                        <i class="bi bi-check-circle-fill me-1"></i>{{ pod.status }}
-                                                    </span>
-                                                {% elif pod.status == "Pending" %}
-                                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
-                                                        <i class="bi bi-clock-fill me-1"></i>{{ pod.status }}
-                                                    </span>
-                                                {% else %}
-                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
-                                                        <i class="bi bi-x-circle-fill me-1"></i>{{ pod.status }}
-                                                    </span>
-                                                {% endif %}
-                                            </td>
-                                            <td class="pe-3 text-muted">{{ pod.restarts }}</td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
     </div>
 {% endblock %}

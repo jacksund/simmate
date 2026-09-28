@@ -82,6 +82,8 @@ class DevToolsConfig(AppConfig):
     description_short = (
         "Local diagnostics: git status, Docker containers, and Kubernetes pods"
     )
+    # only register urls & show in the website when settings.website.debug is True
+    debug_only = True
 
 
 class EmoleculesConfig(AppConfig):

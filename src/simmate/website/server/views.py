@@ -211,6 +211,9 @@ def apps(request):
             ):
                 continue
 
+            if getattr(app_config, "debug_only", False) and not settings.website.debug:
+                continue
+
             extra_apps.append(
                 {
                     "verbose_name": app_config.verbose_name,

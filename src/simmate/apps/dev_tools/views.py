@@ -463,30 +463,110 @@ def _get_docker_info() -> dict:
     }
 
 
-def _get_kubectl_info() -> dict:
+# sentinel value for the namespace selector that lists every namespace (-A)
+ALL_NAMESPACES = "__all__"
+
+
+def _ns_args(namespace: str) -> list[str]:
+    if namespace == ALL_NAMESPACES:
+        return ["-A"]
+    return ["-n", namespace]
+
+
+def _get_kubectl_namespaces() -> list[str]:
+    ok, output = _run_cmd(["kubectl", "get", "namespaces", "-o", "name"])
+    if not ok:
+        return []
+    return [
+        line.strip().removeprefix("namespace/")
+        for line in output.splitlines()
+        if line.strip()
+    ]
+
+
+def _get_kubectl_pods(namespace: str) -> tuple[bool, list[dict]]:
+    ok, output = _run_cmd(
+        ["kubectl", "get", "pods", *_ns_args(namespace), "--no-headers"]
+    )
+    if not ok:
+        return False, []
+
+    # the namespace column is only given when listing all namespaces
+    offset = 1 if namespace == ALL_NAMESPACES else 0
+    pods = []
+    for line in output.splitlines():
+        parts = line.split()
+        if len(parts) < 5 + offset:
+            continue
+        pods.append(
+            {
+                "namespace": parts[0] if offset else namespace,
+                "name": parts[offset],
+                "ready": parts[offset + 1],
+                "status": parts[offset + 2],
+                # restarts can be followed by "(5m ago)", so age is taken
+                # from the end of the line
+                "restarts": parts[offset + 3],
+                "age": parts[-1],
+            }
+        )
+    return True, pods
+
+
+def _get_kubectl_deployments(namespace: str) -> tuple[bool, list[dict]]:
+    ok, output = _run_cmd(
+        ["kubectl", "get", "deployments", *_ns_args(namespace), "-o", "json"],
+        timeout=10,
+    )
+    if not ok:
+        return False, []
+    try:
+        items = json.loads(output).get("items", [])
+    except json.JSONDecodeError:
+        return False, []
+
+    deployments = []
+    for item in items:
+        metadata = item.get("metadata", {})
+        spec = item.get("spec", {})
+        status = item.get("status", {})
+        deployments.append(
+            {
+                "namespace": metadata.get("namespace", ""),
+                "name": metadata.get("name", ""),
+                "replicas": spec.get("replicas", 0) or 0,
+                "ready": status.get("readyReplicas", 0) or 0,
+                "up_to_date": status.get("updatedReplicas", 0) or 0,
+                "available": status.get("availableReplicas", 0) or 0,
+            }
+        )
+    return True, deployments
+
+
+def _get_kubectl_info(namespace: str = "default") -> dict:
     if not shutil.which("kubectl"):
         return {"available": False}
 
-    ok, output = _run_cmd(["kubectl", "get", "pods", "-A", "--no-headers"])
-    if not ok:
-        return {"available": True, "error": "Cannot reach cluster", "pods": []}
+    pods_ok, pods = _get_kubectl_pods(namespace)
+    if not pods_ok:
+        return {
+            "available": True,
+            "error": "Cannot reach cluster",
+            "pods": [],
+            "deployments": [],
+            "namespaces": [],
+        }
+    _, deployments = _get_kubectl_deployments(namespace)
 
-    pods = []
-    for line in output.splitlines():
-        if not line.strip():
-            continue
-        parts = line.split()
-        pods.append(
-            {
-                "namespace": parts[0] if len(parts) > 0 else "",
-                "name": parts[1] if len(parts) > 1 else "",
-                "ready": parts[2] if len(parts) > 2 else "",
-                "status": parts[3] if len(parts) > 3 else "",
-                "restarts": parts[4] if len(parts) > 4 else "0",
-            }
-        )
-
-    return {"available": True, "pods": pods, "error": None}
+    return {
+        "available": True,
+        "error": None,
+        "namespaces": _get_kubectl_namespaces(),
+        "pods": pods,
+        "deployments": deployments,
+        "running_count": sum(p["status"] == "Running" for p in pods),
+        "pod_count": len(pods),
+    }
 
 
 def _parse_diff(diff_text: str) -> list[dict]:
@@ -556,6 +636,5 @@ def home(request):
     context = {
         "page_title": "Dev Tools",
         "breadcrumbs": ["Apps", "Dev Tools"],
-        "kubectl": _get_kubectl_info(),
     }
     return render(request, "dev_tools/home.html", context)

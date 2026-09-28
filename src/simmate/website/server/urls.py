@@ -5,7 +5,7 @@ from django.urls import include, path
 from django.views.generic import RedirectView
 
 from simmate.config import settings
-from simmate.utils import get_app_submodule
+from simmate.utils import get_app_submodule, get_class
 from simmate.website.server import views
 
 
@@ -18,6 +18,11 @@ def get_app_urls():
     for app_name in settings.apps:
         urls_path = get_app_submodule(app_name, "urls")
         if urls_path:
+            # some apps (e.g. dev tools) should never be exposed on a production server
+            app_config = get_class(app_name)
+            if getattr(app_config, "debug_only", False) and not settings.website.debug:
+                continue
+
             simple_name = urls_path.split(".")[-2]
             new_path = path(
                 route=f"apps/{simple_name}/",
