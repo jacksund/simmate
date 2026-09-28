@@ -29,6 +29,7 @@ def get_all_components(
         "simmate.website.configs.CoreConfig",
         "simmate.website.configs.DataExplorerConfig",
         "simmate.website.configs.WorkflowExplorerConfig",
+        "simmate.website.configs.ComputeManagementConfig",
     ]:
         # check if there is a components module for this app and load it if so
         components_path = get_app_submodule(app_name, "components")

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from simmate.compute import SimmateWorker
 from simmate.website.data_explorer.components import TableComponent
-
-from ..worker import SimmateWorker
 
 
 class SimmateWorkerComponent(TableComponent):
@@ -14,5 +13,5 @@ class SimmateWorkerComponent(TableComponent):
         "for each worker in the cluster."
     )
     template_names = {
-        "entries": "workflow_explorer/workers/table.html",
+        "entries": "compute_management/workers/table.html",
     }

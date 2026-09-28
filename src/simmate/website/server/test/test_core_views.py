@@ -55,7 +55,7 @@ def test_apps_view(client):
 def test_compute_app_view(client):
     response = client.get("/apps/compute/")
     assert response.status_code == 200
-    assertTemplateUsed(response, "compute/home.html")
+    assertTemplateUsed(response, "compute_management/home.html")
 
 
 @pytest.mark.django_db

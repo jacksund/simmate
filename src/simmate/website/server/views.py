@@ -13,9 +13,9 @@ from simmate.apps.jarvis.models import JarvisStructure
 from simmate.apps.materials_project.models import MatprojStructure
 from simmate.apps.oqmd.models import OqmdStructure
 from simmate.config import settings
-from simmate.utils import get_app_submodule, get_class
 from simmate.website.core.models import Notification
 from simmate.website.data_explorer.forms import ChemicalSystemForm
+from simmate.website.utils import get_website_apps
 
 # -----------------------------------------------------------------------------
 
@@ -199,28 +199,15 @@ def permission_denied(request):
 
 
 def apps(request):
-    extra_apps = []
-    for app_name in settings.apps:
-        urls_path = get_app_submodule(app_name, "urls")
-        if urls_path:
-            app_config = get_class(app_name)
-
-            if (
-                hasattr(app_config, "hide_in_website")
-                and app_config.hide_in_website == True
-            ):
-                continue
-
-            if getattr(app_config, "debug_only", False) and not settings.website.debug:
-                continue
-
-            extra_apps.append(
-                {
-                    "verbose_name": app_config.verbose_name,
-                    "short_name": app_config.name.split(".")[-1],
-                    "description_short": app_config.description_short,
-                }
-            )
+    extra_apps = [
+        {
+            "verbose_name": app["config"].verbose_name,
+            "url_prefix": app["url_prefix"],
+            "description_short": app["config"].description_short,
+        }
+        for app in get_website_apps()
+        if not getattr(app["config"], "hide_in_website", False)
+    ]
     context = {
         "extra_apps": extra_apps,
         "breadcrumbs": ["Apps"],

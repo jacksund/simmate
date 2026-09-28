@@ -2,10 +2,11 @@
 
 import logging
 import uuid
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 import pandas
+from django.db.models import Count, Q
 from django.utils import timezone
 from rich import print
 from rich.progress import track
@@ -196,42 +197,49 @@ class SimmateExecutor:
                 print(f"{job.id} | {error}")
 
     @staticmethod
-    def get_stats(tags: list[str] = []) -> dict:
+    def get_stats(tags: list[str] = [], since: datetime = None) -> dict:
+        """
+        Counts WorkItems by status in a single query.
+
+        Args:
+            tags: Only count WorkItems with all of these tags.
+            since: Only count WorkItems updated after this time.
+
+        Returns:
+            A dictionary of counts, plus the error percentage (errored out of
+            all finished + errored items).
+        """
         query = WorkItem.objects.all()
         if tags:
             query = query.filter_by_tags(tags=tags)
+        if since:
+            query = query.filter(updated_at__gte=since)
 
-        npending = query.filter(status="P").count()
-        nrunning = query.filter(status="R").count()
-        ncanceled = query.filter(status="C").count()
-        nfinished = query.filter(status="F").count()
-        nerrored = query.filter(status="E").count()
+        stats = query.aggregate(
+            npending=Count("id", filter=Q(status="P")),
+            nrunning=Count("id", filter=Q(status="R")),
+            ncanceled=Count("id", filter=Q(status="C")),
+            nfinished=Count("id", filter=Q(status="F")),
+            nerrored=Count("id", filter=Q(status="E")),
+            nrunning_long=Count(
+                "id",
+                filter=Q(
+                    status="R",
+                    updated_at__lte=timezone.now() - timedelta(days=1),
+                ),
+            ),
+        )
 
-        if nfinished:
-            error_percent = (nerrored / (nerrored + nfinished)) * 100
-        else:
-            error_percent = 0
+        ndone = stats["nerrored"] + stats["nfinished"]
+        stats["error_percent"] = stats["nerrored"] / ndone * 100 if ndone else 0
 
-        nrunning_long = query.filter(
-            status="R",
-            updated_at__lte=timezone.now() - timedelta(days=1),
-        ).count()
-
-        return {
-            "npending": npending,
-            "nrunning": nrunning,
-            "ncanceled": ncanceled,
-            "nfinished": nfinished,
-            "nerrored": nerrored,
-            "error_percent": error_percent,
-            "nrunning_long": nrunning_long,
-        }
+        return stats
 
     @classmethod
     def show_stats(cls, tags: list[str] = []):
         stats = cls.get_stats(tags=tags)
         print(f"PENDING:   {stats['npending']}")
-        print(f"RUNNING:   {stats['nrunning']} ({stats['npending']} for +24hrs)")
+        print(f"RUNNING:   {stats['nrunning']} ({stats['nrunning_long']} for +24hrs)")
         print(f"FINISHED:  {stats['nfinished']}")
         print(f"ERRORED:   {stats['nerrored']} ({stats['error_percent']:.2f}%)")
         print(f"CANCELED:  {stats['ncanceled']}")

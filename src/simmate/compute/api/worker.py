@@ -93,7 +93,7 @@ class ApiWorker:
                 # Request the next work item
                 try:
                     response = self.session.post(
-                        f"{self.server_url}/compute/work_items/next/",
+                        f"{self.server_url}/apps/compute/work_items/next/",
                         json={"tags": self.tags},
                         timeout=10,
                     )
@@ -155,7 +155,7 @@ class ApiWorker:
                 # Send result back to API
                 try:
                     update_response = self.session.post(
-                        f"{self.server_url}/compute/work_items/{workitem_id}/update/",
+                        f"{self.server_url}/apps/compute/work_items/{workitem_id}/update/",
                         json={
                             "status": status,
                             "result": result_b64,

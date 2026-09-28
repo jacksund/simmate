@@ -1,7 +1,11 @@
 {% extends "htmx/form_base.html" %}
 {% load htmx %}
 {% block form %}
-    <div class="card border-0 shadow-sm">
+    {# hx-target/include/swap are inherited by every hx-post element below #}
+    <div class="card border-0 shadow-sm"
+         hx-target="#{{ component.component_id }}"
+         hx-include="#{{ component.component_id }}"
+         hx-swap="outerHTML settle:0">
         {# Card header: branch, staged/unstaged badge counts, and actions #}
         <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
             <div>
@@ -52,10 +56,7 @@
                                     <button type="button"
                                             class="dropdown-item font-monospace small {% if name == branch %}active{% endif %}"
                                             {% if name == branch %}disabled{% endif %}
-                                            hx-post="{% url 'htmx:component_method' component.component_id 'checkout' %}?branch=%22{{ name|urlencode }}%22"
-                                            hx-target="#{{ component.component_id }}"
-                                            hx-include="#{{ component.component_id }}"
-                                            hx-swap="outerHTML settle:0">
+                                            hx-post="{% url 'htmx:component_method' component.component_id 'checkout' %}?branch=%22{{ name|urlencode }}%22">
                                         <i class="bi bi-git me-1"></i>{{ name }}
                                     </button>
                                 </li>
@@ -74,10 +75,7 @@
                                 <li>
                                     <button type="button"
                                             class="dropdown-item font-monospace small"
-                                            hx-post="{% url 'htmx:component_method' component.component_id 'checkout' %}?branch=%22{{ name|urlencode }}%22"
-                                            hx-target="#{{ component.component_id }}"
-                                            hx-include="#{{ component.component_id }}"
-                                            hx-swap="outerHTML settle:0">
+                                            hx-post="{% url 'htmx:component_method' component.component_id 'checkout' %}?branch=%22{{ name|urlencode }}%22">
                                         <i class="bi bi-cloud me-1"></i>{{ name }}
                                     </button>
                                 </li>
@@ -91,57 +89,28 @@
                     <button type="button"
                             class="btn btn-sm btn-outline-secondary py-0 flex-shrink-0"
                             hx-post="{% url 'htmx:component_method' component.component_id 'fetch' %}"
-                            hx-target="#{{ component.component_id }}"
-                            hx-include="#{{ component.component_id }}"
-                            hx-swap="outerHTML settle:0"
                             title="git fetch --all --prune">
-                        <span class="htmx-indicator spinner-border spinner-border-sm"
-                              role="status"
-                              style="width: 0.7rem;
-                                     height: 0.7rem;
-                                     border-width: 0.1em"></span>
+                        {% include "dev_tools/partials/spinner.html" %}
                         <i class="bi bi-cloud-download"></i>
                     </button>
                     <button type="button"
                             class="btn btn-sm btn-outline-secondary py-0 flex-shrink-0"
                             hx-post="{% url 'htmx:component_method' component.component_id 'refresh' %}"
-                            hx-target="#{{ component.component_id }}"
-                            hx-include="#{{ component.component_id }}"
-                            hx-swap="outerHTML settle:0"
                             title="Refresh git status">
-                        <span class="htmx-indicator spinner-border spinner-border-sm"
-                              role="status"
-                              style="width: 0.7rem;
-                                     height: 0.7rem;
-                                     border-width: 0.1em"></span>
+                        {% include "dev_tools/partials/spinner.html" %}
                         <i class="bi bi-arrow-clockwise"></i>
                     </button>
                     <button type="button"
                             class="btn btn-sm btn-outline-secondary py-0 flex-shrink-0"
-                            hx-post="{% url 'htmx:component_method' component.component_id 'lint' %}"
-                            hx-target="#{{ component.component_id }}"
-                            hx-include="#{{ component.component_id }}"
-                            hx-swap="outerHTML settle:0">
-                        <span class="htmx-indicator spinner-border spinner-border-sm me-1"
-                              role="status"
-                              style="width: 0.7rem;
-                                     height: 0.7rem;
-                                     border-width: 0.1em"></span>
+                            hx-post="{% url 'htmx:component_method' component.component_id 'lint' %}">
+                        {% include "dev_tools/partials/spinner.html" with extra_class="me-1" %}
                         <i class="bi bi-check2-all me-1"></i>Lint
                     </button>
                 </div>
             {% endif %}
         </div>
         {# Checkout / fetch results #}
-        {% if component.action_error %}
-            <div class="alert alert-danger py-1 px-2 mx-3 mb-2 small rounded-1 font-monospace"
-                 style="white-space: pre-wrap;
-                        font-size: 0.72rem">{{ component.action_error }}</div>
-        {% elif component.action_message %}
-            <div class="alert alert-success py-1 px-2 mx-3 mb-2 small rounded-1 font-monospace"
-                 style="white-space: pre-wrap;
-                        font-size: 0.72rem">{{ component.action_message }}</div>
-        {% endif %}
+        {% include "htmx/partials/action_alert.html" %}
         {# Top: commit graph | file list + commit #}
         <div class="card-body p-0 border-top" style="height: 480px;">
             <div class="row g-0 h-100">
@@ -192,205 +161,13 @@
                                 {% endfor %}
                             </div>
                         {% endif %}
-                        {# Unstaged section #}
-                        <div class="d-flex flex-column" style="flex: 1 1 0; min-height: 0;">
-                            <div class="d-flex align-items-center justify-content-between px-2 py-1 flex-shrink-0 border-bottom">
-                                <small class="text-uppercase fw-semibold text-muted"
-                                       style="font-size: 0.68rem;
-                                              letter-spacing: 0.06em">Unstaged</small>
-                                <div class="d-flex align-items-center gap-1">
-                                    <small class="text-muted"
-                                           style="font-size: 0.7rem">{{ unstaged_files|length }}</small>
-                                    {% if unstaged_files %}
-                                        <button type="button"
-                                                class="btn border-0 p-0 px-1"
-                                                title="Stage all"
-                                                style="line-height: 1;
-                                                       color: #3fb950;
-                                                       opacity: 0.5;
-                                                       font-size: 0.8rem"
-                                                onmouseover="this.style.opacity='1'"
-                                                onmouseout="this.style.opacity='0.5'"
-                                                {% htmx_post trigger="click" method_name="stage_all" %}>
-                                            <i class="bi bi-plus-circle-fill"></i>
-                                        </button>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="flex-grow-1" style="overflow-y: auto; min-height: 0;">
-                                {% if unstaged_files %}
-                                    {% for file in unstaged_files %}
-                                        <div class="d-flex align-items-center gap-1 px-1 py-1 git-file-row {% if file.path == component.selected_file and component.selected_view == 'unstaged' %}active{% endif %}"
-                                             data-path="{{ file.path }}">
-                                            <button type="button"
-                                                    class="btn border-0 p-0 px-1 flex-shrink-0"
-                                                    title="Stage file"
-                                                    style="line-height: 1;
-                                                           color: #3fb950;
-                                                           opacity: 0.45;
-                                                           font-size: 0.85rem"
-                                                    onmouseover="this.style.opacity='1'"
-                                                    onmouseout="this.style.opacity='0.45'"
-                                                    hx-post="{% url 'htmx:component_method' component.component_id 'stage_file' %}?file={{ file.path|urlencode }}"
-                                                    hx-target="#{{ component.component_id }}"
-                                                    hx-include="#{{ component.component_id }}"
-                                                    hx-swap="outerHTML settle:0">
-                                                <i class="bi bi-plus-circle-fill"></i>
-                                            </button>
-                                            <button type="button"
-                                                    class="btn p-0 border-0 bg-transparent flex-grow-1 text-start d-flex align-items-center gap-1"
-                                                    style="min-width: 0"
-                                                    title="{% if file.orig_path %}{{ file.orig_path }} → {% endif %}{{ file.path }}"
-                                                    hx-post="{% url 'htmx:component_method' component.component_id 'show_diff' %}?file={{ file.path|urlencode }}&view=unstaged"
-                                                    hx-target="#{{ component.component_id }}"
-                                                    hx-include="#{{ component.component_id }}"
-                                                    hx-swap="outerHTML settle:0">
-                                                <span class="flex-shrink-0"
-                                                      style="width: 0.85rem;
-                                                             text-align: center;
-                                                             font-size: 0.72rem;
-                                                             line-height: 1">
-                                                    {% if file.status == "A" or file.status == "??" %}
-                                                        <i class="bi bi-plus text-success fw-bold"></i>
-                                                    {% elif file.status == "D" %}
-                                                        <i class="bi bi-dash text-danger fw-bold"></i>
-                                                    {% elif file.status == "R" %}
-                                                        <i class="bi bi-arrow-left-right text-info"></i>
-                                                    {% elif file.status == "C" %}
-                                                        <i class="bi bi-files text-info"></i>
-                                                    {% elif file.status == "U" %}
-                                                        <i class="bi bi-exclamation-triangle-fill text-warning"></i>
-                                                    {% else %}
-                                                        <i class="bi bi-pencil-fill text-warning"></i>
-                                                    {% endif %}
-                                                </span>
-                                                <span class="d-flex flex-grow-1 font-monospace overflow-hidden"
-                                                      style="font-size: 0.78rem;
-                                                             min-width: 0">
-                                                    {% if file.dir %}<span class="text-muted"
-      style="overflow: hidden;
-             text-overflow: ellipsis;
-             white-space: nowrap;
-             flex-shrink: 1;
-             min-width: 0">{{ file.dir }}</span>{% endif %}
-                                                    <span class="text-body"
-                                                          style="flex-shrink: 0;
-                                                                 white-space: nowrap">{{ file.name }}</span>
-                                                </span>
-                                            </button>
-                                        </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="px-3 py-2">
-                                        <small class="text-muted fst-italic"
-                                               style="font-size: 0.75rem">No unstaged changes</small>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {# Staged section #}
-                        <div class="d-flex flex-column border-top"
-                             style="flex: 1 1 0;
-                                    min-height: 0">
-                            <div class="d-flex align-items-center justify-content-between px-2 py-1 flex-shrink-0 border-bottom">
-                                <small class="text-uppercase fw-semibold text-muted"
-                                       style="font-size: 0.68rem;
-                                              letter-spacing: 0.06em">Staged</small>
-                                <div class="d-flex align-items-center gap-1">
-                                    <small class="text-muted"
-                                           style="font-size: 0.7rem">{{ staged_files|length }}</small>
-                                    {% if staged_files %}
-                                        <button type="button"
-                                                class="btn border-0 p-0 px-1"
-                                                title="Unstage all"
-                                                style="line-height: 1;
-                                                       color: #f85149;
-                                                       opacity: 0.5;
-                                                       font-size: 0.8rem"
-                                                onmouseover="this.style.opacity='1'"
-                                                onmouseout="this.style.opacity='0.5'"
-                                                {% htmx_post trigger="click" method_name="unstage_all" %}>
-                                            <i class="bi bi-dash-circle-fill"></i>
-                                        </button>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="flex-grow-1" style="overflow-y: auto; min-height: 0;">
-                                {% if staged_files %}
-                                    {% for file in staged_files %}
-                                        <div class="d-flex align-items-center gap-1 px-1 py-1 git-file-row {% if file.path == component.selected_file and component.selected_view == 'staged' %}active{% endif %}"
-                                             data-path="{{ file.path }}">
-                                            <button type="button"
-                                                    class="btn border-0 p-0 px-1 flex-shrink-0"
-                                                    title="Unstage file"
-                                                    style="line-height: 1;
-                                                           color: #f85149;
-                                                           opacity: 0.45;
-                                                           font-size: 0.85rem"
-                                                    onmouseover="this.style.opacity='1'"
-                                                    onmouseout="this.style.opacity='0.45'"
-                                                    hx-post="{% url 'htmx:component_method' component.component_id 'unstage_file' %}?file={{ file.path|urlencode }}"
-                                                    hx-target="#{{ component.component_id }}"
-                                                    hx-include="#{{ component.component_id }}"
-                                                    hx-swap="outerHTML settle:0">
-                                                <i class="bi bi-dash-circle-fill"></i>
-                                            </button>
-                                            <button type="button"
-                                                    class="btn p-0 border-0 bg-transparent flex-grow-1 text-start d-flex align-items-center gap-1"
-                                                    style="min-width: 0"
-                                                    title="{% if file.orig_path %}{{ file.orig_path }} → {% endif %}{{ file.path }}"
-                                                    hx-post="{% url 'htmx:component_method' component.component_id 'show_diff' %}?file={{ file.path|urlencode }}&view=staged"
-                                                    hx-target="#{{ component.component_id }}"
-                                                    hx-include="#{{ component.component_id }}"
-                                                    hx-swap="outerHTML settle:0">
-                                                <span class="flex-shrink-0"
-                                                      style="width: 0.85rem;
-                                                             text-align: center;
-                                                             font-size: 0.72rem;
-                                                             line-height: 1">
-                                                    {% if file.status == "A" %}
-                                                        <i class="bi bi-plus text-success fw-bold"></i>
-                                                    {% elif file.status == "D" %}
-                                                        <i class="bi bi-dash text-danger fw-bold"></i>
-                                                    {% elif file.status == "R" %}
-                                                        <i class="bi bi-arrow-left-right text-info"></i>
-                                                    {% elif file.status == "C" %}
-                                                        <i class="bi bi-files text-info"></i>
-                                                    {% elif file.status == "U" %}
-                                                        <i class="bi bi-exclamation-triangle-fill text-warning"></i>
-                                                    {% else %}
-                                                        <i class="bi bi-pencil-fill text-warning"></i>
-                                                    {% endif %}
-                                                </span>
-                                                <span class="d-flex flex-grow-1 font-monospace overflow-hidden"
-                                                      style="font-size: 0.78rem;
-                                                             min-width: 0">
-                                                    {% if file.dir %}<span class="text-muted"
-      style="overflow: hidden;
-             text-overflow: ellipsis;
-             white-space: nowrap;
-             flex-shrink: 1;
-             min-width: 0">{{ file.dir }}</span>{% endif %}
-                                                    <span class="text-body"
-                                                          style="flex-shrink: 0;
-                                                                 white-space: nowrap">{{ file.name }}</span>
-                                                </span>
-                                            </button>
-                                        </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="px-3 py-2">
-                                        <small class="text-muted fst-italic"
-                                               style="font-size: 0.75rem">No staged changes</small>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
+                        {% include "dev_tools/partials/git_file_section.html" with label="Unstaged" files=unstaged_files view="unstaged" empty_text="No unstaged changes" section_class="" file_method="stage_file" file_title="Stage file" all_method="stage_all" all_title="Stage all" icon="plus-circle-fill" color="#3fb950" %}
+                        {% include "dev_tools/partials/git_file_section.html" with label="Staged" files=staged_files view="staged" empty_text="No staged changes" section_class="border-top" file_method="unstage_file" file_title="Unstage file" all_method="unstage_all" all_title="Unstage all" icon="dash-circle-fill" color="#f85149" %}
                         {# Commit box #}
                         <div class="border-top px-2 py-2 flex-shrink-0">
-                            {% if commit_error %}
+                            {% if component.commit_error %}
                                 <div class="alert alert-danger py-1 px-2 mb-2 small rounded-1">
-                                    <i class="bi bi-exclamation-triangle me-1"></i>{{ commit_error }}
+                                    <i class="bi bi-exclamation-triangle me-1"></i>{{ component.commit_error }}
                                 </div>
                             {% endif %}
                             <form {% htmx_post trigger="submit" method_name="commit" %}>
@@ -419,13 +196,11 @@
         </div>
         {# Bottom: full-width diff viewer (compact until there is something to show) #}
         <div class="border-top d-flex flex-column"
-             style="{% if component.selected_file or lint_output %}height: 600px;
+             style="{% if component.selected_file or component.lint_output %}height: 600px;
                     {% endif %}">
             <div class="px-3 pt-3 pb-1 flex-shrink-0 d-flex align-items-center justify-content-between">
-                <small class="text-uppercase text-muted fw-semibold"
-                       style="font-size: 0.68rem;
-                              letter-spacing: 0.06em">
-                    {% if not component.selected_file and lint_output %}Lint Output{% else %}Diff Viewer{% endif %}
+                <small class="text-uppercase text-muted fw-semibold section-label">
+                    {% if not component.selected_file and component.lint_output %}Lint Output{% else %}Diff Viewer{% endif %}
                 </small>
             </div>
             <div class="flex-grow-1 border-top mx-3 mb-3 d-flex flex-column"
@@ -441,19 +216,13 @@
                         {% if show_unstage_btn %}
                             <button type="button"
                                     class="btn btn-sm btn-outline-warning py-0 flex-shrink-0"
-                                    hx-post="{% url 'htmx:component_method' component.component_id 'unstage_file' %}"
-                                    hx-target="#{{ component.component_id }}"
-                                    hx-include="#{{ component.component_id }}"
-                                    hx-swap="outerHTML settle:0">
+                                    hx-post="{% url 'htmx:component_method' component.component_id 'unstage_file' %}">
                                 <i class="bi bi-dash-circle me-1"></i>Unstage
                             </button>
                         {% elif show_stage_btn %}
                             <button type="button"
                                     class="btn btn-sm btn-outline-success py-0 flex-shrink-0"
-                                    hx-post="{% url 'htmx:component_method' component.component_id 'stage_file' %}"
-                                    hx-target="#{{ component.component_id }}"
-                                    hx-include="#{{ component.component_id }}"
-                                    hx-swap="outerHTML settle:0">
+                                    hx-post="{% url 'htmx:component_method' component.component_id 'stage_file' %}">
                                 <i class="bi bi-plus-circle me-1"></i>Stage
                             </button>
                         {% endif %}
@@ -464,56 +233,7 @@
                                 overflow-x: auto;
                                 min-height: 0">
                         {% if diff_lines %}
-                            <table style="width: 100%;
-                                          border-collapse: collapse;
-                                          font-size: 0.75rem;
-                                          font-family: monospace;
-                                          line-height: 1.5">
-                                {% for row in diff_lines %}
-                                    {% if row.type == "hunk" %}
-                                        <tr style="background: rgba(var(--bs-info-rgb), 0.08);">
-                                            <td colspan="4"
-                                                class="text-info"
-                                                style="padding: 2px 8px;
-                                                       white-space: pre">{{ row.text }}</td>
-                                        </tr>
-                                    {% else %}
-                                        <tr>
-                                            <td style="width: 3rem;
-                                                       min-width: 3rem;
-                                                       text-align: right;
-                                                       padding: 0 6px;
-                                                       color: var(--bs-secondary-color);
-                                                       user-select: none;
-                                                       border-right: 1px solid var(--bs-border-color);
-                                                       {% if row.left_type == 'del' %}background: rgba(248,81,73,0.15);
-                                                       {% elif row.left_type == 'empty' %}background: var(--bs-tertiary-bg);
-                                                       {% endif %}">{{ row.left_num }}</td>
-                                            <td style="padding: 0 8px;
-                                                       white-space: pre;
-                                                       {% if row.left_type == 'del' %}background: rgba(248,81,73,0.15);
-                                                       {% elif row.left_type == 'empty' %}background: var(--bs-tertiary-bg);
-                                                       {% endif %}">{{ row.left_text }}</td>
-                                            <td style="width: 3rem;
-                                                       min-width: 3rem;
-                                                       text-align: right;
-                                                       padding: 0 6px;
-                                                       color: var(--bs-secondary-color);
-                                                       user-select: none;
-                                                       border-right: 1px solid var(--bs-border-color);
-                                                       border-left: 2px solid var(--bs-border-color);
-                                                       {% if row.right_type == 'add' %}background: rgba(63,185,80,0.15);
-                                                       {% elif row.right_type == 'empty' %}background: var(--bs-tertiary-bg);
-                                                       {% endif %}">{{ row.right_num }}</td>
-                                            <td style="padding: 0 8px;
-                                                       white-space: pre;
-                                                       {% if row.right_type == 'add' %}background: rgba(63,185,80,0.15);
-                                                       {% elif row.right_type == 'empty' %}background: var(--bs-tertiary-bg);
-                                                       {% endif %}">{{ row.right_text }}</td>
-                                        </tr>
-                                    {% endif %}
-                                {% endfor %}
-                            </table>
+                            {% include "dev_tools/partials/diff_table.html" %}
                         {% else %}
                             <div class="text-center text-muted py-4">
                                 <i class="bi bi-file-earmark-x fs-3 mb-2 d-block"></i>
@@ -521,18 +241,14 @@
                             </div>
                         {% endif %}
                     </div>
-                {% elif lint_output %}
+                {% elif component.lint_output %}
                     <div class="flex-grow-1 px-2 pt-2 pb-2 font-monospace"
                          style="overflow-y: auto;
                                 min-height: 0;
                                 font-size: 0.75rem;
                                 white-space: pre-wrap;
                                 line-height: 1.6">
-                        {% if lint_error %}
-                            <span class="text-danger">{{ lint_output }}</span>
-                        {% else %}
-                            <span class="text-success">{{ lint_output }}</span>
-                        {% endif %}
+                        <span class="{% if component.lint_error %}text-danger{% else %}text-success{% endif %}">{{ component.lint_output }}</span>
                     </div>
                 {% else %}
                     <div class="text-center text-muted py-4 flex-grow-1">

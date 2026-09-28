@@ -1,0 +1,49 @@
+{% comment %}
+Log panel for the docker + kubernetes components. Expects `logs`, `has_more_logs`, and a
+`title` naming what the logs are for. htmx target/include/swap are inherited
+from the component's card.
+{% endcomment %}
+<div class="border-top">
+    <div class="d-flex justify-content-between align-items-center px-3 py-2">
+        <small class="fw-semibold">
+            <i class="bi bi-file-text me-1"></i>Logs:
+            <span class="font-monospace">{{ title }}</span>
+            <span class="text-muted fw-normal">(last {{ component.log_tail }} lines)</span>
+        </small>
+        <div class="d-flex align-items-center gap-2">
+            {% if has_more_logs %}
+                <button type="button"
+                        class="btn btn-sm btn-outline-secondary py-0"
+                        hx-post="{% url 'htmx:component_method' component.component_id 'load_more_logs' %}">
+                    <i class="bi bi-chevron-double-up me-1"></i>Load more
+                </button>
+            {% endif %}
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary py-0"
+                    hx-post="{% url 'htmx:component_method' component.component_id 'refresh' %}"
+                    title="Refresh logs">
+                {% include "dev_tools/partials/spinner.html" %}
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary py-0"
+                    hx-post="{% url 'htmx:component_method' component.component_id 'hide_logs' %}"
+                    title="Close logs">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    </div>
+    <pre id="{{ component.component_id }}-logs"
+         class="font-monospace small bg-body-tertiary p-3 mb-0"
+         style="max-height: 500px;
+                overflow: auto;
+                white-space: pre-wrap;
+                font-size: 0.72rem">{{ logs|default:"(no log output)" }}</pre>
+    {# newest lines are at the bottom, so start scrolled to the end #}
+    <script>
+        (function() {
+            var el = document.getElementById("{{ component.component_id }}-logs");
+            if (el) el.scrollTop = el.scrollHeight;
+        })();
+    </script>
+</div>

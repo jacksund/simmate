@@ -7,6 +7,15 @@ class CoreConfig(AppConfig):
     name = "simmate.website.core"
 
 
+class ComputeManagementConfig(AppConfig):
+    name = "simmate.website.compute_management"
+    url_prefix = "compute"  # the worker REST API is served under apps/compute/
+    verbose_name = "Compute Management"
+    description_short = (
+        "A dashboard for monitoring cluster workers, queues, and compute resources"
+    )
+
+
 class DataExplorerConfig(AppConfig):
     name = "simmate.website.data_explorer"
 

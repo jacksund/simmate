@@ -64,14 +64,6 @@ class CodConfig(AppConfig):
     name = "simmate.apps.cod"
 
 
-class ComputeConfig(AppConfig):
-    name = "simmate.apps.compute"
-    verbose_name = "Compute Management"
-    description_short = (
-        "A dashboard for monitoring cluster workers, queues, and compute resources"
-    )
-
-
 class DeepmdConfig(AppConfig):
     name = "simmate.apps.deepmd"
 

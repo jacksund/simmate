@@ -41,6 +41,7 @@
 
 - moved `simmate.workflows.execution` and `simmate.workflows.scheduler` to `simmate.compute` to align with the CLI and documentation structure
 - renamed the `simmate engine` command group to `simmate compute` and updated internal modules/tests
+- consolidated compute management into `simmate.compute` (engine) and a new built-in `simmate.website.compute_management` app (dashboard, table components, and worker REST API). `WorkItem` and `SimmateWorker` moved from the `workflow_explorer` app to `compute_management` (tables are renamed to `compute__work_items` and `compute__workers`, and existing rows are not carried over), the worker REST API moved to `/apps/compute/work_items/`, and `simmate.apps.configs.ComputeConfig` was removed from the list of optional apps
 - refactored `website.data_explorer` to use HTMX components for all table entries, moving UI-specific features from `DatabaseTable` and `HTMLMixin` into `DynamicTableForm`
 - refactored the `chemspace` app to use an independent `ChemspaceClient` for source data management and chunked yielding, aligning its architecture with the `chembl` app
 - moved `chemspace.utils.download_raw_files` into `ChemspaceClient.download_source_data`

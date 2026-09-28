@@ -1,0 +1,49 @@
+{% extends "data_explorer/entries.html" %}
+{% block table_report %}
+    {# same figures as the compute dashboard's Activity Timeline, for the filtered results #}
+    <div class="row g-3 mb-3">
+        {% if component.report.activity %}
+            <div class="col-xl-6">
+                <h6 class="fw-semibold mb-0">Status Activity</h6>
+                {% htmx_plotly_figure component.report.activity %}
+            </div>
+        {% endif %}
+        {% if component.report.queue_depth %}
+            <div class="col-xl-6">
+                <h6 class="fw-semibold mb-0">Queue Depth</h6>
+                {% htmx_plotly_figure component.report.queue_depth %}
+            </div>
+        {% endif %}
+        {% if component.report.jobs %}
+            <div class="col-12">
+                <h6 class="fw-semibold mb-0">Jobs by Worker</h6>
+                <small class="text-muted">Most recent 500 items</small>
+                {% htmx_plotly_figure component.report.jobs %}
+            </div>
+        {% endif %}
+        {% if component.report.durations %}
+            <div class="col-12">
+                <h6 class="fw-semibold mb-0">Duration by Workflow</h6>
+                {% htmx_plotly_figure component.report.durations %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+{% block table_headers %}
+    {% table_header "id" "ID" min_width=150 %}
+    <th style="min-width:200px">Workflow</th>
+    {% table_header "status" min_width=150 %}
+    {% table_header "updated_at" "Elapsed" min_width=125 %}
+    {% table_header "worker" min_width=150 %}
+    {% table_header "tags" min_width=150 %}
+{% endblock %}
+{% block table_rows %}
+    {% include "compute_management/work_items/row_cells.html" %}
+    <td>
+        {% for tag in entry.tags %}
+            <span class="badge rounded-pill text-bg-primary align-middle">{{ tag }}</span>
+        {% empty %}
+            -
+        {% endfor %}
+    </td>
+{% endblock %}

@@ -1,8 +1,6 @@
 {# Commit graph panel for dev_tools/git.html -- expects the GitComponent context #}
 <div class="d-flex align-items-center justify-content-between px-2 py-1 flex-shrink-0 border-bottom">
-    <small class="text-uppercase fw-semibold text-muted"
-           style="font-size: 0.68rem;
-                  letter-spacing: 0.06em">Commits</small>
+    <small class="text-uppercase fw-semibold text-muted section-label">Commits</small>
     <small class="text-muted" style="font-size: 0.7rem;">{{ commits|length }}</small>
 </div>
 <div class="flex-grow-1"
@@ -21,10 +19,7 @@
                     cursor: pointer"
              title="{{ c.hash }}"
              hx-post="{% url 'htmx:component_method' component.component_id 'select_commit' %}?commit=%22{{ c.hash }}%22"
-             hx-trigger="click[!target.closest('.dropdown')]"
-             hx-target="#{{ component.component_id }}"
-             hx-include="#{{ component.component_id }}"
-             hx-swap="outerHTML settle:0">
+             hx-trigger="click[!target.closest('.dropdown')]">
             <svg width="{{ graph_width }}"
                  height="{{ row_h }}"
                  class="flex-shrink-0 ms-1"
@@ -72,10 +67,7 @@
                                     <button type="button"
                                             class="dropdown-item"
                                             {% if ref.is_head %}disabled{% endif %}
-                                            hx-post="{% url 'htmx:component_method' component.component_id 'checkout' %}?branch=%22{{ ref.name|urlencode }}%22"
-                                            hx-target="#{{ component.component_id }}"
-                                            hx-include="#{{ component.component_id }}"
-                                            hx-swap="outerHTML settle:0">
+                                            hx-post="{% url 'htmx:component_method' component.component_id 'checkout' %}?branch=%22{{ ref.name|urlencode }}%22">
                                         <i class="bi bi-box-arrow-in-right me-1"></i>
                                         {% if ref.is_head %}
                                             Checked out
@@ -143,15 +135,8 @@
         <div class="text-center py-2">
             <button type="button"
                     class="btn btn-sm btn-outline-secondary"
-                    hx-post="{% url 'htmx:component_method' component.component_id 'load_more' %}"
-                    hx-target="#{{ component.component_id }}"
-                    hx-include="#{{ component.component_id }}"
-                    hx-swap="outerHTML settle:0">
-                <span class="htmx-indicator spinner-border spinner-border-sm me-1"
-                      role="status"
-                      style="width: 0.7rem;
-                             height: 0.7rem;
-                             border-width: 0.1em"></span>
+                    hx-post="{% url 'htmx:component_method' component.component_id 'load_more' %}">
+                {% include "dev_tools/partials/spinner.html" with extra_class="me-1" %}
                 Load more ({{ commits|length }} shown)
             </button>
         </div>

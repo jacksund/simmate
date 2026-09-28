@@ -1,6 +1,9 @@
 {# BUG-FIX: overflow-anchor needed for HtmxComponent.retarget() calls #}
 <div id="{{ component.component_id }}" style="overflow-anchor: none">
     {% block form %}{% endblock %}
+    {% if component.refresh_interval %}
+        {% htmx_refresh refresh_loop=component.refresh_interval indicator="None" %}
+    {% endif %}
     {% if component.js_actions %}
         {% htmx_js_actions component.js_actions %}
     {% endif %}

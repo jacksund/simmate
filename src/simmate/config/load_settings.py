@@ -148,8 +148,6 @@ class SimmateSettings:
                 "simmate.apps.configs.ChemblConfig",
                 "simmate.apps.configs.ChemspaceConfig",
                 "simmate.apps.configs.CodConfig",
-                "simmate.apps.configs.ComputeConfig",
-                "simmate.apps.configs.DevToolsConfig",
                 "simmate.apps.configs.EmoleculesConfig",
                 "simmate.apps.configs.EnamineConfig",
                 "simmate.apps.configs.EppoGdConfig",
@@ -254,8 +252,8 @@ class SimmateSettings:
                         "simmate.apps.ethereum.components.EthereumTransactionComponent",
                     ],
                     "Compute Resources": [
-                        "simmate.compute.components.WorkItemComponent",
-                        "simmate.compute.components.SimmateWorkerComponent",
+                        "simmate.website.compute_management.components.WorkItemComponent",
+                        "simmate.website.compute_management.components.SimmateWorkerComponent",
                     ],
                     "Other": [
                         "simmate.apps.eppo_gd.components.EppoCodeComponent",

@@ -106,6 +106,7 @@ The web interface is built with Django and HTMX.
 - **`core/`**: Shared components, templates, static files, and base models for the UI.
 - **`data_explorer/`**: App for searching and exploring database tables.
 - **`workflow_explorer/`**: App for submitting workflows and viewing results/analytics.
+- **`compute_management/`**: Compute dashboard, WorkItem/Worker tables, and the worker REST API (served at `/apps/compute/`).
 - **`htmx/`**: Base classes and utilities for HTMX-based components.
 
 ## Workflows and Execution (`src/simmate/workflows/` & `src/simmate/compute/`)
@@ -116,7 +117,7 @@ The web interface is built with Django and HTMX.
 - **`src/simmate/workflows/common/`**:
     - `S3Workflow`: Handles file-based codes (VASP/QE) with automated I/O.
     - `StagedWorkflow`: Manages multi-stage/chained runs.
-- **`src/simmate/compute/`**: Backend for job submission and worker management (Executor, Worker, and Scheduler).
+- **`src/simmate/compute/`**: Backend for job submission and worker management (Executor, Worker, and Scheduler). Its models are registered under `website/compute_management/`.
 
 ## Coding Conventions
 
@@ -136,6 +137,5 @@ The web interface is built with Django and HTMX.
 
 ## AI Agent Guidelines
 
-- **Tool Restrictions:** Do NOT use `python` (scripts), `git`, `pytest`, linting tools, or database migrations. The user will handle testing, linting, and migrations manually. Bulk updates via Python scripts are strictly prohibited as they have proven ineffective.
 - **Dependencies:** Verify `pyproject.toml` before assuming a library is available.
 - **Documentation:** Always refer to `docs/full_guides/` when building new apps or workflows. These guides provide essential architectural patterns, naming conventions, and best practices.

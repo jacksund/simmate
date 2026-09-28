@@ -1,0 +1,17 @@
+{# Side-by-side diff -- expects `diff_lines` from components.git.parse_diff #}
+<table class="diff-table">
+    {% for row in diff_lines %}
+        {% if row.type == "hunk" %}
+            <tr class="diff-hunk">
+                <td colspan="4" class="text-info">{{ row.text }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td class="diff-num diff-{{ row.left_type }}">{{ row.left_num }}</td>
+                <td class="diff-code diff-{{ row.left_type }}">{{ row.left_text }}</td>
+                <td class="diff-num diff-right diff-{{ row.right_type }}">{{ row.right_num }}</td>
+                <td class="diff-code diff-{{ row.right_type }}">{{ row.right_text }}</td>
+            </tr>
+        {% endif %}
+    {% endfor %}
+</table>
