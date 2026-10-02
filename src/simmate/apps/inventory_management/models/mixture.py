@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import random
+
 from simmate.database.core import DatabaseTable, table_column
 
 from .substance import Substance
@@ -9,6 +11,45 @@ class Mixture(DatabaseTable):
 
     class Meta:
         db_table = "inventory_management__mixtures"
+
+    # -------------------------------------------------------------------------
+
+    # same convention as Substance IDs (no vowels or Y)
+    _LETTERS = "BCDFGHJKLMNPQRSTVWXZ"
+
+    @staticmethod
+    def generate_id_prefix() -> str:
+        return "".join(random.choices(Mixture._LETTERS, k=4))
+
+    id = table_column.BigAutoField(primary_key=True)
+
+    id_prefix = table_column.CharField(
+        max_length=4,
+        blank=True,
+        null=True,
+    )
+    """
+    Random 4-letter prefix shown with the integer `id` as the `display_id`
+    (e.g. "BCDF-123"). This makes the ID recognizable and acts as a typo check.
+    """
+
+    @property
+    def display_id(self) -> str:
+        """
+        The human-readable ID to show in user interfaces and exports.
+        """
+        return f"{self.id_prefix}-{self.id}"
+
+    @classmethod
+    def get_by_display_id(cls, display_id: str):
+        """
+        Loads a mixture using its display ID (e.g. "BCDF-123"). Raises
+        `Mixture.DoesNotExist` if the prefix does not match the number.
+        """
+        prefix, _, number = display_id.strip().upper().partition("-")
+        if not number.isdigit():
+            raise cls.DoesNotExist(f"Invalid mixture ID: '{display_id}'")
+        return cls.objects.get(id=int(number), id_prefix=prefix)
 
     # -------------------------------------------------------------------------
 

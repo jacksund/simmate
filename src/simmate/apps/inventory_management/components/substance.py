@@ -134,7 +134,7 @@ class SubstanceComponent(TableComponent, MoleculeInput, StructureInput):
         super().check_form_for_create()
         # id is auto-generated in postsave_to_db or handled manually if not set
         if not self.form_data.get("id"):
-            self.form_data["id"] = Substance.generate_id()
+            self.form_data["id"] = Substance.generate_unique_id()
 
         # also set registered_by to current user
         if not self.form_data.get("registered_by_id"):

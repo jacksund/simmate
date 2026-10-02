@@ -17,34 +17,46 @@ class Substance(DatabaseTable):
 
     id = table_column.CharField(max_length=12, primary_key=True)
     """
-    The unique ID assigned to each substance in the format LLL-NNN-NNNN.
-    
-    IDs follow a format that make them more readable:
-        {3 letters}-{3 numbers}-{4 numbers}
-    
-    Letters are not allowed to be vowels or the letter Y. And numbers are 0-9.
+    The unique, human-readable ID of the substance (e.g. `BCD-012-3456`).
 
-    This results in IDs such as...
-        BCD-012-3456
+    IDs follow the format of a phone number, but with letters in the first group:
+        {3 letters}-{3 numbers}-{4 numbers}
+
+    Letters are uppercase consonants excluding Y (20 options), and numbers
+    are 0-9.
     
-    The fixed format means there are a finite number of unique IDs possible:
-        (20**3)*(10**3)*(10**4) = 80 billion IDs
+    **Why this format?**
+
+    - Integer IDs (1, 2, 3, ...) are hard to read once large (e.g. 52614354),
+      and they are continuous, so a single typo usually points to a different
+      but valid entry.
+    - UUIDs solve the typo problem but are far less readable.
+    - The phone number layout (000-000-0000) is familiar and easy to read.
+      Replacing the first group with letters increases the number of possible
+      IDs and makes accidental matches from typos rare.
+    - Letters also make the ID distinct from other formats (such as real phone
+      numbers), giving it a recognizable look: "that's a Simmate substance ID".
+    - Vowels and Y are excluded so that IDs never spell real words, which
+      avoids accidental profanity or otherwise offensive/sensitive terms.
+
+    **ID Levels**
+
+    The base format allows for (20**3) * (10**7) = 80 billion unique IDs. To
+    support massive enumerated catalogs (e.g. >100 billion compounds), IDs are
+    assigned at one of three "levels", where each level converts the next
+    number group into letters:
+
+        Level 1: LLL-000-0000  (80 billion IDs)
+        Level 2: LLL-LLL-0000  (640 billion IDs)
+        Level 3: LLL-LLL-LLLL  (10.24 trillion IDs)
     
-    As for how we arrived at this format:
-        - an integer-based ID (1,2,3,4,...) has the downside of being difficult
-          to read for large numbers (e.g. 52614354) and also continuous such
-          that one typo likely references another different (but valid) entry
-        - Relative to integer IDs, UUIDs fix the continuous issue but greatly 
-          worsen the readability
-        - The format we use is derrived from a familiar format of telephone
-          numbers (000-000-0000), and to ensure more total possible IDs and to 
-          make continuity rare, the first three entries were replaced with letters
-        - the use of letters also helps to distinguish this format from others
-          (such as real phone numbers). It gives the ID a "recognizable brand"
-          where users can see it and go "that looks like a simmate substance id"
-        - vowels and Y are excluded from letters to prevent accidental 
-          formation of real words, which in some cases can have 
-          negative consequences (profanity, politics, voilence, etc)
+    Level 1 is reserved for substances that are certified, well known, 
+    and/or have been experimentally synthesized, while levels 2 and 3
+    are used for massive enumerated/virtual catalogs.
+
+    Further levels (e.g. mixing letters and numbers within a group, or
+    case-sensitive letters) are possible but not implemented, as they would
+    overlap with the formats above and be harder to read and retype.
     """
 
     # the difference can get blurry here but I have this primarily to indicate
@@ -423,30 +435,62 @@ class Substance(DatabaseTable):
     _LETTERS = "BCDFGHJKLMNPQRSTVWXZ"  # instead of string.ascii_uppercase
 
     @classmethod
-    def generate_id(cls) -> str:
+    def generate_id(cls, level: int = 1) -> str:
         """
-        Generates a unique and readable ID in the format:
+        Generates a readable ID at the given level (1-3). Level 1 is the format:
             {3 Letters}-{3 Numbers}-{4 Numbers}
+
+        Each higher level swaps the next group of numbers for letters. See
+        the docstring of the `id` column for all formats.
 
         Letters are not allow to be vowels or the letter Y. Numbers are 0-9.
         """
-        letters_group = "".join(random.choices(cls._LETTERS, k=3))
-        num_group_1 = "".join(random.choices(string.digits, k=3))
-        num_group_2 = "".join(random.choices(string.digits, k=4))
-        return f"{letters_group}-{num_group_1}-{num_group_2}"
+        assert 1 <= level <= 3, f"Unknown ID level: {level}"
+        return "-".join(
+            "".join(
+                random.choices(cls._LETTERS if i < level else string.digits, k=size)
+            )
+            for i, size in enumerate((3, 3, 4))
+        )
 
-    def generate_unique_id(cls, existing_ids: list[str] = None) -> str:
+    @classmethod
+    def get_id_level(cls, substance_id: str) -> int | None:
+        """
+        Returns the level of the given ID, or None if it is not a valid format.
+        """
+        groups = substance_id.split("-")
+        if [len(g) for g in groups] != [3, 3, 4]:
+            return None
+        for level in (1, 2, 3):
+            letters = "".join(groups[:level])
+            numbers = "".join(groups[level:])
+            if all(c in cls._LETTERS for c in letters) and all(
+                c in string.digits for c in numbers
+            ):
+                return level
+        return None
 
-        if not existing_ids:
-            existing_ids = cls.objects.values_list("id", flat=True).all()
+    @classmethod
+    def generate_unique_id(cls, level: int = 1) -> str:
+        """
+        Generates an ID at the given level that is not already in use.
+        """
+        return cls.generate_unique_ids(count=1, level=level)[0]
 
-        found_unique_id = False
-        while not found_unique_id:
-            new_id = cls.generate_id()
-            if new_id not in existing_ids:
-                found_unique_id = True
-
-        return new_id
+    @classmethod
+    def generate_unique_ids(cls, count: int, level: int = 1) -> list[str]:
+        """
+        Generates IDs at the given level that are not already in use and are
+        unique amongst themselves (e.g. for bulk importing a catalog).
+        """
+        new_ids = set()
+        while len(new_ids) < count:
+            nremaining = count - len(new_ids)
+            candidates = {cls.generate_id(level) for _ in range(min(nremaining, 2_000))}
+            candidates -= new_ids
+            taken = cls.objects.filter(id__in=candidates).values_list("id", flat=True)
+            new_ids.update(candidates.difference(taken))
+        return list(new_ids)
 
     # -------------------------------------------------------------------------
 
