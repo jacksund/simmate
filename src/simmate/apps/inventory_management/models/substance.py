@@ -59,6 +59,22 @@ class Substance(DatabaseTable):
     overlap with the formats above and be harder to read and retype.
     """
 
+    check_digit = table_column.CharField(max_length=1, blank=True, null=True)
+    """
+    A single-letter checksum of the `id` (e.g. `K` for `BCD-012-3456`).
+
+    This is kept separate from the ID so that the ID stays short and readable,
+    but it can be shown alongside the ID (e.g. `BCD-012-3456 / K`) and used to
+    confirm that a typed ID is valid before searching the database. This
+    matters because the table can potentially contain billions of entries, and
+    a typo otherwise requires a full lookup before we can say "this ID does
+    not exist".
+
+    The check digit is calculated with the Luhn mod N algorithm (N=20) and is
+    always one of the consonants used in IDs. It works for all ID levels.
+    See `calculate_check_digit` for details.
+    """
+
     # the difference can get blurry here but I have this primarily to indicate
     # the best defaults for rendering the compound (e.g. 2D flat vs 3D crystal)
     # and writing its chemical formula (reduced vs full) in the overview. It
@@ -494,62 +510,51 @@ class Substance(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # DEV NOTES: I was playing with the idea of a check digit, but end up
-    # scratching it because it made the ID too long and less readable.
-    # Below are my notes if I choose to return to using it.
+    # The check digit uses the Luhn mod N algorithm with N=20 so that it is
+    # always one of our consonants. Each character is mapped to a value in
+    # 0-19: letters use their index in _LETTERS and digits use their own value.
+    # Because the ID format fixes which positions are letters vs digits (at
+    # every level), each position's characters map to unique values, so all
+    # single-character typos and nearly all adjacent swaps are detected. Swaps
+    # between a letter and a digit change the format and are caught by
+    # `get_id_level` instead.
 
-    # The check digit is based on the Luhn mod N algorithm, where we modify the
-    # algorithm to only give letters.
-    # - the check digit is used because this table can potentially contain
-    #   hundreds of millions of compounds, and one typo in the ID means we
-    #   must search through all IDs before saying "this ID does not exist".
-    #   The check digit lets us confirm it is valid before hitting the database
-    #   and save on compute time with invalid IDs. Only letters are used in
-    #   the check because codes look cleaner and more consistent.
+    @classmethod
+    def _id_char_value(cls, char: str) -> int:
+        return int(char) if char.isdigit() else cls._LETTERS.index(char)
 
-    # generate_id method would have this at the end:
-    #   partial_id = f"{letters_group}-{num_group_1}-{num_group_2}"
-    #   check_digit = cls.calculate_luhn_consonant(partial_id)
-    #   return f"{check_digit}-{partial_id}"
+    @classmethod
+    def calculate_check_digit(cls, substance_id: str) -> str:
+        """
+        Calculates the single-letter check digit for an ID of any level.
+        """
+        substance_id = substance_id.upper()
+        if not cls.get_id_level(substance_id):
+            raise ValueError(f"Invalid substance ID format: {substance_id}")
 
-    # @classmethod
-    # def calculate_luhn_consonant(cls, partial_id: str) -> str:
-    #     """
-    #     Calculates a Luhn-inspired checksum digit restricted to the LETTERS
-    #     constant (20 consonants).
-    #     The algorithm treats the input as base-36 (alphanumeric) but performs the
-    #     final modulo operation against the length of the consonant list (20) to
-    #     ensure the check digit is always a specific letter.
-    #     """
-    #     clean_id = partial_id.replace("-", "").upper()
-    #     base_n = len(cls._LETTERS)  # 20
-    #     total_sum = 0
-    #     for i, char in enumerate(reversed(clean_id)):
-    #         # Convert alphanumeric char to integer (0-35)
-    #         val = int(char, 36)
-    #         # Double every other digit
-    #         if i % 2 == 0:
-    #             val *= 2
-    #             # If doubling exceeds our base, subtract the base to keep it "single digit"
-    #             if val >= base_n:
-    #                 val = (val % base_n) + (val // base_n)
-    #         total_sum += val
-    #     # Map the final sum back to the consonant list
-    #     check_index = (base_n - (total_sum % base_n)) % base_n
-    #     return cls._LETTERS[check_index]
+        base_n = len(cls._LETTERS)  # 20
+        total = 0
+        for i, char in enumerate(reversed(substance_id.replace("-", ""))):
+            value = cls._id_char_value(char)
+            # double every other value, starting with the rightmost
+            if i % 2 == 0:
+                value *= 2
+                # sum the "digits" in base N to keep it within 0 to N-1
+                value = (value // base_n) + (value % base_n)
+            total += value
+        return cls._LETTERS[(base_n - (total % base_n)) % base_n]
 
-    # @classmethod
-    # def validate_id(cls, full_id: str) -> bool:
-    #     """
-    #     Validates the full ID string by recalculating the checksum of the body
-    #     and comparing it against the provided leading check digit.
-    #     """
-    #     # Extract the leading check digit and the rest of the ID
-    #     # Format is C-LLL-NNN-NNNN
-    #     provided_check_char = full_id[0]
-    #     core_id = full_id[2:]
-    #     # Calculate what the check digit should be based on the core
-    #     expected_check_char = cls.calculate_luhn_consonant(core_id)
-    #     return provided_check_char == expected_check_char
+    @classmethod
+    def validate_id(cls, substance_id: str, check_digit: str | None = None) -> bool:
+        """
+        Checks that the ID has a valid format and, if a check digit is given,
+        that it matches the ID. This does not check the database.
+        """
+        substance_id = substance_id.upper()
+        if not cls.get_id_level(substance_id):
+            return False
+        if check_digit is None:
+            return True
+        return check_digit.upper() == cls.calculate_check_digit(substance_id)
 
     # -------------------------------------------------------------------------

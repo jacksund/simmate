@@ -135,6 +135,12 @@ class SubstanceComponent(TableComponent, MoleculeInput, StructureInput):
         # id is auto-generated in postsave_to_db or handled manually if not set
         if not self.form_data.get("id"):
             self.form_data["id"] = Substance.generate_unique_id()
+        if not self.form_data.get("check_digit") and Substance.validate_id(
+            self.form_data["id"]
+        ):
+            self.form_data["check_digit"] = Substance.calculate_check_digit(
+                self.form_data["id"]
+            )
 
         # also set registered_by to current user
         if not self.form_data.get("registered_by_id"):
