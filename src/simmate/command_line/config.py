@@ -106,6 +106,12 @@ def add(
                 "simmate.apps.configs.DeepmdConfig",
             ]
         )
+    elif app_name == "dev_tools":
+        settings.add_apps_and_update(
+            [
+                "simmate.apps.configs.DevToolsConfig",
+            ]
+        )
     elif app_name == "evolution":
         settings.add_apps_and_update(
             [

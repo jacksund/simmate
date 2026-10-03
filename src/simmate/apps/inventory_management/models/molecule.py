@@ -8,7 +8,8 @@ class Molecule(MoleculeMixin):
     A chemical molecule.
 
     This table stores the molecular structure (2D or 3D) and associated
-    cheminformatics features (SMILES, InChI, etc.).
+    cheminformatics features (SMILES, InChI, etc.). Substances link to these
+    entries via `Substance.molecule`.
     """
 
     class Meta:

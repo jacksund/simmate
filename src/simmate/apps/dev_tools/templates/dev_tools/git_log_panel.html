@@ -1,0 +1,144 @@
+{# Commit graph panel for dev_tools/git.html -- expects the GitComponent context #}
+<div class="d-flex align-items-center justify-content-between px-2 py-1 flex-shrink-0 border-bottom">
+    <small class="text-uppercase fw-semibold text-muted section-label">Commits</small>
+    <small class="text-muted" style="font-size: 0.7rem;">{{ commits|length }}</small>
+</div>
+<div class="flex-grow-1"
+     style="overflow-y: auto;
+            overflow-x: hidden;
+            min-height: 0">
+    {% if not commits %}
+        <div class="px-3 py-2">
+            <small class="text-muted fst-italic" style="font-size: 0.75rem;">No commits found</small>
+        </div>
+    {% endif %}
+    {% for c in commits %}
+        {# Commit row #}
+        <div class="git-log-row d-flex align-items-center gap-2 pe-2 {% if c.hash == component.selected_commit %}active{% endif %}"
+             style="height: {{ row_h }}px;
+                    cursor: pointer"
+             title="{{ c.hash }}"
+             hx-post="{% url 'htmx:component_method' component.component_id 'select_commit' %}?commit=%22{{ c.hash }}%22"
+             hx-trigger="click[!target.closest('.dropdown')]">
+            <svg width="{{ graph_width }}"
+                 height="{{ row_h }}"
+                 class="flex-shrink-0 ms-1"
+                 style="overflow: visible">
+                {% for p in c.paths %}
+                    <path d="{{ p.d }}" stroke="{{ p.color }}" stroke-width="2" fill="none" />
+                {% endfor %}
+                {% if c.is_head %}
+                    <circle cx="{{ c.x }}" cy="{{ c.y }}" r="5.5" stroke="{{ c.color }}" stroke-width="2.5" style="fill: var(--bs-body-bg)" />
+                {% else %}
+                    <circle cx="{{ c.x }}" cy="{{ c.y }}" r="4.5" fill="{{ c.color }}" />
+                {% endif %}
+            </svg>
+            <div class="d-flex align-items-center gap-1 flex-grow-1"
+                 style="min-width: 0">
+                {# Ref pills #}
+                {% for ref in c.refs %}
+                    {% if ref.kind == "tag" %}
+                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle font-monospace flex-shrink-0"
+                              style="font-size: 0.65rem">
+                            <i class="bi bi-tag me-1"></i>{{ ref.name }}
+                        </span>
+                    {% else %}
+                        <div class="dropdown flex-shrink-0">
+                            <button type="button"
+                                    class="badge border font-monospace {% if ref.kind == 'head' %}bg-warning text-dark border-warning{% elif ref.kind == 'local' %}bg-primary-subtle text-primary-emphasis border-primary-subtle{% else %}bg-secondary-subtle text-secondary-emphasis border-secondary-subtle{% endif %}"
+                                    style="font-size: 0.65rem"
+                                    data-bs-toggle="dropdown"
+                                    data-bs-popper-config='{"strategy":"fixed"}'
+                                    aria-expanded="false">
+                                {% if ref.kind == "head" %}
+                                    <i class="bi bi-signpost-fill me-1"></i>
+                                {% elif ref.kind == "local" %}
+                                    <i class="bi bi-git me-1"></i>
+                                {% else %}
+                                    <i class="bi bi-cloud me-1"></i>
+                                {% endif %}
+                                {{ ref.name }}
+                            </button>
+                            <ul class="dropdown-menu shadow-sm small">
+                                <li>
+                                    <h6 class="dropdown-header font-monospace">{{ ref.name }}</h6>
+                                </li>
+                                <li>
+                                    <button type="button"
+                                            class="dropdown-item"
+                                            {% if ref.is_head %}disabled{% endif %}
+                                            hx-post="{% url 'htmx:component_method' component.component_id 'checkout' %}?branch=%22{{ ref.name|urlencode }}%22">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i>
+                                        {% if ref.is_head %}
+                                            Checked out
+                                        {% else %}
+                                            Checkout
+                                        {% endif %}
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button"
+                                            class="dropdown-item"
+                                            onclick="navigator.clipboard.writeText('{{ ref.name|escapejs }}')">
+                                        <i class="bi bi-clipboard me-1"></i> Copy name
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                <span class="text-truncate {% if c.is_head %}fw-semibold{% endif %}"
+                      style="font-size: 0.78rem">{{ c.subject }}</span>
+            </div>
+            <small class="text-muted text-nowrap flex-shrink-0"
+                   style="font-size: 0.68rem"
+                   title="{{ c.author }}">{{ c.age }}</small>
+        </div>
+        {# Expanded commit details #}
+        {% if c.hash == component.selected_commit and commit_detail %}
+            <div class="d-flex gap-2 pe-2 git-log-detail">
+                <div class="flex-shrink-0 position-relative ms-1"
+                     style="width: {{ graph_width }}px">
+                    {% for p in c.passthrough %}
+                        <div class="position-absolute top-0 bottom-0"
+                             style="left: calc({{ p.x }}px - 1px);
+                                    width: 2px;
+                                    background: {{ p.color }}"></div>
+                    {% endfor %}
+                </div>
+                <div class="flex-grow-1 border rounded-2 bg-body-tertiary my-1 p-2"
+                     style="min-width: 0;
+                            font-size: 0.72rem">
+                    <div class="font-monospace text-muted text-truncate">
+                        <i class="bi bi-hash"></i>{{ commit_detail.hash }}
+                    </div>
+                    <div class="text-muted">
+                        <i class="bi bi-person me-1"></i>{{ commit_detail.author }}
+                    </div>
+                    <div class="text-muted mb-1">
+                        <i class="bi bi-calendar me-1"></i>{{ commit_detail.date }}
+                    </div>
+                    <div class="mb-1" style="white-space: pre-wrap;">{{ commit_detail.body }}</div>
+                    {% if commit_detail.stat_lines %}
+                        <div class="font-monospace border-top pt-1"
+                             style="white-space: pre;
+                                    overflow-x: auto;
+                                    font-size: 0.68rem">
+                            {% for line in commit_detail.stat_lines %}{{ line }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+    {% if has_more_commits %}
+        <div class="text-center py-2">
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    hx-post="{% url 'htmx:component_method' component.component_id 'load_more' %}">
+                {% include "dev_tools/partials/spinner.html" with extra_class="me-1" %}
+                Load more ({{ commits|length }} shown)
+            </button>
+        </div>
+    {% endif %}
+</div>

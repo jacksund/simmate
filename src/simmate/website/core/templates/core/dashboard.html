@@ -1,0 +1,92 @@
+{% extends "core/site_base.html" %}
+{% load static %}
+{% block tabtitle %}Operations Dashboard - Simmate{% endblock %}
+{% block body %}
+    {# Header & Action Bar #}
+    <div class="row align-items-center mb-4">
+        <div class="col-md-7">
+            <h1 class="h2 mb-1 fw-bold text-dark">
+                <i class="bi bi-speedometer2 text-primary"></i> Operations Dashboard
+            </h1>
+            <p class="text-muted mb-0">
+                Executive summary across compute clusters, laboratory automation, chemical inventory, and research datasets.
+            </p>
+        </div>
+        <div class="col-md-5 text-md-end mt-3 mt-md-0">
+            <span class="badge bg-success-subtle text-success border border-success me-2 px-2 py-2">
+                <i class="bi bi-check-circle-fill me-1"></i> All Services Operational
+            </span>
+            <a href="{% url 'apps' %}" class="btn btn-primary btn-sm me-1">
+                <i class="bi bi-grid-fill"></i> View All Apps
+            </a>
+            <a href="https://jacksund.github.io/simmate/home/"
+               target="_blank"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-book"></i> Docs <i class="bi bi-box-arrow-up-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+    {# Top Cross-Platform KPI Metrics #}
+    {% include "core/basic_elements/summary_cards.html" %}
+    {# Lower Section: Cross-Platform Live Activity & System Services #}
+    <div class="row g-3 mb-4">
+        {# Left: Unified Activity Timeline #}
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
+                    <div>
+                        <h5 class="card-title mb-0 fw-semibold">Cross-Platform Activity</h5>
+                        <small class="text-muted">Live event stream across simulations, lab hardware, and inventory</small>
+                    </div>
+                    <span class="badge bg-light text-dark border">Real-Time</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for event in recent_activity %}
+                            <div class="list-group-item px-3 py-3 border-0 border-bottom">
+                                <div class="d-flex align-items-start justify-content-between">
+                                    <div class="d-flex align-items-start">
+                                        <span class="badge {{ event.domain_badge }} me-2 mt-1 px-2 py-1">
+                                            <i class="bi {{ event.icon }} me-1"></i> {{ event.domain }}
+                                        </span>
+                                        <div>
+                                            <div class="fw-semibold text-dark small mb-1">{{ event.title }}</div>
+                                            <div class="text-muted small">{{ event.detail }}</div>
+                                        </div>
+                                    </div>
+                                    <small class="text-secondary ps-2 text-nowrap">{{ event.time }}</small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {# Right: Platform Services & Infrastructure Health #}
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pt-3 px-3">
+                    <h5 class="card-title mb-0 fw-semibold">Platform Infrastructure</h5>
+                    <small class="text-muted">Status of compute workers, database, and background services</small>
+                </div>
+                <div class="card-body px-3 pb-3">
+                    {% for service in system_services %}
+                        <div class="border rounded-3 p-3 mb-3 bg-body">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-semibold text-dark">{{ service.name }}</span>
+                                <span class="badge bg-success-subtle text-success small">
+                                    <i class="bi bi-check-circle me-1"></i> {{ service.status }}
+                                </span>
+                            </div>
+                            <p class="text-muted small mb-2">{{ service.description }}</p>
+                            <div class="d-flex justify-content-between small text-secondary">
+                                <span>Health Metric</span>
+                                <span class="fw-medium text-dark">{{ service.metric }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,285 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    {# hx-target/include/swap are inherited by every hx-post button below #}
+    <div hx-target="#{{ component.component_id }}"
+         hx-include="#{{ component.component_id }}"
+         hx-swap="outerHTML settle:0">
+        {# Header #}
+        <div class="text-center pt-3 pb-2 mb-4">
+            <h1 class="h2 fw-bold mb-0">
+                <i class="bi bi-cpu me-2"></i>Compute Management
+            </h1>
+            <small class="text-muted">Updated {{ last_updated|time:"H:i:s" }} · refreshes every {{ component.refresh_interval }}</small>
+        </div>
+        {# Cancel / shutdown / mark-stale results #}
+        {% include "htmx/partials/action_alert.html" %}
+        {# KPI Summary Cards #}
+        {% include "core/basic_elements/summary_cards.html" %}
+        {# Needs Attention #}
+        {% if alerts %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent border-0 pt-3 px-3">
+                    <h5 class="card-title mb-0 fw-semibold">
+                        <i class="bi bi-bell text-danger me-1"></i> Needs Attention
+                    </h5>
+                </div>
+                <ul class="list-group list-group-flush small">
+                    {% for alert in alerts %}
+                        <li class="list-group-item d-flex align-items-center justify-content-between gap-3 px-3">
+                            <span class="text-{{ alert.level }}-emphasis">
+                                <i class="bi {{ alert.icon }} text-{{ alert.level }} me-2"></i>{{ alert.message }}
+                            </span>
+                            {% if alert.action and can_manage %}
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-{{ alert.level }} py-0 flex-shrink-0"
+                                        hx-post="{% url 'htmx:component_method' component.component_id alert.action.method %}{% if alert.action.kwarg %}?{{ alert.action.kwarg }}={{ alert.action.value|urlencode }}{% endif %}"
+                                        {% if alert.action.confirm %}hx-confirm="{{ alert.action.confirm }}"{% endif %}>
+                                    {{ alert.action.label }}
+                                </button>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        {# Activity Timeline -- figures are shared with the WorkItem data explorer report #}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex flex-wrap gap-2 justify-content-between align-items-center pt-3 px-3">
+                <div>
+                    <h5 class="card-title mb-0 fw-semibold">Activity Timeline</h5>
+                    <small class="text-muted">
+                        {{ timeline_count }} work item{{ timeline_count|pluralize }} active in the last {{ component.timeline_period }}
+                        {% if timeline_count >= timeline_limit %}(limited to the most recent {{ timeline_limit }}){% endif %}
+                    </small>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <div class="btn-group btn-group-sm" role="group">
+                        {% for key, label in timeline_views %}
+                            <button type="button"
+                                    class="btn {% if component.timeline_view == key %}btn-primary{% else %}btn-outline-primary{% endif %}"
+                                    hx-post="{% url 'htmx:component_method' component.component_id 'set_timeline_view' %}?view=%22{{ key }}%22">
+                                {{ label }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group">
+                        {% for period in timeline_periods %}
+                            <button type="button"
+                                    class="btn {% if component.timeline_period == period %}btn-secondary{% else %}btn-outline-secondary{% endif %}"
+                                    hx-post="{% url 'htmx:component_method' component.component_id 'set_timeline_period' %}?period=%22{{ period }}%22">
+                                {{ period }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="card-body px-3 pb-3">
+                {% if timeline_figure %}
+                    <div class="compute-timeline-chart">{% htmx_plotly_figure timeline_figure %}</div>
+                {% else %}
+                    <div class="d-flex align-items-center justify-content-center text-muted small"
+                         style="height: 320px">No work item activity in the last {{ component.timeline_period }}</div>
+                {% endif %}
+            </div>
+        </div>
+        {# Per-workflow health #}
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0 pt-3 px-3">
+                        <h5 class="card-title mb-0 fw-semibold">Workflow Health</h5>
+                        <small class="text-muted">Current queue plus finished/failed over the last 7 days</small>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive" style="max-height: 330px">
+                            <table class="table table-sm table-striped align-middle mb-0 small">
+                                <thead class="table-primary sticky-top">
+                                    <tr>
+                                        <th class="ps-3">Workflow</th>
+                                        <th class="text-end">Queued</th>
+                                        <th class="text-end">Running</th>
+                                        <th class="text-end">Done</th>
+                                        <th class="text-end">Failed</th>
+                                        <th class="text-end pe-3">Error %</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in workflow_health %}
+                                        <tr>
+                                            <td class="ps-3">
+                                                <code>{{ row.name }}</code>
+                                            </td>
+                                            <td class="text-end">{{ row.npending }}</td>
+                                            <td class="text-end">{{ row.nrunning }}</td>
+                                            <td class="text-end">{{ row.nfinished }}</td>
+                                            <td class="text-end {% if row.nerrored %}text-danger fw-semibold{% endif %}">{{ row.nerrored }}</td>
+                                            <td class="text-end pe-3 {% if row.error_percent >= 25 %}text-danger fw-semibold{% endif %}">
+                                                {% if row.error_percent is None %}
+                                                    -
+                                                {% else %}
+                                                    {{ row.error_percent }}%
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="6"
+                                                class="text-center text-muted py-4">No recent work items.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {# Lower Section: Live Calculations Table & Workers by Host #}
+        <div class="row g-3 mb-4">
+            {# Left: Live / Recent Workflow Executions #}
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0 d-flex flex-wrap gap-2 justify-content-between align-items-center pt-3 px-3">
+                        <div>
+                            <h5 class="card-title mb-0 fw-semibold">Live Calculations</h5>
+                            <small class="text-muted">Most recently updated work items</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="btn-group btn-group-sm" role="group">
+                                {% for key, label in status_filters %}
+                                    <button type="button"
+                                            class="btn {% if component.status_filter == key %}btn-primary{% else %}btn-outline-primary{% endif %}"
+                                            hx-post="{% url 'htmx:component_method' component.component_id 'set_status_filter' %}?status=%22{{ key }}%22">
+                                        {{ label }}
+                                    </button>
+                                {% endfor %}
+                            </div>
+                            {# opens the explorer with the same filter + ordering as this table #}
+                            <a href="{% url 'data_explorer:table' 'WorkItem' %}?order_by=-updated_at{% if component.status_filter %}&status={{ component.status_filter }}{% endif %}"
+                               class="btn btn-outline-secondary btn-sm">
+                                View All <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        {# same columns & styling as the WorkItem data explorer table #}
+                        <div class="table-responsive">
+                            <table class="table table-striped align-middle mb-0">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Workflow</th>
+                                        <th style="min-width:110px">Status</th>
+                                        <th>Elapsed</th>
+                                        <th>Worker</th>
+                                        {% if can_manage %}<th></th>{% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for entry in recent_work_items %}
+                                        <tr>
+                                            {% include "compute_management/work_items/row_cells.html" %}
+                                            {% if can_manage %}
+                                                <td class="text-end">
+                                                    {% if entry.status == "P" %}
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-outline-danger py-0"
+                                                                title="Cancel"
+                                                                hx-post="{% url 'htmx:component_method' component.component_id 'cancel_item' %}?item=%22{{ entry.id }}%22"
+                                                                hx-confirm="Cancel work item {{ entry.id|truncatechars:10 }}?">
+                                                            <i class="bi bi-x-lg"></i>
+                                                        </button>
+                                                    {% endif %}
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="6"
+                                                class="text-center text-muted py-4">No matching work items.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {# Right: Workers grouped by host #}
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
+                        <div>
+                            <h5 class="card-title mb-0 fw-semibold">Workers by Host</h5>
+                            <small class="text-muted">Active workers with a recent heartbeat</small>
+                        </div>
+                        <a href="{% url 'data_explorer:table' 'SimmateWorker' %}"
+                           class="btn btn-outline-secondary btn-sm">
+                            History <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="card-body px-3 pb-3">
+                        {% for host in worker_hosts %}
+                            <div class="border rounded-3 p-3 mb-3 bg-body">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-semibold text-body font-monospace">{{ host.name }}</span>
+                                    {% status_badge host.badge_text host.badge_theme icon=host.badge_icon %}
+                                </div>
+                                <div class="d-flex justify-content-between small text-muted mb-1">
+                                    <span>{{ host.nworkers }} worker{{ host.nworkers|pluralize }} · {{ host.nrunning }} running</span>
+                                    <span>{{ host.utilization }}% utilized</span>
+                                </div>
+                                <div class="progress mb-2" style="height: 6px;">
+                                    <div class="progress-bar {% if host.utilization >= 85 %}bg-warning{% else %}bg-primary{% endif %}"
+                                         role="progressbar"
+                                         style="width: {{ host.utilization }}%"
+                                         aria-valuenow="{{ host.utilization }}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100"></div>
+                                </div>
+                                <div class="d-flex justify-content-between small text-secondary">
+                                    <small>
+                                        {{ host.ncores|floatformat:"0"|default:"-" }} cores ·
+                                        {{ host.ram|floatformat:"0"|default:"-" }} GB RAM ·
+                                        {{ host.nitems }} items done
+                                    </small>
+                                    <small>heartbeat {{ host.last_heartbeat|timesince }} ago</small>
+                                </div>
+                                {# open state lives on the component so it survives auto-refresh #}
+                                <details class="mt-2 small"
+                                         {% if component.expanded_host == host.name %}open{% endif %}>
+                                    <summary class="text-muted"
+                                             hx-post="{% url 'htmx:component_method' component.component_id 'toggle_host' %}?host={{ host.name|urlencode }}">
+                                        Workers
+                                    </summary>
+                                    <ul class="list-unstyled mb-0 mt-1">
+                                        {% for worker in host.workers %}
+                                            <li class="d-flex justify-content-between align-items-center py-1 border-top">
+                                                <span class="font-monospace">
+                                                    #{{ worker.id }} · {{ worker.status }}
+                                                    <span class="text-muted">· {{ worker.nitems_completed|default_if_none:0 }} done</span>
+                                                </span>
+                                                {% if worker.shutdown_flag %}
+                                                    <span class="badge bg-secondary-subtle text-secondary">shutting down</span>
+                                                {% elif can_manage %}
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-outline-danger py-0"
+                                                            hx-post="{% url 'htmx:component_method' component.component_id 'shutdown_worker' %}?worker={{ worker.id }}"
+                                                            hx-confirm="Shut down worker #{{ worker.id }} after its current work item?">
+                                                        <i class="bi bi-power"></i>
+                                                    </button>
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </details>
+                            </div>
+                        {% empty %}
+                            <div class="text-center text-muted small py-4">No active workers found.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

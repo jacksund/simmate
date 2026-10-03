@@ -13,6 +13,7 @@ class AnalysisDashboardConfig(AppConfig):
     description_short = (
         "A dashboard for analyzing general datasets with dynamic and interactive plots"
     )
+    app_card_template = "analysis_dashboard/app_card.html"
 
 
 class BaderConfig(AppConfig):
@@ -68,6 +69,16 @@ class DeepmdConfig(AppConfig):
     name = "simmate.apps.deepmd"
 
 
+class DevToolsConfig(AppConfig):
+    name = "simmate.apps.dev_tools"
+    verbose_name = "Dev Tools"
+    description_short = (
+        "Local diagnostics: git status, Docker containers, and Kubernetes pods"
+    )
+    # only register urls & show in the website when settings.website.debug is True
+    debug_only = True
+
+
 class EmoleculesConfig(AppConfig):
     name = "simmate.apps.emolecules"
 
@@ -90,6 +101,9 @@ class EvolutionConfig(AppConfig):
 
 class InventoryManagementConfig(AppConfig):
     name = "simmate.apps.inventory_management"
+    verbose_name = "Inventory Management"
+    description_short = "A dashboard for tracking lab chemicals, containers, batches, and storage locations"
+    app_card_template = "inventory_management/app_card.html"
 
 
 class JarvisConfig(AppConfig):
@@ -100,6 +114,7 @@ class LabAutomationConfig(AppConfig):
     name = "simmate.apps.lab_automation"
     verbose_name = "Lab Automation"
     description_short = "A dashboard for controling and monitoring sensors/devices"
+    app_card_template = "lab_automation/app_card.html"
 
 
 class MaterialsProjectConfig(AppConfig):

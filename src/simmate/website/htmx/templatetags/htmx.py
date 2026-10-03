@@ -114,7 +114,8 @@ def htmx_refresh(
 ):
     method_kwargs = urllib.parse.urlencode(method_kwargs)
     component = context.get("component")
-    trigger = f"every {refresh_loop}"
+    # skip polling while the browser tab is hidden
+    trigger = f"every {refresh_loop} [document.visibilityState === 'visible']"
     return locals()
 
 

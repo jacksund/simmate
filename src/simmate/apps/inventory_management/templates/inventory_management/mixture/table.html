@@ -9,7 +9,7 @@
     <th style="min-width:50px">Edit</th>
 {% endblock %}
 {% block table_rows %}
-    <td>{% foreign_key_link entry %}</td>
+    <td>{% foreign_key_link entry display_column="display_id" %}</td>
     <td>{{ entry.common_name|default:"--" }}</td>
     <td>{{ entry.mixture_type|default:"--" }}</td>
     <td>{{ entry.description|truncatechars:100 }}</td>

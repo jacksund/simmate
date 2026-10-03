@@ -1,0 +1,10 @@
+{# Result of the last action -- expects `component.action_error` / `action_message` #}
+{% if component.action_error %}
+    <div class="alert alert-danger py-1 px-2 mx-3 mb-2 small rounded-1 font-monospace"
+         style="white-space: pre-wrap;
+                font-size: 0.72rem">{{ component.action_error }}</div>
+{% elif component.action_message %}
+    <div class="alert alert-success py-1 px-2 mx-3 mb-2 small rounded-1 font-monospace"
+         style="white-space: pre-wrap;
+                font-size: 0.72rem">{{ component.action_message }}</div>
+{% endif %}

@@ -117,3 +117,17 @@ Override these methods to control component behavior:
 *   `pre_parse()`: Called before AJAX POST data is processed.
 *   `post_parse()`: Called after POST data is applied to `self.form_data`.
 *   `process()`: The default method triggered if an interactive element (like a button) does not specify a `method_name`.
+
+---
+
+## Auto-Refreshing Components
+
+For live views (dashboards, job monitors, etc.), set `refresh_interval` on the class and the component will re-render itself on that interval. Polling pauses while the browser tab is hidden. This requires the template to extend `htmx/form_base.html`.
+
+```python
+class MyDashboardComponent(HtmxComponent):
+    template_name = "my_app/dashboard.html"
+    refresh_interval = "5s"  # any htmx interval, e.g. "500ms", "1m"
+```
+
+To refresh on an interval by calling a specific method instead, use `{% htmx_refresh refresh_loop="10s" method_name="my_method" %}` inside your template.

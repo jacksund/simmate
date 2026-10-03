@@ -6,6 +6,7 @@ import cloudpickle
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import JsonResponse
+from django.utils import timezone
 
 from simmate.compute.work_item import WorkItem
 from simmate.config import settings
@@ -63,8 +64,9 @@ def get_next_work_item(request):
 
         # Update status to running
         workitem.status = "R"
+        workitem.started_at = timezone.now()
         # We don't have a worker object for API workers at the moment, so worker is null
-        workitem.save(update_fields=["status", "updated_at"])
+        workitem.save(update_fields=["status", "started_at", "updated_at"])
 
     # Convert binary fields to base64 strings for JSON serialization
     response_data = {

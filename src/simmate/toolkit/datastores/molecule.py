@@ -129,25 +129,34 @@ class MoleculeDatastore(Datastore):
             logging.warning(f"Removed {num_failed} invalid molecules.")
         return df.filter(is_valid)
 
-    @update_table()
+    default_properties: list[str] = [
+        "molecular_weight_exact",
+        "num_atoms_heavy",
+        "num_stereocenters",
+        "num_h_acceptors",
+        "num_h_donors",
+        "log_p_rdkit",
+        "synthetic_accessibility",
+    ]
+
+    @update_table(skip_nulls="smiles")
     def add_property_columns(
         cls,
         df: polars.DataFrame,
-        properties: list[str] = [
-            "molecular_weight_exact",
-            "num_atoms_heavy",
-            "num_stereocenters",
-            "num_h_acceptors",
-            "num_h_donors",
-            "log_p_rdkit",
-            "synthetic_accessibility",
-        ],
+        properties: list[str] | None = None,
     ):
         """
         Computes physicochemical properties and adds them as columns.
-        Defaults to the classic Lipinski-relevant set: MW, heavy atom count,
-        stereocenters, LogP, and synthetic accessibility score.
+        Defaults to `default_properties`, the classic Lipinski-relevant set:
+        MW, heavy atom count, stereocenters, LogP, and synthetic accessibility.
         """
+        if properties is None:
+            properties = cls.default_properties
+        if len(df) == 0:
+            return df.with_columns(
+                [polars.Series(p, [], dtype=polars.Float64) for p in properties]
+            )
+
         prop_df = PropertyGrabber.featurize_many(
             molecules=df["smiles"].to_list(),
             properties=properties,
@@ -156,7 +165,7 @@ class MoleculeDatastore(Datastore):
         )
         return polars.concat([df, prop_df], how="horizontal")
 
-    @update_table()
+    @update_table(skip_nulls="smiles")
     def add_method_columns(
         cls,
         df: polars.DataFrame,
@@ -196,7 +205,7 @@ class MoleculeDatastore(Datastore):
 
     # for datasets that require explicit-H smiles and fps
 
-    @update_table()
+    @update_table(skip_nulls="smiles")
     def convert_to_explicit_h_smiles(cls, df: polars.DataFrame):
 
         method_df = MethodCaller.featurize_many(
@@ -207,7 +216,7 @@ class MoleculeDatastore(Datastore):
         )
         return df.with_columns(method_df.to_series(0).alias("smiles"))
 
-    @update_table()
+    @update_table(skip_nulls="smiles")
     def add_pattern_fingerprint_column(
         cls, df: polars.DataFrame, explicit_h: bool = False
     ):
@@ -286,7 +295,13 @@ class MoleculeDatastore(Datastore):
             cls._bound_vector_indexes[name] = index
         return cls._bound_vector_indexes[name]
 
-    @update_table()
+    usearch_columns: tuple[str, ...] = ("maccs", "ecfp4", "fcfp4")
+    """
+    Fingerprint columns computed together in one pass when
+    `add_fingerprints(fingerprint_type="usearch")` is used.
+    """
+
+    @update_table(skip_nulls="smiles")
     def add_fingerprints(
         cls,
         df: polars.DataFrame,
@@ -313,7 +328,7 @@ class MoleculeDatastore(Datastore):
         """
         if len(df) == 0:
             cols = (
-                ["maccs", "ecfp4", "fcfp4"]
+                cls.usearch_columns
                 if fingerprint_type == "usearch"
                 else [fingerprint_type]
             )
@@ -325,11 +340,9 @@ class MoleculeDatastore(Datastore):
             fingerprints = USearchFingerprints.featurize_many(
                 df["smiles"].to_list(), parallel=True
             )
-            maccs_list, ecfp4_list, fcfp4_list = zip(*fingerprints)
             return df.with_columns(
-                polars.Series("maccs", maccs_list),
-                polars.Series("ecfp4", ecfp4_list),
-                polars.Series("fcfp4", fcfp4_list),
+                polars.Series(name, values)
+                for name, values in zip(cls.usearch_columns, zip(*fingerprints))
             )
 
         elif fingerprint_type in cls.vector_indexes:
@@ -346,6 +359,39 @@ class MoleculeDatastore(Datastore):
         raise ValueError(
             f"Unknown fingerprint_type {fingerprint_type!r}. Valid options: {valid}"
         )
+
+    @classmethod
+    def _featurize_new_rows(
+        cls,
+        df: polars.DataFrame,
+        live_columns: set[str],
+    ) -> polars.DataFrame:
+        """
+        Adds property + fingerprint columns to new rows so that they match the
+        columns already present in the live datastore.
+        """
+        property_columns = [
+            c
+            for c in cls.default_properties
+            if c in live_columns and c not in df.columns
+        ]
+        if property_columns:
+            df = cls.add_property_columns(df=df, properties=property_columns)
+
+        missing_fps = {
+            index.column_name: fp_type
+            for fp_type, index in cls.vector_indexes.items()
+            if index.column_name in live_columns and index.column_name not in df.columns
+        }
+        # the three usearch fingerprints can be computed together in one pass
+        if set(cls.usearch_columns) <= missing_fps.keys():
+            df = cls.add_fingerprints(df=df, fingerprint_type="usearch")
+            for column in cls.usearch_columns:
+                missing_fps.pop(column)
+        for fp_type in missing_fps.values():
+            df = cls.add_fingerprints(df=df, fingerprint_type=fp_type)
+
+        return df
 
     @classmethod
     def search_similar(

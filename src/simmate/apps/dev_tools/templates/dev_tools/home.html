@@ -1,0 +1,53 @@
+{% extends "core/site_base.html" %}
+{% load static htmx %}
+{% block tabtitle %}Dev Tools - Simmate{% endblock %}
+{% block extraheader %}
+    <style>
+    .git-file-row { transition: background-color 0.1s; }
+    .git-file-row:hover { background-color: var(--bs-tertiary-bg); }
+    .git-file-row.active { background-color: var(--bs-primary-bg-subtle); }
+    .git-log-row { transition: background-color 0.1s; }
+    .git-log-row:hover { background-color: var(--bs-tertiary-bg); }
+    .git-log-row.active { background-color: var(--bs-primary-bg-subtle); }
+    .git-log-row .badge[data-bs-toggle] { cursor: pointer; }
+    .htmx-indicator { display: none !important; }
+    .htmx-request .htmx-indicator { display: inline-block !important; }
+    .section-label { font-size: 0.68rem; letter-spacing: 0.06em; }
+    /* git file lists */
+    .git-icon-btn { line-height: 1; opacity: 0.45; }
+    .git-icon-btn:hover { opacity: 1; }
+    .git-status-icon { width: 0.85rem; text-align: center; font-size: 0.72rem; line-height: 1; }
+    .git-file-dir { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 1; min-width: 0; }
+    .git-file-name { flex-shrink: 0; white-space: nowrap; }
+    /* side-by-side diff */
+    .diff-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; font-family: monospace; line-height: 1.5; }
+    .diff-hunk { background: rgba(var(--bs-info-rgb), 0.08); }
+    .diff-hunk td { padding: 2px 8px; white-space: pre; }
+    .diff-num { width: 3rem; min-width: 3rem; text-align: right; padding: 0 6px; color: var(--bs-secondary-color); user-select: none; border-right: 1px solid var(--bs-border-color); }
+    .diff-num.diff-right { border-left: 2px solid var(--bs-border-color); }
+    .diff-code { padding: 0 8px; white-space: pre; }
+    .diff-del { background: rgba(248, 81, 73, 0.15); }
+    .diff-add { background: rgba(63, 185, 80, 0.15); }
+    .diff-empty { background: var(--bs-tertiary-bg); }
+    </style>
+{% endblock %}
+{% block body %}
+    {# Header #}
+    <div class="text-center pt-3 pb-2 mb-4">
+        <h1 class="h2 fw-bold mb-0">
+            <i class="bi bi-tools me-2"></i>Dev Tools
+        </h1>
+    </div>
+    {# Kubernetes: deployments with scaling, pods with logs #}
+    <div class="row g-3 mb-5">
+        <div class="col-12">{% htmx_component "kubernetes-component" %}</div>
+    </div>
+    {# Docker: containers with start/stop/delete and logs #}
+    <div class="row g-3 mb-5">
+        <div class="col-12">{% htmx_component "docker-component" %}</div>
+    </div>
+    {# Git: commit graph, status, and diffs #}
+    <div class="row g-3 mb-5">
+        <div class="col-12">{% htmx_component "git-component" %}</div>
+    </div>
+{% endblock %}

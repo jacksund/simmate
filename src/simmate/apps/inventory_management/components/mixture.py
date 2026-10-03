@@ -33,7 +33,7 @@ class MixtureComponent(TableComponent):
         "update",
     ]
 
-    tabtitle_label_col = "id"
+    tabtitle_label_col = "display_id"
 
     # -------------------------------------------------------------------------
 
@@ -43,6 +43,11 @@ class MixtureComponent(TableComponent):
         "mixture_type",
         "substances__ids",
     ]
+
+    def check_form_for_create(self):
+        super().check_form_for_create()
+        if not self.form_data.get("id_prefix"):
+            self.form_data["id_prefix"] = Mixture.generate_id_prefix()
 
     # -------------------------------------------------------------------------
 

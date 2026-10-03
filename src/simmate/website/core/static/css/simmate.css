@@ -281,3 +281,12 @@ a:focus {
 .spinner-grow {
     animation-duration: 1.0s !important;
 }
+/* -------------------------------------------------------------------------- */
+
+/* Cards on the Apps page lift slightly on hover */
+.app-card {
+    transition: box-shadow 0.15s ease-in-out;
+}
+.app-card:hover {
+    box-shadow: var(--bs-box-shadow) !important;
+}

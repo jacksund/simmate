@@ -1,0 +1,74 @@
+{% load htmx %}
+{% comment %}
+One file list of the git panel (either "Unstaged" or "Staged"). Expects:
+    label, files, view ("unstaged"/"staged"), empty_text, section_class,
+    file_method + file_title (per-file action), all_method + all_title,
+    icon + color (for the action buttons)
+htmx target/include/swap are inherited from the component's card.
+{% endcomment %}
+<div class="d-flex flex-column {{ section_class }}"
+     style="flex: 1 1 0;
+            min-height: 0">
+    <div class="d-flex align-items-center justify-content-between px-2 py-1 flex-shrink-0 border-bottom">
+        <small class="text-uppercase fw-semibold text-muted section-label">{{ label }}</small>
+        <div class="d-flex align-items-center gap-1">
+            <small class="text-muted" style="font-size: 0.7rem">{{ files|length }}</small>
+            {% if files %}
+                <button type="button"
+                        class="btn border-0 p-0 px-1 git-icon-btn"
+                        title="{{ all_title }}"
+                        style="color: {{ color }};
+                               font-size: 0.8rem"
+                        {% htmx_post trigger="click" method_name=all_method %}>
+                    <i class="bi bi-{{ icon }}"></i>
+                </button>
+            {% endif %}
+        </div>
+    </div>
+    <div class="flex-grow-1" style="overflow-y: auto; min-height: 0;">
+        {% for file in files %}
+            <div class="d-flex align-items-center gap-1 px-1 py-1 git-file-row {% if file.path == component.selected_file and component.selected_view == view %}active{% endif %}"
+                 data-path="{{ file.path }}">
+                <button type="button"
+                        class="btn border-0 p-0 px-1 flex-shrink-0 git-icon-btn"
+                        title="{{ file_title }}"
+                        style="color: {{ color }};
+                               font-size: 0.85rem"
+                        hx-post="{% url 'htmx:component_method' component.component_id file_method %}?file={{ file.path|urlencode }}">
+                    <i class="bi bi-{{ icon }}"></i>
+                </button>
+                <button type="button"
+                        class="btn p-0 border-0 bg-transparent flex-grow-1 text-start d-flex align-items-center gap-1"
+                        style="min-width: 0"
+                        title="{% if file.orig_path %}{{ file.orig_path }} → {% endif %}{{ file.path }}"
+                        hx-post="{% url 'htmx:component_method' component.component_id 'show_diff' %}?file={{ file.path|urlencode }}&view={{ view }}">
+                    <span class="flex-shrink-0 git-status-icon">
+                        {% if file.status == "A" or file.status == "??" %}
+                            <i class="bi bi-plus text-success fw-bold"></i>
+                        {% elif file.status == "D" %}
+                            <i class="bi bi-dash text-danger fw-bold"></i>
+                        {% elif file.status == "R" %}
+                            <i class="bi bi-arrow-left-right text-info"></i>
+                        {% elif file.status == "C" %}
+                            <i class="bi bi-files text-info"></i>
+                        {% elif file.status == "U" %}
+                            <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                        {% else %}
+                            <i class="bi bi-pencil-fill text-warning"></i>
+                        {% endif %}
+                    </span>
+                    <span class="d-flex flex-grow-1 font-monospace overflow-hidden"
+                          style="font-size: 0.78rem;
+                                 min-width: 0">
+                        {% if file.dir %}<span class="text-muted git-file-dir">{{ file.dir }}</span>{% endif %}
+                        <span class="text-body git-file-name">{{ file.name }}</span>
+                    </span>
+                </button>
+            </div>
+        {% empty %}
+            <div class="px-3 py-2">
+                <small class="text-muted fst-italic" style="font-size: 0.75rem">{{ empty_text }}</small>
+            </div>
+        {% endfor %}
+    </div>
+</div>

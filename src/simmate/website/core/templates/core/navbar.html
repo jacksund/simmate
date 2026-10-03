@@ -28,8 +28,12 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
+                        <a class="nav-link{% if request.path|slice:':11' == '/dashboard/' %} active{% endif %}"
+                           href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link{% if request.path|slice:':6' == '/apps/' %} active{% endif %}"
-                           href="{% url 'apps' %}"><i class="bi bi-speedometer2"></i> Apps</a>
+                           href="{% url 'apps' %}"><i class="bi bi-grid-fill"></i> Apps</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link{% if request.path|slice:':6' == '/data/' %} active{% endif %}"

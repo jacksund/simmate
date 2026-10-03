@@ -23,8 +23,8 @@ class WorkItem(DatabaseTable):
     """
 
     class Meta:
-        app_label = "workflow_explorer"
-        db_table = "workflow_engine__work_items"
+        app_label = "compute_management"
+        db_table = "compute__work_items"
 
     # -------------------------------------------------------------------------
 
@@ -94,7 +94,7 @@ class WorkItem(DatabaseTable):
     # -------------------------------------------------------------------------
 
     worker = table_column.ForeignKey(
-        "workflow_explorer.SimmateWorker",
+        "compute_management.SimmateWorker",
         on_delete=table_column.SET_NULL,
         related_name="work_items",
         blank=True,
@@ -103,6 +103,40 @@ class WorkItem(DatabaseTable):
     """
     The worker that picked up and started the item.
     """
+
+    started_at = table_column.DateTimeField(blank=True, null=True)
+    """
+    When a worker picked up this item and started running it. Together with
+    `created_at` (submitted) and `updated_at` (finished, for completed items)
+    this gives the queue-wait and run time of the item.
+    """
+
+    # -------------------------------------------------------------------------
+
+    @staticmethod
+    def get_workflow_name(tags: list[str]) -> str:
+        """
+        Recovers the full workflow name (e.g. "relaxation.vasp.matproj") from the
+        tags of a WorkItem. Workflows submitted via `run_cloud` include their full
+        name as a tag, except on SQLite where only "simmate" is used.
+
+        Args:
+            tags: The tags of a WorkItem.
+
+        Returns:
+            The full workflow name, or "Unlabeled" if it could not be determined.
+        """
+        for tag in tags or []:
+            if tag.count(".") == 2:
+                return tag
+        return "Unlabeled"
+
+    @property
+    def workflow_name(self) -> str:
+        """
+        The full workflow name of this item (see `get_workflow_name`).
+        """
+        return self.get_workflow_name(self.tags)
 
     # -------------------------------------------------------------------------
     # The methods below turn this into a future-like object
