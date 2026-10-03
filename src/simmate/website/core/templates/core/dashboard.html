@@ -27,31 +27,7 @@
         </div>
     </div>
     {# Top Cross-Platform KPI Metrics #}
-    <div class="row g-3 mb-4">
-        {% for card in summary_cards %}
-            <div class="col-12 col-sm-6 col-lg-3">
-                <a href="{{ card.link }}" class="text-decoration-none">
-                    <div class="card border-0 shadow-sm h-100 hover-shadow">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="text-muted small fw-semibold text-uppercase">{{ card.title }}</span>
-                                <span class="badge {{ card.badge_class }} small">{{ card.badge_text }}</span>
-                            </div>
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <div class="fs-2 fw-bold text-dark lh-1 mb-1">{{ card.value }}</div>
-                                    <div class="text-muted small">{{ card.subtext }}</div>
-                                </div>
-                                <div class="rounded-3 p-3 {{ card.icon_bg }}">
-                                    <i class="bi {{ card.icon }} fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        {% endfor %}
-    </div>
+    {% include "core/basic_elements/summary_cards.html" %}
     {# Section: Specialized Application Dashboards #}
     <div class="row mb-3">
         <div class="col-12">

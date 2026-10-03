@@ -1,0 +1,8 @@
+{# The substance or mixture of `batch`, shown by ID with its name underneath #}
+{% if batch.mixture %}
+    {% foreign_key_link batch.mixture display_column="display_id" %}
+    {% if batch.mixture.common_name %}<div class="text-muted">{{ batch.mixture.common_name|truncatechars:40 }}</div>{% endif %}
+{% else %}
+    {% foreign_key_link batch.substance %}
+    {% if batch.substance.common_name %}<div class="text-muted">{{ batch.substance.common_name|truncatechars:40 }}</div>{% endif %}
+{% endif %}

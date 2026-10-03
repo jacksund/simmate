@@ -14,29 +14,7 @@
         {# Cancel / shutdown / mark-stale results #}
         {% include "htmx/partials/action_alert.html" %}
         {# KPI Summary Cards #}
-        <div class="row g-3 mb-4">
-            {% for card in summary_cards %}
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="text-muted small fw-semibold text-uppercase">{{ card.title }}</span>
-                                <span class="badge {{ card.badge_class }} small">{{ card.badge_text }}</span>
-                            </div>
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <div class="fs-2 fw-bold text-body lh-1 mb-1">{{ card.value }}</div>
-                                    <div class="text-muted small">{{ card.subtext }}</div>
-                                </div>
-                                <div class="rounded-3 p-3 {{ card.icon_bg }}">
-                                    <i class="bi {{ card.icon }} fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
+        {% include "core/basic_elements/summary_cards.html" %}
         {# Needs Attention #}
         {% if alerts %}
             <div class="card border-0 shadow-sm mb-4">
@@ -245,9 +223,7 @@
                             <div class="border rounded-3 p-3 mb-3 bg-body">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <span class="fw-semibold text-body font-monospace">{{ host.name }}</span>
-                                    <span class="badge {{ host.badge_class }} small">
-                                        <i class="bi {{ host.badge_icon }} me-1"></i> {{ host.badge_text }}
-                                    </span>
+                                    {% status_badge host.badge_text host.badge_theme icon=host.badge_icon %}
                                 </div>
                                 <div class="d-flex justify-content-between small text-muted mb-1">
                                     <span>{{ host.nworkers }} worker{{ host.nworkers|pluralize }} · {{ host.nrunning }} running</span>

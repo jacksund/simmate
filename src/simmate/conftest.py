@@ -275,6 +275,21 @@ def copy_test_files(tmp_path, test_directory, test_folder):
         )
 
 
+@pytest.fixture
+def fake_data(db):
+    """
+    Gives a function that loads an app's fake data (`test/fake_data.zip`) into
+    the test database. For example:
+    ``` python
+    def test_example(fake_data):
+        fake_data("inventory_management")
+    ```
+    """
+    from simmate.database.utils import load_fake_data
+
+    return load_fake_data
+
+
 def make_dummy_files(*filenames: str):
     """
     This is a utility that creates files. The content of these files are not

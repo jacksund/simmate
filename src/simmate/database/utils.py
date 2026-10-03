@@ -1,17 +1,26 @@
 # -*- coding: utf-8 -*-
 
+import base64
+import csv
+import io
+import json
 import logging
 import shutil
 import subprocess
 import urllib
 import zipfile
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 from pathlib import Path
 
+import polars
 from django.apps import apps
+from django.contrib.auth import get_user_model
 from django.core.management import call_command
+from django.core.management.color import no_style
+from django.db import connection, models, transaction
 from django.db.utils import DatabaseError
+from django.utils import timezone
 
 from simmate.config import settings
 from simmate.utils import get_directory
@@ -588,3 +597,234 @@ def create_prebuild():
         zip_file.write(db_filename, arcname=f"{prebuild_name}.sqlite3")
 
     logging.info(f"Success! Prebuild created: {zip_filename.name}")
+
+
+def get_fake_data_path(app_label: str) -> Path:
+    """
+    Returns the path to an app's fake data archive (`test/fake_data.zip`
+    within the app's folder). The file may not exist.
+    """
+    return Path(apps.get_app_config(app_label).path) / "test" / "fake_data.zip"
+
+
+FAKE_USERNAMES = [
+    "chemist1",
+    "chemist2",
+    "chemist3",
+    "chemist4",
+    "lab_manager",
+    "technician",
+]
+"""
+Users shared by all apps' fake data. Users are matched by username when
+loaded, so every app can include these and they are only created once.
+"""
+
+
+def get_fake_users() -> list[dict]:
+    """
+    Gives `auth.User` rows for `FAKE_USERNAMES`, for use with `write_fake_data`.
+    Their ids are 1, 2, 3... in the order of `FAKE_USERNAMES`.
+    """
+    return [
+        dict(
+            id=i,
+            username=username,
+            email=f"{username}@example.com",
+            password="!",  # unusable password
+            is_active=True,
+            is_staff=False,
+            is_superuser=False,
+        )
+        for i, username in enumerate(FAKE_USERNAMES, start=1)
+    ]
+
+
+def write_fake_data(
+    filename: Path,
+    tables: dict[str, list[dict]],
+    reference_date: datetime,
+):
+    """
+    Writes fake data in the format that `load_fake_data` reads.
+
+    #### Parameters
+
+    - `filename`:
+        The zip file to write (typically `get_fake_data_path(app_label)`)
+    - `tables`:
+        Rows for each model label (e.g. "inventory_management.Batch"), given
+        in the order they should be loaded. Columns should be the database
+        column names (e.g. `batch_id`). Datetimes, bytes, and lists/dicts
+        (for JSON columns) are converted for you.
+    - `reference_date`:
+        The date the data was generated at. This becomes "now" when loaded.
+    """
+    with zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr(
+            "metadata.json",
+            json.dumps({"reference_date": reference_date.isoformat()}),
+        )
+        for i, (label, rows) in enumerate(tables.items(), start=1):
+            buffer = io.StringIO()
+            writer = csv.DictWriter(buffer, fieldnames=list(rows[0].keys()))
+            writer.writeheader()
+            for row in rows:
+                writer.writerow({k: _to_csv_value(v) for k, v in row.items()})
+            archive.writestr(f"{i:02d}_{label}.csv", buffer.getvalue())
+            logging.info(f"Wrote {len(rows):,} rows for {label}")
+
+
+def _to_csv_value(value):
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, bytes):
+        return base64.b64encode(value).decode()  # read by BinaryField.to_python
+    if isinstance(value, (list, dict)):
+        return json.dumps(value)
+    return value
+
+
+def load_fake_data(app_label: str) -> dict[str, int]:
+    """
+    Loads an app's fake data (`test/fake_data.zip`, made by `write_fake_data`)
+    into the database. This is meant for tests and for populating a fresh dev
+    database, so that UIs can be explored without real data.
+
+    The zip contains a `metadata.json` and one CSV per table:
+
+    - `metadata.json` gives the `reference_date` that the data was generated
+      at. All datetime columns are shifted by `now - reference_date` so that
+      relative dates (e.g. "expires in 10 days") stay the same over time.
+    - CSVs are named `NN_<app_label>.<ModelName>.csv`, where `NN` sets the
+      load order (so foreign keys exist before they are referenced). Columns
+      use the column names in the database (e.g. `batch_id`) and include
+      explicit `id`s. Many-to-many links use the auto-generated through model
+      (e.g. `inventory_management.Batch_parent_batches.csv`).
+
+    Rows of a `DatabaseTable` are built with `from_toolkit`, so toolkit
+    columns (e.g. a `molecule` given as SMILES) get fully populated.
+
+    Users are matched by username, so they can be shared across apps and real
+    users are left alone. All other tables use explicit IDs, so this will
+    fail if any of the rows already exist. Load into an empty database (e.g.
+    after `simmate database reset`).
+
+    #### Parameters
+
+    - `app_label`:
+        The label of the app to load data for (e.g. "inventory_management")
+
+    #### Returns
+
+    The number of rows loaded for each table
+    """
+    from simmate.database.core import DatabaseTable
+
+    filename = get_fake_data_path(app_label)
+    if not filename.exists():
+        raise FileNotFoundError(f"No fake data found for the '{app_label}' app")
+
+    with zipfile.ZipFile(filename) as archive:
+        metadata = json.loads(archive.read("metadata.json"))
+        tables = {
+            name: archive.read(name)
+            for name in sorted(archive.namelist())
+            if name.endswith(".csv")
+        }
+
+    reference_date = datetime.fromisoformat(metadata["reference_date"])
+    date_shift = timezone.now() - reference_date
+
+    user_model = get_user_model()
+    user_ids = {}  # fake user id --> real user id
+    loaded_models = []
+    counts = {}
+    with transaction.atomic():
+        for name, content in tables.items():
+            label = name.split("_", 1)[1].removesuffix(".csv")
+            model = apps.get_model(label)
+            df = polars.read_csv(io.BytesIO(content), infer_schema=False)
+            parsers = _get_fake_data_parsers(model, df.columns, date_shift, user_ids)
+            entries = [
+                {
+                    column: parsers[column](value) if value else None
+                    for column, value in row.items()
+                }
+                for row in df.to_dicts()
+            ]
+            counts[label] = len(entries)
+
+            # users are shared across apps (and real ones may already exist),
+            # so we match on username and remap their ids in other tables
+            if model == user_model:
+                for entry in entries:
+                    fake_id = entry.pop("id")
+                    user, _ = user_model.objects.get_or_create(
+                        username=entry.pop("username"),
+                        defaults=entry,
+                    )
+                    user_ids[fake_id] = user.id
+                continue
+
+            if issubclass(model, DatabaseTable):
+                objs = [model.from_toolkit(**entry) for entry in entries]
+            else:
+                objs = [model(**entry) for entry in entries]
+            model.objects.bulk_create(objs)
+            loaded_models.append(model)
+
+            # auto_now(_add) columns are overwritten on create, so we restore
+            # the original timestamps (bulk_update skips auto_now)
+            auto_columns = [
+                field.attname
+                for field in model._meta.concrete_fields
+                if field.attname in df.columns
+                and (
+                    getattr(field, "auto_now", False)
+                    or getattr(field, "auto_now_add", False)
+                )
+            ]
+            if auto_columns:
+                for obj, entry in zip(objs, entries):
+                    for column in auto_columns:
+                        setattr(obj, column, entry[column])
+                model.objects.bulk_update(objs, auto_columns)
+
+            logging.info(f"Loaded {len(objs):,} rows into {label}")
+
+        # explicit ids don't advance the auto-increment sequences (Postgres)
+        sql = connection.ops.sequence_reset_sql(no_style(), loaded_models)
+        with connection.cursor() as cursor:
+            for statement in sql:
+                cursor.execute(statement)
+
+    return counts
+
+
+def _get_fake_data_parsers(
+    model,
+    columns: list[str],
+    date_shift: timedelta,
+    user_ids: dict[int, int],
+) -> dict[str, callable]:
+    """
+    Gives a function for each CSV column that converts its string values into
+    python values for the given model.
+    """
+    fields = {field.attname: field for field in model._meta.concrete_fields}
+    parsers = {}
+    for column in columns:
+        field = fields[column]
+        if isinstance(field, models.ForeignKey):
+            if field.related_model == get_user_model():
+                parsers[column] = lambda v: user_ids[int(v)]
+                continue
+            field = field.target_field
+        if isinstance(field, models.JSONField):
+            parsers[column] = json.loads
+        elif isinstance(field, models.DateTimeField):
+            parsers[column] = lambda v, f=field: f.to_python(v) + date_shift
+        else:
+            parsers[column] = field.to_python
+    return parsers

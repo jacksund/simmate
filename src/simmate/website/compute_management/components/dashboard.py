@@ -48,11 +48,6 @@ STATUS_FILTERS = [
     ("E", "Errored"),
 ]
 
-SUCCESS_BADGE = "bg-success-subtle text-success border border-success"
-WARNING_BADGE = "bg-warning-subtle text-warning border border-warning"
-SECONDARY_BADGE = "bg-secondary-subtle text-secondary border border-secondary"
-DANGER_BADGE = "bg-danger-subtle text-danger border border-danger"
-
 
 class ComputeDashboardComponent(HtmxComponent):
     """
@@ -211,13 +206,11 @@ class ComputeDashboardComponent(HtmxComponent):
                 "value": f"{nworkers:,}",
                 "subtext": f"{nworkers_busy} busy, {nworkers - nworkers_busy} idle",
                 "badge_text": f"{nstale} stale" if nstale else "heartbeats ok",
-                "badge_class": (
-                    DANGER_BADGE
-                    if nstale
-                    else SUCCESS_BADGE if nworkers else SECONDARY_BADGE
+                "badge_theme": (
+                    "danger" if nstale else "success" if nworkers else "secondary"
                 ),
                 "icon": "bi-cpu",
-                "icon_bg": "bg-primary-subtle text-primary",
+                "icon_theme": "primary",
             },
             {
                 "title": "Queue",
@@ -230,9 +223,9 @@ class ComputeDashboardComponent(HtmxComponent):
                 "badge_text": (
                     f"{nunserved:,} unserved" if nunserved else "all served"
                 ),
-                "badge_class": WARNING_BADGE if nunserved else SECONDARY_BADGE,
+                "badge_theme": "warning" if nunserved else "secondary",
                 "icon": "bi-hourglass-split",
-                "icon_bg": "bg-secondary-subtle text-secondary",
+                "icon_theme": "secondary",
             },
             {
                 "title": "Running",
@@ -241,9 +234,9 @@ class ComputeDashboardComponent(HtmxComponent):
                 "badge_text": (
                     f"{norphaned:,} orphaned" if norphaned else "none orphaned"
                 ),
-                "badge_class": DANGER_BADGE if norphaned else SECONDARY_BADGE,
+                "badge_theme": "danger" if norphaned else "secondary",
                 "icon": "bi-gear-wide-connected",
-                "icon_bg": "bg-info-subtle text-info",
+                "icon_theme": "info",
             },
             {
                 "title": "Last 24h",
@@ -254,11 +247,9 @@ class ComputeDashboardComponent(HtmxComponent):
                     else "no completed runs"
                 ),
                 "badge_text": f"{stats_24h['nerrored']:,} failed",
-                "badge_class": (
-                    DANGER_BADGE if stats_24h["nerrored"] else SECONDARY_BADGE
-                ),
+                "badge_theme": ("danger" if stats_24h["nerrored"] else "secondary"),
                 "icon": "bi-check2-circle",
-                "icon_bg": "bg-success-subtle text-success",
+                "icon_theme": "success",
             },
         ]
 
@@ -555,15 +546,15 @@ class ComputeDashboardComponent(HtmxComponent):
                 badge = (
                     "Busy",
                     "bi-lightning-charge",
-                    "bg-warning-subtle text-warning",
+                    "warning",
                 )
             elif nrunning:
-                badge = ("Healthy", "bi-check-circle", "bg-success-subtle text-success")
+                badge = ("Healthy", "bi-check-circle", "success")
             else:
                 badge = (
                     "Idle",
                     "bi-pause-circle",
-                    "bg-secondary-subtle text-secondary",
+                    "secondary",
                 )
 
             worker_hosts.append(
@@ -579,7 +570,7 @@ class ComputeDashboardComponent(HtmxComponent):
                     "utilization": utilization,
                     "badge_text": badge[0],
                     "badge_icon": badge[1],
-                    "badge_class": badge[2],
+                    "badge_theme": badge[2],
                 }
             )
         worker_hosts.sort(key=lambda host: -host["nworkers"])
