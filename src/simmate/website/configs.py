@@ -14,6 +14,7 @@ class ComputeManagementConfig(AppConfig):
     description_short = (
         "A dashboard for monitoring cluster workers, queues, and compute resources"
     )
+    app_card_template = "compute_management/app_card.html"
 
 
 class DataExplorerConfig(AppConfig):

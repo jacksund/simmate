@@ -33,6 +33,19 @@ def getattribute(obj, attr):
 
 
 @register.filter
+def split(value: str, sep: str = ",") -> list[str]:
+    """
+    Splits a string into a list of stripped, non-empty items.
+
+    Example use:
+    ``` html
+    {% for tag in "Substances, Batches"|split:"," %}
+    ```
+    """
+    return [item.strip() for item in str(value).split(sep) if item.strip()]
+
+
+@register.filter
 def getitem(dictionary, key):
     """
     Wraps the get dictionary python method into a django template tag so that we

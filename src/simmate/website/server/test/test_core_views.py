@@ -49,6 +49,14 @@ def test_apps_view(client):
     response = client.get("/apps/")
     assert response.status_code == 200
     assertTemplateUsed(response, "core/apps.html")
+    # app-specific cards plus the built-in static cards
+    assertTemplateUsed(response, "compute_management/app_card.html")
+    assertTemplateUsed(response, "core/app_cards/data_catalogs.html")
+    assertTemplateUsed(response, "core/app_cards/workflows_hub.html")
+    content = response.content.decode()
+    assert "Scientific Data Catalogs" in content
+    assert "Workflows Hub" in content
+    assert 'href="compute/"' in content
 
 
 @pytest.mark.django_db

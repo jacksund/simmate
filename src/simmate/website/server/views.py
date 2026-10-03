@@ -204,6 +204,7 @@ def apps(request):
             "verbose_name": app["config"].verbose_name,
             "url_prefix": app["url_prefix"],
             "description_short": app["config"].description_short,
+            "card_template": getattr(app["config"], "app_card_template", None),
         }
         for app in get_website_apps()
         if not getattr(app["config"], "hide_in_website", False)
@@ -289,123 +290,6 @@ def dashboard_default_view(request):
         },
     ]
 
-    app_dashboards = [
-        {
-            "title": "Compute Management",
-            "badge": "16 Workers &bull; 92% HPC Load",
-            "badge_class": "bg-success-subtle text-success border border-success",
-            "description": (
-                "Real-time monitoring of distributed DFT simulations, SLURM cluster partitions, "
-                "autoscaling cloud workers, and calculation execution throughput."
-            ),
-            "icon": "bi-cpu",
-            "icon_color": "text-primary",
-            "metrics": [
-                ("In-Flight Calculations", "42"),
-                ("Weekly Throughput", "4,240 jobs"),
-                ("Active CPU Cores", "152 cores"),
-            ],
-            "url": "/apps/compute/",
-            "button_text": "Open Compute Dashboard",
-            "button_class": "btn-primary",
-        },
-        {
-            "title": "Laboratory Automation",
-            "badge": "Hotplates Online &bull; Synthesis Active",
-            "badge_class": "bg-success-subtle text-success border border-success",
-            "description": (
-                "Hardware device control and sensor monitoring, stirring hotplate PID feedback, "
-                "ambient lab climate telemetry, and automated synthesis workflows."
-            ),
-            "icon": "bi-robot",
-            "icon_color": "text-danger",
-            "metrics": [
-                ("Hotplate 1 Temp", "150 °C"),
-                ("Ambient Climate", "21.4 °C / 44% RH"),
-                ("Synthesis Status", "Step 2 of 4"),
-            ],
-            "url": "/apps/lab_automation/",
-            "button_text": "Open Lab Automation Dashboard",
-            "button_class": "btn-primary",
-        },
-        {
-            "title": "Inventory Management",
-            "badge": "All Units In Bounds &bull; 3 Low Stock",
-            "badge_class": "bg-info-subtle text-info border border-info",
-            "description": (
-                "Reagent tracking, bottle barcoding, cold storage/glovebox conditions, "
-                "lot formulations, and regulatory usage compliance logs."
-            ),
-            "icon": "bi-box-seam",
-            "icon_color": "text-info",
-            "metrics": [
-                ("Active Containers", "4,350"),
-                ("Tracked Substances", "1,280"),
-                ("Storage Units", "18 locations"),
-            ],
-            "url": "/apps/inventory_management/",
-            "button_text": "Open Inventory Dashboard",
-            "button_class": "btn-primary",
-        },
-        {
-            "title": "Scientific Data Catalogs",
-            "badge": "6 Repositories Connected",
-            "badge_class": "bg-secondary-subtle text-secondary border border-secondary",
-            "description": (
-                "Search and explore crystallographic and molecular datasets aggregated from "
-                "Materials Project, AFLOW, OQMD, COD, JARVIS, and ChEMBL."
-            ),
-            "icon": "bi-database",
-            "icon_color": "text-warning",
-            "metrics": [
-                ("Crystal Structures", "1,452,890"),
-                ("Molecules & Ligands", "450,200"),
-                ("Curated Export", "CSV, JSON, SQL"),
-            ],
-            "url": "/data/",
-            "button_text": "Explore Data Catalogs",
-            "button_class": "btn-outline-primary",
-        },
-        {
-            "title": "Workflows Hub",
-            "badge": "35+ Workflows Configured",
-            "badge_class": "bg-primary-subtle text-primary border border-primary-subtle",
-            "description": (
-                "Automated simulation pipelines for DFT relaxation, electronic band structures, "
-                "population analysis, and molecular dynamics with Quick Submit."
-            ),
-            "icon": "bi-diagram-3",
-            "icon_color": "text-primary",
-            "metrics": [
-                ("Simulation Engines", "VASP & QE"),
-                ("Quick Submit", "Ready"),
-                ("Custom Presets", "Enabled"),
-            ],
-            "url": "/workflows/",
-            "button_text": "Open Workflows Hub",
-            "button_class": "btn-outline-primary",
-        },
-        {
-            "title": "Analysis Dashboard",
-            "badge": "Interactive Plot Studio",
-            "badge_class": "bg-light text-dark border",
-            "description": (
-                "Interactive plotting and data visualization studio for multi-dataset "
-                "property correlation, hull energy analysis, and structure screening."
-            ),
-            "icon": "bi-graph-up",
-            "icon_color": "text-success",
-            "metrics": [
-                ("Plot Types", "Scatter, Bar, Hist"),
-                ("Plot Engine", "Plotly.js"),
-                ("Interactive Filters", "Dynamic"),
-            ],
-            "url": "/apps/analysis_dashboard/",
-            "button_text": "Open Analysis Studio",
-            "button_class": "btn-outline-primary",
-        },
-    ]
-
     recent_activity = [
         {
             "domain": "Compute",
@@ -488,7 +372,6 @@ def dashboard_default_view(request):
         "page_title": "Operations Dashboard",
         "breadcrumbs": ["Dashboard"],
         "summary_cards": summary_cards,
-        "app_dashboards": app_dashboards,
         "recent_activity": recent_activity,
         "system_services": system_services,
     }

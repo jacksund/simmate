@@ -28,47 +28,6 @@
     </div>
     {# Top Cross-Platform KPI Metrics #}
     {% include "core/basic_elements/summary_cards.html" %}
-    {# Section: Specialized Application Dashboards #}
-    <div class="row mb-3">
-        <div class="col-12">
-            <h4 class="fw-bold mb-1">Application Dashboards</h4>
-            <p class="text-muted small mb-0">Jump directly into specialized domain management and instrumentation dashboards.</p>
-        </div>
-    </div>
-    <div class="row g-4 mb-4">
-        {% for app in app_dashboards %}
-            <div class="col-md-6 col-lg-4">
-                <div class="card border-0 shadow-sm h-100 d-flex flex-column">
-                    <div class="card-header bg-transparent border-0 pt-3 px-3 pb-0">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div class="d-flex align-items-center">
-                                <i class="bi {{ app.icon }} {{ app.icon_color }} fs-3 me-2"></i>
-                                <h5 class="card-title mb-0 fw-bold text-dark">{{ app.title }}</h5>
-                            </div>
-                        </div>
-                        <span class="badge {{ app.badge_class }} small">{{ app.badge }}</span>
-                    </div>
-                    <div class="card-body px-3 py-2 d-flex flex-column">
-                        <p class="text-muted small mb-3 flex-grow-0">{{ app.description }}</p>
-                        {# Metrics preview #}
-                        <div class="bg-light rounded-3 p-2 mb-3 mt-auto">
-                            <div class="row g-2 text-center">
-                                {% for label, val in app.metrics %}
-                                    <div class="col-4">
-                                        <div class="fw-bold small text-dark lh-1">{{ val }}</div>
-                                        <small class="text-muted" style="font-size: 0.72rem;">{{ label }}</small>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <a href="{{ app.url }}" class="btn {{ app.button_class }} btn-sm w-100">
-                            {{ app.button_text }} <i class="bi bi-arrow-right ms-1"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
     {# Lower Section: Cross-Platform Live Activity & System Services #}
     <div class="row g-3 mb-4">
         {# Left: Unified Activity Timeline #}

@@ -162,3 +162,24 @@ You could view them in the Simmate website at:
 
 !!! tip
     Read more about custom views in our [Website guides](/full_guides/website/creating_views.md)
+
+### Customizing your card on the Apps page
+
+Any app with a `urls.py` gets a card on the Apps page (`/apps/`). You can control this card with a few optional attributes on your app's config:
+
+``` python
+from django.apps import AppConfig
+
+class ExampleAppConfig(AppConfig):
+    name = "example_app"
+    verbose_name = "Example App"  # card title
+    description_short = "A dashboard for ..."  # card description
+    url_prefix = "example"  # changes the route to `/apps/example/` (defaults to the module name)
+    app_card_template = "example_app/app_card.html"  # optional custom card contents
+```
+
+If `app_card_template` is set, the template is rendered *inside* the card outline and receives `app` (with `verbose_name`, `description_short`, and `url_prefix`). For the standard styled card, you can include Simmate's built-in card body (`tags` is a comma-separated list):
+
+```html+django
+{% include "core/app_cards/card_body.html" with title="Example App" icon="bi-star" icon_color="text-primary" tags="Tables, Plots, Workflows" description="A dashboard for ..." url=app.url_prefix|add:"/" button_text="Open Example App" %}
+```
