@@ -2,7 +2,7 @@
 {% load htmx %}
 {% block form %}
     {# hx-target/include/swap are inherited by every hx-post button below #}
-    <div class="card border-0 shadow-sm"
+    <div class="card shadow-sm"
          hx-target="#{{ component.component_id }}"
          hx-include="#{{ component.component_id }}"
          hx-swap="outerHTML settle:0">

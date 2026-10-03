@@ -9,6 +9,7 @@ from django.utils import timezone
 
 from simmate.compute import WorkItem
 from simmate.website.data_explorer.components import TableComponent
+from simmate.website.htmx.components.utils import style_dashboard_figure
 
 STATUS_LABELS = dict(WorkItem.StatusOptions.choices)
 
@@ -163,17 +164,12 @@ class WorkItemComponent(TableComponent):
 
     @staticmethod
     def _style_figure(figure, height: int):
-        # semi-transparent grid & neutral font so figures work in light/dark mode
-        grid_color = "rgba(128,128,128,0.2)"
+        style_dashboard_figure(figure)
         figure.update_layout(
             height=height,
             margin=dict(t=30, r=15, l=50, b=35),
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
             legend=dict(orientation="h", x=0, y=1.02, yanchor="bottom", title=None),
-            font=dict(size=12, color="#888888"),
-            xaxis=dict(gridcolor=grid_color),
-            yaxis=dict(gridcolor=grid_color),
+            font=dict(size=12),
         )
         return figure
 

@@ -290,3 +290,8 @@ a:focus {
 .app-card:hover {
     box-shadow: var(--bs-box-shadow) !important;
 }
+
+/* Hairline border so shadowed cards stand out against the white page */
+.card.shadow-sm {
+    --bs-card-border-color: rgba(var(--bs-emphasis-color-rgb), 0.08);
+}

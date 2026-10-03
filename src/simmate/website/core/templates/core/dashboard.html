@@ -2,29 +2,11 @@
 {% load static %}
 {% block tabtitle %}Operations Dashboard - Simmate{% endblock %}
 {% block body %}
-    {# Header & Action Bar #}
-    <div class="row align-items-center mb-4">
-        <div class="col-md-7">
-            <h1 class="h2 mb-1 fw-bold text-dark">
-                <i class="bi bi-speedometer2 text-primary"></i> Operations Dashboard
-            </h1>
-            <p class="text-muted mb-0">
-                Executive summary across compute clusters, laboratory automation, chemical inventory, and research datasets.
-            </p>
-        </div>
-        <div class="col-md-5 text-md-end mt-3 mt-md-0">
-            <span class="badge bg-success-subtle text-success border border-success me-2 px-2 py-2">
-                <i class="bi bi-check-circle-fill me-1"></i> All Services Operational
-            </span>
-            <a href="{% url 'apps' %}" class="btn btn-primary btn-sm me-1">
-                <i class="bi bi-grid-fill"></i> View All Apps
-            </a>
-            <a href="https://jacksund.github.io/simmate/home/"
-               target="_blank"
-               class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-book"></i> Docs <i class="bi bi-box-arrow-up-right ms-1"></i>
-            </a>
-        </div>
+    {# Header #}
+    <div class="text-center pt-3 pb-2 mb-4">
+        <h1 class="h2 fw-bold mb-0">
+            <i class="bi bi-speedometer2 me-2"></i>Operations Dashboard
+        </h1>
     </div>
     {# Top Cross-Platform KPI Metrics #}
     {% include "core/basic_elements/summary_cards.html" %}
@@ -32,7 +14,7 @@
     <div class="row g-3 mb-4">
         {# Left: Unified Activity Timeline #}
         <div class="col-lg-7">
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card shadow-sm h-100">
                 <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
                     <div>
                         <h5 class="card-title mb-0 fw-semibold">Cross-Platform Activity</h5>
@@ -64,7 +46,7 @@
         </div>
         {# Right: Platform Services & Infrastructure Health #}
         <div class="col-lg-5">
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card shadow-sm h-100">
                 <div class="card-header bg-transparent border-0 pt-3 px-3">
                     <h5 class="card-title mb-0 fw-semibold">Platform Infrastructure</h5>
                     <small class="text-muted">Status of compute workers, database, and background services</small>

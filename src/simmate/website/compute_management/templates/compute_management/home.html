@@ -1,8 +1,5 @@
 {% extends "core/site_base.html" %}
 {% block tabtitle %}Compute Dashboard - Simmate{% endblock %}
-{% block extraheader %}
-    <style>.compute-timeline-chart .modebar-container { display: none; }</style>
-{% endblock %}
 {% block body %}
     {% htmx_component "compute-dashboard-component" %}
 {% endblock %}

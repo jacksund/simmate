@@ -1,0 +1,42 @@
+{% comment %}
+"Needs Attention" card for dashboards. Expects an `alerts` list of dicts with
+a `level` (bootstrap color), `icon`, and `message`. Each alert can optionally
+give a `count` (shown before the message) and one of the following for the
+right-hand side: a `url` (View button), an `action` (htmx button on the
+current component, shown when `can_manage`), or an `owner` (muted text).
+{% endcomment %}
+{% if alerts %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 pt-3 px-3">
+            <h5 class="card-title mb-0 fw-semibold">
+                <i class="bi bi-bell text-danger me-1"></i> Needs Attention
+            </h5>
+        </div>
+        <ul class="list-group list-group-flush small">
+            {% for alert in alerts %}
+                <li class="list-group-item d-flex align-items-center justify-content-between gap-3 px-3">
+                    <span class="text-{{ alert.level }}-emphasis">
+                        <i class="bi {{ alert.icon }} text-{{ alert.level }} me-2"></i>
+                        {% if alert.count is not None %}<span class="fw-semibold">{{ alert.count }}</span> ·{% endif %}
+                        {{ alert.message }}
+                    </span>
+                    {% if alert.url %}
+                        <a href="{{ alert.url }}"
+                           class="btn btn-sm btn-outline-{{ alert.level }} py-0 flex-shrink-0">View</a>
+                    {% elif alert.action %}
+                        {% if can_manage %}
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-{{ alert.level }} py-0 flex-shrink-0"
+                                    hx-post="{% url 'htmx:component_method' component.component_id alert.action.method %}{% if alert.action.kwarg %}?{{ alert.action.kwarg }}={{ alert.action.value|urlencode }}{% endif %}"
+                                    {% if alert.action.confirm %}hx-confirm="{{ alert.action.confirm }}"{% endif %}>
+                                {{ alert.action.label }}
+                            </button>
+                        {% endif %}
+                    {% elif alert.owner %}
+                        <span class="text-muted text-nowrap flex-shrink-0">{{ alert.owner }}</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
