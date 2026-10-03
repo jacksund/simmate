@@ -8,6 +8,14 @@ from .substance import Substance
 
 
 class Mixture(DatabaseTable):
+    """
+    A defined combination of substances, such as a stock solution or a
+    solvent blend.
+
+    Components are listed loosely via `substances`, and any details on how they
+    are combined (e.g. concentrations or ratios) go in the `description`.
+    Mixtures are identified by their `display_id` (e.g. "BCDF-123").
+    """
 
     class Meta:
         db_table = "inventory_management__mixtures"
@@ -19,9 +27,16 @@ class Mixture(DatabaseTable):
 
     @staticmethod
     def generate_id_prefix() -> str:
+        """
+        Generates a random 4-letter prefix for use as the `id_prefix`.
+        """
         return "".join(random.choices(Mixture._LETTERS, k=4))
 
     id = table_column.BigAutoField(primary_key=True)
+    """
+    The auto-incrementing integer ID of the mixture. This is combined with
+    `id_prefix` to give the `display_id`.
+    """
 
     id_prefix = table_column.CharField(
         max_length=4,
@@ -44,7 +59,8 @@ class Mixture(DatabaseTable):
     def get_by_display_id(cls, display_id: str):
         """
         Loads a mixture using its display ID (e.g. "BCDF-123"). Raises
-        `Mixture.DoesNotExist` if the prefix does not match the number.
+        `Mixture.DoesNotExist` if the ID is malformed, if no mixture has that
+        number, or if the prefix does not match the number.
         """
         prefix, _, number = display_id.strip().upper().partition("-")
         if not number.isdigit():
@@ -65,14 +81,27 @@ class Mixture(DatabaseTable):
         blank=True,
         null=True,
     )
+    """
+    The kind of mixture this is. Must be one of `mixture_type_options`.
+    """
 
     description = table_column.TextField(blank=True, null=True)
+    """
+    A full description of the mixture, including any details not captured by
+    `substances` (e.g. "0.1 M solution of ___ in 3:1 methanol:water").
+    """
 
     # -------------------------------------------------------------------------
 
     common_name = table_column.CharField(max_length=255, blank=True, null=True)
+    """
+    The name that the mixture is most commonly referred to by.
+    """
 
     synonyms = table_column.JSONField(blank=True, null=True, default=list)
+    """
+    A list of other names that the mixture is known by.
+    """
 
     # -------------------------------------------------------------------------
 
@@ -91,6 +120,9 @@ class Mixture(DatabaseTable):
         db_table="inventory_management__mixture_components",
         related_name="mixtures",
     )
+    """
+    The substances that make up this mixture.
+    """
 
     # I could get more detailed with the components of a mixture, but as things
     # get more complex, it in some ways get more rigid (e.g. a unique mixture

@@ -8,7 +8,8 @@ class Structure(StructureMixin):
     A crystal structure.
 
     This table stores the unit cell, atomic sites, and spacegroup information
-    for a crystal structure.
+    for a crystal structure. Substances link to these entries via
+    `Substance.structure`.
     """
 
     class Meta:

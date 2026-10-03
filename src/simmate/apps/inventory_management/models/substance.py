@@ -9,6 +9,17 @@ from simmate.database.core import DatabaseTable, table_column
 
 
 class Substance(DatabaseTable):
+    """
+    A unique, registered chemical identity, such as an element, molecule,
+    molecular salt, or material.
+
+    Each substance gets a human-readable ID (e.g. `BCD-012-3456`) and can be
+    linked to its molecular or crystal structure, to entries in third-party
+    datasets (e.g. PubChem or the Materials Project), and to related substances
+    (e.g. stereoisomers or phases via `parent`). Physical samples of a
+    substance are tracked as `Batch` entries, and substances can also be
+    combined into a `Mixture`.
+    """
 
     class Meta:
         db_table = "inventory_management__substances"
@@ -95,8 +106,15 @@ class Substance(DatabaseTable):
         blank=True,
         null=True,
     )
+    """
+    The general category of the substance. Must be one of
+    `substance_type_options`.
+    """
 
     description = table_column.TextField(blank=True, null=True)
+    """
+    Any extra details about the substance.
+    """
 
     # -------------------------------------------------------------------------
 
@@ -104,7 +122,7 @@ class Substance(DatabaseTable):
 
     is_theoretical = table_column.BooleanField(blank=True, null=True, default=False)
     """
-    Whether the substance has been experimentally synthesized before or if is a
+    Whether the substance has been experimentally synthesized before or if it is a
     purely theoretical compound.
 
     We allow theoretical compounds to be registered for cases such as predicted
@@ -128,12 +146,12 @@ class Substance(DatabaseTable):
     Whether this is a private substance, where the substance is intentionally
     kept secret. Do not confuse with `is_unknown` where the substance
     is truly unknown even by the submitter.
-    
-    so that private entities can register/reserve a unique ID. This
-    makes it so that you have a private instance in sync with the public
-    registry without revealing your substance. Therefore when the substance
-    is made public + registered to this table, there are not conflicting 
-    records of what the ID is (+ ensures their ID isn't already taken)
+
+    This allows private entities to register/reserve a unique ID, so that a
+    private instance can stay in sync with the public registry without
+    revealing the substance. Then, if the substance is later made public,
+    there are no conflicting records of what the ID is (and the ID is
+    guaranteed to not already be taken).
     """
 
     is_unknown = table_column.BooleanField(blank=True, null=True, default=False)
@@ -144,7 +162,7 @@ class Substance(DatabaseTable):
     compound.
     
     Once the compound is known...
-    - if it is in fact a new substace, associated batches retains this substance 
+    - if it is in fact a new substance, associated batches retains this substance 
       ID and the entry is updated with the structure
     - if the substance ends up being something already registered, this ID 
       becomes delisted and all associated batches have their link switched
@@ -172,7 +190,7 @@ class Substance(DatabaseTable):
         null=True,
     )
     """
-    The user that submitted the regstration of this substance, effectively being
+    The user that submitted the registration of this substance, effectively being
     the first to reserve the unique ID.
     
     In the open collective, Simmate makes registration cost $1 per substance - 
@@ -182,7 +200,7 @@ class Substance(DatabaseTable):
     
     We put the $1 fee in place in order to deter users from abusing the public
     forms with too many submissions. Otherwise, users would not be able 
-    to register new substances without manual intervetion/review by our team
+    to register new substances without manual intervention/review by our team
     (which would slow down teams & make them wait to register something new).
     
     In cases where waiting is okay, you can also send our team a request to get
@@ -192,13 +210,32 @@ class Substance(DatabaseTable):
     the user.
     """
 
+    projects = table_column.ManyToManyField(
+        "project_management.Project",
+        blank=True,
+        related_name="substances",
+        db_table="inventory_management__substance_projects",
+    )
+    """
+    The projects that this substance is associated with.
+    """
+
     # -------------------------------------------------------------------------
 
     common_name = table_column.CharField(max_length=255, blank=True, null=True)
+    """
+    The name that the substance is most commonly referred to by.
+    """
 
     iupac_name = table_column.TextField(blank=True, null=True)
+    """
+    The systematic IUPAC name of the substance.
+    """
 
     synonyms = table_column.JSONField(blank=True, null=True, default=list)
+    """
+    A list of other names that the substance is known by.
+    """
 
     # -------------------------------------------------------------------------
 
@@ -290,7 +327,8 @@ class Substance(DatabaseTable):
         null=True,
     )
     """
-    The specific stereochemical classification(s) of the substance.
+    The specific stereochemical classification(s) of the substance. Values
+    should be from `stereomchem_type_options`.
 
     Stereoisomer Classification (Same connectivity, different 3D arrangement)
         ├── Configurational (Bonds must break to interconvert)
@@ -317,6 +355,10 @@ class Substance(DatabaseTable):
         blank=True,
         null=True,
     )
+    """
+    A short key that distinguishes stereoisomers that share the same flat
+    structure (e.g. to be used alongside an InChI key).
+    """
     # TODO: key to add on to the inchi key to distinguish and query different
     # isomers -- like cis/trans labels, but also need keys for other types
     # and also combos. Need to think on this more... could even be integer ranking
@@ -324,6 +366,8 @@ class Substance(DatabaseTable):
     # -------------------------------------------------------------------------
 
     # Molecular datasets
+    # Each of these links to the matching entry in a third-party dataset, if
+    # one exists. Note `pubchem` stores the PubChem CID rather than a link.
 
     bcpc = table_column.ForeignKey(
         "bcpc.BcpcIsoPesticide",
@@ -394,10 +438,15 @@ class Substance(DatabaseTable):
         blank=True,
         null=True,
     )
+    """
+    The PubChem compound ID (CID) of the substance.
+    """
 
     # -------------------------------------------------------------------------
 
     # Crystalline datasets
+    # Each of these links to the matching entry in a third-party dataset, if
+    # one exists.
 
     aflow = table_column.ForeignKey(
         "aflow.AflowStructure",
@@ -442,12 +491,16 @@ class Substance(DatabaseTable):
     # -------------------------------------------------------------------------
 
     extra_metadata = table_column.JSONField(blank=True, null=True)
+    """
+    Any additional data about the substance that does not fit in the columns
+    above.
+    """
 
     # -------------------------------------------------------------------------
 
     # Define consonants list by removing vowels and Y from the uppercase alphabet
     # We exclude these to prevent accidental formation of real words, which in
-    # some cases can have negative consequences (profanity, politics, voilence, etc)
+    # some cases can have negative consequences (profanity, politics, violence, etc)
     _LETTERS = "BCDFGHJKLMNPQRSTVWXZ"  # instead of string.ascii_uppercase
 
     @classmethod
@@ -459,7 +512,7 @@ class Substance(DatabaseTable):
         Each higher level swaps the next group of numbers for letters. See
         the docstring of the `id` column for all formats.
 
-        Letters are not allow to be vowels or the letter Y. Numbers are 0-9.
+        Letters are not allowed to be vowels or the letter Y. Numbers are 0-9.
         """
         assert 1 <= level <= 3, f"Unknown ID level: {level}"
         return "-".join(
@@ -521,6 +574,9 @@ class Substance(DatabaseTable):
 
     @classmethod
     def _id_char_value(cls, char: str) -> int:
+        """
+        Maps an ID character to its value (0-19) for the check digit calculation.
+        """
         return int(char) if char.isdigit() else cls._LETTERS.index(char)
 
     @classmethod
