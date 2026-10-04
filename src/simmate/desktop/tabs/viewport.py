@@ -77,9 +77,11 @@ class ViewportTab(QWidget):
         super().__init__()
 
         self.view = gl.GLViewWidget()
+        self.view.setBackgroundColor("w")
         self.view.setCameraPosition(distance=12, elevation=25)
         grid = gl.GLGridItem()
         grid.setSize(12, 12)
+        grid.setColor((0, 0, 0, 76))
         grid.translate(0, 0, -3)
         self.view.addItem(grid)
         self.mesh_item = None
