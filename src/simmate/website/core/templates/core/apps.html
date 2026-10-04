@@ -9,7 +9,7 @@
     <div class="row g-4">
         {% for extra_app in extra_apps %}
             <div class="col-md-6 col-lg-4">
-                <div class="card app-card shadow-sm h-100">
+                <div class="card app-card shadow-sm border-primary h-100">
                     {% if extra_app.card_template %}
                         {% include extra_app.card_template with app=extra_app %}
                     {% else %}
@@ -20,10 +20,10 @@
         {% endfor %}
         {# Built-in cards that are always present #}
         <div class="col-md-6 col-lg-4">
-            <div class="card app-card shadow-sm h-100">{% include "core/app_cards/data_catalogs.html" %}</div>
+            <div class="card app-card shadow-sm border-primary h-100">{% include "core/app_cards/data_catalogs.html" %}</div>
         </div>
         <div class="col-md-6 col-lg-4">
-            <div class="card app-card shadow-sm h-100">{% include "core/app_cards/workflows_hub.html" %}</div>
+            <div class="card app-card shadow-sm border-primary h-100">{% include "core/app_cards/workflows_hub.html" %}</div>
         </div>
     </div>
 {% endblock %}

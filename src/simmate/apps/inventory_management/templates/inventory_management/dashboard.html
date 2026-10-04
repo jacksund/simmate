@@ -7,15 +7,15 @@
         </h1>
         <small class="text-muted">Updated {{ last_updated|time:"H:i:s" }} · refreshes every {{ component.refresh_interval }}</small>
     </div>
-    {# KPI Summary Cards #}
-    {% include "core/basic_elements/summary_cards.html" %}
+    {# Catalogs #}
+    {% include "core/basic_elements/catalogs_card.html" %}
     {# Needs Attention #}
     {% include "core/basic_elements/alerts_card.html" %}
     {# Recent Usage & Storage Locations #}
     <div class="row g-3 mb-4">
         {# Left: Recent Usage Table #}
         <div class="col-lg-7">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm border-light-subtle h-100">
                 <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
                     <div>
                         <h5 class="card-title mb-0 fw-semibold">Recent Usage</h5>
@@ -65,7 +65,7 @@
         </div>
         {# Right: Storage Locations #}
         <div class="col-lg-5">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm border-light-subtle h-100">
                 <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
                     <div>
                         <h5 class="card-title mb-0 fw-semibold">Storage Locations</h5>
@@ -107,7 +107,7 @@
         </div>
     </div>
     {# Expiring Soon #}
-    <div class="card shadow-sm mb-4">
+    <div class="card shadow-sm border-light-subtle mb-4">
         <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
             <div>
                 <h5 class="card-title mb-0 fw-semibold">Expiring Soon</h5>
@@ -158,34 +158,6 @@
                         {% endfor %}
                     </tbody>
                 </table>
-            </div>
-        </div>
-    </div>
-    {# Inventory Catalogs #}
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-transparent border-0 pt-3 px-3">
-            <h5 class="card-title mb-0 fw-semibold">Inventory Catalogs</h5>
-            <small class="text-muted">Browse, search, and add to each table</small>
-        </div>
-        <div class="card-body px-3 pb-3">
-            <div class="row g-3">
-                {% for catalog in catalogs %}
-                    <div class="col-md-4 col-sm-6">
-                        <a href="{% url 'data_explorer:table' catalog.table %}"
-                           class="text-decoration-none">
-                            <div class="p-3 border rounded-3 bg-body-tertiary h-100">
-                                <div class="d-flex align-items-center justify-content-between mb-1">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi {{ catalog.icon }} fs-4 me-2"></i>
-                                        <h6 class="mb-0 text-body fw-bold">{{ catalog.title }}</h6>
-                                    </div>
-                                    <span class="text-muted small fw-semibold">{{ catalog.count }}</span>
-                                </div>
-                                <small class="text-muted">{{ catalog.description }}</small>
-                            </div>
-                        </a>
-                    </div>
-                {% endfor %}
             </div>
         </div>
     </div>

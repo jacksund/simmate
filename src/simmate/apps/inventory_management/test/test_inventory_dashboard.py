@@ -74,14 +74,12 @@ def test_dashboard(client):
     UsageLog.objects.create(source_container=low, user=user, amount_removed=95)
 
     batch_stats = InventoryDashboardComponent.get_batch_stats(now)
-    assert batch_stats["nactive"] == 3  # not inflated by the containers join
+    assert batch_stats["nbatches"] == 3  # not inflated by the containers join
     assert batch_stats["nexpired"] == 1
     assert batch_stats["nexpiring"] == 1
-    assert batch_stats["nsubstances_in_stock"] == 1
     assert batch_stats["nunstored"] == 1
 
     container_stats = InventoryDashboardComponent.get_container_stats()
-    assert container_stats["nin_stock"] == 3
     assert container_stats["nlow"] == 1
     assert container_stats["nempty"] == 1
     assert container_stats["nunlocated"] == 1
@@ -105,5 +103,6 @@ def test_dashboard(client):
     assert response.status_code == 200
     content = response.content.decode()
     assert "Needs Attention" in content
+    assert "Storage Locations" in content
     assert "BCD-012-3456" in content
     assert "Freezer 1" in content

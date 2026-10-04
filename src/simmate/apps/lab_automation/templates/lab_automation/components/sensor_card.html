@@ -1,6 +1,6 @@
 {% extends "htmx/form_base.html" %}
 {% block form %}
-    <div class="card shadow-sm h-100">
+    <div class="card h-100 {% if component.borderless %}border-0 bg-transparent{% else %}shadow-sm border-light-subtle{% endif %}">
         <div class="card-body pb-1">
             <div class="d-flex align-items-center justify-content-between mb-2">
                 <span class="text-muted small fw-semibold text-uppercase">

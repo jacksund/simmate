@@ -1,5 +1,6 @@
 {# Shared card for every dashboard widget. Expects a `widget` dict (see `simmate.website.core.dashboard`) and renders `widget.template` as the body #}
-<div class="card shadow-sm" data-widget-key="{{ widget.key }}">
+<div class="card shadow-sm border-light-subtle"
+     data-widget-key="{{ widget.key }}">
     <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between pt-3 px-3">
         <h6 class="card-title mb-0 fw-semibold">
             <span class="widget-controls d-none text-muted me-1"

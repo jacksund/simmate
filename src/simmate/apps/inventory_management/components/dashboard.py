@@ -116,12 +116,10 @@ class InventoryDashboardComponent(HtmxComponent):
         ctx = super().get_context()
         now = timezone.now()
 
-        slow_stats, slow_context = self.get_slow_context(now)
-        stats = {**slow_stats, **self.get_usage_stats(now)}
+        stats, slow_context = self.get_slow_context(now)
 
         ctx.update(
             last_updated=now,
-            summary_cards=self.get_summary_cards(stats),
             alerts=self.get_alerts(now, stats),
             recent_usage=self.get_recent_usage(),
             expiring_days=EXPIRING_WITHIN.days,
@@ -180,8 +178,6 @@ class InventoryDashboardComponent(HtmxComponent):
         """
         stats = Batch.objects.aggregate(
             nbatches=Count("id"),
-            nactive=Count("id", filter=IN_STOCK),
-            nactive_mixture=Count("id", filter=IN_STOCK & Q(is_mixture=True)),
             nexpired=Count("id", filter=IN_STOCK & Q(expiration_date__lt=now)),
             nexpiring=Count(
                 "id",
@@ -189,9 +185,6 @@ class InventoryDashboardComponent(HtmxComponent):
                 & Q(
                     expiration_date__gte=now, expiration_date__lt=now + EXPIRING_WITHIN
                 ),
-            ),
-            nsubstances_in_stock=Count(
-                "substance_id", filter=IN_STOCK & Q(is_mixture=False), distinct=True
             ),
         )
         # batches with stock but no containers to hold it. This is a separate
@@ -208,7 +201,6 @@ class InventoryDashboardComponent(HtmxComponent):
         """
         return Container.objects.aggregate(
             ncontainers=Count("id"),
-            nin_stock=Count("id", filter=IN_STOCK),
             nlow=Count(
                 "id",
                 filter=IN_STOCK
@@ -219,77 +211,6 @@ class InventoryDashboardComponent(HtmxComponent):
             nempty=Count("id", filter=IN_STOCK & Q(current_amount__lte=0)),
             nunlocated=Count("id", filter=IN_STOCK & Q(location__isnull=True)),
         )
-
-    @staticmethod
-    def get_usage_stats(now: datetime) -> dict:
-        """
-        Counts recent usage logs and the users behind them.
-        """
-        return UsageLog.objects.filter(
-            created_at__gte=now - timedelta(days=7)
-        ).aggregate(
-            nusage_week=Count("id"),
-            nusage_day=Count("id", filter=Q(created_at__gte=now - timedelta(days=1))),
-            nusers_week=Count("user_id", distinct=True),
-        )
-
-    @staticmethod
-    def get_summary_cards(stats: dict) -> list[dict]:
-        """
-        Builds the KPI cards shown at the top of the dashboard.
-
-        Args:
-            stats: The combined batch, container, and usage counts.
-
-        Returns:
-            A list of dictionaries, each describing a single card.
-        """
-        nactive = stats["nactive"]
-        nmixture = stats["nactive_mixture"]
-        nexpired = stats["nexpired"]
-        nunlocated = stats["nunlocated"]
-        nlow = stats["nlow"]
-        nusers = stats["nusers_week"]
-        return [
-            {
-                "title": "Substances",
-                "value": format_compact(stats["nsubstances"]),
-                "subtext": "registered (estimated)",
-                "badge_text": f"{stats['nsubstances_in_stock']:,} in stock",
-                "badge_theme": "secondary",
-                "icon": "bi-hexagon",
-                "icon_theme": "primary",
-            },
-            {
-                "title": "Containers in Stock",
-                "value": f"{stats['nin_stock']:,}",
-                "subtext": f"{nlow:,} low stock" if nlow else "no low stock",
-                "badge_text": (
-                    f"{nunlocated:,} unlocated" if nunlocated else "all located"
-                ),
-                "badge_theme": "warning" if nunlocated else "success",
-                "icon": "bi-box-seam",
-                "icon_theme": "info",
-            },
-            {
-                "title": "Active Batches",
-                "value": f"{nactive:,}",
-                "subtext": f"{nactive - nmixture:,} substance · {nmixture:,} mixture",
-                "badge_text": f"{nexpired:,} expired" if nexpired else "none expired",
-                "badge_theme": "danger" if nexpired else "success",
-                "icon": "bi-layers",
-                "icon_theme": "warning",
-            },
-            {
-                "title": "Usage (7d)",
-                "value": f"{stats['nusage_week']:,}",
-                "subtext": f"by {nusers:,} user{'s' if nusers != 1 else ''}",
-                "badge_text": f"{stats['nusage_day']:,} today",
-                "badge_theme": "secondary",
-                "icon": "bi-clock-history",
-                "icon_theme": "success",
-            },
-        ]
 
     @staticmethod
     def get_alerts(now: datetime, stats: dict) -> list[dict]:

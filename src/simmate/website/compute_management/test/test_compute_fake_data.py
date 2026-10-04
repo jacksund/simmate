@@ -36,3 +36,4 @@ def test_compute_fake_data(fake_data, client):
     ComputeDashboardComponent._slow_context = None  # shared across tests
     response = client.get("/apps/compute/")
     assert response.status_code == 200
+    assert "Worker processes that poll queues" in response.content.decode()

@@ -1,0 +1,31 @@
+{# Grid of links to an app's tables. Each catalog in `catalogs` is a dict with table, title, description, icon, and an optional count and url (defaults to the table's data explorer page). #}
+<div class="card shadow-sm border-light-subtle mb-4">
+    <div class="card-header bg-transparent border-0 pt-3 px-3">
+        <h5 class="card-title mb-0 fw-semibold">
+            <i class="bi bi-bar-chart me-2"></i>Data Catalogs
+        </h5>
+    </div>
+    <div class="card-body px-3 pb-3">
+        <div class="row g-3">
+            {% for catalog in catalogs %}
+                <div class="col-sm-6 col-lg-4 col-xxl-3">
+                    <a href="{% if catalog.url %}{{ catalog.url }}{% else %}{% url 'data_explorer:table' catalog.table %}{% endif %}"
+                       class="text-decoration-none">
+                        <div class="p-3 border rounded-3 bg-body-tertiary h-100">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi {{ catalog.icon }} fs-4 me-2"></i>
+                                    <h6 class="mb-0 text-body fw-bold">{{ catalog.title }}</h6>
+                                </div>
+                                {% if catalog.count is not None %}
+                                    <span class="text-muted small fw-semibold">{{ catalog.count }}</span>
+                                {% endif %}
+                            </div>
+                            <small class="text-muted">{{ catalog.description }}</small>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

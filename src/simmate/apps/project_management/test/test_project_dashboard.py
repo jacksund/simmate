@@ -9,7 +9,7 @@ from django.utils import timezone
 from simmate.apps.project_management.components.dashboard import (
     ProjectDashboardComponent,
 )
-from simmate.apps.project_management.models import Project, Tag, Wallet
+from simmate.apps.project_management.models import Project, Wallet
 from simmate.config import settings
 
 
@@ -33,17 +33,12 @@ def test_dashboard(client, monkeypatch):
     hermes = Project.objects.create(name="Hermes", status="Active")
     Project.objects.filter(id=hermes.id).update(updated_at=now - timedelta(days=400))
     Project.objects.create(name="Hestia", status="Under Review")
-    Tag.objects.create(name="screening", tag_type="all-projects")
 
     stats = ProjectDashboardComponent.get_project_stats(now)
-    assert stats["nactive"] == 3  # not inflated by the leaders/members joins
-    assert stats["nactive_top_level"] == 3
     assert stats["nrequires_update"] == 1
     assert stats["nstale"] == 1
     assert stats["nreview"] == 1
-    assert stats["nno_leaders"] == 2
-    assert stats["nleaders"] == 2
-    assert stats["nusers"] == 2
+    assert stats["nno_leaders"] == 2  # not inflated by the leaders join
 
     alerts = ProjectDashboardComponent.get_alerts(now, stats)
     assert len(alerts) == 4
@@ -65,6 +60,7 @@ def test_dashboard(client, monkeypatch):
     assert response.status_code == 200
     content = response.content.decode()
     assert "Needs Attention" in content
+    assert "Labels for organizing project data" in content
     assert "Zeus" in content
     assert "Recent Transactions" not in content
 
@@ -76,7 +72,6 @@ def test_dashboard(client, monkeypatch):
         to_wallet=zeus_wallet, usdc_amount=100, status="Pending", sending_user=leader
     )
     stats.update(ProjectDashboardComponent.get_finance_stats(now))
-    assert stats["usdc_total"] == 100
     assert stats["npending"] == 1
     alerts = ProjectDashboardComponent.get_alerts(now, stats, show_finances=True)
     assert len(alerts) == 5
@@ -89,5 +84,5 @@ def test_dashboard(client, monkeypatch):
     assert response.status_code == 200
     content = response.content.decode()
     assert "Recent Transactions" in content
-    assert "Project Funds" in content
+    assert "USDC and token balances" in content
     assert "My Projects" in content

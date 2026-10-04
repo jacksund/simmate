@@ -283,12 +283,20 @@ a:focus {
 }
 /* -------------------------------------------------------------------------- */
 
-/* Cards on the Apps page lift slightly on hover */
+/* Cards on the Apps page lift slightly and tint on hover (matches Quick Submit cards) */
 .app-card {
-    transition: box-shadow 0.15s ease-in-out;
+    transition: box-shadow 0.15s ease-in-out, background-color 0.15s ease-in-out;
 }
 .app-card:hover {
     box-shadow: var(--bs-box-shadow) !important;
+    background-color: var(--bs-primary-bg-subtle);
+}
+.app-card-arrow {
+    transition: color 0.15s ease-in-out, transform 0.15s ease-in-out;
+}
+.app-card:hover .app-card-arrow {
+    color: var(--bs-primary) !important;
+    transform: translate(2px, -2px);
 }
 
 /* Hairline border so shadowed cards stand out against the white page */

@@ -49,6 +49,11 @@ class SimulatedSensorComponent(HtmxComponent):
     history_y: list[float] = None
     max_points: int = 1000
 
+    borderless: bool = False
+    """
+    Drops the card's border and shadow, e.g. when it sits inside another card.
+    """
+
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         cls.history_x = []
@@ -192,12 +197,14 @@ class AirQualityComponent(SimulatedSensorComponent):
 
 
 class HotplateTempSensor(SimulatedSensorComponent):
+    borderless = True
     label = "Temperature"
     units = "°C"
     icon = "bi-thermometer-high"
 
 
 class HotplateStirSensor(SimulatedSensorComponent):
+    borderless = True
     label = "Stir Speed"
     units = "%"
     icon = "bi-arrow-repeat"

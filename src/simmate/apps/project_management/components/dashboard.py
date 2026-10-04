@@ -5,14 +5,14 @@ from datetime import datetime, timedelta
 from urllib.parse import urlencode
 
 from django.contrib.auth.models import User
-from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Sum
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q
 from django.urls import reverse
 from django.utils import timezone
 
 from simmate.config import settings
 from simmate.website.htmx.components import HtmxComponent
 
-from ..models import Project, Tag, Transaction, Wallet
+from ..models import Project, Transaction, Wallet
 
 STALE_AFTER = timedelta(days=365)
 """
@@ -108,15 +108,12 @@ class ProjectDashboardComponent(HtmxComponent):
         show_finances = settings.website.show_finances
 
         stats = self.get_project_stats(now)
-        # the tags card is replaced by the funds card when finances are shown
-        stats.update(
-            self.get_finance_stats(now) if show_finances else self.get_tag_stats()
-        )
+        if show_finances:
+            stats.update(self.get_finance_stats(now))
 
         ctx.update(
             last_updated=now,
             show_finances=show_finances,
-            summary_cards=self.get_summary_cards(stats, show_finances),
             alerts=self.get_alerts(now, stats, show_finances),
             projects=self.get_project_tree(),
             disciplines=self.get_disciplines(),
@@ -139,18 +136,12 @@ class ProjectDashboardComponent(HtmxComponent):
     @staticmethod
     def get_project_stats(now: datetime) -> dict:
         """
-        Counts projects by their status and team.
+        Counts projects by their status and leadership.
         """
         leads = Project.leaders.through.objects
-        members = Project.members.through.objects
-        stats = Project.objects.aggregate(
-            nactive=Count("id", filter=Q(status="Active")),
-            nactive_top_level=Count(
-                "id", filter=Q(status="Active", parent_project__isnull=True)
-            ),
+        return Project.objects.aggregate(
             nreview=Count("id", filter=Q(status="Under Review")),
             nrequires_update=Count("id", filter=Q(status="Requires Update")),
-            ninactive=Count("id", filter=Q(status="Inactive")),
             nstaged=Count("id", filter=Q(status="Staged for Deletion")),
             nstale=Count(
                 "id", filter=Q(status="Active", updated_at__lt=now - STALE_AFTER)
@@ -160,125 +151,19 @@ class ProjectDashboardComponent(HtmxComponent):
                 "id", filter=~Q(Exists(leads.filter(project_id=OuterRef("pk"))))
             ),
         )
-        is_leader = Q(Exists(leads.filter(user_id=OuterRef("pk"))))
-        is_member = Q(Exists(members.filter(user_id=OuterRef("pk"))))
-        stats.update(
-            User.objects.aggregate(
-                nleaders=Count("id", filter=is_leader),
-                nusers=Count("id", filter=is_leader | is_member),
-            )
-        )
-        return stats
-
-    @staticmethod
-    def get_tag_stats() -> dict:
-        """
-        Counts tags and how many are shared by all projects.
-        """
-        return Tag.objects.aggregate(
-            ntags=Count("id"),
-            nshared=Count("id", filter=Q(tag_type="all-projects")),
-        )
 
     @staticmethod
     def get_finance_stats(now: datetime) -> dict:
         """
-        Totals project wallet balances and counts transactions that need
-        attention.
+        Counts transactions that need attention.
         """
-        stats = Wallet.objects.filter(wallet_type="project").aggregate(
-            usdc_total=Sum("usdc_balance"),
-            token_total=Sum("token_balance"),
+        return Transaction.objects.aggregate(
+            npending=Count("id", filter=Q(status__in=PENDING_STATUSES)),
+            nfailed_week=Count(
+                "id",
+                filter=Q(status="Failed", created_at__gte=now - FAILED_WINDOW),
+            ),
         )
-        stats.update(
-            Transaction.objects.aggregate(
-                npending=Count("id", filter=Q(status__in=PENDING_STATUSES)),
-                nfailed_week=Count(
-                    "id",
-                    filter=Q(status="Failed", created_at__gte=now - FAILED_WINDOW),
-                ),
-            )
-        )
-        return stats
-
-    @staticmethod
-    def get_summary_cards(stats: dict, show_finances: bool = False) -> list[dict]:
-        """
-        Builds the KPI cards shown at the top of the dashboard.
-
-        Args:
-            stats: The combined project, tag, and (optionally) finance counts.
-            show_finances: Whether to show project funds instead of tags.
-
-        Returns:
-            A list of dictionaries, each describing a single card.
-        """
-        nactive = stats["nactive"]
-        ntop = stats["nactive_top_level"]
-        nreview = stats["nreview"]
-        nno_leaders = stats["nno_leaders"]
-        nneeds_update = stats["nrequires_update"] + stats["nstale"]
-        cards = [
-            {
-                "title": "Active Projects",
-                "value": f"{nactive:,}",
-                "subtext": f"{ntop:,} top-level · {nactive - ntop:,} sub-projects",
-                "badge_text": (
-                    f"{nreview:,} under review" if nreview else "none in review"
-                ),
-                "badge_theme": "info" if nreview else "secondary",
-                "icon": "bi-kanban",
-                "icon_theme": "success",
-            },
-            {
-                "title": "Team",
-                "value": f"{stats['nusers']:,}",
-                "subtext": f"{stats['nleaders']:,} leader{'s' if stats['nleaders'] != 1 else ''}",
-                "badge_text": (
-                    f"{nno_leaders:,} without leaders" if nno_leaders else "all led"
-                ),
-                "badge_theme": "warning" if nno_leaders else "success",
-                "icon": "bi-people",
-                "icon_theme": "primary",
-            },
-            {
-                "title": "Needs Update",
-                "value": f"{nneeds_update:,}",
-                "subtext": f"{stats['nstale']:,} stale for over a year",
-                "badge_text": f"{stats['ninactive']:,} inactive",
-                "badge_theme": "secondary",
-                "icon": "bi-hourglass-split",
-                "icon_theme": "warning",
-            },
-        ]
-        if show_finances:
-            npending = stats["npending"]
-            cards.append(
-                {
-                    "title": "Project Funds",
-                    "value": f"${stats['usdc_total'] or 0:,.2f}",
-                    "subtext": f"{stats['token_total'] or 0:,.0f} tokens",
-                    "badge_text": (
-                        f"{npending:,} pending" if npending else "none pending"
-                    ),
-                    "badge_theme": "warning" if npending else "success",
-                    "icon": "bi-wallet2",
-                    "icon_theme": "info",
-                }
-            )
-        else:
-            cards.append(
-                {
-                    "title": "Tags",
-                    "value": f"{stats['ntags']:,}",
-                    "subtext": f"{stats['nshared']:,} shared across projects",
-                    "badge_text": f"{stats['ntags'] - stats['nshared']:,} project-specific",
-                    "badge_theme": "secondary",
-                    "icon": "bi-tags",
-                    "icon_theme": "info",
-                }
-            )
-        return cards
 
     @staticmethod
     def get_alerts(

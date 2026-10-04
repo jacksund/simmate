@@ -13,12 +13,12 @@
         </div>
         {# Cancel / shutdown / mark-stale results #}
         {% include "htmx/partials/action_alert.html" %}
-        {# KPI Summary Cards #}
-        {% include "core/basic_elements/summary_cards.html" %}
+        {# Catalogs #}
+        {% include "core/basic_elements/catalogs_card.html" %}
         {# Needs Attention #}
         {% include "core/basic_elements/alerts_card.html" %}
         {# Activity Timeline -- figures are shared with the WorkItem data explorer report #}
-        <div class="card shadow-sm mb-4">
+        <div class="card shadow-sm border-light-subtle mb-4">
             <div class="card-header bg-transparent border-0 d-flex flex-wrap gap-2 justify-content-between align-items-center pt-3 px-3">
                 <div>
                     <h5 class="card-title mb-0 fw-semibold">Activity Timeline</h5>
@@ -60,7 +60,7 @@
         {# Per-workflow health #}
         <div class="row g-3 mb-4">
             <div class="col-12">
-                <div class="card shadow-sm h-100">
+                <div class="card shadow-sm border-light-subtle h-100">
                     <div class="card-header bg-transparent border-0 pt-3 px-3">
                         <h5 class="card-title mb-0 fw-semibold">Workflow Health</h5>
                         <small class="text-muted">Current queue plus finished/failed over the last 7 days</small>
@@ -113,7 +113,7 @@
         <div class="row g-3 mb-4">
             {# Left: Live / Recent Workflow Executions #}
             <div class="col-lg-7">
-                <div class="card shadow-sm h-100">
+                <div class="card shadow-sm border-light-subtle h-100">
                     <div class="card-header bg-transparent border-0 d-flex flex-wrap gap-2 justify-content-between align-items-center pt-3 px-3">
                         <div>
                             <h5 class="card-title mb-0 fw-semibold">Live Calculations</h5>
@@ -182,7 +182,7 @@
             </div>
             {# Right: Workers grouped by host #}
             <div class="col-lg-5">
-                <div class="card shadow-sm h-100">
+                <div class="card shadow-sm border-light-subtle h-100">
                     <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
                         <div>
                             <h5 class="card-title mb-0 fw-semibold">Workers by Host</h5>

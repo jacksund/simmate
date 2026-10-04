@@ -7,9 +7,8 @@ from datetime import datetime, timedelta
 import cloudpickle
 import pandas
 from django.core.exceptions import ValidationError
-from django.db.models import Count, Min, Q
+from django.db.models import Count, Q
 from django.utils import timezone
-from django.utils.timesince import timesince
 
 from simmate.compute import SimmateExecutor, SimmateWorker, WorkItem
 from simmate.compute.worker import STALE_AFTER
@@ -19,8 +18,8 @@ from .work_item import WorkItemComponent
 
 SLOW_REFRESH = timedelta(seconds=60)
 """
-How often the more expensive panels (activity timeline and workflow health
-table) are rebuilt. Everything else updates on every `refresh_interval`.
+How often the more expensive panels (activity timeline, workflow health
+table, and catalog counts) are rebuilt. Everything else updates on every `refresh_interval`.
 """
 
 TIMELINE_PERIODS = {
@@ -46,6 +45,22 @@ STATUS_FILTERS = [
     ("R", "Running"),
     ("P", "Pending"),
     ("E", "Errored"),
+]
+
+CATALOGS = [
+    # (model, title, description, icon)
+    (
+        WorkItem,
+        "Work Items",
+        "Queued, running, and finished tasks submitted to workers",
+        "bi-list-task text-primary",
+    ),
+    (
+        SimmateWorker,
+        "Workers",
+        "Worker processes that poll queues and run work items",
+        "bi-hdd-stack text-success",
+    ),
 ]
 
 
@@ -116,14 +131,6 @@ class ComputeDashboardComponent(HtmxComponent):
             timeline_periods=list(TIMELINE_PERIODS.keys()),
             timeline_views=TIMELINE_VIEWS,
             timeline_limit=TIMELINE_LIMIT,
-            summary_cards=self.get_summary_cards(
-                stats=stats,
-                stats_24h=stats_24h,
-                active_workers=active_workers,
-                nstale=nstale,
-                norphaned=norphaned,
-                nunserved=sum(q["count"] for q in unserved_queues),
-            ),
             alerts=self.get_alerts(
                 stats=stats,
                 stats_24h=stats_24h,
@@ -157,6 +164,16 @@ class ComputeDashboardComponent(HtmxComponent):
                 timeline_figure=report.get(self.timeline_view),
                 timeline_count=len(timeline_df),
                 workflow_health=self.get_workflow_health(),
+                catalogs=[
+                    dict(
+                        table=model.__name__,
+                        title=title,
+                        description=description,
+                        icon=icon,
+                        count=f"{model.objects.count():,}",
+                    )
+                    for model, title, description, icon in CATALOGS
+                ],
             )
             self._slow_context_time = now
         return self._slow_context
@@ -167,91 +184,6 @@ class ComputeDashboardComponent(HtmxComponent):
     # -------------------------------------------------------------------------
     # Data
     # -------------------------------------------------------------------------
-
-    @staticmethod
-    def get_summary_cards(
-        stats: dict,
-        stats_24h: dict,
-        active_workers: list[SimmateWorker],
-        nstale: int,
-        norphaned: int,
-        nunserved: int,
-    ) -> list[dict]:
-        """
-        Builds the KPI cards shown at the top of the dashboard.
-
-        Args:
-            stats: The output of `SimmateExecutor.get_stats()`.
-            stats_24h: Same as `stats`, but limited to the last 24 hours.
-            active_workers: Workers that are active and have a fresh heartbeat.
-            nstale: The number of workers with a stale heartbeat.
-            norphaned: The number of running items on inactive workers.
-            nunserved: The number of pending items no active worker can run.
-
-        Returns:
-            A list of dictionaries, each describing a single card.
-        """
-        nworkers = len(active_workers)
-        nworkers_busy = sum(w.status == "Running" for w in active_workers)
-
-        oldest_pending = WorkItem.objects.filter(status="P").aggregate(
-            oldest=Min("created_at")
-        )["oldest"]
-
-        ndone_24h = stats_24h["nfinished"] + stats_24h["nerrored"]
-
-        return [
-            {
-                "title": "Workers",
-                "value": f"{nworkers:,}",
-                "subtext": f"{nworkers_busy} busy, {nworkers - nworkers_busy} idle",
-                "badge_text": f"{nstale} stale" if nstale else "heartbeats ok",
-                "badge_theme": (
-                    "danger" if nstale else "success" if nworkers else "secondary"
-                ),
-                "icon": "bi-cpu",
-                "icon_theme": "primary",
-            },
-            {
-                "title": "Queue",
-                "value": f"{stats['npending']:,}",
-                "subtext": (
-                    f"oldest waiting {timesince(oldest_pending)}"
-                    if oldest_pending
-                    else "queue is empty"
-                ),
-                "badge_text": (
-                    f"{nunserved:,} unserved" if nunserved else "all served"
-                ),
-                "badge_theme": "warning" if nunserved else "secondary",
-                "icon": "bi-hourglass-split",
-                "icon_theme": "secondary",
-            },
-            {
-                "title": "Running",
-                "value": f"{stats['nrunning']:,}",
-                "subtext": f"{stats['nrunning_long']:,} running >24h",
-                "badge_text": (
-                    f"{norphaned:,} orphaned" if norphaned else "none orphaned"
-                ),
-                "badge_theme": "danger" if norphaned else "secondary",
-                "icon": "bi-gear-wide-connected",
-                "icon_theme": "info",
-            },
-            {
-                "title": "Last 24h",
-                "value": f"{stats_24h['nfinished']:,}",
-                "subtext": (
-                    f"{100 - stats_24h['error_percent']:.1f}% success rate"
-                    if ndone_24h
-                    else "no completed runs"
-                ),
-                "badge_text": f"{stats_24h['nerrored']:,} failed",
-                "badge_theme": ("danger" if stats_24h["nerrored"] else "secondary"),
-                "icon": "bi-check2-circle",
-                "icon_theme": "success",
-            },
-        ]
 
     @staticmethod
     def get_unserved_queues(worker_tags: list[list[str]], limit: int = 5) -> list[dict]:

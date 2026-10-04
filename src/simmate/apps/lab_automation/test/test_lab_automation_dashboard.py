@@ -25,11 +25,7 @@ SENSORS = [
 ]
 
 
-def test_summary_cards_and_alerts():
-    cards = LabDashboardComponent.get_summary_cards()
-    assert len(cards) == 4
-    assert cards[0]["value"] == str(len(TASKS["running"]))
-
+def test_alerts():
     messages = " ".join(a["message"] for a in LabDashboardComponent.get_alerts())
     for task in TASKS["failed"]:
         assert task["name"] in messages
@@ -58,5 +54,6 @@ def test_dashboard_page(client):
     content = response.content.decode()
     assert "Lab Automation" in content
     assert "Task Board" in content
+    assert "People and robots working in the lab" in content
     assert "Hotplate 2" in content
     assert "Ambient Temp" in content

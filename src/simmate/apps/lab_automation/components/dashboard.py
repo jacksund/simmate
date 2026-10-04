@@ -4,7 +4,7 @@ from django.utils import timezone
 
 from simmate.website.htmx.components import HtmxComponent
 
-from .sensors import AmbientTempComponent, HumidityComponent, SimulatedSensorComponent
+from .sensors import SimulatedSensorComponent
 
 # NOTE: everything below is placeholder data until real devices, agents, and
 # task scheduling are connected. The sensor readings are simulated separately
@@ -218,6 +218,43 @@ AGENTS = [
     },
 ]
 
+CATALOGS = [
+    # links are placeholders until these have their own tables
+    {
+        "title": "Devices",
+        "description": "Hotplates, furnaces, and other connected equipment",
+        "icon": "bi-thermometer-high text-danger",
+        "count": len(HOTPLATES),
+        "url": "#",
+    },
+    {
+        "title": "Sensors",
+        "description": "Room and device sensors feeding live readings",
+        "icon": "bi-broadcast text-info",
+        "url": "#",
+    },
+    {
+        "title": "Protocols",
+        "description": "Reusable step-by-step procedures for experiments",
+        "icon": "bi-journal-text text-warning",
+        "url": "#",
+    },
+    {
+        "title": "Tasks",
+        "description": "Scheduled, running, and finished lab tasks",
+        "icon": "bi-list-check text-primary",
+        "count": sum(len(tasks) for tasks in TASKS.values()),
+        "url": "#",
+    },
+    {
+        "title": "Agents",
+        "description": "People and robots working in the lab",
+        "icon": "bi-robot text-success",
+        "count": len(AGENTS),
+        "url": "#",
+    },
+]
+
 AI_SUMMARY = (
     "Current focus is on synthesizing high-purity YBa2Cu3O7 superconductor samples. "
     "Recent XRD results from Batch 11 indicate an optimal calcination profile, so the "
@@ -248,7 +285,7 @@ class LabDashboardComponent(HtmxComponent):
         ctx.update(
             last_updated=timezone.now(),
             sensor_refresh_interval=SimulatedSensorComponent.refresh_interval,
-            summary_cards=self.get_summary_cards(),
+            catalogs=CATALOGS,
             alerts=self.get_alerts(),
             hotplates=HOTPLATES,
             task_columns=self.get_task_columns(),
@@ -260,65 +297,6 @@ class LabDashboardComponent(HtmxComponent):
     # -------------------------------------------------------------------------
     # Data
     # -------------------------------------------------------------------------
-
-    @staticmethod
-    def get_summary_cards() -> list[dict]:
-        """
-        Builds the KPI cards shown at the top of the dashboard.
-
-        Returns:
-            A list of dictionaries, each describing a single card.
-        """
-        nrunning = len(TASKS["running"])
-        nqueued = len(TASKS["scheduled"]) + len(TASKS["preparing"])
-        nfailed = len(TASKS["failed"])
-
-        nactive = sum(a["status"] == "Active" for a in AGENTS)
-        nrobots = sum(a["is_robot"] and a["status"] == "Active" for a in AGENTS)
-        nmaintenance = sum(a["status"] == "Under Maintenance" for a in AGENTS)
-
-        nhotplates = len(HOTPLATES)
-
-        return [
-            {
-                "title": "Running Tasks",
-                "value": f"{nrunning:,}",
-                "subtext": f"{nqueued} scheduled or preparing",
-                "badge_text": f"{nfailed} failed" if nfailed else "none failed",
-                "badge_theme": "danger" if nfailed else "success",
-                "icon": "bi-play-circle",
-                "icon_theme": "primary",
-            },
-            {
-                "title": "Equipment",
-                "value": f"{nhotplates}",
-                "subtext": "hotplates running experiments",
-                "badge_text": "all online",
-                "badge_theme": "success",
-                "icon": "bi-thermometer-high",
-                "icon_theme": "danger",
-            },
-            {
-                "title": "Agents Active",
-                "value": f"{nactive} / {len(AGENTS)}",
-                "subtext": f"{nrobots} robots · {nactive - nrobots} people",
-                "badge_text": (
-                    f"{nmaintenance} in maintenance" if nmaintenance else "all ready"
-                ),
-                "badge_theme": "warning" if nmaintenance else "success",
-                "icon": "bi-robot",
-                "icon_theme": "success",
-            },
-            {
-                "title": "Lab Climate",
-                "value": f"{AmbientTempComponent.target:.1f} °C",
-                "subtext": f"{HumidityComponent.target:.0f}% humidity",
-                "badge_text": "nominal",
-                "badge_theme": "success",
-                "icon": "bi-thermometer-half",
-                "icon_theme": "info",
-            },
-        ]
 
     @staticmethod
     def get_alerts() -> list[dict]:
