@@ -1,0 +1,15 @@
+{# Widget body: the user's most recent notifications #}
+<ul class="list-group list-group-flush small">
+    {% for notification in data.notifications %}
+        <li class="list-group-item d-flex align-items-start gap-2 px-3{% if notification.is_read %} text-muted{% endif %}">
+            <i class="bi {{ notification.icon }} mt-1"></i>
+            <div class="flex-grow-1">
+                <div class="{% if not notification.is_read %}fw-semibold{% endif %}">{{ notification.message }}</div>
+                <div class="text-muted">{{ notification.when }}</div>
+            </div>
+            {% if not notification.is_read %}
+                <span class="badge rounded-pill bg-primary mt-1" title="Unread">&nbsp;</span>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>

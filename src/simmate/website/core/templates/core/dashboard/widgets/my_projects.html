@@ -1,0 +1,15 @@
+{# Widget body: projects the user leads or belongs to #}
+<ul class="list-group list-group-flush small">
+    {% for project in data.projects %}
+        <li class="list-group-item px-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">{{ project.name }}</span>
+                <span class="badge bg-{{ project.status_theme }}-subtle text-{{ project.status_theme }}-emphasis">{{ project.status }}</span>
+            </div>
+            <div class="d-flex justify-content-between text-muted">
+                <span><i class="bi bi-person-badge me-1"></i>{{ project.role }}</span>
+                <span>{{ project.when }}</span>
+            </div>
+        </li>
+    {% endfor %}
+</ul>

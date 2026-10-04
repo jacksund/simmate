@@ -143,6 +143,9 @@ class PriceCatalogConfig(AppConfig):
 
 class ProjectManagementConfig(AppConfig):
     name = "simmate.apps.project_management"
+    verbose_name = "Project Management"
+    description_short = "A dashboard for tracking project status, teams, and funding"
+    app_card_template = "project_management/app_card.html"
 
     def ready(self):
         # signals a wallet creation for new users

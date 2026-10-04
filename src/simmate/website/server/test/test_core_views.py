@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from pytest_django.asserts import assertTemplateUsed
+from pytest_django.asserts import assertTemplateNotUsed, assertTemplateUsed
 
 
 @pytest.mark.django_db
@@ -42,6 +42,19 @@ def test_dashboard_view(client):
     response = client.get("/dashboard/")
     assert response.status_code == 200
     assertTemplateUsed(response, "core/dashboard.html")
+    # signed-out users only see the app summaries and a sign-in prompt
+    assertTemplateNotUsed(response, "core/dashboard/widget_frame.html")
+    assert "Sign in to see your dashboard" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_dashboard_view_signed_in(admin_client):
+    response = admin_client.get("/dashboard/")
+    assert response.status_code == 200
+    assertTemplateUsed(response, "core/dashboard/widget_frame.html")
+    assertTemplateUsed(response, "core/dashboard/widget_catalog.html")
+    for widget in response.context["main_widgets"] + response.context["side_widgets"]:
+        assertTemplateUsed(response, widget["template"])
 
 
 @pytest.mark.django_db
@@ -71,6 +84,13 @@ def test_inventory_management_app_view(client):
     response = client.get("/apps/inventory_management/")
     assert response.status_code == 200
     assertTemplateUsed(response, "inventory_management/home.html")
+
+
+@pytest.mark.django_db
+def test_project_management_app_view(client):
+    response = client.get("/apps/project_management/")
+    assert response.status_code == 200
+    assertTemplateUsed(response, "project_management/home.html")
 
 
 @pytest.mark.django_db

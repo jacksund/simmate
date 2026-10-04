@@ -1,0 +1,12 @@
+{# A single row of the dashboard's project table. Sub-projects (`is_child`) are indented under their parent #}
+<tr>
+    <td class="{% if is_child %}ps-4{% else %}ps-3{% endif %}">
+        {% if is_child %}<i class="bi bi-arrow-return-right text-muted me-1"></i>{% endif %}
+        {% foreign_key_link project display_column="name" %}
+    </td>
+    <td>{% status_badge project.status|default:"No status" project.status_theme %}</td>
+    <td class="text-muted">{{ project.discipline|default:"--" }}</td>
+    <td class="text-end">{{ project.nleaders }}</td>
+    <td class="text-end">{{ project.nmembers }}</td>
+    <td class="pe-3 text-muted text-nowrap">{{ project.updated_at|timesince }} ago</td>
+</tr>

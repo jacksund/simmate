@@ -1,0 +1,38 @@
+{# "Add widget" panel shown in customize mode. Expects `widget_catalog`, a list of {app, widgets} groups #}
+<div id="dashboard-widget-catalog"
+     class="card shadow-sm border-primary border-opacity-50 mb-3 d-none">
+    <div class="card-header bg-transparent border-0 pt-3 px-3">
+        <h6 class="card-title mb-0 fw-semibold">
+            <i class="bi bi-plus-square text-primary me-1"></i> Add Widgets
+        </h6>
+        <small class="text-muted">Preview only: layouts aren't saved yet</small>
+    </div>
+    <div class="card-body pt-2">
+        <div class="row g-3">
+            {% for group in widget_catalog %}
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="text-muted small fw-semibold text-uppercase mb-2">{{ group.app }}</div>
+                    <div class="list-group small">
+                        {% for item in group.widgets %}
+                            <div class="list-group-item d-flex align-items-start justify-content-between gap-2">
+                                <div>
+                                    <div class="fw-semibold">
+                                        <i class="bi {{ item.icon }} me-1"></i> {{ item.title }}
+                                    </div>
+                                    <div class="text-muted">{{ item.description }}</div>
+                                </div>
+                                {% if item.is_active %}
+                                    <span class="badge bg-success-subtle text-success flex-shrink-0">Added</span>
+                                {% else %}
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-primary py-0 flex-shrink-0"
+                                            disabled>Add</button>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,41 @@
+{# Widget body: the user's work item counts and most recent runs #}
+<div class="card-body pt-1 px-3 pb-2">
+    <div class="row g-2 mb-3">
+        {% for count in data.counts %}
+            <div class="col-6 col-md-3">
+                <div class="rounded-3 p-2 text-center bg-{{ count.theme }}-subtle">
+                    <div class="fs-4 fw-bold text-{{ count.theme }}-emphasis lh-1">{{ count.value }}</div>
+                    <div class="small text-{{ count.theme }}-emphasis">{{ count.label }}</div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle small mb-0">
+            <thead>
+                <tr class="text-muted">
+                    <th class="fw-normal">Workflow</th>
+                    <th class="fw-normal">Target</th>
+                    <th class="fw-normal">Status</th>
+                    <th class="fw-normal text-end">Duration</th>
+                    <th class="fw-normal text-end">When</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for run in data.runs %}
+                    <tr>
+                        <td>
+                            <code class="text-body">{{ run.workflow }}</code>
+                        </td>
+                        <td class="fw-semibold">{{ run.target }}</td>
+                        <td>
+                            <span class="badge bg-{{ run.status_theme }}-subtle text-{{ run.status_theme }}-emphasis">{{ run.status }}</span>
+                        </td>
+                        <td class="text-end text-nowrap">{{ run.duration }}</td>
+                        <td class="text-end text-muted text-nowrap">{{ run.when }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

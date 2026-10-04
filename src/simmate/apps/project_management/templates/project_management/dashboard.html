@@ -1,0 +1,187 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    {# Header #}
+    <div class="text-center pt-3 pb-2 mb-4">
+        <h1 class="h2 fw-bold mb-0">
+            <i class="bi bi-kanban me-2"></i>Project Management
+        </h1>
+        <small class="text-muted">Updated {{ last_updated|time:"H:i:s" }} · refreshes every {{ component.refresh_interval }}</small>
+    </div>
+    {# KPI Summary Cards #}
+    {% include "core/basic_elements/summary_cards.html" %}
+    {# Needs Attention #}
+    {% include "core/basic_elements/alerts_card.html" %}
+    {# Projects & My Projects / Disciplines #}
+    <div class="row g-3 mb-4">
+        {# Left: Project Tree #}
+        <div class="col-lg-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
+                    <div>
+                        <h5 class="card-title mb-0 fw-semibold">Projects</h5>
+                        <small class="text-muted">Top-level projects and their sub-projects, most recently updated first</small>
+                    </div>
+                    <a href="{% url 'data_explorer:table' 'Project' %}?order_by=-updated_at"
+                       class="btn btn-outline-secondary btn-sm">
+                        View All <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle mb-0 small">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th class="ps-3">Project</th>
+                                    <th>Status</th>
+                                    <th>Discipline</th>
+                                    <th class="text-end">Leaders</th>
+                                    <th class="text-end">Members</th>
+                                    <th class="pe-3">Updated</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for project in projects %}
+                                    {% include "project_management/dashboard_project_row.html" %}
+                                    {% for child in project.children %}
+                                        {% include "project_management/dashboard_project_row.html" with project=child is_child=True %}
+                                    {% endfor %}
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6"
+                                            class="text-center text-muted py-4">No projects have been created yet.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {# Right: My Projects & Disciplines #}
+        <div class="col-lg-5 d-flex flex-column gap-3">
+            {% if request.user.is_authenticated %}
+                <div class="card shadow-sm">
+                    <div class="card-header bg-transparent border-0 pt-3 px-3">
+                        <h5 class="card-title mb-0 fw-semibold">My Projects</h5>
+                        <small class="text-muted">Projects you lead or are a member of</small>
+                    </div>
+                    <div class="card-body px-3 pb-3">
+                        {% for project in my_projects %}
+                            <a href="{% url 'data_explorer:table-entry' 'Project' project.id %}"
+                               class="d-block text-decoration-none border rounded-3 p-3 mb-2 bg-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-semibold text-body">{{ project.name }}</span>
+                                    <span class="badge {% if project.role == 'Leader' %}bg-primary-subtle text-primary{% else %}bg-secondary-subtle text-secondary{% endif %} small">{{ project.role }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between small text-muted mt-1">
+                                    <span>
+                                        {% status_badge project.status|default:"No status" project.status_theme %}
+                                        {% if project.parent_project %}· in {{ project.parent_project.name }}{% endif %}
+                                    </span>
+                                    <span>{{ project.updated_at|timesince }} ago</span>
+                                </div>
+                            </a>
+                        {% empty %}
+                            <div class="text-center text-muted small py-3">You aren't part of any projects yet.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+            <div class="card shadow-sm flex-grow-1">
+                <div class="card-header bg-transparent border-0 pt-3 px-3">
+                    <h5 class="card-title mb-0 fw-semibold">By Discipline</h5>
+                    <small class="text-muted">Number of projects in each research area</small>
+                </div>
+                <ul class="list-group list-group-flush small">
+                    {% for discipline in disciplines %}
+                        <a href="{% url 'data_explorer:table' 'Project' %}{% if discipline.discipline %}?discipline={{ discipline.discipline|urlencode }}{% else %}?discipline__isnull=true{% endif %}"
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-3">
+                            <span class="fw-semibold">{{ discipline.discipline|default:"Unassigned" }}</span>
+                            <span>
+                                <span class="badge bg-success-subtle text-success">{{ discipline.nactive }} active</span>
+                                <span class="badge bg-secondary-subtle text-secondary">{{ discipline.total }} total</span>
+                            </span>
+                        </a>
+                    {% empty %}
+                        <li class="list-group-item text-center text-muted py-4">No projects have been created yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    {# Recent Transactions #}
+    {% if show_finances %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
+                <div>
+                    <h5 class="card-title mb-0 fw-semibold">Recent Transactions</h5>
+                    <small class="text-muted">Latest funding, transfers, and payments between wallets</small>
+                </div>
+                <a href="{% url 'data_explorer:table' 'Transaction' %}?order_by=-created_at"
+                   class="btn btn-outline-secondary btn-sm">
+                    View All <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle mb-0 small">
+                        <thead class="table-primary">
+                            <tr>
+                                <th class="ps-3">Type</th>
+                                <th>From → To</th>
+                                <th class="text-end">USDC</th>
+                                <th class="text-end">Tokens</th>
+                                <th>Status</th>
+                                <th class="pe-3">When</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in recent_transactions %}
+                                <tr>
+                                    <td class="ps-3">
+                                        {% foreign_key_link transaction display_column="transaction_type" %}
+                                        {% if transaction.transaction_subtype %}<div class="text-muted">{{ transaction.transaction_subtype }}</div>{% endif %}
+                                    </td>
+                                    <td class="text-nowrap">{{ transaction.from_label }} <i class="bi bi-arrow-right text-muted"></i> {{ transaction.to_label }}</td>
+                                    <td class="text-end">{{ transaction.usdc_amount|floatformat:2 }}</td>
+                                    <td class="text-end">{{ transaction.token_amount|floatformat:0 }}</td>
+                                    <td>{% status_badge transaction.status|default:"--" transaction.status_theme %}</td>
+                                    <td class="pe-3 text-muted text-nowrap">{{ transaction.created_at|timesince }} ago</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">No transactions yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {# Catalogs #}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 pt-3 px-3">
+            <h5 class="card-title mb-0 fw-semibold">Project Catalogs</h5>
+            <small class="text-muted">Browse, search, and add to each table</small>
+        </div>
+        <div class="card-body px-3 pb-3">
+            <div class="row g-3">
+                {% for catalog in catalogs %}
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{% url 'data_explorer:table' catalog.table %}"
+                           class="text-decoration-none">
+                            <div class="p-3 border rounded-3 bg-body-tertiary h-100">
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="bi {{ catalog.icon }} fs-4 me-2"></i>
+                                    <h6 class="mb-0 text-body fw-bold">{{ catalog.title }}</h6>
+                                </div>
+                                <small class="text-muted">{{ catalog.description }}</small>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

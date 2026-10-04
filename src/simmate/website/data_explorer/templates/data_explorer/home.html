@@ -18,12 +18,11 @@
 {% block body %}
     {% simmate_setting "website.lock_data_redistribution" as LOCK_DATA_REDISTRIBUTION %}
     {# Header #}
-    <section class="jumbotron text-center py-3">
-        <div class="container">
-            <h1 class="jumbotron-heading">Data Explorer</h1>
-            <p class="lead text-muted">Explore datasets, search across elements, or download data.</p>
-        </div>
-    </section>
+    <div class="text-center pt-3 pb-2 mb-4">
+        <h1 class="h2 fw-bold mb-0">
+            <i class="bi bi-bar-chart me-2"></i>Data Explorer
+        </h1>
+    </div>
     <ul class="nav nav-tabs nav-bordered mb-3">
         <li class="nav-item">
             <a href="#quick-search-section"

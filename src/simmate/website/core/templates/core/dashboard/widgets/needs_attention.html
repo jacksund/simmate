@@ -1,0 +1,24 @@
+{# Widget body: alerts from every app, filtered to the user. Same alert dicts as `core/basic_elements/alerts_card.html`, plus an `app` label #}
+{% if data.alerts %}
+    <ul class="list-group list-group-flush small">
+        {% for alert in data.alerts %}
+            <li class="list-group-item d-flex align-items-center justify-content-between gap-3 px-3">
+                <span class="text-{{ alert.level }}-emphasis">
+                    <i class="bi {{ alert.icon }} text-{{ alert.level }} me-2"></i>
+                    {% if alert.count is not None %}<span class="fw-semibold">{{ alert.count }}</span>{% endif %}
+                    {{ alert.message }}
+                </span>
+                <span class="d-flex align-items-center gap-2 flex-shrink-0">
+                    <span class="badge bg-body-secondary text-body-secondary fw-normal">{{ alert.app }}</span>
+                    <a href="{{ alert.url }}"
+                       class="btn btn-sm btn-outline-{{ alert.level }} py-0">View</a>
+                </span>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <div class="card-body text-center text-muted small">
+        <i class="bi bi-check2-circle text-success fs-4"></i>
+        <div>You're all caught up</div>
+    </div>
+{% endif %}

@@ -1,11 +1,11 @@
 {% load simmate_utils %}
 {% comment %}
 Styled card contents shared by app cards on the Apps page.
-Expects: title, icon, icon_color, tags (comma-separated), description, url, button_text
+Expects: title, icon, tags (comma-separated), description, url, button_text
 {% endcomment %}
 <div class="card-body d-flex flex-column">
     <div class="d-flex align-items-center mb-3">
-        <i class="bi {{ icon }} {{ icon_color }} fs-4 me-2"></i>
+        <i class="bi {{ icon }} text-primary fs-4 me-2"></i>
         <h5 class="card-title mb-0 fw-bold text-dark">{{ title }}</h5>
     </div>
     <div class="d-flex flex-wrap gap-1 mb-3">

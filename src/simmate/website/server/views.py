@@ -13,6 +13,12 @@ from simmate.apps.jarvis.models import JarvisStructure
 from simmate.apps.materials_project.models import MatprojStructure
 from simmate.apps.oqmd.models import OqmdStructure
 from simmate.config import settings
+from simmate.website.core.dashboard import (
+    get_default_widgets,
+    get_platform_pulse,
+    get_quick_actions,
+    get_widget_catalog,
+)
 from simmate.website.core.models import Notification
 from simmate.website.data_explorer.forms import ChemicalSystemForm
 from simmate.website.utils import get_website_apps
@@ -243,137 +249,21 @@ def faqs(request):
 
 def dashboard_default_view(request):
     """
-    Default summary dashboard view providing high-level operational visibility
-    across computational workflows, laboratory automation, chemical inventory,
-    and scientific data catalogs, with links to dedicated app dashboards.
+    Default personal dashboard: a board of widgets showing what needs the
+    signed-in user's attention, their runs, projects, and notifications, plus
+    a compact summary of each app. Currently uses placeholder data (see
+    `simmate.website.core.dashboard`).
     """
-    summary_cards = [
-        {
-            "title": "Compute & Workflows",
-            "value": "42 Active",
-            "subtext": "16 workers online (99.4% success)",
-            "badge_text": "SLURM & Cloud",
-            "badge_theme": "success",
-            "icon": "bi-cpu",
-            "icon_theme": "primary",
-            "link": "/apps/compute/",
-        },
-        {
-            "title": "Chemical Inventory",
-            "value": "4,350 Items",
-            "subtext": "1,280 substances in stock",
-            "badge_text": "18 Locations",
-            "badge_theme": "info",
-            "icon": "bi-box-seam",
-            "icon_theme": "info",
-            "link": "/apps/inventory_management/",
-        },
-        {
-            "title": "Lab Automation",
-            "value": "4 Devices",
-            "subtext": "1 active protocol running",
-            "badge_text": "Nominal",
-            "badge_theme": "success",
-            "icon": "bi-robot",
-            "icon_theme": "success",
-            "link": "/apps/lab_automation/",
-        },
-        {
-            "title": "Data Catalogs",
-            "value": "1.45M Entries",
-            "subtext": "Crystals & molecules across 6 databases",
-            "badge_text": "Synced 10m ago",
-            "badge_theme": "secondary",
-            "icon": "bi-database",
-            "icon_theme": "warning",
-            "link": "/data/",
-        },
-    ]
-
-    recent_activity = [
-        {
-            "domain": "Compute",
-            "domain_badge": "bg-primary-subtle text-primary border border-primary-subtle",
-            "icon": "bi-cpu",
-            "title": "DFT Relaxation started: LiFePO4",
-            "detail": "Run calc-849201 assigned to slurm-node-03 with 32 cores",
-            "time": "4m ago",
-        },
-        {
-            "domain": "Lab Automation",
-            "domain_badge": "bg-danger-subtle text-danger border border-danger-subtle",
-            "icon": "bi-robot",
-            "title": "Hotplate 1 reached 150 °C target",
-            "detail": "Exp: Synthesis of YBa2Cu3O7 transitioned to Step 2 (Hold 80 °C)",
-            "time": "18m ago",
-        },
-        {
-            "domain": "Inventory",
-            "domain_badge": "bg-info-subtle text-info border border-info-subtle",
-            "icon": "bi-box-seam",
-            "title": "Reagent checkout: Lithium Iron Phosphate (25.0 g)",
-            "detail": "Container CNT-4821 checked out by jacksund from Cabinet B-3",
-            "time": "32m ago",
-        },
-        {
-            "domain": "Compute",
-            "domain_badge": "bg-primary-subtle text-primary border border-primary-subtle",
-            "icon": "bi-cpu",
-            "title": "Band Structure calculation completed: CsPbI3",
-            "detail": "Run calc-849198 finished with status Completed (Band gap: 1.73 eV)",
-            "time": "1h ago",
-        },
-        {
-            "domain": "Inventory",
-            "domain_badge": "bg-info-subtle text-info border border-info-subtle",
-            "icon": "bi-box-seam",
-            "title": "Solvent restocked: DMSO 99.9% (100 mL)",
-            "detail": "Container CNT-1904 logged into Flammables Unit 1",
-            "time": "2h ago",
-        },
-        {
-            "domain": "Data Catalogs",
-            "domain_badge": "bg-warning-subtle text-warning border border-warning-subtle",
-            "icon": "bi-database",
-            "title": "Materials Project dataset synchronized",
-            "detail": "1,420 new crystalline structures indexed and validated",
-            "time": "3h ago",
-        },
-    ]
-
-    system_services = [
-        {
-            "name": "HPC SLURM Cluster",
-            "description": "Distributed node partition for heavy calculations",
-            "status": "Operational",
-            "metric": "92% Load (120/128 cores)",
-        },
-        {
-            "name": "Cloud Workers (K8s)",
-            "description": "Autoscaling cloud pods for workflow tasks",
-            "status": "Operational",
-            "metric": "64% Capacity (32/48 cores)",
-        },
-        {
-            "name": "PostgreSQL & RDKit",
-            "description": "Primary relational database and molecular index",
-            "status": "Optimal",
-            "metric": "28% Disk (42 GB / 250 GB)",
-        },
-        {
-            "name": "Redis Broker",
-            "description": "Message queue and caching layer",
-            "status": "Optimal",
-            "metric": "1.1 ms Latency",
-        },
-    ]
-
+    widgets = get_default_widgets() if request.user.is_authenticated else []
     context = {
-        "page_title": "Operations Dashboard",
+        "page_title": "Dashboard",
         "breadcrumbs": ["Dashboard"],
-        "summary_cards": summary_cards,
-        "recent_activity": recent_activity,
-        "system_services": system_services,
+        "summary_cards": get_platform_pulse(),
+        "quick_actions": get_quick_actions(),
+        # the board has a wide main column and a narrow side column
+        "main_widgets": [w for w in widgets if w["column"] == "main"],
+        "side_widgets": [w for w in widgets if w["column"] == "side"],
+        "widget_catalog": get_widget_catalog([w["key"] for w in widgets]),
     }
     template = "core/dashboard.html"
     return render(request, template, context)
