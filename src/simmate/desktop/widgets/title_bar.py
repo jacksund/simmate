@@ -1,32 +1,90 @@
-from PySide6.QtCore import Qt
+from pathlib import Path
+
+from PySide6.QtCore import QRectF, QSize, Qt
+from PySide6.QtGui import QColor, QIcon, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import (
+    QAbstractButton,
     QHBoxLayout,
     QLabel,
-    QMenuBar,
-    QSizePolicy,
-    QToolButton,
     QWidget,
 )
+
+import simmate
 
 # Same teal as the website (see website/core/static/css/simmate.css)
 PRIMARY_COLOR = "#009485"
 PRIMARY_DARKER = "#006b60"
 PRIMARY_LIGHTER = "#00a695"
 
+# Radius (px) of the window's rounded corners.
+CORNER_RADIUS = 10
+
+ICON_PATH = (
+    Path(simmate.__file__).parent
+    / "website"
+    / "core"
+    / "static"
+    / "images"
+    / "simmate-icon.svg"
+)
+
 STYLE = f"""
-#titleBar {{ background: {PRIMARY_COLOR}; }}
-#titleBar QLabel {{ color: white; font-weight: bold; padding: 0 8px; }}
-#titleBar QMenuBar {{ background: transparent; color: white; }}
-#titleBar QMenuBar::item {{ background: transparent; padding: 4px 10px; }}
-#titleBar QMenuBar::item:selected {{ background: {PRIMARY_LIGHTER}; }}
-#titleBar QMenuBar::item:pressed {{ background: {PRIMARY_DARKER}; }}
-#titleBar QToolButton {{
-    color: white; background: transparent; border: none;
-    min-width: 46px; min-height: 32px; font-size: 14px;
-}}
-#titleBar QToolButton:hover {{ background: {PRIMARY_LIGHTER}; }}
-#titleBar QToolButton#closeButton:hover {{ background: #e81123; }}
+#titleBar QLabel {{ color: white; }}
+#titleBar #titleLabel {{ font-weight: bold; padding: 0 12px 0 8px; }}
 """
+
+
+class WindowButton(QAbstractButton):
+    """A minimize, maximize, or close button with a thin line-drawn icon.
+
+    The glyph is painted rather than taken from a font, so it looks the same
+    (and stays crisp) on every OS. Hovering shows a soft rounded highlight, or
+    red for the close button.
+    """
+
+    def __init__(self, kind: str):
+        super().__init__()
+        self.kind = kind  # "minimize", "maximize", "restore", or "close"
+        self.setFixedSize(QSize(40, 28))
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.setCursor(Qt.CursorShape.ArrowCursor)
+        self.setAttribute(Qt.WidgetAttribute.WA_Hover)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        if self.underMouse():
+            if self.kind == "close":
+                color = QColor("#c42b1c" if self.isDown() else "#e81123")
+            else:
+                color = QColor(255, 255, 255, 70 if self.isDown() else 40)
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(color)
+            painter.drawRoundedRect(QRectF(self.rect()).adjusted(2, 2, -2, -2), 6, 6)
+
+        pen = QPen(QColor("white"), 1.3)
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        painter.setPen(pen)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+        center = QRectF(self.rect()).center()
+        size = 10
+        box = QRectF(center.x() - size / 2, center.y() - size / 2, size, size)
+        if self.kind == "minimize":
+            painter.drawLine(box.left(), center.y(), box.right(), center.y())
+        elif self.kind == "maximize":
+            painter.drawRoundedRect(box, 2, 2)
+        elif self.kind == "restore":
+            front = box.adjusted(0, 2, -2, 0)
+            painter.drawRoundedRect(front, 1.5, 1.5)
+            back = QPainterPath()
+            back.moveTo(box.left() + 2, box.top())
+            back.lineTo(box.right(), box.top())
+            back.lineTo(box.right(), box.bottom() - 2)
+            painter.drawPath(back)
+        elif self.kind == "close":
+            painter.drawLine(box.topLeft(), box.bottomRight())
+            painter.drawLine(box.topRight(), box.bottomLeft())
 
 
 class TitleBar(QWidget):
@@ -34,40 +92,50 @@ class TitleBar(QWidget):
 
     The OS draws its own title bar in the system theme (e.g. dark on GNOME), which
     can't be recolored. So the main window hides it and uses this instead. It holds
-    the app name, the menu bar, and min/max/close buttons. Drag it to move the
-    window, and double-click it to maximize.
+    the app icon and name, and min/max/close buttons. Drag it to move
+    the window, and double-click it to maximize.
     """
 
     def __init__(self, window: QWidget):
         super().__init__()
         self.window_ = window
         self.setObjectName("titleBar")
-        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground)
         self.setStyleSheet(STYLE)
+        self.setFixedHeight(40)
 
-        self.menu_bar = QMenuBar()
-        # Menu bars stretch by default, which would cover the bar and block dragging.
-        self.menu_bar.setSizePolicy(
-            QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed
-        )
+        icon = QLabel()
+        icon.setPixmap(QIcon(str(ICON_PATH)).pixmap(22, 22))
+        title = QLabel("Simmate Desktop", objectName="titleLabel")
+
         self._drag_offset = None
 
-        minimize_button = QToolButton(text="—")
+        minimize_button = WindowButton("minimize")
         minimize_button.clicked.connect(window.showMinimized)
-        self.maximize_button = QToolButton(text="☐")
+        self.maximize_button = WindowButton("maximize")
         self.maximize_button.clicked.connect(self.toggle_maximized)
-        close_button = QToolButton(text="✕", objectName="closeButton")
+        close_button = WindowButton("close")
         close_button.clicked.connect(window.close)
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        layout.addWidget(QLabel("Simmate"))
-        layout.addWidget(self.menu_bar, alignment=Qt.AlignmentFlag.AlignVCenter)
+        layout.setContentsMargins(12, 0, 6, 0)
+        layout.setSpacing(2)
+        layout.addWidget(icon)
+        layout.addWidget(title)
         layout.addStretch()
         for button in [minimize_button, self.maximize_button, close_button]:
-            button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
             layout.addWidget(button)
+
+    def paintEvent(self, event):
+        # Teal background with rounded top corners (square when maximized, so it
+        # meets the screen edges).
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        radius = 0 if self.window_.isMaximized() else CORNER_RADIUS
+        rect = QRectF(self.rect())
+        path = QPainterPath()
+        path.addRoundedRect(rect.adjusted(0, 0, 0, radius), radius, radius)
+        painter.setClipRect(rect)
+        painter.fillPath(path, QColor(PRIMARY_COLOR))
 
     def toggle_maximized(self):
         if self.window_.isMaximized():
@@ -77,7 +145,11 @@ class TitleBar(QWidget):
 
     def update_maximize_button(self):
         """Call when the window's state changes so the icon reflects it."""
-        self.maximize_button.setText("❐" if self.window_.isMaximized() else "☐")
+        self.maximize_button.kind = (
+            "restore" if self.window_.isMaximized() else "maximize"
+        )
+        self.maximize_button.update()
+        self.update()
 
     def mousePressEvent(self, event):
         if event.button() != Qt.MouseButton.LeftButton:

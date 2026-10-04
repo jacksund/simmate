@@ -1,20 +1,39 @@
 # -*- coding: utf-8 -*-
 
-from PySide6.QtCore import QEvent, Qt
-from PySide6.QtGui import QAction, QKeySequence
+from PySide6.QtCore import QEvent, QRectF, Qt
+from PySide6.QtGui import QAction, QIcon, QKeySequence, QPainter, QPainterPath
 from PySide6.QtWidgets import QMainWindow, QTabWidget
 
-from simmate.desktop.tabs import DashboardTab, ViewportTab
+from simmate.desktop.tabs import DashboardTab, PlaceholderTab
 from simmate.desktop.widgets import TitleBar
+from simmate.desktop.widgets.title_bar import (
+    CORNER_RADIUS,
+    ICON_PATH,
+    PRIMARY_COLOR,
+)
 
 # Width (px) of the invisible border you can drag to resize the window.
 RESIZE_MARGIN = 5
+
+# Flat tabs with a teal underline on the selected one. Set on the window, so it
+# also covers tab widgets nested inside the tabs.
+TAB_STYLE = f"""
+QTabWidget::pane {{ border: none; border-top: 1px solid palette(mid); top: -1px; }}
+QTabWidget::tab-bar {{ left: 8px; }}
+QTabBar::tab {{
+    background: transparent; color: #5f6368;
+    border: none; border-bottom: 2px solid transparent;
+    padding: 8px 16px; margin-right: 4px; font-weight: 600;
+}}
+QTabBar::tab:hover {{ color: palette(text); border-bottom-color: palette(mid); }}
+QTabBar::tab:selected {{ color: {PRIMARY_COLOR}; border-bottom-color: {PRIMARY_COLOR}; }}
+"""
 
 
 class MainWindow(QMainWindow):
     """
     The top-level window of the Simmate desktop app. It holds each tab and
-    owns the menu and status bar.
+    owns the status bar.
 
     The window is frameless so it can use our own teal `TitleBar`. Without the
     OS frame, it handles resizing itself through a thin margin around its edges.
@@ -22,11 +41,17 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Simmate")
+        self.setWindowTitle("Simmate Desktop")
+        self.setWindowIcon(QIcon(str(ICON_PATH)))
         self.resize(1400, 900)
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
+        # A see-through window lets us round its corners in paintEvent. The resize
+        # margin stays invisible but still catches the mouse.
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setMouseTracking(True)  # so the cursor changes over the resize margin
         self.setContentsMargins(*[RESIZE_MARGIN] * 4)
+
+        self.setStyleSheet(TAB_STYLE)
 
         self.title_bar = TitleBar(self)
         self.setMenuWidget(self.title_bar)
@@ -34,21 +59,39 @@ class MainWindow(QMainWindow):
         tabs = QTabWidget()
         for tab, title in [
             (DashboardTab(), "Dashboard"),
-            (ViewportTab(), "3D"),
+            (PlaceholderTab("Toolkit"), "Toolkit"),
+            (PlaceholderTab("Datastores"), "Datastores"),
+            (PlaceholderTab("Workers"), "Workers"),
+            (PlaceholderTab("Settings"), "Settings"),
         ]:
             # Each tab reports what it's doing via a signal; the window owns the status bar.
             tab.status.connect(self.statusBar().showMessage)
             tabs.addTab(tab, title)
         self.setCentralWidget(tabs)
 
-        self._build_menu()
+        # The window shows a resize cursor over its margin. Give its children a
+        # normal arrow so they don't inherit that cursor once the mouse moves in.
+        for child in [self.title_bar, tabs, self.statusBar()]:
+            child.setCursor(Qt.CursorShape.ArrowCursor)
+
+        self._add_shortcuts()
         self.statusBar().showMessage("Ready")
 
-    def _build_menu(self):
+    def _add_shortcuts(self):
         quit_action = QAction("&Quit", self)
         quit_action.setShortcut(QKeySequence.StandardKey.Quit)
         quit_action.triggered.connect(self.close)
-        self.title_bar.menu_bar.addMenu("&File").addAction(quit_action)
+        self.addAction(quit_action)
+
+    def paintEvent(self, event):
+        # Fill the area inside the resize margin with the normal window color,
+        # rounding the corners unless maximized.
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        radius = 0 if self.isMaximized() else CORNER_RADIUS
+        path = QPainterPath()
+        path.addRoundedRect(QRectF(self.contentsRect()), radius, radius)
+        painter.fillPath(path, self.palette().window())
 
     def changeEvent(self, event):
         if event.type() == QEvent.Type.WindowStateChange:
