@@ -7,7 +7,9 @@ import typer
 from rich import print
 from typer import Context
 
-workflows_app = typer.Typer(rich_markup_mode="markdown")
+from simmate.command_line.utilities import AlphabeticalGroup
+
+workflows_app = typer.Typer(rich_markup_mode="markdown", cls=AlphabeticalGroup)
 
 
 @workflows_app.callback(no_args_is_help=True)

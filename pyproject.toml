@@ -77,6 +77,13 @@ dev = [
     "mkdocstrings-python>=2.0.3,<3.0.0",
     # IDE
     "spyder-kernels==3.1.*",
+    # Exe builds
+    "pyinstaller>=6.22.3",
+]
+desktop = [
+    "pyopengl>=3.1.10",
+    "pyqtgraph>=0.14.0",
+    "pyside6>=6.11.2",
 ]
 # App-specific deps
 baderkit = [
