@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import threading
 import time
 import traceback
+from contextlib import ContextDecorator
+from datetime import timedelta
 
 import cloudpickle
 from django.contrib.auth.models import User
-from django.db import transaction
+from django.db import connection, transaction
+from django.utils import timezone
 from rich import print
 
 from simmate.database.core import DatabaseTable, table_column
@@ -27,6 +31,19 @@ HEADER_ART = r"""
 =====================================================================
 """
 
+ACTIVE_STATUSES = ["Setting Up", "Idle", "Running"]
+
+HEARTBEAT_INTERVAL = 60
+"""
+Seconds between heartbeats while a worker is busy running a WorkItem.
+"""
+
+STALE_AFTER = timedelta(minutes=5)
+"""
+An active worker that hasn't checked in for this long is considered stale
+(e.g. it was killed by SLURM, OOM, or a node failure).
+"""
+
 
 class SimmateWorker(DatabaseTable):
     """
@@ -35,8 +52,8 @@ class SimmateWorker(DatabaseTable):
     """
 
     class Meta:
-        app_label = "workflow_explorer"
-        db_table = "workflow_engine__workers"
+        app_label = "compute_management"
+        db_table = "compute__workers"
 
     # -------------------------------------------------------------------------
 
@@ -50,7 +67,7 @@ class SimmateWorker(DatabaseTable):
         "Crashed",
     ]
     status = table_column.CharField(
-        max_length=10,
+        max_length=20,
         blank=True,
         null=True,
     )
@@ -165,7 +182,7 @@ class SimmateWorker(DatabaseTable):
                 self.tags = ["simmate"]
 
             # save worker entry to database
-            self.status = "Setting up"
+            self.status = "Setting Up"
             self.save()  # creates initial object
 
             # print the header in the console to let the user know the worker started
@@ -209,6 +226,10 @@ class SimmateWorker(DatabaseTable):
                     self.save(update_fields=["status", "updated_at"])
                     return
 
+                # check if a shutdown was requested (e.g. from the web UI)
+                if self.check_shutdown_flag():
+                    return
+
                 # check the length of the queue and while it is empty, we want to
                 # loop. The exception of looping endlessly is if we want the worker
                 # to shutdown instead.
@@ -218,6 +239,9 @@ class SimmateWorker(DatabaseTable):
                     self.status = "Idle"
                     self.save(update_fields=["status", "updated_at"])
                     time.sleep(self.waittime_on_empty_queue)
+
+                    if self.check_shutdown_flag():
+                        return
 
                     # This is a special condition where we may want to close the
                     # worker if the queue stays empty
@@ -258,7 +282,10 @@ class SimmateWorker(DatabaseTable):
                     # worker tries to grab the same WorkItem
                     workitem.status = "R"
                     workitem.worker = self
-                    workitem.save(update_fields=["status", "worker", "updated_at"])
+                    workitem.started_at = timezone.now()
+                    workitem.save(
+                        update_fields=["status", "worker", "started_at", "updated_at"]
+                    )
 
                 # Print out the job ID that is being ran for the user to see
                 logging.info(f"Running WorkItem with id {workitem.id}")
@@ -268,9 +295,11 @@ class SimmateWorker(DatabaseTable):
                 args = cloudpickle.loads(workitem.args)
                 kwargs = cloudpickle.loads(workitem.kwargs)
 
-                # Try running the WorkItem
+                # Try running the WorkItem. A heartbeat thread keeps our
+                # `updated_at` fresh so long jobs aren't mistaken for dead workers.
                 try:
-                    result = fxn(*args, **kwargs)
+                    with WorkerHeartbeat(worker_id=self.id):
+                        result = fxn(*args, **kwargs)
                 # if it fails, we want to "capture" the error and return it
                 # rather than have the Worker fail itself.
                 except Exception as exception:
@@ -338,43 +367,101 @@ class SimmateWorker(DatabaseTable):
         )
         return queue_size
 
+    def check_shutdown_flag(self) -> bool:
+        """
+        Reloads `shutdown_flag` from the database and, if it is set, marks this
+        worker as stopped.
 
-# -----------------------------------------------------------------------------
+        Returns:
+            True if the worker should shut down.
+        """
+        self.refresh_from_db(fields=["shutdown_flag"])
+        if not self.shutdown_flag:
+            return False
+        logging.info("Shutdown was requested for this worker. Shutting down.")
+        self.status = "Stopped"
+        self.save(update_fields=["status", "updated_at"])
+        return True
 
-# Typically workers have a heartbeat thread that can separately check in with
-# the database so that users can see it is still up and running. However,
-# this introduces context switching and other complexities that I would like
-# to avoid with DFT programs on HPC. It's much cleaner to have a single python
-# thread. If time tests show heartbeat threads are a non-issue, I can use
-# a decorator like this:
-#
-# import threading
-# from contextlib import ContextDecorator
-#
-# class worker_heartbeat(ContextDecorator):
-#     # then add to method with...     @worker_heartbeat(interval=300)
-#
-#     def __init__(self, interval=5):
-#         self.interval = interval
-#         self.stop_signal = threading.Event()
-#         self.thread = None
-#
-#     def _heartbeat_logic(self):
-#         while not self.stop_signal.is_set():
-#             logging.info("heartbeat is active")  # or ping database
-#             self.stop_signal.wait(timeout=self.interval)
-#
-#     def __enter__(self):
-#         self.stop_signal.clear()
-#         self.thread = threading.Thread(
-#             target=self._heartbeat_logic,
-#             daemon=True,  # ensures thread exit when main thread errors
-#         )
-#         self.thread.start()
-#         return self
-#
-#     def __exit__(self, exc_type, exc_val, exc_tb):
-#         self.stop_signal.set()
-#         if self.thread:
-#             self.thread.join()
-#         logging.info("heartbeat stopped")
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_active(cls):
+        """
+        Workers that are active and have checked in recently.
+        """
+        return cls.objects.filter(
+            status__in=ACTIVE_STATUSES,
+            updated_at__gte=timezone.now() - STALE_AFTER,
+        )
+
+    @classmethod
+    def get_stale(cls):
+        """
+        Workers that claim to be active but haven't checked in within
+        `STALE_AFTER`. These have most likely been killed without a clean
+        shutdown.
+        """
+        return cls.objects.filter(
+            status__in=ACTIVE_STATUSES,
+            updated_at__lt=timezone.now() - STALE_AFTER,
+        )
+
+    @classmethod
+    def mark_stale_workers(cls) -> int:
+        """
+        Sets the status of all stale workers to "Stale Heartbeat". Any WorkItems
+        these workers were running are left untouched, but can be found with
+        `WorkItem.objects.filter(status="R", worker__status="Stale Heartbeat")`.
+
+        Returns:
+            The number of workers updated.
+        """
+        return cls.get_stale().update(
+            status="Stale Heartbeat",
+            updated_at=timezone.now(),
+        )
+
+
+class WorkerHeartbeat(ContextDecorator):
+    """
+    Runs a background thread that periodically bumps a worker's `updated_at`
+    column while the main thread is busy running a WorkItem.
+
+    Failures are logged but never raised, so a flaky database connection will
+    not kill the WorkItem.
+    """
+
+    def __init__(self, worker_id: int, interval: float = HEARTBEAT_INTERVAL):
+        self.worker_id = worker_id
+        self.interval = interval
+        self.stop_signal = threading.Event()
+        self.thread = None
+
+    def _heartbeat_logic(self):
+        try:
+            while not self.stop_signal.wait(timeout=self.interval):
+                try:
+                    SimmateWorker.objects.filter(pk=self.worker_id).update(
+                        updated_at=timezone.now()
+                    )
+                except Exception as error:
+                    logging.warning(f"Worker heartbeat failed: {error}")
+        finally:
+            # each thread gets its own db connection, so close it on exit
+            connection.close()
+
+    def __enter__(self):
+        self.stop_signal.clear()
+        self.thread = threading.Thread(
+            target=self._heartbeat_logic,
+            daemon=True,  # ensures thread exit when main thread errors
+        )
+        self.thread.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop_signal.set()
+        if self.thread:
+            self.thread.join()
+        return False

@@ -1,0 +1,12 @@
+{# Widget body: pinned and recently visited pages #}
+<div class="list-group list-group-flush small">
+    {% for page in data.pages %}
+        <a href="{{ page.url }}"
+           class="list-group-item list-group-item-action d-flex align-items-center gap-2 px-3">
+            <i class="bi {{ page.icon }} text-muted"></i>
+            <span class="flex-grow-1 text-truncate">{{ page.title }}</span>
+            {% if page.is_pinned %}<i class="bi bi-pin-angle-fill text-warning" title="Pinned"></i>{% endif %}
+            <span class="text-muted text-nowrap">{{ page.when }}</span>
+        </a>
+    {% endfor %}
+</div>

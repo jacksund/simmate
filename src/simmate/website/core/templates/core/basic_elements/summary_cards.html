@@ -1,0 +1,26 @@
+{# KPI cards for the top of a dashboard. Each card in `summary_cards` is a dict with title, value, subtext, badge_text, badge_theme (bootstrap color), icon, icon_theme (bootstrap color), and an optional link #}
+<div class="row g-3 mb-4">
+    {% for card in summary_cards %}
+        <div class="col-12 col-sm-6 col-lg-3">
+            {% if card.link %}<a href="{{ card.link }}" class="text-decoration-none">{% endif %}
+            <div class="card shadow-sm border-light-subtle h-100{% if card.link %} hover-shadow{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted small fw-semibold text-uppercase">{{ card.title }}</span>
+                        {% status_badge card.badge_text card.badge_theme %}
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fs-2 fw-bold text-body lh-1 mb-1">{{ card.value }}</div>
+                            <div class="text-muted small">{{ card.subtext }}</div>
+                        </div>
+                        <div class="rounded-3 p-3 bg-{{ card.icon_theme }}-subtle text-{{ card.icon_theme }}">
+                            <i class="bi {{ card.icon }} fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% if card.link %}</a>{% endif %}
+        </div>
+    {% endfor %}
+</div>

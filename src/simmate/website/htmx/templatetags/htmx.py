@@ -114,7 +114,8 @@ def htmx_refresh(
 ):
     method_kwargs = urllib.parse.urlencode(method_kwargs)
     component = context.get("component")
-    trigger = f"every {refresh_loop}"
+    # skip polling while the browser tab is hidden
+    trigger = f"every {refresh_loop} [document.visibilityState === 'visible']"
     return locals()
 
 
@@ -611,6 +612,7 @@ def htmx_plotly_figure(
     stream_method: str = "get_new_data",
     stream_interval: int = None,
     max_points: int = 10000,
+    show_modebar: bool = True,
 ):
     """
     Converts a plotly figure object to an html element for the frontend.
@@ -626,6 +628,7 @@ def htmx_plotly_figure(
         full_html=False,
         include_plotlyjs=False,
         div_id=div_id,
+        config=None if show_modebar else {"displayModeBar": False},
     )
 
     # The htmx_post template tag expects a python dictionary for method_kwargs.

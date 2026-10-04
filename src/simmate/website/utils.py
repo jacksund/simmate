@@ -244,3 +244,42 @@ def parse_request_get(
         if group_filters
         else {**url_get_args, **extra_kwargs}
     )
+
+
+BUILTIN_WEBSITE_APPS = ["simmate.website.configs.ComputeManagementConfig"]
+"""
+Built-in website apps that are exposed under `apps/` alongside `settings.apps`.
+"""
+
+
+def get_website_apps() -> list[dict]:
+    """
+    Returns every app that supplies a `urls` module and should be served on
+    this server, including its url namespace and route prefix.
+
+    Apps can set `url_prefix` on their AppConfig to change the route (it
+    defaults to the app's module name, which is also always the namespace).
+    """
+    # local import to avoid circular imports during django setup
+    from simmate.config import settings
+    from simmate.utils import get_app_submodule, get_class
+
+    website_apps = []
+    for app_name in [*BUILTIN_WEBSITE_APPS, *settings.apps]:
+        urls_path = get_app_submodule(app_name, "urls")
+        if not urls_path:
+            continue
+        app_config = get_class(app_name)
+        # some apps (e.g. dev tools) should never be exposed on a production server
+        if getattr(app_config, "debug_only", False) and not settings.website.debug:
+            continue
+        namespace = urls_path.split(".")[-2]
+        website_apps.append(
+            {
+                "config": app_config,
+                "urls_path": urls_path,
+                "namespace": namespace,
+                "url_prefix": getattr(app_config, "url_prefix", namespace),
+            }
+        )
+    return website_apps

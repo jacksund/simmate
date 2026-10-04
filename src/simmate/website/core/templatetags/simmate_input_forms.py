@@ -147,6 +147,15 @@ def status_bar(
     return locals()
 
 
+@register.inclusion_tag(filename="core/basic_elements/status_badge.html")
+def status_badge(
+    text: str,
+    theme: str = "secondary",
+    icon: str = None,
+):
+    return locals()
+
+
 @register.inclusion_tag(
     filename="core/basic_elements/table_header.html",
     takes_context=True,

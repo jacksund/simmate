@@ -1,0 +1,41 @@
+{# Shared WorkItem table cells (data explorer + compute dashboard) -- expects `entry` #}
+{# Column order: ID | Workflow | Status | Elapsed | Worker #}
+<td>{% foreign_key_link entry "id" truncate_chars=10 %}</td>
+<td>
+    <code>{{ entry.workflow_name }}</code>
+    {# only set by views that load errors (e.g. the compute dashboard) #}
+    {% if entry.error_message %}
+        <div class="text-danger font-monospace text-break small">{{ entry.error_message }}</div>
+    {% endif %}
+</td>
+<td>
+    {% if entry.status == "P" %}
+        {% status_bar "Pending" "secondary" %}
+    {% elif entry.status == "R" %}
+        {% status_bar "Running" "primary" %}
+    {% elif entry.status == "C" %}
+        {% status_bar "Cancelled" "warning" %}
+    {% elif entry.status == "E" %}
+        {% status_bar "Errored" "danger" %}
+    {% elif entry.status == "F" %}
+        {% status_bar "Finished" "success" %}
+    {% endif %}
+</td>
+<td class="text-muted text-nowrap">
+    {% if entry.status == "R" %}
+        {{ entry.updated_at|timesince }}
+    {% elif entry.status == "P" %}
+        queued {{ entry.created_at|timesince }}
+    {% else %}
+        {{ entry.created_at|timesince:entry.updated_at }}
+    {% endif %}
+</td>
+<td>
+    {% if entry.worker and entry.worker.computer_system %}
+        {% foreign_key_link entry.worker "computer_system" %}
+    {% elif entry.worker %}
+        {% foreign_key_link entry.worker %}
+    {% else %}
+        -
+    {% endif %}
+</td>

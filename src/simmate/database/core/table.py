@@ -127,6 +127,32 @@ class DatabaseTable(models.Model, ArchiveMixin):
         return cls._meta.get_fields()
 
     @classmethod
+    def get_estimated_count(cls) -> int:
+        """
+        Gives the number of rows in this table without a full `COUNT(*)`, which
+        is far too slow for massive tables. On Postgres, this uses the planner's
+        row estimate (updated by autovacuum/ANALYZE). Other backends fall back
+        to an exact count, as these are only used for small, local databases.
+
+        Returns:
+            The (estimated) number of rows.
+        """
+        if settings.database_backend == "postgresql":
+            from django.db import connection
+
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT reltuples::bigint FROM pg_class WHERE oid = %s::regclass",
+                    [cls._meta.db_table],
+                )
+                row = cursor.fetchone()
+            # -1 (or 0) means the table hasn't been analyzed yet, which only
+            # happens for new (and therefore small) tables
+            if row and row[0] > 0:
+                return row[0]
+        return cls.objects.count()
+
+    @classmethod
     def get_column_names(
         cls,
         include_parents: bool = True,

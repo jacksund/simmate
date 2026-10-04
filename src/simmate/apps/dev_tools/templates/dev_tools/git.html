@@ -1,0 +1,262 @@
+{% extends "htmx/form_base.html" %}
+{% load htmx %}
+{% block form %}
+    {# hx-target/include/swap are inherited by every hx-post element below #}
+    <div class="card shadow-sm"
+         hx-target="#{{ component.component_id }}"
+         hx-include="#{{ component.component_id }}"
+         hx-swap="outerHTML settle:0">
+        {# Card header: branch, staged/unstaged badge counts, and actions #}
+        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
+            <div>
+                <h5 class="card-title mb-0 fw-semibold">
+                    <i class="bi bi-git text-warning me-1"></i> Git
+                </h5>
+                {% if available %}
+                    <small class="text-muted font-monospace">
+                        <i class="bi bi-signpost-2 me-1"></i>{{ branch }}
+                    </small>
+                {% endif %}
+            </div>
+            {% if available %}
+                <div class="d-flex align-items-center gap-2">
+                    {% if is_clean %}
+                        <span class="badge bg-success-subtle text-success border border-success small">
+                            <i class="bi bi-check-circle me-1"></i> Clean
+                        </span>
+                    {% else %}
+                        {% if has_staged %}
+                            <span class="badge bg-success-subtle text-success border border-success small">
+                                <i class="bi bi-check2 me-1"></i>{{ staged_files|length }} staged
+                            </span>
+                        {% endif %}
+                        {% if unstaged_files %}
+                            <span class="badge bg-warning-subtle text-warning border border-warning small">
+                                <i class="bi bi-pencil me-1"></i>{{ unstaged_files|length }} unstaged
+                            </span>
+                        {% endif %}
+                    {% endif %}
+                    {# All-branches dropdown #}
+                    <div class="dropdown">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary py-0 dropdown-toggle"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                title="Branches">
+                            <i class="bi bi-signpost-split"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm small"
+                            style="max-height: 400px;
+                                   overflow-y: auto">
+                            <li>
+                                <h6 class="dropdown-header">Local</h6>
+                            </li>
+                            {% for name in branches.local %}
+                                <li>
+                                    <button type="button"
+                                            class="dropdown-item font-monospace small {% if name == branch %}active{% endif %}"
+                                            {% if name == branch %}disabled{% endif %}
+                                            hx-post="{% url 'htmx:component_method' component.component_id 'checkout' %}?branch=%22{{ name|urlencode }}%22">
+                                        <i class="bi bi-git me-1"></i>{{ name }}
+                                    </button>
+                                </li>
+                            {% empty %}
+                                <li>
+                                    <span class="dropdown-item-text text-muted">None</span>
+                                </li>
+                            {% endfor %}
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <h6 class="dropdown-header">Remote</h6>
+                            </li>
+                            {% for name in branches.remote %}
+                                <li>
+                                    <button type="button"
+                                            class="dropdown-item font-monospace small"
+                                            hx-post="{% url 'htmx:component_method' component.component_id 'checkout' %}?branch=%22{{ name|urlencode }}%22">
+                                        <i class="bi bi-cloud me-1"></i>{{ name }}
+                                    </button>
+                                </li>
+                            {% empty %}
+                                <li>
+                                    <span class="dropdown-item-text text-muted">None</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary py-0 flex-shrink-0"
+                            hx-post="{% url 'htmx:component_method' component.component_id 'fetch' %}"
+                            title="git fetch --all --prune">
+                        {% include "dev_tools/partials/spinner.html" %}
+                        <i class="bi bi-cloud-download"></i>
+                    </button>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary py-0 flex-shrink-0"
+                            hx-post="{% url 'htmx:component_method' component.component_id 'refresh' %}"
+                            title="Refresh git status">
+                        {% include "dev_tools/partials/spinner.html" %}
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary py-0 flex-shrink-0"
+                            hx-post="{% url 'htmx:component_method' component.component_id 'lint' %}">
+                        {% include "dev_tools/partials/spinner.html" with extra_class="me-1" %}
+                        <i class="bi bi-check2-all me-1"></i>Lint
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+        {# Checkout / fetch results #}
+        {% include "htmx/partials/action_alert.html" %}
+        {# Top: commit graph | file list + commit #}
+        <div class="card-body p-0 border-top" style="height: 480px;">
+            <div class="row g-0 h-100">
+                {# Left panel: commit graph #}
+                {% if available %}
+                    <div class="col-lg-6 border-end d-flex flex-column"
+                         style="min-width: 0;
+                                height: 100%">{% include "dev_tools/git_log_panel.html" %}</div>
+                {% endif %}
+                {# Right panel: file list + commit #}
+                <div class="col-lg-6 d-flex flex-column"
+                     style="min-width: 0;
+                            height: 100%">
+                    {% if not available %}
+                        <div class="d-flex align-items-center justify-content-center flex-grow-1 text-muted">
+                            <div class="text-center py-4">
+                                <i class="bi bi-x-circle fs-3 mb-2 d-block"></i>
+                                <small>git not found or not in a repository</small>
+                            </div>
+                        </div>
+                    {% else %}
+                        {# Dirstat #}
+                        {% if dirstat %}
+                            <div class="px-2 pt-1 pb-1 border-bottom flex-shrink-0">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <small class="text-uppercase fw-semibold text-muted"
+                                           style="font-size: 0.63rem;
+                                                  letter-spacing: 0.06em">Changed Dirs</small>
+                                </div>
+                                {% for stat in dirstat %}
+                                    <div class="d-flex align-items-center gap-2 mb-1" style="line-height: 1;">
+                                        <span class="flex-shrink-0 fw-semibold font-monospace"
+                                              style="font-size: 0.63rem;
+                                                     width: 2.2rem;
+                                                     color: var(--bs-warning-text-emphasis)">{{ stat.pct|floatformat:0 }}%</span>
+                                        <div class="flex-grow-1" style="min-width: 0;">
+                                            <div class="progress rounded-pill" style="height: 3px;">
+                                                <div class="progress-bar bg-warning"
+                                                     style="width: {{ stat.pct|floatformat:0 }}%"></div>
+                                            </div>
+                                        </div>
+                                        <span class="font-monospace text-muted text-truncate flex-shrink-1"
+                                              style="font-size: 0.63rem;
+                                                     min-width: 0;
+                                                     max-width: 55%"
+                                              title="{{ stat.path }}">{{ stat.path }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        {% include "dev_tools/partials/git_file_section.html" with label="Unstaged" files=unstaged_files view="unstaged" empty_text="No unstaged changes" section_class="" file_method="stage_file" file_title="Stage file" all_method="stage_all" all_title="Stage all" icon="plus-circle-fill" color="#3fb950" %}
+                        {% include "dev_tools/partials/git_file_section.html" with label="Staged" files=staged_files view="staged" empty_text="No staged changes" section_class="border-top" file_method="unstage_file" file_title="Unstage file" all_method="unstage_all" all_title="Unstage all" icon="dash-circle-fill" color="#f85149" %}
+                        {# Commit box #}
+                        <div class="border-top px-2 py-2 flex-shrink-0">
+                            {% if component.commit_error %}
+                                <div class="alert alert-danger py-1 px-2 mb-2 small rounded-1">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>{{ component.commit_error }}
+                                </div>
+                            {% endif %}
+                            <form {% htmx_post trigger="submit" method_name="commit" %}>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="text"
+                                           name="commit_message"
+                                           class="form-control form-control-sm font-monospace"
+                                           style="font-size: 0.78rem"
+                                           placeholder="Commit message…"
+                                           value="{{ component.form_data.commit_message|default:'' }}"
+                                           {% if not has_staged %}disabled{% endif %}
+                                           oninput="this.closest('form').querySelector('[type=submit]').disabled = !this.value.trim()"
+                                           required>
+                                    <button type="submit"
+                                            class="btn btn-sm btn-success flex-shrink-0"
+                                            disabled
+                                            title="{% if not has_staged %}Stage files first{% else %}Commit staged files{% endif %}">
+                                        <i class="bi bi-check2 me-1"></i>Commit{% if staged_files %} <span class="badge bg-success-emphasis ms-1">{{ staged_files|length }}</span>{% endif %}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {# Bottom: full-width diff viewer (compact until there is something to show) #}
+        <div class="border-top d-flex flex-column"
+             style="{% if component.selected_file or component.lint_output %}height: 600px;
+                    {% endif %}">
+            <div class="px-3 pt-3 pb-1 flex-shrink-0 d-flex align-items-center justify-content-between">
+                <small class="text-uppercase text-muted fw-semibold section-label">
+                    {% if not component.selected_file and component.lint_output %}Lint Output{% else %}Diff Viewer{% endif %}
+                </small>
+            </div>
+            <div class="flex-grow-1 border-top mx-3 mb-3 d-flex flex-column"
+                 style="min-height: 0;
+                        overflow: hidden">
+                {% if component.selected_file %}
+                    {# File header with stage/unstage button #}
+                    <div class="d-flex align-items-center justify-content-between gap-2 px-2 py-1 border-bottom flex-shrink-0">
+                        <span class="font-monospace small text-muted text-truncate flex-grow-1"
+                              title="{{ component.selected_file }}">
+                            <i class="bi bi-file-diff me-1"></i>{{ component.selected_file }}
+                        </span>
+                        {% if show_unstage_btn %}
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-warning py-0 flex-shrink-0"
+                                    hx-post="{% url 'htmx:component_method' component.component_id 'unstage_file' %}">
+                                <i class="bi bi-dash-circle me-1"></i>Unstage
+                            </button>
+                        {% elif show_stage_btn %}
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-success py-0 flex-shrink-0"
+                                    hx-post="{% url 'htmx:component_method' component.component_id 'stage_file' %}">
+                                <i class="bi bi-plus-circle me-1"></i>Stage
+                            </button>
+                        {% endif %}
+                    </div>
+                    {# Diff content #}
+                    <div class="flex-grow-1"
+                         style="overflow-y: auto;
+                                overflow-x: auto;
+                                min-height: 0">
+                        {% if diff_lines %}
+                            {% include "dev_tools/partials/diff_table.html" %}
+                        {% else %}
+                            <div class="text-center text-muted py-4">
+                                <i class="bi bi-file-earmark-x fs-3 mb-2 d-block"></i>
+                                <small>No diff available for this file.</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% elif component.lint_output %}
+                    <div class="flex-grow-1 px-2 pt-2 pb-2 font-monospace"
+                         style="overflow-y: auto;
+                                min-height: 0;
+                                font-size: 0.75rem;
+                                white-space: pre-wrap;
+                                line-height: 1.6">
+                        <span class="{% if component.lint_error %}text-danger{% else %}text-success{% endif %}">{{ component.lint_output }}</span>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4 flex-grow-1">
+                        <i class="bi bi-arrow-up-circle fs-3 mb-2 d-block"></i>
+                        <small>Select a file to view its diff</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

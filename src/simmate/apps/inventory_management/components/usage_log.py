@@ -38,7 +38,7 @@ class UsageLogComponent(TableComponent):
     # CREATE
 
     required_inputs = [
-        "container_id",
+        "source_container_id",
         "amount_removed",
     ]
 
@@ -52,7 +52,8 @@ class UsageLogComponent(TableComponent):
     # UPDATE
 
     mount_for_update_columns = [
-        "container_id",
+        "source_container_id",
+        "destination_batch_id",
         "user_id",
         "amount_removed",
         "comments",

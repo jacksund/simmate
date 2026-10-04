@@ -13,9 +13,15 @@ from simmate.apps.jarvis.models import JarvisStructure
 from simmate.apps.materials_project.models import MatprojStructure
 from simmate.apps.oqmd.models import OqmdStructure
 from simmate.config import settings
-from simmate.utils import get_app_submodule, get_class
+from simmate.website.core.dashboard import (
+    get_default_widgets,
+    get_platform_pulse,
+    get_quick_actions,
+    get_widget_catalog,
+)
 from simmate.website.core.models import Notification
 from simmate.website.data_explorer.forms import ChemicalSystemForm
+from simmate.website.utils import get_website_apps
 
 # -----------------------------------------------------------------------------
 
@@ -199,25 +205,16 @@ def permission_denied(request):
 
 
 def apps(request):
-    extra_apps = []
-    for app_name in settings.apps:
-        urls_path = get_app_submodule(app_name, "urls")
-        if urls_path:
-            app_config = get_class(app_name)
-
-            if (
-                hasattr(app_config, "hide_in_website")
-                and app_config.hide_in_website == True
-            ):
-                continue
-
-            extra_apps.append(
-                {
-                    "verbose_name": app_config.verbose_name,
-                    "short_name": app_config.name.split(".")[-1],
-                    "description_short": app_config.description_short,
-                }
-            )
+    extra_apps = [
+        {
+            "verbose_name": app["config"].verbose_name,
+            "url_prefix": app["url_prefix"],
+            "description_short": app["config"].description_short,
+            "card_template": getattr(app["config"], "app_card_template", None),
+        }
+        for app in get_website_apps()
+        if not getattr(app["config"], "hide_in_website", False)
+    ]
     context = {
         "extra_apps": extra_apps,
         "breadcrumbs": ["Apps"],
@@ -248,3 +245,34 @@ def faqs(request):
     context = {"breadcrumbs": ["FAQs"]}
     template = "core/faqs.html"
     return render(request, template, context)
+
+
+def dashboard_default_view(request):
+    """
+    Default personal dashboard: a board of widgets showing what needs the
+    signed-in user's attention, their runs, projects, and notifications, plus
+    a compact summary of each app. Currently uses placeholder data (see
+    `simmate.website.core.dashboard`).
+    """
+    widgets = get_default_widgets() if request.user.is_authenticated else []
+    context = {
+        "page_title": "Dashboard",
+        "breadcrumbs": ["Dashboard"],
+        "summary_cards": get_platform_pulse(),
+        "quick_actions": get_quick_actions(),
+        # the board has a wide main column and a narrow side column
+        "main_widgets": [w for w in widgets if w["column"] == "main"],
+        "side_widgets": [w for w in widgets if w["column"] == "side"],
+        "widget_catalog": get_widget_catalog([w["key"] for w in widgets]),
+    }
+    template = "core/dashboard.html"
+    return render(request, template, context)
+
+
+def dashboard(request):
+    if not settings.website.dashboard_view:
+        return dashboard_default_view(request)
+    else:
+        dashboard_module = importlib.import_module(settings.website.dashboard_view)
+        dashboard_view = getattr(dashboard_module, "dashboard")
+        return dashboard_view(request)

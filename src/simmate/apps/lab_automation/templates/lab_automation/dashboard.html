@@ -1,0 +1,196 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    <style>
+        .lab-task-column { flex: 1 0 260px; max-width: 340px; }
+        .lab-task-card { border-left: 4px solid var(--lab-accent) !important; }
+    </style>
+    {# Header #}
+    <div class="text-center pt-3 pb-2 mb-4">
+        <h1 class="h2 fw-bold mb-0">
+            <i class="bi bi-robot me-2"></i>Lab Automation
+        </h1>
+        <small class="text-muted">Updated {{ last_updated|time:"H:i:s" }} · sensors refresh every {{ sensor_refresh_interval }}</small>
+    </div>
+    {# Catalogs #}
+    {% include "core/basic_elements/catalogs_card.html" %}
+    {# Needs Attention #}
+    {% include "core/basic_elements/alerts_card.html" %}
+    {# Lab Environment #}
+    <div class="mb-4">
+        <div class="mb-2 px-1">
+            <h5 class="mb-0 fw-semibold">Lab Environment</h5>
+            <small class="text-muted">Ambient conditions from the room sensors</small>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-4">{% htmx_component "ambient-temp-component" %}</div>
+            <div class="col-md-4">{% htmx_component "humidity-component" %}</div>
+            <div class="col-md-4">{% htmx_component "air-quality-component" %}</div>
+        </div>
+    </div>
+    {# Equipment #}
+    <div class="mb-4">
+        <div class="mb-2 px-1">
+            <h5 class="mb-0 fw-semibold">Equipment</h5>
+            <small class="text-muted">Live readings from connected devices</small>
+        </div>
+        {% for hotplate in hotplates %}
+            <div class="card shadow-sm border-light-subtle mb-3">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-lg-4">
+                            <div class="p-3 h-100">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-semibold text-body">
+                                        <i class="bi bi-thermometer-high text-danger me-1"></i>{{ hotplate.name }}
+                                    </span>
+                                    {% status_badge hotplate.status_text hotplate.status_theme icon="bi-play-circle" %}
+                                </div>
+                                <div class="fw-semibold mb-3">{{ hotplate.experiment }}</div>
+                                <dl class="row small mb-0">
+                                    <dt class="col-5 text-muted fw-normal">Current step</dt>
+                                    <dd class="col-7">
+                                        {{ hotplate.current_step }}
+                                    </dd>
+                                    <dt class="col-5 text-muted fw-normal">Time remaining</dt>
+                                    <dd class="col-7">
+                                        {{ hotplate.time_remaining }}
+                                    </dd>
+                                    <dt class="col-5 text-muted fw-normal">Owner</dt>
+                                    <dd class="col-7 mb-0">
+                                        {{ hotplate.owner }}
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4">{% htmx_component hotplate.temp_component %}</div>
+                        <div class="col-md-6 col-lg-4">{% htmx_component hotplate.stir_component %}</div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {# Task Board #}
+    <div class="card shadow-sm border-light-subtle mb-4">
+        <div class="card-header bg-transparent border-0 pt-3 px-3">
+            <h5 class="card-title mb-0 fw-semibold">Task Board</h5>
+            <small class="text-muted">Experiments and maintenance across the lab</small>
+        </div>
+        <div class="card-body px-3 pb-3">
+            <div class="d-flex gap-3 overflow-x-auto pb-2">
+                {% for column in task_columns %}
+                    <div class="lab-task-column bg-body-tertiary rounded-3 p-2">
+                        <div class="d-flex justify-content-between align-items-center px-1 mb-2">
+                            <span class="small fw-semibold text-uppercase text-{{ column.theme }}">
+                                <i class="bi {{ column.icon }} me-1"></i>{{ column.title }}
+                            </span>
+                            <span class="badge rounded-pill bg-{{ column.theme }}-subtle text-{{ column.theme }}">{{ column.tasks|length }}</span>
+                        </div>
+                        {% for task in column.tasks %}
+                            <div class="lab-task-card border rounded-3 bg-body p-2 mb-2 small"
+                                 style="--lab-accent: var(--bs-{{ column.theme }})">
+                                <div class="fw-semibold {% if column.key == 'completed' %}text-muted text-decoration-line-through{% endif %}">
+                                    {{ task.name }}
+                                </div>
+                                {% if column.key == "scheduled" %}
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <span class="text-muted"><i class="bi bi-clock me-1"></i>{{ task.duration }}</span>
+                                        {% status_badge task.priority|capfirst task.priority_theme %}
+                                    </div>
+                                {% elif column.key == "preparing" %}
+                                    <div class="text-info-emphasis mt-1">
+                                        <i class="bi bi-info-circle me-1"></i>{{ task.status }}
+                                    </div>
+                                {% elif column.key == "running" %}
+                                    <div class="d-flex justify-content-between text-muted mt-1 mb-1">
+                                        <span>{{ task.progress }}%</span>
+                                        <span><i class="bi bi-hourglass-split me-1"></i>{{ task.eta }}</span>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-primary"
+                                             role="progressbar"
+                                             style="width: {{ task.progress }}%"
+                                             aria-valuenow="{{ task.progress }}"
+                                             aria-valuemin="0"
+                                             aria-valuemax="100"></div>
+                                    </div>
+                                {% elif column.key == "completed" %}
+                                    <div class="text-muted mt-1">
+                                        <i class="bi bi-clock-history me-1"></i>{{ task.time }}
+                                    </div>
+                                {% elif column.key == "failed" %}
+                                    <div class="text-danger-emphasis mt-1">
+                                        <i class="bi bi-x-circle me-1"></i>{{ task.reason }}
+                                    </div>
+                                {% endif %}
+                                <div class="d-flex justify-content-between text-muted border-top mt-2 pt-2">
+                                    <span title="Owner"><i class="bi bi-person me-1"></i>{{ task.owner }}</span>
+                                    <span title="Equipment"><i class="bi bi-gear me-1"></i>{{ task.equipment }}</span>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="text-center text-muted small py-3">No {{ column.title|lower }} tasks</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {# Agents & AI Summary #}
+    <div class="row g-3 mb-4">
+        {# Left: Agents & Staff #}
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-light-subtle h-100">
+                <div class="card-header bg-transparent border-0 pt-3 px-3">
+                    <h5 class="card-title mb-0 fw-semibold">Agents & Staff</h5>
+                    <small class="text-muted">People and robots working in the lab</small>
+                </div>
+                <div class="card-body px-3 pb-3">
+                    <div class="row g-3">
+                        {% for agent in agents %}
+                            <div class="col-md-6">
+                                <div class="border rounded-3 p-3 bg-body h-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-semibold text-body">
+                                            <i class="bi {{ agent.icon }} text-{{ agent.badge_theme }} me-1"></i>{{ agent.name }}
+                                        </span>
+                                        {% status_badge agent.status agent.badge_theme icon=agent.badge_icon %}
+                                    </div>
+                                    <div class="d-flex justify-content-between small text-muted mb-1">
+                                        <span>{{ agent.type }}</span>
+                                        <span><i class="bi bi-geo-alt me-1"></i>{{ agent.location }}</span>
+                                    </div>
+                                    <div class="small mb-2">
+                                        {{ agent.current_task|default:"No current task" }}
+                                        <span class="text-muted">· {{ agent.objective }}</span>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-{{ agent.badge_theme }}"
+                                             role="progressbar"
+                                             style="width: {{ agent.progress }}%"
+                                             aria-valuenow="{{ agent.progress }}"
+                                             aria-valuemin="0"
+                                             aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {# Right: AI Project Summary #}
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-light-subtle h-100">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
+                    <h5 class="card-title mb-0 fw-semibold">
+                        <i class="bi bi-stars text-primary me-1"></i> AI Project Summary
+                    </h5>
+                    <small class="text-muted">Updated just now</small>
+                </div>
+                <div class="card-body px-3 pb-3">
+                    <p class="mb-0 lh-lg">{{ ai_summary }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

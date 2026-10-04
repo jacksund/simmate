@@ -3,9 +3,7 @@
     {% simmate_setting "website.show_finances" as SHOW_FINANCES %}
     <div class="bg-warning text-dark text-center py-1 small fw-bold">
         <i class="bi bi-cone-striped"></i>
-        This site is under early construction. Data is reset periodically,
-        {% if SHOW_FINANCES %}pricing is disabled,{% endif %}
-        and limited compute is available.
+        This site is under early construction
         <i class="bi bi-cone-striped"></i>
     </div>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary py-1">
@@ -28,8 +26,12 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
+                        <a class="nav-link{% if request.path|slice:':11' == '/dashboard/' %} active{% endif %}"
+                           href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link{% if request.path|slice:':6' == '/apps/' %} active{% endif %}"
-                           href="{% url 'apps' %}"><i class="bi bi-speedometer2"></i> Apps</a>
+                           href="{% url 'apps' %}"><i class="bi bi-grid-fill"></i> Apps</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link{% if request.path|slice:':6' == '/data/' %} active{% endif %}"

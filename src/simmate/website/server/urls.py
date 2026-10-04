@@ -5,30 +5,26 @@ from django.urls import include, path
 from django.views.generic import RedirectView
 
 from simmate.config import settings
-from simmate.utils import get_app_submodule
 from simmate.website.server import views
+from simmate.website.utils import get_website_apps
 
 
 def get_app_urls():
-    # First let's find our custom simmate apps that supply a 'urls' module. We
-    # want to automatically make these avaialable in the web UI.
-
-    extra_url_paths = []
-
-    for app_name in settings.apps:
-        urls_path = get_app_submodule(app_name, "urls")
-        if urls_path:
-            simple_name = urls_path.split(".")[-2]
-            new_path = path(
-                route=f"apps/{simple_name}/",
-                # set the namespace so that we can easily look up app urls
-                #   https://stackoverflow.com/questions/48608894
-                view=include((urls_path, simple_name), namespace=simple_name),
-                name=simple_name,
-            )
-            extra_url_paths.append(new_path)
-
-    return extra_url_paths
+    # Find all simmate apps that supply a 'urls' module and automatically make
+    # them avaialable in the web UI.
+    return [
+        path(
+            route=f"apps/{app['url_prefix']}/",
+            # set the namespace so that we can easily look up app urls
+            #   https://stackoverflow.com/questions/48608894
+            view=include(
+                (app["urls_path"], app["namespace"]),
+                namespace=app["namespace"],
+            ),
+            name=app["namespace"],
+        )
+        for app in get_website_apps()
+    ]
 
 
 def get_disabled_urls():
@@ -84,6 +80,9 @@ urlpatterns = [
     # When you sign out, you are sent to LOGOUT_REDIRECT_URL (set in settings.py)
     path(route="accounts/loginstatus/", view=views.loginstatus, name="loginstatus"),
     #
+    # Dashboard endpoint (overview of metrics & workflows)
+    path(route="dashboard/", view=views.dashboard, name="dashboard"),
+    #
     #
     path(
         route="data/",
@@ -125,12 +124,6 @@ urlpatterns = [
             namespace="htmx",
         ),
         name="htmx",
-    ),
-    #
-    # Core API urls
-    path(
-        route="",
-        view=include("simmate.website.core.urls"),
     ),
     #
     # Custom Simmate apps (if present)

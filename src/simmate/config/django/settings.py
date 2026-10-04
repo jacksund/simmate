@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     "simmate.website.configs.CoreConfig",
     "simmate.website.configs.DataExplorerConfig",
     "simmate.website.configs.WorkflowExplorerConfig",
+    "simmate.website.configs.ComputeManagementConfig",
     "simmate.apps.configs.RdkitConfig",  # enables rdkit ext when using postgres
     *settings.apps,
 ]

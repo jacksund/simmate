@@ -28,6 +28,13 @@ class HtmxComponent:
 
     component_type: str = None
 
+    refresh_interval: str = None
+    """
+    If set (e.g. "5s" or "1m"), the component will automatically re-render
+    itself on this interval. Polling pauses while the browser tab is hidden.
+    Requires the template to extend "htmx/form_base.html".
+    """
+
     # -------------------------------------------------------------------------
 
     component_id: str = None
@@ -39,6 +46,13 @@ class HtmxComponent:
     form_data: dict = None
 
     js_actions: list[dict] = None
+
+    action_error: str = ""
+    action_message: str = ""
+    """
+    Result of the last action method, shown by "htmx/partials/action_alert.html".
+    Both are cleared at the start of every request.
+    """
 
     inital_context: dict = None
 
@@ -81,6 +95,8 @@ class HtmxComponent:
         self.request = request  # for easy access elsewhere
 
         self.js_actions = []  # reset as to not repeat last request's actions
+        self.action_error = ""
+        self.action_message = ""
 
         self.pre_parse()
         self.post_data = self.parse_post_data()
@@ -119,6 +135,12 @@ class HtmxComponent:
                 self.template_name,
                 self.get_context(),
             )
+
+    def refresh(self):
+        """
+        No-op action method. Calling it simply re-renders the component.
+        """
+        pass
 
     # -------------------------------------------------------------------------
 

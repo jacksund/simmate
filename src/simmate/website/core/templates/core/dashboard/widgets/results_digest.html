@@ -1,0 +1,24 @@
+{# Widget body: key outputs from the user's most recently finished calculations #}
+<div class="card-body pt-1 px-3">
+    <div class="row g-3">
+        {% for result in data.results %}
+            <div class="col-md-4">
+                <div class="border rounded-3 p-3 h-100">
+                    <div class="d-flex justify-content-between align-items-baseline mb-1">
+                        <span class="fs-5 fw-bold">{{ result.target }}</span>
+                        <small class="text-muted">{{ result.when }}</small>
+                    </div>
+                    <div class="text-muted small mb-2">{{ result.workflow }}</div>
+                    <dl class="row small mb-0">
+                        {% for label, value in result.metrics %}
+                            <dt class="col-6 fw-normal text-muted">{{ label }}</dt>
+                            <dd class="col-6 fw-semibold text-end mb-1">
+                                {{ value }}
+                            </dd>
+                        {% endfor %}
+                    </dl>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>

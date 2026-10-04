@@ -1,0 +1,20 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    <div class="card h-100 {% if component.borderless %}border-0 bg-transparent{% else %}shadow-sm border-light-subtle{% endif %}">
+        <div class="card-body pb-1">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold text-uppercase">
+                    <i class="bi {{ component.icon }} me-1"
+                       style="color: {{ component.color }}"></i>{{ component.label }}
+                </span>
+                {% status_badge status_text status_theme %}
+            </div>
+            <div class="d-flex align-items-baseline gap-1">
+                <span class="fs-2 fw-bold text-body lh-1">{{ current_value }}</span>
+                <span class="text-muted">{{ component.units }}</span>
+                <span class="text-muted small ms-auto">target {{ component.target|floatformat:"-1" }} {{ component.units }}</span>
+            </div>
+            {% htmx_plotly_figure figure show_modebar=False %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends "htmx/form_base.html" %}
+{% load htmx %}
+{% block form %}
+    {# hx-target/include/swap are inherited by every hx-post element below #}
+    <div class="card shadow-sm"
+         hx-target="#{{ component.component_id }}"
+         hx-include="#{{ component.component_id }}"
+         hx-swap="outerHTML settle:0">
+        {# Card header: namespace selector, counts, and refresh #}
+        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center flex-wrap gap-2 pt-3 px-3">
+            <h5 class="card-title mb-0 fw-semibold">
+                <i class="bi bi-hdd-network text-primary me-1"></i> Kubernetes
+            </h5>
+            <div class="d-flex align-items-center gap-2">
+                {% if available and not error %}
+                    <select name="namespace"
+                            class="form-select form-select-sm w-auto"
+                            title="Namespace"
+                            hx-post="{% url 'htmx:component_method' component.component_id 'set_namespace' %}"
+                            hx-trigger="change">
+                        <option value="{{ all_namespaces }}"
+                                {% if component.namespace == all_namespaces %}selected{% endif %}>
+                            All namespaces
+                        </option>
+                        {% if component.namespace != all_namespaces and component.namespace not in namespaces %}
+                            <option value="{{ component.namespace }}" selected>{{ component.namespace }}</option>
+                        {% endif %}
+                        {% for ns in namespaces %}
+                            <option value="{{ ns }}"
+                                    {% if ns == component.namespace %}selected{% endif %}>{{ ns }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="badge bg-success-subtle text-success border border-success small">{{ running_count }} running</span>
+                    <span class="badge bg-secondary-subtle text-secondary border border-secondary small">{{ pod_count }} pod{{ pod_count|pluralize }}</span>
+                {% endif %}
+                <button type="button"
+                        class="btn btn-sm btn-outline-secondary py-0 flex-shrink-0"
+                        hx-post="{% url 'htmx:component_method' component.component_id 'refresh' %}"
+                        title="Refresh">
+                    {% include "dev_tools/partials/spinner.html" %}
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+        </div>
+        {# Scale results #}
+        {% include "htmx/partials/action_alert.html" %}
+        <div class="card-body p-0">
+            {% if not available %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-x-circle fs-3 mb-2 d-block"></i>
+                    <small>kubectl not installed</small>
+                </div>
+            {% elif error %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-exclamation-triangle fs-3 mb-2 d-block text-warning"></i>
+                    <small>{{ error }}</small>
+                </div>
+            {% else %}
+                {# Deployments #}
+                <div class="px-3 pt-2 pb-1">
+                    <small class="fw-semibold text-muted text-uppercase">Deployments</small>
+                </div>
+                {% if not deployments %}
+                    <div class="text-center text-muted py-3">
+                        <small>No deployments</small>
+                    </div>
+                {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle mb-0">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th class="ps-3">Name</th>
+                                    {% if show_namespace %}<th>Namespace</th>{% endif %}
+                                    <th>Ready</th>
+                                    <th>Up-to-date</th>
+                                    <th>Available</th>
+                                    <th class="pe-3 text-end">Replicas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for d in deployments %}
+                                    <tr>
+                                        <td class="ps-3 fw-semibold font-monospace">{{ d.name }}</td>
+                                        {% if show_namespace %}<td class="text-muted">{{ d.namespace }}</td>{% endif %}
+                                        <td>
+                                            {% if d.replicas == 0 %}
+                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">{{ d.ready }}/{{ d.replicas }}</span>
+                                            {% elif d.ready == d.replicas %}
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                                    <i class="bi bi-check-circle-fill me-1"></i>{{ d.ready }}/{{ d.replicas }}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
+                                                    <i class="bi bi-clock-fill me-1"></i>{{ d.ready }}/{{ d.replicas }}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-muted">{{ d.up_to_date }}</td>
+                                        <td class="text-muted">{{ d.available }}</td>
+                                        <td class="pe-3 text-end text-nowrap">
+                                            <div class="d-inline-flex gap-1">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <button type="button"
+                                                            class="btn btn-outline-secondary"
+                                                            hx-post="{% url 'htmx:component_method' component.component_id 'scale' %}?deployment=%22{{ d.name|urlencode }}%22&namespace=%22{{ d.namespace|urlencode }}%22&replicas={{ d.replicas|add:-1 }}"
+                                                            title="Scale down"
+                                                            {% if d.replicas == 0 %}disabled{% endif %}>
+                                                        <i class="bi bi-dash-lg"></i>
+                                                    </button>
+                                                    <span class="btn btn-outline-secondary disabled font-monospace"
+                                                          style="min-width: 2.5rem">{{ d.replicas }}</span>
+                                                    <button type="button"
+                                                            class="btn btn-outline-secondary"
+                                                            hx-post="{% url 'htmx:component_method' component.component_id 'scale' %}?deployment=%22{{ d.name|urlencode }}%22&namespace=%22{{ d.namespace|urlencode }}%22&replicas={{ d.replicas|add:1 }}"
+                                                            title="Scale up">
+                                                        <i class="bi bi-plus-lg"></i>
+                                                    </button>
+                                                </div>
+                                                {% if d.replicas > 0 %}
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-outline-danger"
+                                                            hx-post="{% url 'htmx:component_method' component.component_id 'scale' %}?deployment=%22{{ d.name|urlencode }}%22&namespace=%22{{ d.namespace|urlencode }}%22&replicas=0"
+                                                            hx-confirm="Scale {{ d.name }} down to 0 replicas?"
+                                                            title="Scale to 0">
+                                                        <i class="bi bi-stop-fill"></i>
+                                                    </button>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+                {# Pods #}
+                <div class="px-3 pt-3 pb-1">
+                    <small class="fw-semibold text-muted text-uppercase">Pods</small>
+                </div>
+                {% if not pods %}
+                    <div class="text-center text-muted py-3">
+                        <small>No pods</small>
+                    </div>
+                {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle mb-0">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th class="ps-3">Name</th>
+                                    {% if show_namespace %}<th>Namespace</th>{% endif %}
+                                    <th>Ready</th>
+                                    <th>Status</th>
+                                    <th>Restarts</th>
+                                    <th>Age</th>
+                                    <th class="pe-3 text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pod in pods %}
+                                    <tr>
+                                        <td class="ps-3 fw-semibold font-monospace">{{ pod.name }}</td>
+                                        {% if show_namespace %}<td class="text-muted">{{ pod.namespace }}</td>{% endif %}
+                                        <td class="text-muted">{{ pod.ready }}</td>
+                                        <td>
+                                            {% if pod.status == "Running" %}
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                                    <i class="bi bi-check-circle-fill me-1"></i>Running
+                                                </span>
+                                            {% elif pod.status == "Completed" %}
+                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                                    <i class="bi bi-check-circle-fill me-1"></i>{{ pod.status }}
+                                                </span>
+                                            {% elif pod.status == "Pending" or pod.status == "ContainerCreating" %}
+                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
+                                                    <i class="bi bi-clock-fill me-1"></i>{{ pod.status }}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                                    <i class="bi bi-x-circle-fill me-1"></i>{{ pod.status }}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-muted">{{ pod.restarts }}</td>
+                                        <td class="text-muted small">{{ pod.age }}</td>
+                                        <td class="pe-3 text-end text-nowrap">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-secondary{% if selected and selected.name == pod.name and selected.namespace == pod.namespace %} active{% endif %}"
+                                                    hx-post="{% url 'htmx:component_method' component.component_id 'show_logs' %}?pod=%22{{ pod.name|urlencode }}%22&namespace=%22{{ pod.namespace|urlencode }}%22"
+                                                    title="View logs">
+                                                <i class="bi bi-file-text"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+        {# Log viewer for the selected pod #}
+        {% if selected %}
+            {% include "dev_tools/partials/log_viewer.html" with title=selected.namespace|add:"/"|add:selected.name %}
+        {% endif %}
+    </div>
+{% endblock %}

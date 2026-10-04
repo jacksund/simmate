@@ -1,0 +1,29 @@
+{# Shared card for every dashboard widget. Expects a `widget` dict (see `simmate.website.core.dashboard`) and renders `widget.template` as the body #}
+<div class="card shadow-sm border-light-subtle"
+     data-widget-key="{{ widget.key }}">
+    <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between pt-3 px-3">
+        <h6 class="card-title mb-0 fw-semibold">
+            <span class="widget-controls d-none text-muted me-1"
+                  title="Drag to reorder"
+                  style="cursor: grab">
+                <i class="bi bi-grip-vertical"></i>
+            </span>
+            <i class="bi {{ widget.icon }} me-1"></i> {{ widget.title }}
+        </h6>
+        <div class="d-flex align-items-center gap-2">
+            {% if widget.link %}
+                <a href="{{ widget.link }}"
+                   class="small text-decoration-none">View all <i class="bi bi-arrow-right"></i></a>
+            {% endif %}
+            <button type="button"
+                    class="widget-controls d-none btn btn-sm btn-link text-danger p-0"
+                    title="Remove widget"
+                    disabled>
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    </div>
+    {% with data=widget.context %}
+        {% include widget.template %}
+    {% endwith %}
+</div>

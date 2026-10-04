@@ -13,7 +13,7 @@
 {% endblock %}
 {% block table_rows %}
     <td>{% foreign_key_link entry %}</td>
-    <td>{% foreign_key_link entry.mixture %}</td>
+    <td>{% foreign_key_link entry.mixture display_column="display_id" %}</td>
     <td>{% foreign_key_link entry.substance %}</td>
     <td>{{ entry.purity|floatformat:3|default:"--" }}%</td>
     <td>{{ entry.expires_at|default:"--" }}</td>
