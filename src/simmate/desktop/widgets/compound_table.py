@@ -25,7 +25,14 @@ from PySide6.QtWidgets import (
     QTableView,
 )
 
-from simmate.desktop.theme import MUTED_COLOR, PRIMARY_COLOR, rgba, tint
+from simmate.desktop.theme import (
+    HIGHLIGHT_ALPHA,
+    HOVER_ALPHA,
+    MUTED_COLOR,
+    PRIMARY_COLOR,
+    rgba,
+    tint,
+)
 from simmate.desktop.widgets.inputs import line_pen, polyline
 from simmate.toolkit import Molecule
 from simmate.toolkit.dataframes import MoleculeDataFrame
@@ -37,13 +44,12 @@ NUMERIC_COLUMNS = ["pIC50", "solubility", "MolWt", "cLogP", "TPSA"]
 THUMBNAIL_SIZE = QSize(180, 120)
 # Row colors, in line with the website (see website/core/static/css/simmate.css).
 # Hover matches --bs-primary-bg-subtle (the primary teal at 10% opacity).
-HIGHLIGHT_COLOR = tint(PRIMARY_COLOR, 26)
+HIGHLIGHT_COLOR = tint(PRIMARY_COLOR, HIGHLIGHT_ALPHA)
 # Selection is the same teal at 25%, between the hover and the full primary color.
 SELECTION_COLOR = rgba(PRIMARY_COLOR, "25%")
 # Header cells get a light tint of the primary color (as rgba, so it works over a
 # light or dark background).
-HEADER_COLOR = tint(PRIMARY_COLOR, 30)
-HEADER_RGBA = rgba(PRIMARY_COLOR, 30)
+HEADER_COLOR = tint(PRIMARY_COLOR, HOVER_ALPHA)
 # Every other row is a shade darker than the window (as rgba, for the same reason).
 STRIPE_COLOR = "rgba(0, 0, 0, 12)"
 # Bordered and rounded like the inputs, but on the window's own background (the
@@ -63,7 +69,7 @@ QAbstractScrollArea::corner {{ background: transparent; }}
 QHeaderView {{ background: palette(window); border-top-left-radius: 6px;
     border-top-right-radius: 6px; }}
 QHeaderView::section {{
-    background: {HEADER_RGBA}; color: palette(text); font-weight: 600;
+    background: {rgba(PRIMARY_COLOR, HOVER_ALPHA)}; color: palette(text); font-weight: 600;
     border: none; border-bottom: 1px solid palette(mid);
     padding: 8px;
 }}
@@ -145,7 +151,7 @@ class CompoundTableModel(QAbstractTableModel):
                 # sorting this column sorts by size
                 return self._heavy_atom_counts[row]
             if role == Qt.ItemDataRole.ToolTipRole:
-                return self.mdf.df["smiles"][row]
+                return self._columns["smiles"][row]
             return None
 
         if role == Qt.ItemDataRole.TextAlignmentRole:
@@ -153,17 +159,22 @@ class CompoundTableModel(QAbstractTableModel):
                 return Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
             return None
         if role == Qt.ItemDataRole.ForegroundRole and key == "status":
-            active = self.mdf.df[key][row] == "Active"
+            active = self._columns[key][row] == "Active"
             return QColor("#4caf50") if active else QColor("#9e9e9e")
         if role == Qt.ItemDataRole.DisplayRole:
-            return str(self.mdf.df[key][row])
+            return str(self._columns[key][row])
         if role == SORT_ROLE:
-            return self.mdf.df[key][row]
+            return self._columns[key][row]
         return None
+
+    # Plain lists, computed once: Qt asks for cells on every paint, and sorting
+    # asks for every row's key many times over.
+    @cached_property
+    def _columns(self) -> dict[str, list]:
+        return {key: self.mdf.df[key].to_list() for _, key in self.COLUMNS[1:]}
 
     @cached_property
     def _heavy_atom_counts(self) -> list[int]:
-        # Computed once: sorting asks for every row's key many times over.
         return [m.num_atoms_heavy for m in self.mdf.df["molecule_obj"]]
 
     def column(self, key: str) -> int:
@@ -213,21 +224,17 @@ class CompoundFilterProxy(QSortFilterProxyModel):
     Each is evaluated over the whole dataframe at once, into a mask of rows to keep.
     """
 
-    def __init__(self):
+    def __init__(self, model: CompoundTableModel):
         super().__init__()
-        self.setSortRole(SORT_ROLE)
         # By row index: which rows pass the user's filters / sit in the plot's view.
-        self.passing = np.ones(0, dtype=bool)
-        self.in_view = np.ones(0, dtype=bool)
+        self.passing = np.ones(model.rowCount(), dtype=bool)
+        self.in_view = self.passing.copy()
+        self.setSourceModel(model)
+        self.setSortRole(SORT_ROLE)
         # The last substructure query and its matches, by row index. Only the
         # sketcher changes the query, so other filter edits reuse the search.
         self._query = None
         self._query_matches = None
-
-    def setSourceModel(self, model: CompoundTableModel):
-        super().setSourceModel(model)
-        self.passing = np.ones(model.rowCount(), dtype=bool)
-        self.in_view = self.passing.copy()
 
     @property
     def mdf(self) -> MoleculeDataFrame:

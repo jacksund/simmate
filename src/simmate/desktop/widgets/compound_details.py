@@ -96,10 +96,10 @@ class CompoundDetails(QWidget):
 
     def _render(self, index: int | None):
         self.current = index
+        self._show_3d()
         if index is None:
             self.title_label.setText("Hover or select a compound to see it here")
             self.svg_widget.load(QByteArray())
-            self._show_3d()
             for label in self.value_labels.values():
                 label.setText("-")
             return
@@ -117,8 +117,6 @@ class CompoundDetails(QWidget):
         self.svg_widget.renderer().setAspectRatioMode(
             Qt.AspectRatioMode.KeepAspectRatio
         )
-
-        self._show_3d()
 
         self.title_label.setText(f"{row['id']}  ({row['series']})")
         for key, label in self.value_labels.items():

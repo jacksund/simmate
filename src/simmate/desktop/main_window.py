@@ -66,7 +66,7 @@ class MainWindow(QMainWindow):
 
         self.setStyleSheet(TAB_STYLE)
 
-        self.title_bar = TitleBar(self)
+        self.title_bar = TitleBar()
         self.setMenuWidget(self.title_bar)
 
         tabs = QTabWidget()

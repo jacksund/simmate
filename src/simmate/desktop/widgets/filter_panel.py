@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtWidgets import (
     QAbstractSpinBox,
     QDoubleSpinBox,
@@ -67,7 +67,10 @@ class FilterPanel(QWidget):
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("ID, series or SMILES…")
         self.search_input.setClearButtonEnabled(True)
-        self.search_input.textChanged.connect(self.filters_changed)
+        # refilter once typing pauses, not on every keystroke
+        self.search_timer = QTimer(self, singleShot=True, interval=150)
+        self.search_timer.timeout.connect(self.filters_changed)
+        self.search_input.textChanged.connect(self.search_timer.start)
 
         self.series_combo = StyledComboBox()
         self.series_combo.addItems(
@@ -173,6 +176,7 @@ class FilterPanel(QWidget):
             column = self.mdf.df[key]
             low.setValue(column.min())
             high.setValue(column.max())
+        self.search_timer.stop()  # the cleared search would emit again
         self.blockSignals(False)
         self.filters_changed.emit()
 

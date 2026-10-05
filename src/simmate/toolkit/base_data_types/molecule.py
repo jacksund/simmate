@@ -878,7 +878,7 @@ class Molecule:
         if highlight_query is not None:
             atoms, bonds = self.get_substructure_match(highlight_query)
             if atoms:
-                molecule = self._align_2d_to_match(highlight_query, atoms)
+                molecule = self.align_2d_to_substructure(highlight_query, atoms)
 
         if image_format == "svg":
             drawer = rdMolDraw2D.MolDraw2DSVG(*size)
@@ -989,7 +989,7 @@ class Molecule:
     def convert_to_3d(
         self,
         keep_hydrogen: bool = False,
-        random_seed: int | None = None,
+        random_seed: int = -1,
     ):
         """
         Converts the molecule to a roughly-optimized 3D conformer.
@@ -1005,13 +1005,12 @@ class Molecule:
         2. If you are converting many molecules to 3D, it is more efficient to
         use the `convert_to_3d` method of the `MoleculeList` class.
 
-        3. Pass a `random_seed` for reproducible conformers.
+        3. Pass a `random_seed` for reproducible conformers (-1 is random).
         """
         # Add implicit hydrogens, which are required for 3D
         self.add_hydrogens()
         # create a single conformer using ETKDG
-        seed = -1 if random_seed is None else random_seed  # -1 = rdkit's random
-        if AllChem.EmbedMolecule(self.rdkit_molecule, randomSeed=seed) != 0:
+        if AllChem.EmbedMolecule(self.rdkit_molecule, randomSeed=random_seed) != 0:
             raise self.ConformerGenerationError(
                 f"Failed to embed a 3D conformer for {self.to_smiles()}"
             )
@@ -1685,7 +1684,7 @@ class Molecule:
         )
         return atoms, bonds
 
-    def align_2d_to_substructure(self, query):  # -> Molecule
+    def align_2d_to_substructure(self, query, atoms: tuple[int] = None):  # -> Molecule
         """
         Gives a copy of this molecule with a 2D depiction laid out so that the
         part matching the substructure `query` sits like the query's own 2D
@@ -1696,14 +1695,12 @@ class Molecule:
         so queries from other programs (with shorter or longer bonds) still
         line up. If there is no match or the query has no coordinates, an
         unchanged copy is returned.
-        """
-        atoms, _ = self.get_substructure_match(query)
-        return self._align_2d_to_match(query, atoms)
 
-    def _align_2d_to_match(self, query, atoms: tuple[int]):  # -> Molecule
+        `atoms` can be given to skip the substructure search when the match
+        (from `get_substructure_match`) is already known.
         """
-        `align_2d_to_substructure`, given the query's already-found match.
-        """
+        if atoms is None:
+            atoms, _ = self.get_substructure_match(query)
         aligned = self.copy()
         if not atoms or not query.num_conformers:
             return aligned
@@ -1721,7 +1718,7 @@ class Molecule:
                 ]
             )
             if mean_bond > 0:
-                scale = self._depiction_bond_length / mean_bond
+                scale = 1.5 / mean_bond  # RDKit's depiction bond length
                 for i, position in enumerate(positions):
                     conformer.SetAtomPosition(i, (position * scale).tolist())
 
@@ -1731,9 +1728,6 @@ class Molecule:
             atomMap=list(enumerate(atoms)),
         )
         return aligned
-
-    _depiction_bond_length: float = 1.5
-    """The bond length used by RDKit's 2D depictions"""
 
     # -------------------------------------------------------------------------
 

@@ -23,13 +23,14 @@ MUTED_LIGHTEST = "#9aa0a6"
 # Radius (px) of the window's rounded corners.
 CORNER_RADIUS = 10
 
+# Alphas (0-255) of the primary-color tints shared across widgets: a hovered row
+# or list item, and a hovered/pressed outlined button (also the header tint).
+HIGHLIGHT_ALPHA = 26
+HOVER_ALPHA = 30
+PRESSED_ALPHA = 60
+
 ICON_PATH = (
-    Path(simmate.__file__).parent
-    / "website"
-    / "core"
-    / "static"
-    / "images"
-    / "simmate-icon.svg"
+    Path(simmate.__file__).parent / "website/core/static/images/simmate-icon.svg"
 )
 
 

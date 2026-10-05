@@ -5,10 +5,7 @@ from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPixmap
 from PySide6.QtWidgets import QComboBox, QStyledItemDelegate
 
-from simmate.desktop.theme import PRIMARY_COLOR, rgba
-
-# Same teal tint as a hovered table row (see compound_table.HIGHLIGHT_COLOR).
-HIGHLIGHT = rgba(PRIMARY_COLOR, 26)
+from simmate.desktop.theme import HIGHLIGHT_ALPHA, PRIMARY_COLOR, rgba
 
 # Rounded, lightly bordered inputs that turn teal on hover/focus. Fill in the
 # image paths with `input_style()`, not by using this directly.
@@ -47,7 +44,7 @@ QComboBox QAbstractItemView::item {{
 }}
 QComboBox QAbstractItemView::item:hover,
 QComboBox QAbstractItemView::item:selected {{
-    background: {HIGHLIGHT};
+    background: {rgba(PRIMARY_COLOR, HIGHLIGHT_ALPHA)};
     color: palette(text);
 }}
 QCheckBox {{ spacing: 8px; }}

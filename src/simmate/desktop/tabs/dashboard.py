@@ -65,8 +65,7 @@ class DashboardTab(QWidget):
         self.mdf = build_dataset()
         self.df = self.mdf.df
         self.model = CompoundTableModel(self.mdf)
-        self.proxy = CompoundFilterProxy()
-        self.proxy.setSourceModel(self.model)
+        self.proxy = CompoundFilterProxy(self.model)
 
         # Our own record of the selection. The table's selection model forgets rows that
         # get filtered out, but we want them re-selected when they come back.
@@ -433,7 +432,7 @@ class DashboardTab(QWidget):
             | QItemSelectionModel.SelectionFlag.Rows
         )
         selection_model = self.table.selectionModel()
-        if current is not None and current in rows:
+        if current in rows:
             # also make the clicked row "current" so the card focuses on it
             selection_model.setCurrentIndex(
                 self._proxy_index(current), QItemSelectionModel.SelectionFlag.NoUpdate

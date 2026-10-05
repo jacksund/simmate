@@ -2,9 +2,11 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QPushButton
 
 from simmate.desktop.theme import (
+    HOVER_ALPHA,
     MUTED_COLOR,
     MUTED_LIGHTER,
     MUTED_LIGHTEST,
+    PRESSED_ALPHA,
     PRIMARY_COLOR,
     PRIMARY_DARKER,
     PRIMARY_LIGHTER,
@@ -22,8 +24,8 @@ QPushButton, QToolButton {{
     padding: 4px 14px; min-height: 18px;
 }}
 QToolButton {{ padding: 4px 6px; }}
-QPushButton:hover, QToolButton:hover {{ background: {rgba(PRIMARY_COLOR, 30)}; }}
-QPushButton:pressed, QToolButton:pressed {{ background: {rgba(PRIMARY_COLOR, 60)}; }}
+QPushButton:hover, QToolButton:hover {{ background: {rgba(PRIMARY_COLOR, HOVER_ALPHA)}; }}
+QPushButton:pressed, QToolButton:pressed {{ background: {rgba(PRIMARY_COLOR, PRESSED_ALPHA)}; }}
 QPushButton:checked, QToolButton:checked, QPushButton[filled="true"] {{
     color: white; background: {PRIMARY_COLOR};
 }}

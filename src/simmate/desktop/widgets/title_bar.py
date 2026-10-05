@@ -80,9 +80,8 @@ class TitleBar(QWidget):
     the window, and double-click it to maximize.
     """
 
-    def __init__(self, window: QWidget):
+    def __init__(self):
         super().__init__()
-        self.window_ = window
         self.setObjectName("titleBar")
         self.setStyleSheet(STYLE)
         self.setFixedHeight(40)
@@ -94,11 +93,11 @@ class TitleBar(QWidget):
         self._drag_offset = None
 
         minimize_button = WindowButton("minimize")
-        minimize_button.clicked.connect(window.showMinimized)
+        minimize_button.clicked.connect(lambda: self.window().showMinimized())
         self.maximize_button = WindowButton("maximize")
         self.maximize_button.clicked.connect(self.toggle_maximized)
         close_button = WindowButton("close")
-        close_button.clicked.connect(window.close)
+        close_button.clicked.connect(lambda: self.window().close())
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(12, 0, 6, 0)
@@ -114,7 +113,7 @@ class TitleBar(QWidget):
         # meets the screen edges).
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        radius = 0 if self.window_.isMaximized() else CORNER_RADIUS
+        radius = 0 if self.window().isMaximized() else CORNER_RADIUS
         rect = QRectF(self.rect())
         path = QPainterPath()
         path.addRoundedRect(rect.adjusted(0, 0, 0, radius), radius, radius)
@@ -122,15 +121,15 @@ class TitleBar(QWidget):
         painter.fillPath(path, QColor(PRIMARY_COLOR))
 
     def toggle_maximized(self):
-        if self.window_.isMaximized():
-            self.window_.showNormal()
+        if self.window().isMaximized():
+            self.window().showNormal()
         else:
-            self.window_.showMaximized()
+            self.window().showMaximized()
 
     def update_maximize_button(self):
         """Call when the window's state changes so the icon reflects it."""
         self.maximize_button.kind = (
-            "restore" if self.window_.isMaximized() else "maximize"
+            "restore" if self.window().isMaximized() else "maximize"
         )
         self.maximize_button.update()
         self.update()
@@ -140,15 +139,15 @@ class TitleBar(QWidget):
             return
         # Prefer letting the OS handle the drag, so snapping and multi-monitor
         # moves work. If the platform refuses, move the window ourselves.
-        if not self.window_.windowHandle().startSystemMove():
+        if not self.window().windowHandle().startSystemMove():
             self._drag_offset = (
                 event.globalPosition().toPoint()
-                - self.window_.frameGeometry().topLeft()
+                - self.window().frameGeometry().topLeft()
             )
 
     def mouseMoveEvent(self, event):
         if self._drag_offset is not None:
-            self.window_.move(event.globalPosition().toPoint() - self._drag_offset)
+            self.window().move(event.globalPosition().toPoint() - self._drag_offset)
 
     def mouseReleaseEvent(self, event):
         self._drag_offset = None

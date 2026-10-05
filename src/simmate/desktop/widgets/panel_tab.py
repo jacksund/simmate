@@ -3,6 +3,8 @@ from PySide6.QtGui import QColor, QFontMetrics, QPainter, QPainterPath, QPen, QT
 from PySide6.QtWidgets import QAbstractButton, QStackedWidget, QVBoxLayout, QWidget
 
 from simmate.desktop.theme import (
+    HOVER_ALPHA,
+    PRESSED_ALPHA,
     PRIMARY_COLOR,
     PRIMARY_DARKER,
     PRIMARY_LIGHTER,
@@ -72,7 +74,8 @@ class PanelTab(QAbstractButton):
             content_color = QColor("white")
         else:
             if self.isDown() or self.underMouse():
-                painter.fillPath(path, tint(PRIMARY_COLOR, 60 if self.isDown() else 30))
+                alpha = PRESSED_ALPHA if self.isDown() else HOVER_ALPHA
+                painter.fillPath(path, tint(PRIMARY_COLOR, alpha))
             painter.setPen(QPen(QColor(PRIMARY_COLOR), self.OUTLINE_WIDTH))
             painter.drawPath(path)
             content_color = QColor(PRIMARY_COLOR)

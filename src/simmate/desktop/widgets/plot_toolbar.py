@@ -28,6 +28,7 @@ PANEL_STYLE = f"""
     background: palette(base); border: 1px solid palette(mid); border-radius: 6px;
 }}
 """
+GEAR_SIZE = 18  # px
 
 
 class PlotToolbar(QWidget):
@@ -107,7 +108,7 @@ class SettingsButton(QToolButton):
         self.setStyleSheet(BUTTON_STYLE)
         self.setToolTip(tooltip)
         self.setIcon(gear_icon())
-        self.setIconSize(QSize(18, 18))
+        self.setIconSize(QSize(GEAR_SIZE, GEAR_SIZE))
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setCheckable(True)  # checked (filled) while the panel is open
         self.toggled.connect(self._set_panel_open)
@@ -160,7 +161,7 @@ class SettingsButton(QToolButton):
         return False
 
 
-def gear_icon(size: int = 18) -> QIcon:
+def gear_icon(size: int = GEAR_SIZE) -> QIcon:
     """A gear in grey, or in white when the button is checked."""
     icon = QIcon()
     for color, state in [

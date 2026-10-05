@@ -7,7 +7,6 @@ from PySide6.QtWebChannel import QWebChannel
 from PySide6.QtWebEngineCore import QWebEngineScript
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
-from simmate.config import settings
 from simmate.toolkit import Molecule
 from simmate.website.core.utils import download_ketcher
 
@@ -41,8 +40,7 @@ def serve_ketcher() -> int:
     Ketcher loads Indigo as WASM, which doesn't work reliably over file:// URLs.
     The server is started once and shared by every sketcher.
     """
-    download_ketcher()
-    ketcher_dir = settings.config_directory / "static_files" / "ketcher"
+    ketcher_dir = download_ketcher()
     server = ThreadingHTTPServer(
         ("127.0.0.1", 0), partial(_QuietHandler, directory=str(ketcher_dir))
     )
