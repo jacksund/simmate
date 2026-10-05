@@ -2,21 +2,14 @@ import threading
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
-import numpy as np
 from PySide6.QtCore import QFile, QIODevice, QObject, QTimer, Signal, Slot
 from PySide6.QtWebChannel import QWebChannel
 from PySide6.QtWebEngineCore import QWebEngineScript
 from PySide6.QtWebEngineWidgets import QWebEngineView
-from rdkit import Chem, RDLogger
 
 from simmate.config import settings
+from simmate.toolkit import Molecule
 from simmate.website.core.utils import download_ketcher
-
-# RDKit prints parse errors to stderr; we report them in the UI instead.
-RDLogger.DisableLog("rdApp.*")
-
-# RDKit's 2D depictions use this bond length; Ketcher's molfiles use a shorter one.
-RDKIT_BOND_LENGTH = 1.5
 
 # Runs inside the Ketcher page: once Ketcher is ready, forward every edit to
 # Python as a molfile through the QWebChannel bridge.
@@ -65,32 +58,11 @@ class _Bridge(QObject):
         self.changed.emit(molfile)
 
 
-def _rescale_to_rdkit(mol: Chem.Mol):
-    """Scale the sketch's 2D coords so its bonds match RDKit's depiction bond length."""
-    if not mol.GetNumBonds() or not mol.GetNumConformers():
-        return
-    conformer = mol.GetConformer()
-    positions = conformer.GetPositions()
-    mean_bond = np.mean(
-        [
-            np.linalg.norm(
-                positions[b.GetBeginAtomIdx()] - positions[b.GetEndAtomIdx()]
-            )
-            for b in mol.GetBonds()
-        ]
-    )
-    if mean_bond == 0:
-        return
-    scale = RDKIT_BOND_LENGTH / mean_bond
-    for i, position in enumerate(positions):
-        conformer.SetAtomPosition(i, (position * scale).tolist())
-
-
 class KetcherWidget(QWebEngineView):
-    """An embedded Ketcher sketcher that reports the drawn structure as an RDKit Mol.
+    """An embedded Ketcher sketcher that reports the drawn structure as a `Molecule`.
 
-    `mol_changed` emits the sketch (with its 2D coords scaled to RDKit's bond
-    length), or None once the canvas is empty. Invalid mid-edit structures are skipped.
+    `mol_changed` emits the sketch (with Ketcher's 2D coords), or None once the
+    canvas is empty. Invalid mid-edit structures are skipped.
     """
 
     mol_changed = Signal(object)
@@ -132,11 +104,10 @@ class KetcherWidget(QWebEngineView):
         self._debounce.start()
 
     def _parse(self):
-        mol = Chem.MolFromMolBlock(self._molfile)
-        if mol is None:
+        try:
+            molecule = Molecule.from_sdf(self._molfile)
+        except Molecule.EmptyMoleculeError:
+            molecule = None  # the canvas was cleared
+        except Exception:
             return  # keep the last good query while the user is mid-edit
-        if mol.GetNumAtoms() == 0:
-            self.mol_changed.emit(None)
-            return
-        _rescale_to_rdkit(mol)
-        self.mol_changed.emit(mol)
+        self.mol_changed.emit(molecule)

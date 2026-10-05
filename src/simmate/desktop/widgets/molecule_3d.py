@@ -1,7 +1,8 @@
 import numpy as np
 import pyqtgraph.opengl as gl
 from PySide6.QtWidgets import QVBoxLayout, QWidget
-from rdkit import Chem
+
+from simmate.toolkit import Molecule
 
 # CPK-style colors (RGBA, 0-1); anything not listed is drawn pink.
 ELEMENT_COLORS = {
@@ -46,19 +47,20 @@ class Molecule3DView(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.view)
 
-    def show_mol(self, mol: Chem.Mol | None):
-        """Draw `mol` (which must have a 3D conformer), or clear the view for None."""
+    def show_mol(self, molecule: Molecule | None):
+        """Draw `molecule` (which must be 3D), or clear the view for None."""
         for item in self.items:
             self.view.removeItem(item)
         self.items.clear()
-        if mol is None:
+        if molecule is None:
             return
 
-        positions = mol.GetConformer().GetPositions()
+        atoms = molecule.atom_list
+        positions = np.array([atom["coords"] for atom in atoms])
         positions = positions - positions.mean(axis=0)
 
-        for atom, position in zip(mol.GetAtoms(), positions):
-            symbol = atom.GetSymbol()
+        for atom, position in zip(atoms, positions):
+            symbol = atom["element"]
             radius = HYDROGEN_RADIUS if symbol == "H" else ATOM_RADIUS
             item = gl.GLMeshItem(
                 meshdata=self.sphere,
@@ -70,9 +72,9 @@ class Molecule3DView(QWidget):
             item.translate(*position)
             self._add(item)
 
-        for bond in mol.GetBonds():
-            start = positions[bond.GetBeginAtomIdx()]
-            vector = positions[bond.GetEndAtomIdx()] - start
+        for bond in molecule.bond_list:
+            start = positions[bond["begin"]]
+            vector = positions[bond["end"]] - start
             length = np.linalg.norm(vector)
             item = gl.GLMeshItem(
                 meshdata=self.cylinder,

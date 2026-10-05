@@ -18,6 +18,7 @@ from simmate.desktop.widgets.compound_table import NUMERIC_COLUMNS, CompoundTabl
 from simmate.desktop.widgets.inputs import input_style, style_combo
 from simmate.desktop.widgets.ketcher import KetcherWidget
 from simmate.desktop.widgets.title_bar import MUTED_COLOR
+from simmate.toolkit.dataframes import MoleculeDataFrame
 
 FILTER_STYLE = f"""
 #panelTitle {{ color: {MUTED_COLOR}; font-weight: bold; }}
@@ -37,9 +38,9 @@ class FilterPanel(QWidget):
 
     SKETCHER_HEIGHT = 380
 
-    def __init__(self, rows: list[dict]):
+    def __init__(self, mdf: MoleculeDataFrame):
         super().__init__()
-        self.rows = rows
+        self.mdf = mdf
         self.query = None
         self.setStyleSheet(FILTER_STYLE + input_style())
 
@@ -68,7 +69,9 @@ class FilterPanel(QWidget):
         self.search_input.textChanged.connect(self.filters_changed)
 
         self.series_combo = QComboBox()
-        self.series_combo.addItems(["All", *sorted({r["series"] for r in self.rows})])
+        self.series_combo.addItems(
+            ["All", *self.mdf.df["series"].unique().sort().to_list()]
+        )
         self.status_combo = QComboBox()
         self.status_combo.addItems(["All", "Active", "Inactive"])
         for combo in (self.series_combo, self.status_combo):
@@ -178,9 +181,9 @@ class FilterPanel(QWidget):
         self.status_combo.setCurrentIndex(0)
         # Set each min/max box to the full range of its column (i.e. no filtering).
         for key, (low, high) in self.range_inputs.items():
-            values = [r[key] for r in self.rows]
-            low.setValue(min(values))
-            high.setValue(max(values))
+            column = self.mdf.df[key]
+            low.setValue(column.min())
+            high.setValue(column.max())
 
         for widget in widgets:
             widget.blockSignals(False)

@@ -1,3 +1,5 @@
+import numpy as np
+import polars
 from PySide6.QtCore import (
     QAbstractTableModel,
     QModelIndex,
@@ -23,13 +25,13 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QTableView,
 )
-from rdkit import Chem
 
-from simmate.desktop.utilities import align_to_query, mol_to_png
 from simmate.desktop.widgets.title_bar import (
     MUTED_COLOR,
     PRIMARY_COLOR,
 )
+from simmate.toolkit import Molecule
+from simmate.toolkit.dataframes import MoleculeDataFrame
 
 # Raw values for sorting (so 10 sorts after 9), separate from the displayed text.
 SORT_ROLE = Qt.ItemDataRole.UserRole
@@ -102,15 +104,15 @@ class CompoundTableModel(QAbstractTableModel):
         ("Tested", "tested"),
     ]
 
-    def __init__(self, rows: list[dict]):
+    def __init__(self, mdf: MoleculeDataFrame):
         super().__init__()
-        self.rows = rows
-        self.highlight_query: Chem.Mol | None = None
+        self.mdf = mdf
+        self.highlight_query: Molecule | None = None
         self.pixmap_cache: dict[int, QPixmap] = {}
         self.highlighted_rows: set[int] = set()  # e.g. rows whose plot point is hovered
 
     def rowCount(self, parent=QModelIndex()):
-        return 0 if parent.isValid() else len(self.rows)
+        return 0 if parent.isValid() else self.mdf.df.height
 
     def columnCount(self, parent=QModelIndex()):
         return 0 if parent.isValid() else len(self.COLUMNS)
@@ -131,7 +133,8 @@ class CompoundTableModel(QAbstractTableModel):
         return None
 
     def data(self, index, role=Qt.ItemDataRole.DisplayRole):
-        row = self.rows[index.row()]
+        df = self.mdf.df
+        row = index.row()
         key = self.COLUMNS[index.column()][1]
 
         if (
@@ -144,14 +147,13 @@ class CompoundTableModel(QAbstractTableModel):
             if role == Qt.ItemDataRole.DecorationRole:
                 return self._thumbnail(index.row())
             if role == SORT_ROLE:
-                return row[
-                    "mol"
-                ].GetNumHeavyAtoms()  # sorting this column sorts by size
+                # sorting this column sorts by size
+                return df["molecule_obj"][row].num_atoms_heavy
             if role == Qt.ItemDataRole.ToolTipRole:
-                return row["smiles"]
+                return df["smiles"][row]
             return None
 
-        value = row[key]
+        value = df[key][row]
         if role == Qt.ItemDataRole.DisplayRole:
             return str(value)
         if role == SORT_ROLE:
@@ -165,13 +167,13 @@ class CompoundTableModel(QAbstractTableModel):
     def column(self, key: str) -> int:
         return [k for _, k in self.COLUMNS].index(key)
 
-    def set_highlight(self, query: Chem.Mol | None):
+    def set_highlight(self, query: Molecule | None):
         self.highlight_query = query
         self.pixmap_cache.clear()
         # Tell views the images changed; they'll re-request only the visible ones.
         self.dataChanged.emit(
             self.index(0, 0),
-            self.index(len(self.rows) - 1, 0),
+            self.index(self.rowCount() - 1, 0),
             [Qt.ItemDataRole.DecorationRole],
         )
 
@@ -188,13 +190,13 @@ class CompoundTableModel(QAbstractTableModel):
 
     def _thumbnail(self, row_index: int) -> QPixmap:
         if row_index not in self.pixmap_cache:
-            mol, atoms, bonds = align_to_query(
-                self.rows[row_index]["mol"], self.highlight_query
-            )
+            molecule = self.mdf.df["molecule_obj"][row_index]
             pixmap = QPixmap()
             pixmap.loadFromData(
-                mol_to_png(
-                    mol, THUMBNAIL_SIZE.width(), THUMBNAIL_SIZE.height(), atoms, bonds
+                molecule.draw(
+                    "png",
+                    size=(THUMBNAIL_SIZE.width(), THUMBNAIL_SIZE.height()),
+                    highlight_query=self.highlight_query,
                 )
             )
             self.pixmap_cache[row_index] = pixmap
@@ -206,52 +208,71 @@ class CompoundFilterProxy(QSortFilterProxyModel):
 
     Rows are filtered two ways, kept apart so changing one never clears the other:
     the user's filters (`set_filters`) and the plot's visible region (`set_view_ranges`).
+    Each is evaluated over the whole dataframe at once, into a mask of rows to keep.
     """
 
     def __init__(self):
         super().__init__()
         self.setSortRole(SORT_ROLE)
-        self.text = ""
-        self.series = None
-        self.status = None
-        self.query = None
-        # [(column key, min, max), ...]; a row must be inside all of them
-        self.value_ranges = []
-        self.view_ranges = []
+        # By row index: which rows pass the user's filters / sit in the plot's view.
+        self.passing = np.ones(0, dtype=bool)
+        self.in_view = np.ones(0, dtype=bool)
+
+    def setSourceModel(self, model: CompoundTableModel):
+        super().setSourceModel(model)
+        self.passing = np.ones(model.rowCount(), dtype=bool)
+        self.in_view = self.passing.copy()
+
+    @property
+    def mdf(self) -> MoleculeDataFrame:
+        return self.sourceModel().mdf
 
     def set_filters(
         self, text="", series=None, status=None, query=None, value_ranges=()
     ):
+        checks = [_range_check(key, low, high) for key, low, high in value_ranges]
+        if text:
+            checks.append(
+                polars.any_horizontal(
+                    polars.col(key)
+                    .str.to_lowercase()
+                    .str.contains(text.lower(), literal=True)
+                    for key in ("id", "series", "smiles")
+                )
+            )
+        if series:
+            checks.append(polars.col("series") == series)
+        if status:
+            checks.append(polars.col("status") == status)
+        passing = self._mask(checks)
+        if query is not None:
+            matches = np.zeros_like(passing)
+            matches[self.mdf.get_substructure_matches(query)] = True
+            passing &= matches
+
         self.beginFilterChange()
-        self.text, self.series, self.status = text.lower(), series, status
-        self.query = query
-        self.value_ranges = list(value_ranges)
+        self.passing = passing
         self.endFilterChange()
 
     def set_view_ranges(self, view_ranges):
+        in_view = self._mask([_range_check(*r) for r in view_ranges])
         self.beginFilterChange()
-        self.view_ranges = list(view_ranges)
+        self.in_view = in_view
         self.endFilterChange()
 
-    def accepts(self, row: dict, include_view: bool = True) -> bool:
-        if self.text and not any(
-            self.text in row[k].lower() for k in ("id", "series", "smiles")
-        ):
-            return False
-        if self.series and row["series"] != self.series:
-            return False
-        if self.status and row["status"] != self.status:
-            return False
-        ranges = self.value_ranges + (self.view_ranges if include_view else [])
-        for key, low, high in ranges:
-            if not low <= row[key] <= high:
-                return False
-        if self.query is not None and not row["mol"].HasSubstructMatch(self.query):
-            return False
-        return True
+    def _mask(self, checks: list[polars.Expr]) -> np.ndarray:
+        """Evaluate `checks` over every row: True where a row passes all of them."""
+        df = self.mdf.df
+        if not checks:
+            return np.ones(df.height, dtype=bool)
+        return df.select(polars.all_horizontal(checks)).to_series().to_numpy().copy()
 
     def filterAcceptsRow(self, source_row, _parent):
-        return self.accepts(self.sourceModel().rows[source_row])
+        return bool(self.passing[source_row] and self.in_view[source_row])
+
+
+def _range_check(key: str, low: float, high: float) -> polars.Expr:
+    return polars.col(key).is_between(low, high)
 
 
 class _SortHeader(QHeaderView):

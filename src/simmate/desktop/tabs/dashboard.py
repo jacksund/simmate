@@ -60,13 +60,14 @@ class DashboardTab(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.rows = build_dataset()
-        self.model = CompoundTableModel(self.rows)
+        self.mdf = build_dataset()
+        self.df = self.mdf.df
+        self.model = CompoundTableModel(self.mdf)
         self.proxy = CompoundFilterProxy()
         self.proxy.setSourceModel(self.model)
 
         # Which rows pass the filter column (ignoring the plot's view), by row index.
-        self.passing = [True] * len(self.rows)
+        self.passing = np.ones(self.df.height, dtype=bool)
         # Our own record of the selection. The table's selection model forgets rows that
         # get filtered out, but we want them re-selected when they come back.
         self.selected_rows: set[int] = set()
@@ -99,7 +100,7 @@ class DashboardTab(QWidget):
         self.view_box = self.plot.getPlotItem().getViewBox()
 
         # Color every point by potency so trends are visible regardless of the chosen axes.
-        pic50 = np.array([r["pIC50"] for r in self.rows])
+        pic50 = self.df["pIC50"].to_numpy()
         cmap = pg.colormap.get("viridis")
         colors = cmap.map((pic50 - pic50.min()) / np.ptp(pic50), mode="qcolor")
         self.brushes = [pg.mkBrush(c) for c in colors]
@@ -138,7 +139,7 @@ class DashboardTab(QWidget):
         self.view_box.sigRangeChanged.connect(self.range_timer.start)
 
         # --- detail card --------------------------------------------------------------
-        self.details = CompoundDetails(self.rows)
+        self.details = CompoundDetails(self.mdf)
         details_scroll = QScrollArea()
         details_scroll.setWidget(self.details)
         details_scroll.setWidgetResizable(True)
@@ -155,7 +156,7 @@ class DashboardTab(QWidget):
 
         # --- side panels --------------------------------------------------------------
         # One page per tab; only the open tab's page shows.
-        self.filter_panel = FilterPanel(self.rows)
+        self.filter_panel = FilterPanel(self.mdf)
         self.filter_panel.filters_changed.connect(self._apply_filters)
         self.left_panel = SidePanel(
             [("Filters", self.filter_panel)]
@@ -264,11 +265,13 @@ class DashboardTab(QWidget):
         self.plot.addItem(item)
         return item
 
-    def _xy(self, row_indices) -> tuple[list, list]:
+    def _xy(self, row_indices) -> tuple[np.ndarray, np.ndarray]:
         x_key, y_key = self.x_combo.currentText(), self.y_combo.currentText()
-        return [self.rows[i][x_key] for i in row_indices], [
-            self.rows[i][y_key] for i in row_indices
-        ]
+        row_indices = list(row_indices)
+        return (
+            self.df[x_key].to_numpy()[row_indices],
+            self.df[y_key].to_numpy()[row_indices],
+        )
 
     def _nearest(self, points, event) -> int | None:
         """Of the (possibly overlapping) points under the cursor, the row closest to it on screen."""
@@ -292,7 +295,7 @@ class DashboardTab(QWidget):
 
     def _update_count(self):
         shown = self.proxy.rowCount()
-        self.status.emit(f"{shown} of {len(self.rows)} compounds shown")
+        self.status.emit(f"{shown} of {self.df.height} compounds shown")
 
     # --- side panels -----------------------------------------------------------------------
 
@@ -348,18 +351,18 @@ class DashboardTab(QWidget):
         self._select_in_table(self.selected_rows, scroll=False)
         self._syncing = False
 
-        self.passing = [self.proxy.accepts(r, include_view=False) for r in self.rows]
+        self.passing = self.proxy.passing
         self._redraw_points()
         self._update_count()
 
     def _redraw_points(self):
-        shown = [i for i, ok in enumerate(self.passing) if ok]
+        shown = np.flatnonzero(self.passing).tolist()
         x, y = self._xy(shown)
         self.scatter.setData(
             x=x, y=y, brush=[self.brushes[i] for i in shown], data=shown
         )
         if self.show_filtered_checkbox.isChecked():
-            x, y = self._xy([i for i, ok in enumerate(self.passing) if not ok])
+            x, y = self._xy(np.flatnonzero(~self.passing))
             self.dimmed_scatter.setData(x=x, y=y)
         else:
             # Not .clear(): it skips prepareGeometryChange, so Qt never repaints the
@@ -398,7 +401,7 @@ class DashboardTab(QWidget):
             self.table.scrollTo(
                 self._proxy_index(row), QAbstractItemView.ScrollHint.EnsureVisible
             )
-            self.status.emit(f"{self.rows[row]['id']}: pIC50 {self.rows[row]['pIC50']}")
+            self.status.emit(f"{self.df['id'][row]}: pIC50 {self.df['pIC50'][row]}")
         else:
             self._update_count()  # back to the count once off the points
 

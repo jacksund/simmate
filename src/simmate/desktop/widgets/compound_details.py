@@ -8,12 +8,12 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from rdkit import Chem
 
-from simmate.desktop.utilities import align_to_query, embed_3d, mol_to_svg
 from simmate.desktop.widgets.button import PrimaryButton
 from simmate.desktop.widgets.compound_table import CompoundTableModel
 from simmate.desktop.widgets.molecule_3d import Molecule3DView
+from simmate.toolkit import Molecule
+from simmate.toolkit.dataframes import MoleculeDataFrame
 
 
 class CompoundDetails(QWidget):
@@ -23,14 +23,14 @@ class CompoundDetails(QWidget):
     asked for (then cached), so hovering through compounds stays fast.
     """
 
-    def __init__(self, rows: list[dict]):
+    def __init__(self, mdf: MoleculeDataFrame):
         super().__init__()
-        self.rows = rows
-        self.query: Chem.Mol | None = None
+        self.mdf = mdf
+        self.query: Molecule | None = None
         self.current: int | None = None
         self.svg_cache: dict[int, bytes] = {}
-        # row index -> 3D mol, or None when embedding failed
-        self.mol_3d_cache: dict[int, Chem.Mol | None] = {}
+        # row index -> 3D molecule, or None when embedding failed
+        self.mol_3d_cache: dict[int, Molecule | None] = {}
 
         self.title_label = QLabel()
         self.title_label.setWordWrap(True)
@@ -84,7 +84,7 @@ class CompoundDetails(QWidget):
 
         self.show_row(None)
 
-    def set_query(self, query: Chem.Mol | None):
+    def set_query(self, query: Molecule | None):
         self.query = query
         self.svg_cache.clear()
         self.show_row(self.current)
@@ -99,10 +99,14 @@ class CompoundDetails(QWidget):
                 label.setText("-")
             return
 
-        row = self.rows[index]
+        row = self.mdf.df.row(index, named=True)
         if index not in self.svg_cache:
-            mol, atoms, bonds = align_to_query(row["mol"], self.query)
-            self.svg_cache[index] = mol_to_svg(mol, 400, 300, atoms, bonds)
+            self.svg_cache[index] = row["molecule_obj"].draw(
+                "svg",
+                size=(400, 300),
+                highlight_query=self.query,
+                stereo_annotations=True,
+            )
         self.svg_widget.load(QByteArray(self.svg_cache[index]))
         # load() swaps in a new renderer config, so re-apply the aspect ratio.
         self.svg_widget.renderer().setAspectRatioMode(
@@ -119,7 +123,12 @@ class CompoundDetails(QWidget):
         """Embed the current compound in 3D and show it."""
         if self.current is None:
             return
-        self.mol_3d_cache[self.current] = embed_3d(self.rows[self.current]["mol"])
+        molecule = self.mdf.df["molecule_obj"][self.current].copy()
+        try:
+            molecule.convert_to_3d(keep_hydrogen=True, random_seed=0xF00D)
+        except Molecule.ConformerGenerationError:
+            molecule = None
+        self.mol_3d_cache[self.current] = molecule
         self._show_3d()
 
     def _show_3d(self):

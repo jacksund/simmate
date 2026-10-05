@@ -257,6 +257,19 @@ class MoleculeDataFrame:
         limit: int = 20_000_000,
         nthreads: int = -1,
     ):
+        filtered_ids = self.get_substructure_matches(molecule_query, limit, nthreads)
+        return self.filter_from_ids(filtered_ids)
+
+    def get_substructure_matches(
+        self,
+        molecule_query: Molecule,
+        limit: int = 20_000_000,
+        nthreads: int = -1,
+    ) -> list[int]:
+        """
+        Gives the row indices of all molecules that contain the substructure
+        query. Use `filter_substructure` to get these rows as a new dataframe.
+        """
         molecule_query = Molecule.from_dynamic(molecule_query)
 
         # NOTE: it is much faster for us to use the underlying `substructure_library`
@@ -266,9 +279,7 @@ class MoleculeDataFrame:
             numThreads=nthreads,
             maxResults=limit,  # BUG: rdkit has no way to allow unlimited
         )
-        filtered_ids = list(filtered_ids)
-
-        return self.filter_from_ids(filtered_ids)
+        return list(filtered_ids)
 
     def filter_similarity_2d(
         self,
