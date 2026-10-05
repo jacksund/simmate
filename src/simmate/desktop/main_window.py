@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 
+from collections.abc import Callable
+from functools import partial
+
 from PySide6.QtCore import QEvent, QRectF, Qt
 from PySide6.QtGui import QAction, QIcon, QKeySequence, QPainter, QPainterPath
-from PySide6.QtWidgets import QMainWindow, QTabWidget
+from PySide6.QtWidgets import QMainWindow, QTabWidget, QWidget
 
+from simmate.desktop import theme
 from simmate.desktop.tabs import DashboardTab, PlaceholderTab
-from simmate.desktop.theme import (
-    CORNER_RADIUS,
-    ICON_PATH,
-    MUTED_COLOR,
-    PRIMARY_COLOR,
-)
 from simmate.desktop.widgets import SystemMonitor, TitleBar
 
 # Width (px) of the invisible border you can drag to resize the window.
@@ -28,18 +26,22 @@ EDGE_CURSORS = {
     Qt.Edge.BottomEdge | Qt.Edge.LeftEdge: Qt.CursorShape.SizeBDiagCursor,
 }
 
-# Flat tabs with a teal underline on the selected one. Set on the window, so it
-# also covers tab widgets nested inside the tabs.
-TAB_STYLE = f"""
+
+def tab_style() -> str:
+    """Flat tabs with a teal underline on the selected one. Set on the window, so it
+    also covers tab widgets nested inside the tabs."""
+    return f"""
 QTabWidget::pane {{ border: none; border-top: 1px solid palette(mid); top: -1px; }}
 QTabWidget::tab-bar {{ left: 8px; }}
 QTabBar::tab {{
-    background: transparent; color: {MUTED_COLOR};
+    background: transparent; color: {theme.MUTED_COLOR};
     border: none; border-bottom: 2px solid transparent;
     padding: 8px 16px; margin-right: 4px; font-weight: 600;
 }}
 QTabBar::tab:hover {{ color: palette(text); border-bottom-color: palette(mid); }}
-QTabBar::tab:selected {{ color: {PRIMARY_COLOR}; border-bottom-color: {PRIMARY_COLOR}; }}
+QTabBar::tab:selected {{
+    color: {theme.PRIMARY_COLOR}; border-bottom-color: {theme.PRIMARY_COLOR};
+}}
 """
 
 
@@ -50,12 +52,14 @@ class MainWindow(QMainWindow):
 
     The window is frameless so it can use our own teal `TitleBar`. Without the
     OS frame, it handles resizing itself through a thin margin around its edges.
+
+    Apps built on Simmate can subclass this and override `get_tabs`.
     """
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Simmate Desktop")
-        self.setWindowIcon(QIcon(str(ICON_PATH)))
+        self.setWindowTitle(theme.APP_NAME)
+        self.setWindowIcon(QIcon(str(theme.ICON_PATH)))
         self.resize(1400, 900)
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
         # A see-through window lets us round its corners in paintEvent. The resize
@@ -64,18 +68,14 @@ class MainWindow(QMainWindow):
         self.setMouseTracking(True)  # so the cursor changes over the resize margin
         self.setContentsMargins(*[RESIZE_MARGIN] * 4)
 
-        self.setStyleSheet(TAB_STYLE)
+        self.setStyleSheet(tab_style())
 
         self.title_bar = TitleBar()
         self.setMenuWidget(self.title_bar)
 
         tabs = QTabWidget()
-        for tab, title in [
-            (DashboardTab(), "Toolkit"),
-            (PlaceholderTab("Datastores"), "Datastores"),
-            (PlaceholderTab("Workers"), "Workers"),
-            (PlaceholderTab("Settings"), "Settings"),
-        ]:
+        for title, make_tab in self.get_tabs():
+            tab = make_tab()
             # Each tab reports what it's doing via a signal; the window owns the status bar.
             tab.status.connect(self.statusBar().showMessage)
             tabs.addTab(tab, title)
@@ -95,10 +95,25 @@ class MainWindow(QMainWindow):
         # Extra room below the text, which otherwise sits low against the window's edge.
         self.statusBar().setContentsMargins(0, 0, 0, 4)
         # Messages in the same grey as the usage readout.
-        self.statusBar().setStyleSheet(f"QStatusBar {{ color: {MUTED_COLOR}; }}")
+        self.statusBar().setStyleSheet(f"QStatusBar {{ color: {theme.MUTED_COLOR}; }}")
 
         self._add_shortcuts()
         self.statusBar().showMessage("Ready")
+
+    def get_tabs(self) -> list[tuple[str, Callable[[], QWidget]]]:
+        """
+        The (title, factory) pairs of the tabs to show, in order. Each factory
+        (e.g. a class) builds its tab, so an override can add, drop, or swap tabs
+        without building the ones it replaces. Each tab needs a
+        `status = Signal(str)`, like `PlaceholderTab`.
+        """
+        return [
+            ("Toolkit", DashboardTab),
+            *[
+                (title, partial(PlaceholderTab, title))
+                for title in ["Datastores", "Workers", "Settings"]
+            ],
+        ]
 
     def _add_shortcuts(self):
         quit_action = QAction("&Quit", self)
@@ -111,7 +126,7 @@ class MainWindow(QMainWindow):
         # rounding the corners unless maximized.
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        radius = 0 if self.isMaximized() else CORNER_RADIUS
+        radius = 0 if self.isMaximized() else theme.CORNER_RADIUS
         path = QPainterPath()
         path.addRoundedRect(QRectF(self.contentsRect()), radius, radius)
         painter.fillPath(path, self.palette().window())

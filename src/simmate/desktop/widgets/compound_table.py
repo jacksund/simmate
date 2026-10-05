@@ -4,7 +4,9 @@ import numpy as np
 import polars
 from PySide6.QtCore import (
     QAbstractTableModel,
+    QByteArray,
     QModelIndex,
+    QRectF,
     QSize,
     QSizeF,
     QSortFilterProxyModel,
@@ -14,10 +16,12 @@ from PySide6.QtGui import (
     QColor,
     QFont,
     QFontMetrics,
+    QGuiApplication,
     QPainter,
     QPalette,
     QPixmap,
 )
+from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QFrame,
@@ -25,14 +29,8 @@ from PySide6.QtWidgets import (
     QTableView,
 )
 
-from simmate.desktop.theme import (
-    HIGHLIGHT_ALPHA,
-    HOVER_ALPHA,
-    MUTED_COLOR,
-    PRIMARY_COLOR,
-    rgba,
-    tint,
-)
+from simmate.desktop import theme
+from simmate.desktop.theme import rgba, tint
 from simmate.desktop.widgets.inputs import line_pen, polyline
 from simmate.toolkit import Molecule
 from simmate.toolkit.dataframes import MoleculeDataFrame
@@ -42,25 +40,25 @@ SORT_ROLE = Qt.ItemDataRole.UserRole
 
 NUMERIC_COLUMNS = ["pIC50", "solubility", "MolWt", "cLogP", "TPSA"]
 THUMBNAIL_SIZE = QSize(180, 120)
-# Row colors, in line with the website (see website/core/static/css/simmate.css).
-# Hover matches --bs-primary-bg-subtle (the primary teal at 10% opacity).
-HIGHLIGHT_COLOR = tint(PRIMARY_COLOR, HIGHLIGHT_ALPHA)
-# Selection is the same teal at 25%, between the hover and the full primary color.
-SELECTION_COLOR = rgba(PRIMARY_COLOR, "25%")
-# Header cells get a light tint of the primary color (as rgba, so it works over a
+# Every other row is a shade darker than the window (as rgba, so it works over a
 # light or dark background).
-HEADER_COLOR = tint(PRIMARY_COLOR, HOVER_ALPHA)
-# Every other row is a shade darker than the window (as rgba, for the same reason).
 STRIPE_COLOR = "rgba(0, 0, 0, 12)"
-# Bordered and rounded like the inputs, but on the window's own background (the
-# rows, header and scroll bars alike): tinted headers, striped rows with no grid,
-# and a slim scroll bar.
-TABLE_STYLE = f"""
+
+
+def table_style() -> str:
+    """Bordered and rounded like the inputs, but on the window's own background (the
+    rows, header and scroll bars alike): tinted headers, striped rows with no grid,
+    and a slim scroll bar.
+
+    Selection is the primary color at 25%, between the hover and the full color.
+    """
+    return f"""
 QTableView {{
     background: palette(window); alternate-background-color: {STRIPE_COLOR};
     border: 1px solid palette(mid); border-radius: 6px;
     gridline-color: transparent; outline: none;
-    selection-background-color: {SELECTION_COLOR}; selection-color: palette(text);
+    selection-background-color: {rgba(theme.PRIMARY_COLOR, "25%")};
+    selection-color: palette(text);
 }}
 /* room between columns, which have no grid lines to split them */
 QTableView::item {{ padding: 0 8px; }}
@@ -69,14 +67,15 @@ QAbstractScrollArea::corner {{ background: transparent; }}
 QHeaderView {{ background: palette(window); border-top-left-radius: 6px;
     border-top-right-radius: 6px; }}
 QHeaderView::section {{
-    background: {rgba(PRIMARY_COLOR, HOVER_ALPHA)}; color: palette(text); font-weight: 600;
+    background: {rgba(theme.PRIMARY_COLOR, theme.HOVER_ALPHA)};
+    color: palette(text); font-weight: 600;
     border: none; border-bottom: 1px solid palette(mid);
     padding: 8px;
 }}
 /* the header's first and last cells follow the card's rounded corners */
 QHeaderView::section:first {{ border-top-left-radius: 6px; }}
 QHeaderView::section:last {{ border-top-right-radius: 6px; }}
-QHeaderView::section:hover {{ color: {PRIMARY_COLOR}; }}
+QHeaderView::section:hover {{ color: {theme.PRIMARY_COLOR}; }}
 /* hidden: `_SortHeader` draws the sort arrow beside its label instead */
 QHeaderView::up-arrow, QHeaderView::down-arrow {{ image: none; width: 0; }}
 QScrollBar:vertical {{ background: transparent; width: 10px; margin: 2px; }}
@@ -84,7 +83,7 @@ QScrollBar:horizontal {{ background: transparent; height: 10px; margin: 2px; }}
 QScrollBar::handle {{ background: palette(mid); border-radius: 3px; }}
 QScrollBar::handle:vertical {{ min-height: 30px; }}
 QScrollBar::handle:horizontal {{ min-width: 30px; }}
-QScrollBar::handle:hover {{ background: {MUTED_COLOR}; }}
+QScrollBar::handle:hover {{ background: {theme.MUTED_COLOR}; }}
 QScrollBar::add-line, QScrollBar::sub-line {{ width: 0; height: 0; }}
 QScrollBar::add-page, QScrollBar::sub-page {{ background: transparent; }}
 """
@@ -110,6 +109,9 @@ class CompoundTableModel(QAbstractTableModel):
     def __init__(self, mdf: MoleculeDataFrame):
         super().__init__()
         self.mdf = mdf
+        # Hovered rows, in line with the website (see website/core/static/css/simmate.css):
+        # matches --bs-primary-bg-subtle (the primary color at 10% opacity).
+        self.highlight_color = tint(theme.PRIMARY_COLOR, theme.HIGHLIGHT_ALPHA)
         self.highlight_query: Molecule | None = None
         self.pixmap_cache: dict[int, QPixmap] = {}
         self.highlighted_rows: set[int] = set()  # e.g. rows whose plot point is hovered
@@ -142,7 +144,7 @@ class CompoundTableModel(QAbstractTableModel):
         # Qt asks for many roles per cell on every paint; answer the cheap ones
         # before touching the dataframe.
         if role == Qt.ItemDataRole.BackgroundRole:
-            return HIGHLIGHT_COLOR if row in self.highlighted_rows else None
+            return self.highlight_color if row in self.highlighted_rows else None
 
         if key == "structure":
             if role == Qt.ItemDataRole.DecorationRole:
@@ -204,14 +206,24 @@ class CompoundTableModel(QAbstractTableModel):
     def _thumbnail(self, row_index: int) -> QPixmap:
         if row_index not in self.pixmap_cache:
             molecule = self.mdf.df["molecule_obj"][row_index]
-            pixmap = QPixmap()
-            pixmap.loadFromData(
-                molecule.draw(
-                    "png",
-                    size=(THUMBNAIL_SIZE.width(), THUMBNAIL_SIZE.height()),
-                    highlight_query=self.highlight_query,
-                )
+            svg = molecule.draw(
+                "svg",
+                size=(THUMBNAIL_SIZE.width(), THUMBNAIL_SIZE.height()),
+                highlight_query=self.highlight_query,
             )
+            # Paint the vector image at the screen's real resolution. A PNG at
+            # THUMBNAIL_SIZE gets stretched, and so pixelated, under display
+            # scaling (e.g. 125%, common on Windows).
+            ratio = QGuiApplication.instance().devicePixelRatio()
+            pixmap = QPixmap(THUMBNAIL_SIZE * ratio)
+            pixmap.setDevicePixelRatio(ratio)
+            pixmap.fill(Qt.GlobalColor.transparent)
+            painter = QPainter(pixmap)
+            # explicit bounds: by default the renderer fills the pixmap's size in
+            # device pixels, which the ratio then scales up a second time
+            bounds = QRectF(0, 0, THUMBNAIL_SIZE.width(), THUMBNAIL_SIZE.height())
+            QSvgRenderer(QByteArray(svg)).render(painter, bounds)
+            painter.end()
             self.pixmap_cache[row_index] = pixmap
         return self.pixmap_cache[row_index]
 
@@ -307,6 +319,8 @@ class _SortHeader(QHeaderView):
 
     def __init__(self):
         super().__init__(Qt.Orientation.Horizontal)
+        # the same light tint of the primary color that the stylesheet gives sections
+        self.color = tint(theme.PRIMARY_COLOR, theme.HOVER_ALPHA)
         # Unlike the table's default header, a new one ignores clicks (i.e. sorting).
         self.setSectionsClickable(True)
 
@@ -336,7 +350,7 @@ class _SortHeader(QHeaderView):
             # finish the background and bottom line under the arrow.
             super().paintSection(painter, rect.adjusted(0, 0, -space, 0), logical_index)
             strip = rect.adjusted(rect.width() - space, 0, 0, 0)
-            painter.fillRect(strip, HEADER_COLOR)
+            painter.fillRect(strip, self.color)
             painter.setPen(self.palette().color(QPalette.ColorRole.Mid))
             painter.drawLine(strip.bottomLeft(), strip.bottomRight())
             left = rect.right() - self.PADDING - self.ARROW.width()
@@ -357,7 +371,7 @@ class _SortHeader(QHeaderView):
 
         painter.save()
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setPen(line_pen(PRIMARY_COLOR))
+        painter.setPen(line_pen(theme.PRIMARY_COLOR))
         painter.drawPath(chevron)
         painter.restore()
 
@@ -370,7 +384,7 @@ class CompoundTable(QTableView):
         model = proxy.sourceModel()
         self.setHorizontalHeader(_SortHeader())
         self.setModel(proxy)
-        self.setStyleSheet(TABLE_STYLE)
+        self.setStyleSheet(table_style())
         self.setFrameShape(QFrame.Shape.NoFrame)  # the stylesheet draws the border
         self.setShowGrid(False)
         self.setAlternatingRowColors(True)

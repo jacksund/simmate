@@ -1,7 +1,7 @@
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
-from simmate.desktop.theme import MUTED_COLOR
+from simmate.desktop import theme
 
 
 class PlaceholderTab(QWidget):
@@ -13,6 +13,6 @@ class PlaceholderTab(QWidget):
         super().__init__()
         label = QLabel(f"<h2>{title}</h2><p>Coming soon</p>")
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        label.setStyleSheet(f"color: {MUTED_COLOR};")
+        label.setStyleSheet(f"color: {theme.MUTED_COLOR};")
         layout = QVBoxLayout(self)
         layout.addWidget(label)

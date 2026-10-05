@@ -20,13 +20,13 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from simmate.desktop.theme import MUTED_COLOR
-from simmate.desktop.widgets.button import BUTTON_STYLE, PrimaryButton
+from simmate.desktop import theme
+from simmate.desktop.widgets.button import PrimaryButton, button_style
 
-PANEL_STYLE = f"""
-#settingsPanel {{
+PANEL_STYLE = """
+#settingsPanel {
     background: palette(base); border: 1px solid palette(mid); border-radius: 6px;
-}}
+}
 """
 GEAR_SIZE = 18  # px
 
@@ -104,8 +104,8 @@ class SettingsButton(QToolButton):
 
     def __init__(self, content: QWidget, tooltip: str = "Settings"):
         super().__init__()
-        self.setProperty("muted", True)  # grey, read by BUTTON_STYLE
-        self.setStyleSheet(BUTTON_STYLE)
+        self.setProperty("muted", True)  # grey, read by button_style
+        self.setStyleSheet(button_style())
         self.setToolTip(tooltip)
         self.setIcon(gear_icon())
         self.setIconSize(QSize(GEAR_SIZE, GEAR_SIZE))
@@ -165,7 +165,7 @@ def gear_icon(size: int = GEAR_SIZE) -> QIcon:
     """A gear in grey, or in white when the button is checked."""
     icon = QIcon()
     for color, state in [
-        (MUTED_COLOR, QIcon.State.Off),
+        (theme.MUTED_COLOR, QIcon.State.Off),
         ("white", QIcon.State.On),
     ]:
         pixmap = _gear_pixmap(size, QColor(color))

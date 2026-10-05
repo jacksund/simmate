@@ -2,6 +2,9 @@
 
 """
 Colors and other look-and-feel constants shared by every part of the desktop app.
+
+Widgets read these at runtime (as `theme.PRIMARY_COLOR`, not via a `from` import),
+so apps built on top of Simmate can rebrand the desktop app with `configure`.
 """
 
 from pathlib import Path
@@ -9,6 +12,9 @@ from pathlib import Path
 from PySide6.QtGui import QColor
 
 import simmate
+
+# Shown in the title bar and the OS's window list.
+APP_NAME = "Simmate Desktop"
 
 # Same teal as the website (see website/core/static/css/simmate.css)
 PRIMARY_COLOR = "#009485"
@@ -32,6 +38,22 @@ PRESSED_ALPHA = 60
 ICON_PATH = (
     Path(simmate.__file__).parent / "website/core/static/images/simmate-icon.svg"
 )
+# The icon drawn on the primary-color title bar, if not ICON_PATH. Rebrands may
+# want a white variant here, while keeping a colored ICON_PATH for the taskbar.
+TITLE_ICON_PATH = None
+
+
+def configure(**overrides) -> None:
+    """
+    Overrides any of the constants above, e.g. `configure(PRIMARY_COLOR="#0072ce")`.
+
+    For apps that rebrand the desktop app. Call it before any window is built,
+    because widgets read these values when they are created.
+    """
+    for name, value in overrides.items():
+        if not name.isupper() or name not in globals():
+            raise ValueError(f"Unknown desktop theme setting: {name}")
+        globals()[name] = value
 
 
 def tint(color: str, alpha: int) -> QColor:

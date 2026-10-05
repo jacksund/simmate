@@ -5,11 +5,21 @@ from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPixmap
 from PySide6.QtWidgets import QComboBox, QStyledItemDelegate
 
-from simmate.desktop.theme import HIGHLIGHT_ALPHA, PRIMARY_COLOR, rgba
+from simmate.desktop import theme
+from simmate.desktop.theme import rgba
 
-# Rounded, lightly bordered inputs that turn teal on hover/focus. Fill in the
-# image paths with `input_style()`, not by using this directly.
-_INPUT_STYLE = f"""
+
+def input_style() -> str:
+    """The stylesheet for inputs, for any widget holding them: rounded, lightly
+    bordered inputs that turn teal on hover/focus.
+
+    Combo boxes in it should be `StyledComboBox`es.
+    """
+    chevron = _icon_file(
+        "chevron", (10, 6), [(1, 1), (5, 5), (9, 1)], theme.PRIMARY_COLOR
+    )
+    check = _icon_file("check", (12, 12), [(2.5, 6.5), (5, 9), (9.5, 3.5)], "white")
+    return f"""
 QLineEdit, QComboBox, QDoubleSpinBox {{
     background: palette(base);
     border: 1px solid palette(mid);
@@ -19,14 +29,14 @@ QLineEdit, QComboBox, QDoubleSpinBox {{
 }}
 QLineEdit:hover, QComboBox:hover, QDoubleSpinBox:hover,
 QLineEdit:focus, QComboBox:focus, QDoubleSpinBox:focus {{
-    border-color: {PRIMARY_COLOR};
+    border-color: {theme.PRIMARY_COLOR};
 }}
 /* spin boxes add their own inner margin; match the other inputs' height */
 QDoubleSpinBox {{ padding-top: 3px; padding-bottom: 2px; }}
 /* a plain list below the box, rather than a menu panel over it */
 QComboBox {{ combobox-popup: 0; }}
 QComboBox::drop-down {{ border: none; width: 24px; }}
-QComboBox::down-arrow {{ image: url("{{chevron}}"); width: 10px; height: 6px; }}
+QComboBox::down-arrow {{ image: url("{chevron}"); width: 10px; height: 6px; }}
 /* the open dropdown list: rounded, with rows highlighted like the table's */
 QComboBoxPrivateContainer {{ border: none; background: transparent; }}
 QComboBox QAbstractItemView {{
@@ -44,7 +54,7 @@ QComboBox QAbstractItemView::item {{
 }}
 QComboBox QAbstractItemView::item:hover,
 QComboBox QAbstractItemView::item:selected {{
-    background: {rgba(PRIMARY_COLOR, HIGHLIGHT_ALPHA)};
+    background: {rgba(theme.PRIMARY_COLOR, theme.HIGHLIGHT_ALPHA)};
     color: palette(text);
 }}
 QCheckBox {{ spacing: 8px; }}
@@ -54,27 +64,13 @@ QCheckBox::indicator {{
     border: 1px solid palette(mid);
     border-radius: 4px;
 }}
-QCheckBox::indicator:hover {{ border-color: {PRIMARY_COLOR}; }}
+QCheckBox::indicator:hover {{ border-color: {theme.PRIMARY_COLOR}; }}
 QCheckBox::indicator:checked {{
-    background: {PRIMARY_COLOR};
-    border-color: {PRIMARY_COLOR};
-    image: url("{{check}}");
+    background: {theme.PRIMARY_COLOR};
+    border-color: {theme.PRIMARY_COLOR};
+    image: url("{check}");
 }}
 """
-
-
-def input_style() -> str:
-    """The stylesheet for inputs, for any widget holding them.
-
-    Combo boxes in it should be `StyledComboBox`es.
-    """
-    return _INPUT_STYLE.replace(
-        "{chevron}",
-        _icon_file("chevron", (10, 6), [(1, 1), (5, 5), (9, 1)], PRIMARY_COLOR),
-    ).replace(
-        "{check}",
-        _icon_file("check", (12, 12), [(2.5, 6.5), (5, 9), (9.5, 3.5)], "white"),
-    )
 
 
 class StyledComboBox(QComboBox):

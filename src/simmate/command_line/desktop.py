@@ -5,8 +5,6 @@ This defines commands for the Simmate desktop app. All commands are accessible
 through the `simmate desktop` command.
 """
 
-import logging
-import tempfile
 from pathlib import Path
 
 import typer
@@ -66,30 +64,12 @@ def build(
     Note: importing `simmate` also imports django and pymatgen, so these are
     bundled too and the executable will be fairly large.
     """
-    import PyInstaller.__main__
-
     import simmate.desktop
+    from simmate.desktop.build import build_executable
 
-    entry_script = Path(simmate.desktop.__file__).parent / "__main__.py"
-
-    # build/ and .spec files are only intermediates, so keep them out of the cwd
-    with tempfile.TemporaryDirectory() as work_dir:
-        args = [
-            str(entry_script),
-            "--onefile",
-            "--noconfirm",
-            f"--name={name}",
-            f"--distpath={output_dir}",
-            f"--workpath={work_dir}",
-            f"--specpath={work_dir}",
-            # PyOpenGL selects its platform backend at runtime, which
-            # PyInstaller can't detect on its own
-            "--collect-submodules=OpenGL.platform",
-            # simmate/__init__.py reads its version from package metadata
-            "--copy-metadata=simmate",
-            "--console" if console else "--windowed",
-        ]
-        logging.info(f"Running PyInstaller with: {' '.join(args)}")
-        PyInstaller.__main__.run(args)
-
-    logging.info(f"Done! Your executable is in: {output_dir}")
+    build_executable(
+        entry_script=Path(simmate.desktop.__file__).parent / "__main__.py",
+        name=name,
+        output_dir=output_dir,
+        console=console,
+    )
