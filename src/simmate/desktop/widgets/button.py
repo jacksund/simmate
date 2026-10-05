@@ -1,13 +1,14 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QPushButton
 
-from simmate.desktop.widgets.title_bar import (
+from simmate.desktop.theme import (
     MUTED_COLOR,
     MUTED_LIGHTER,
     MUTED_LIGHTEST,
     PRIMARY_COLOR,
     PRIMARY_DARKER,
     PRIMARY_LIGHTER,
+    rgba,
 )
 
 # Outlined in the primary color, and filled when on (checked), like the side
@@ -21,8 +22,8 @@ QPushButton, QToolButton {{
     padding: 4px 14px; min-height: 18px;
 }}
 QToolButton {{ padding: 4px 6px; }}
-QPushButton:hover, QToolButton:hover {{ background: rgba(0, 148, 133, 30); }}
-QPushButton:pressed, QToolButton:pressed {{ background: rgba(0, 148, 133, 60); }}
+QPushButton:hover, QToolButton:hover {{ background: {rgba(PRIMARY_COLOR, 30)}; }}
+QPushButton:pressed, QToolButton:pressed {{ background: {rgba(PRIMARY_COLOR, 60)}; }}
 QPushButton:checked, QToolButton:checked, QPushButton[filled="true"] {{
     color: white; background: {PRIMARY_COLOR};
 }}
@@ -36,10 +37,10 @@ QPushButton[muted="true"], QToolButton[muted="true"] {{
     color: {MUTED_COLOR}; border-color: palette(mid);
 }}
 QPushButton[muted="true"]:hover, QToolButton[muted="true"]:hover {{
-    background: rgba(95, 99, 104, 25); border-color: {MUTED_COLOR};
+    background: {rgba(MUTED_COLOR, 25)}; border-color: {MUTED_COLOR};
 }}
 QPushButton[muted="true"]:pressed, QToolButton[muted="true"]:pressed {{
-    background: rgba(95, 99, 104, 50);
+    background: {rgba(MUTED_COLOR, 50)};
 }}
 QPushButton[muted="true"]:checked, QToolButton[muted="true"]:checked {{
     color: white; background: {MUTED_LIGHTER}; border-color: {MUTED_LIGHTER};

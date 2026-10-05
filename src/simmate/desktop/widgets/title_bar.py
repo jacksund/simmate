@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from PySide6.QtCore import QRectF, QSize, Qt
 from PySide6.QtGui import QColor, QIcon, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import (
@@ -9,29 +7,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-import simmate
-
-# Same teal as the website (see website/core/static/css/simmate.css)
-PRIMARY_COLOR = "#009485"
-PRIMARY_DARKER = "#006b60"
-PRIMARY_LIGHTER = "#00a695"
-# Grey for secondary text and controls (e.g. unselected tabs), plus lighter
-# shades for the fill of a checked grey button (and its hover).
-MUTED_COLOR = "#5f6368"
-MUTED_LIGHTER = "#80868b"
-MUTED_LIGHTEST = "#9aa0a6"
-
-# Radius (px) of the window's rounded corners.
-CORNER_RADIUS = 10
-
-ICON_PATH = (
-    Path(simmate.__file__).parent
-    / "website"
-    / "core"
-    / "static"
-    / "images"
-    / "simmate-icon.svg"
-)
+from simmate.desktop.theme import CORNER_RADIUS, ICON_PATH, PRIMARY_COLOR
 
 STYLE = f"""
 #titleBar QLabel {{ color: white; }}

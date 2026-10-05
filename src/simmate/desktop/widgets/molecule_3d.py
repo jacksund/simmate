@@ -36,6 +36,7 @@ class Molecule3DView(QWidget):
         self.view.setBackgroundColor("w")
         self.view.setMinimumSize(240, 180)
         self.items: list[gl.GLMeshItem] = []
+        self.molecule: Molecule | None = None  # the one drawn now
 
         # Built once and reused by every atom/bond item.
         self.sphere = gl.MeshData.sphere(rows=12, cols=16, radius=1.0)
@@ -49,6 +50,9 @@ class Molecule3DView(QWidget):
 
     def show_mol(self, molecule: Molecule | None):
         """Draw `molecule` (which must be 3D), or clear the view for None."""
+        if molecule is self.molecule:
+            return  # already drawn; rebuilding every mesh is costly
+        self.molecule = molecule
         for item in self.items:
             self.view.removeItem(item)
         self.items.clear()
@@ -62,26 +66,15 @@ class Molecule3DView(QWidget):
         for atom, position in zip(atoms, positions):
             symbol = atom["element"]
             radius = HYDROGEN_RADIUS if symbol == "H" else ATOM_RADIUS
-            item = gl.GLMeshItem(
-                meshdata=self.sphere,
-                smooth=True,
-                color=ELEMENT_COLORS.get(symbol, DEFAULT_COLOR),
-                shader="shaded",
-            )
+            item = self._add(self.sphere, ELEMENT_COLORS.get(symbol, DEFAULT_COLOR))
             item.scale(radius, radius, radius)
             item.translate(*position)
-            self._add(item)
 
         for bond in molecule.bond_list:
             start = positions[bond["begin"]]
             vector = positions[bond["end"]] - start
             length = np.linalg.norm(vector)
-            item = gl.GLMeshItem(
-                meshdata=self.cylinder,
-                smooth=True,
-                color=BOND_COLOR,
-                shader="shaded",
-            )
+            item = self._add(self.cylinder, BOND_COLOR)
             # The cylinder runs along +z from the origin; stretch it to the bond's
             # length, turn it to point along the bond, then move it to the start atom.
             item.scale(1, 1, length)
@@ -92,11 +85,14 @@ class Molecule3DView(QWidget):
             elif vector[2] < 0:
                 item.rotate(180, 1, 0, 0)
             item.translate(*start)
-            self._add(item)
 
         size = np.ptp(positions, axis=0).max() if len(positions) > 1 else 1
         self.view.setCameraPosition(distance=size + 3)
 
-    def _add(self, item: gl.GLMeshItem):
+    def _add(self, meshdata: gl.MeshData, color: tuple) -> gl.GLMeshItem:
+        item = gl.GLMeshItem(
+            meshdata=meshdata, smooth=True, color=color, shader="shaded"
+        )
         self.view.addItem(item)
         self.items.append(item)
+        return item

@@ -878,7 +878,7 @@ class Molecule:
         if highlight_query is not None:
             atoms, bonds = self.get_substructure_match(highlight_query)
             if atoms:
-                molecule = self.align_2d_to_substructure(highlight_query)
+                molecule = self._align_2d_to_match(highlight_query, atoms)
 
         if image_format == "svg":
             drawer = rdMolDraw2D.MolDraw2DSVG(*size)
@@ -1697,8 +1697,14 @@ class Molecule:
         line up. If there is no match or the query has no coordinates, an
         unchanged copy is returned.
         """
-        aligned = self.copy()
         atoms, _ = self.get_substructure_match(query)
+        return self._align_2d_to_match(query, atoms)
+
+    def _align_2d_to_match(self, query, atoms: tuple[int]):  # -> Molecule
+        """
+        `align_2d_to_substructure`, given the query's already-found match.
+        """
+        aligned = self.copy()
         if not atoms or not query.num_conformers:
             return aligned
 

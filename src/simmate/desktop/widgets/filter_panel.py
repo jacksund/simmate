@@ -1,7 +1,6 @@
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QAbstractSpinBox,
-    QComboBox,
     QDoubleSpinBox,
     QFrame,
     QGridLayout,
@@ -13,11 +12,11 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from simmate.desktop.theme import MUTED_COLOR
 from simmate.desktop.widgets.button import PrimaryButton
 from simmate.desktop.widgets.compound_table import NUMERIC_COLUMNS, CompoundTableModel
-from simmate.desktop.widgets.inputs import input_style, style_combo
+from simmate.desktop.widgets.inputs import StyledComboBox, input_style
 from simmate.desktop.widgets.ketcher import KetcherWidget
-from simmate.desktop.widgets.title_bar import MUTED_COLOR
 from simmate.toolkit.dataframes import MoleculeDataFrame
 
 FILTER_STYLE = f"""
@@ -32,9 +31,11 @@ class FilterPanel(QWidget):
     """The dashboard's filter column: a substructure sketcher with column filters below.
 
     `filters_changed` fires whenever anything changes; read the new state with `filters()`.
+    `query_changed` also fires (first) when the sketched substructure changes.
     """
 
     filters_changed = Signal()
+    query_changed = Signal(object)
 
     SKETCHER_HEIGHT = 380
 
@@ -68,14 +69,13 @@ class FilterPanel(QWidget):
         self.search_input.setClearButtonEnabled(True)
         self.search_input.textChanged.connect(self.filters_changed)
 
-        self.series_combo = QComboBox()
+        self.series_combo = StyledComboBox()
         self.series_combo.addItems(
             ["All", *self.mdf.df["series"].unique().sort().to_list()]
         )
-        self.status_combo = QComboBox()
+        self.status_combo = StyledComboBox()
         self.status_combo.addItems(["All", "Active", "Inactive"])
         for combo in (self.series_combo, self.status_combo):
-            style_combo(combo)
             combo.currentIndexChanged.connect(self.filters_changed)
 
         # A grid rather than a QFormLayout, which won't center labels on taller fields.
@@ -114,7 +114,7 @@ class FilterPanel(QWidget):
                     range_layout.addWidget(QLabel("to", objectName="rangeSep"))
                 range_layout.addWidget(spin, stretch=1)
             self.range_inputs[key] = spins
-            add_row(headers.get(key, key), range_row)
+            add_row(headers[key], range_row)
 
         # --- layout -------------------------------------------------------------------
         content = QWidget(objectName="filterContent")
@@ -146,16 +146,8 @@ class FilterPanel(QWidget):
         """The current filters, as keyword arguments for `CompoundFilterProxy.set_filters`."""
         return dict(
             text=self.search_input.text(),
-            series=(
-                self.series_combo.currentText()
-                if self.series_combo.currentIndex()
-                else None
-            ),
-            status=(
-                self.status_combo.currentText()
-                if self.status_combo.currentIndex()
-                else None
-            ),
+            series=_choice(self.series_combo),
+            status=_choice(self.status_combo),
             query=self.query,
             value_ranges=[
                 (key, low.value(), high.value())
@@ -170,12 +162,9 @@ class FilterPanel(QWidget):
         self._reset_form()
 
     def _reset_form(self):
-        widgets = [self.search_input, self.series_combo, self.status_combo]
-        for spins in self.range_inputs.values():
-            widgets.extend(spins)
-        for widget in widgets:
-            widget.blockSignals(True)
-
+        # Every input forwards its changes through `filters_changed`, so muting
+        # it gives a single emit for the whole reset.
+        self.blockSignals(True)
         self.search_input.clear()
         self.series_combo.setCurrentIndex(0)
         self.status_combo.setCurrentIndex(0)
@@ -184,11 +173,15 @@ class FilterPanel(QWidget):
             column = self.mdf.df[key]
             low.setValue(column.min())
             high.setValue(column.max())
-
-        for widget in widgets:
-            widget.blockSignals(False)
+        self.blockSignals(False)
         self.filters_changed.emit()
 
     def _on_query_changed(self, query):
         self.query = query
+        self.query_changed.emit(query)
         self.filters_changed.emit()
+
+
+def _choice(combo: StyledComboBox) -> str | None:
+    """The combo's text, or None while it's on its first ("All") item."""
+    return combo.currentText() if combo.currentIndex() else None

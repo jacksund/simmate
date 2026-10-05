@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 import numpy as np
 import pyqtgraph as pg
 from PySide6.QtCore import (
@@ -11,9 +13,9 @@ from PySide6.QtCore import (
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
-    QComboBox,
     QFormLayout,
     QFrame,
+    QGraphicsView,
     QHBoxLayout,
     QLabel,
     QScrollArea,
@@ -24,6 +26,7 @@ from PySide6.QtWidgets import (
 
 from simmate.desktop.example_data.compounds import build_dataset
 from simmate.desktop.tabs.placeholder import PlaceholderTab
+from simmate.desktop.theme import MUTED_COLOR
 from simmate.desktop.widgets import (
     NUMERIC_COLUMNS,
     CompoundDetails,
@@ -34,10 +37,9 @@ from simmate.desktop.widgets import (
     PlotToolbar,
     SettingsButton,
     SidePanel,
+    StyledComboBox,
     input_style,
-    style_combo,
 )
-from simmate.desktop.widgets.title_bar import MUTED_COLOR
 
 # Side panel tabs not built yet; each opens a "coming soon" page for now.
 # Left: bulk / many-compound / table operations. Right: single-compound work.
@@ -66,24 +68,20 @@ class DashboardTab(QWidget):
         self.proxy = CompoundFilterProxy()
         self.proxy.setSourceModel(self.model)
 
-        # Which rows pass the filter column (ignoring the plot's view), by row index.
-        self.passing = np.ones(self.df.height, dtype=bool)
         # Our own record of the selection. The table's selection model forgets rows that
         # get filtered out, but we want them re-selected when they come back.
         self.selected_rows: set[int] = set()
-        self.focus_row: int | None = (
-            None  # what the detail card shows when nothing is hovered
-        )
+        # what the detail card shows when nothing is hovered
+        self.focus_row: int | None = None
         self._syncing = False
 
         # --- plot ---------------------------------------------------------------------
-        self.x_combo = QComboBox()
-        self.y_combo = QComboBox()
+        self.x_combo = StyledComboBox()
+        self.y_combo = StyledComboBox()
         for combo, default in [(self.x_combo, "cLogP"), (self.y_combo, "pIC50")]:
             combo.addItems(NUMERIC_COLUMNS)
             combo.setCurrentText(default)
             combo.currentTextChanged.connect(self._update_axes)
-            style_combo(combo)
 
         self.show_filtered_checkbox = QCheckBox("Show filtered-out points in grey")
         self.show_filtered_checkbox.setToolTip(
@@ -97,6 +95,13 @@ class DashboardTab(QWidget):
             background=None
         )  # transparent: the window shows through
         self.plot.showGrid(x=True, y=True, alpha=0.3)
+        # Repaint the whole plot on any change. By default only the changed items'
+        # bounds are repainted, but pyqtgraph's ScatterPlotItem.setData shrinks
+        # those bounds before reporting the change, so points removed outside the
+        # new bounds (e.g. hiding the grey points while zoomed in) linger on screen.
+        self.plot.setViewportUpdateMode(
+            QGraphicsView.ViewportUpdateMode.FullViewportUpdate
+        )
         self.view_box = self.plot.getPlotItem().getViewBox()
 
         # Color every point by potency so trends are visible regardless of the chosen axes.
@@ -158,6 +163,9 @@ class DashboardTab(QWidget):
         # One page per tab; only the open tab's page shows.
         self.filter_panel = FilterPanel(self.mdf)
         self.filter_panel.filters_changed.connect(self._apply_filters)
+        # re-draw thumbnails and the card with the new substructure highlighted & aligned
+        self.filter_panel.query_changed.connect(self.model.set_highlight)
+        self.filter_panel.query_changed.connect(self.details.set_query)
         self.left_panel = SidePanel(
             [("Filters", self.filter_panel)]
             + [(title, PlaceholderTab(title)) for title in LEFT_PLACEHOLDERS],
@@ -338,31 +346,32 @@ class DashboardTab(QWidget):
 
     # --- filters ----------------------------------------------------------------------------
 
-    def _apply_filters(self):
-        filters = self.filter_panel.filters()
-        query = filters["query"]
-        if query is not self.model.highlight_query:
-            # re-draw thumbnails and the card with the new substructure highlighted & aligned
-            self.model.set_highlight(query)
-            self.details.set_query(query)
-
+    @contextmanager
+    def _refiltering(self):
+        """Wrap a change to the table's rows: the selection churn it causes is ignored,
+        then rows of our selection that are (back) in the table are re-selected."""
         self._syncing = True
-        self.proxy.set_filters(**filters)
-        self._select_in_table(self.selected_rows, scroll=False)
-        self._syncing = False
+        try:
+            yield
+            self._select_in_table(self.selected_rows, scroll=False)
+        finally:
+            self._syncing = False
 
-        self.passing = self.proxy.passing
+    def _apply_filters(self):
+        with self._refiltering():
+            self.proxy.set_filters(**self.filter_panel.filters())
         self._redraw_points()
         self._update_count()
 
     def _redraw_points(self):
-        shown = np.flatnonzero(self.passing).tolist()
+        passing = self.proxy.passing
+        shown = np.flatnonzero(passing).tolist()
         x, y = self._xy(shown)
         self.scatter.setData(
             x=x, y=y, brush=[self.brushes[i] for i in shown], data=shown
         )
         if self.show_filtered_checkbox.isChecked():
-            x, y = self._xy(np.flatnonzero(~self.passing))
+            x, y = self._xy(np.flatnonzero(~passing))
             self.dimmed_scatter.setData(x=x, y=y)
         else:
             # Not .clear(): it skips prepareGeometryChange, so Qt never repaints the
@@ -381,16 +390,13 @@ class DashboardTab(QWidget):
 
     def _filter_to_view(self):
         (x_min, x_max), (y_min, y_max) = self.view_box.viewRange()
-        self._syncing = True
-        self.proxy.set_view_ranges(
-            [
-                (self.x_combo.currentText(), x_min, x_max),
-                (self.y_combo.currentText(), y_min, y_max),
-            ]
-        )
-        # restore rows that came back into view
-        self._select_in_table(self.selected_rows, scroll=False)
-        self._syncing = False
+        with self._refiltering():
+            self.proxy.set_view_ranges(
+                [
+                    (self.x_combo.currentText(), x_min, x_max),
+                    (self.y_combo.currentText(), y_min, y_max),
+                ]
+            )
         self._update_count()
 
     def _on_plot_hover(self, _item, points, event):
@@ -463,7 +469,8 @@ class DashboardTab(QWidget):
             self.status.emit(f"{len(self.selected_rows)} compound(s) selected")
 
     def _refresh_selection_marks(self):
-        x, y = self._xy(sorted(r for r in self.selected_rows if self.passing[r]))
+        passing = self.proxy.passing
+        x, y = self._xy(sorted(r for r in self.selected_rows if passing[r]))
         self.selection_marks.setData(x=x, y=y)
 
     def _on_table_hover(self, index):

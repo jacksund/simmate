@@ -5,10 +5,10 @@ from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPixmap
 from PySide6.QtWidgets import QComboBox, QStyledItemDelegate
 
-from simmate.desktop.widgets.title_bar import PRIMARY_COLOR
+from simmate.desktop.theme import PRIMARY_COLOR, rgba
 
 # Same teal tint as a hovered table row (see compound_table.HIGHLIGHT_COLOR).
-HIGHLIGHT = "rgba(0, 148, 133, 26)"
+HIGHLIGHT = rgba(PRIMARY_COLOR, 26)
 
 # Rounded, lightly bordered inputs that turn teal on hover/focus. Fill in the
 # image paths with `input_style()`, not by using this directly.
@@ -69,7 +69,7 @@ QCheckBox::indicator:checked {{
 def input_style() -> str:
     """The stylesheet for inputs, for any widget holding them.
 
-    Combo boxes in it also need `style_combo`.
+    Combo boxes in it should be `StyledComboBox`es.
     """
     return _INPUT_STYLE.replace(
         "{chevron}",
@@ -80,22 +80,41 @@ def input_style() -> str:
     )
 
 
-def style_combo(combo: QComboBox):
-    """Let `input_style()` round and pad the combo's dropdown list.
+class StyledComboBox(QComboBox):
+    """A combo box whose dropdown list `input_style()` can round and pad.
 
     The list sits in its own popup window, which is square and opaque unless made
     frameless and see-through. And the combo's default item delegate ignores
     stylesheets, so swap in a standard one for the `::item` rules to apply.
     """
-    combo.setCursor(Qt.CursorShape.PointingHandCursor)
-    combo.setItemDelegate(QStyledItemDelegate(combo))
-    popup = combo.view().window()
-    popup.setWindowFlags(
-        popup.windowFlags()
-        | Qt.WindowType.FramelessWindowHint
-        | Qt.WindowType.NoDropShadowWindowHint
-    )
-    popup.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setItemDelegate(QStyledItemDelegate(self))
+        popup = self.view().window()
+        popup.setWindowFlags(
+            popup.windowFlags()
+            | Qt.WindowType.FramelessWindowHint
+            | Qt.WindowType.NoDropShadowWindowHint
+        )
+        popup.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+
+def line_pen(color: str) -> QPen:
+    """The rounded pen used for small line icons (arrows, check marks, chevrons)."""
+    pen = QPen(QColor(color), 1.6)
+    pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+    pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+    return pen
+
+
+def polyline(points: list[tuple[float, float]]) -> QPainterPath:
+    """An open path through `points`, for drawing with `line_pen`."""
+    path = QPainterPath(QPointF(*points[0]))
+    for point in points[1:]:
+        path.lineTo(*point)
+    return path
 
 
 def _icon_file(
@@ -116,14 +135,8 @@ def _icon_file(
         painter = QPainter(pixmap)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.scale(scale, scale)
-        pen = QPen(QColor(color), 1.6)
-        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-        pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
-        painter.setPen(pen)
-        line = QPainterPath(QPointF(*points[0]))
-        for point in points[1:]:
-            line.lineTo(*point)
-        painter.drawPath(line)
+        painter.setPen(line_pen(color))
+        painter.drawPath(polyline(points))
         painter.end()
         pixmap.save(str(path))
     return path.as_posix()

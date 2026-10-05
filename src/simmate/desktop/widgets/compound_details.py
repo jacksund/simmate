@@ -82,14 +82,19 @@ class CompoundDetails(QWidget):
         layout.addWidget(self.structure_tabs, stretch=1)
         layout.addLayout(form)
 
-        self.show_row(None)
+        self._render(None)
 
     def set_query(self, query: Molecule | None):
         self.query = query
         self.svg_cache.clear()
-        self.show_row(self.current)
+        self._render(self.current)
 
     def show_row(self, index: int | None):
+        # Hovering fires for every mouse move, so skip re-showing the same compound.
+        if index != self.current:
+            self._render(index)
+
+    def _render(self, index: int | None):
         self.current = index
         if index is None:
             self.title_label.setText("Hover or select a compound to see it here")

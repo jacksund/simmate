@@ -2,7 +2,7 @@ import psutil
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QLabel
 
-from simmate.desktop.widgets.title_bar import MUTED_COLOR
+from simmate.desktop.theme import MUTED_COLOR
 
 
 class SystemMonitor(QLabel):

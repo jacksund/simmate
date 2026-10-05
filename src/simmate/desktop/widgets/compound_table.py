@@ -1,9 +1,10 @@
+from functools import cached_property
+
 import numpy as np
 import polars
 from PySide6.QtCore import (
     QAbstractTableModel,
     QModelIndex,
-    QPointF,
     QSize,
     QSizeF,
     QSortFilterProxyModel,
@@ -14,9 +15,7 @@ from PySide6.QtGui import (
     QFont,
     QFontMetrics,
     QPainter,
-    QPainterPath,
     QPalette,
-    QPen,
     QPixmap,
 )
 from PySide6.QtWidgets import (
@@ -26,10 +25,8 @@ from PySide6.QtWidgets import (
     QTableView,
 )
 
-from simmate.desktop.widgets.title_bar import (
-    MUTED_COLOR,
-    PRIMARY_COLOR,
-)
+from simmate.desktop.theme import MUTED_COLOR, PRIMARY_COLOR, rgba, tint
+from simmate.desktop.widgets.inputs import line_pen, polyline
 from simmate.toolkit import Molecule
 from simmate.toolkit.dataframes import MoleculeDataFrame
 
@@ -40,13 +37,13 @@ NUMERIC_COLUMNS = ["pIC50", "solubility", "MolWt", "cLogP", "TPSA"]
 THUMBNAIL_SIZE = QSize(180, 120)
 # Row colors, in line with the website (see website/core/static/css/simmate.css).
 # Hover matches --bs-primary-bg-subtle (the primary teal at 10% opacity).
-HIGHLIGHT_COLOR = QColor(0, 148, 133, 26)
+HIGHLIGHT_COLOR = tint(PRIMARY_COLOR, 26)
 # Selection is the same teal at 25%, between the hover and the full primary color.
-SELECTION_COLOR = "rgba(0, 148, 133, 25%)"
+SELECTION_COLOR = rgba(PRIMARY_COLOR, "25%")
 # Header cells get a light tint of the primary color (as rgba, so it works over a
 # light or dark background).
-HEADER_COLOR = QColor(0, 148, 133, 30)
-HEADER_RGBA = "rgba({}, {}, {}, {})".format(*HEADER_COLOR.getRgb())
+HEADER_COLOR = tint(PRIMARY_COLOR, 30)
+HEADER_RGBA = rgba(PRIMARY_COLOR, 30)
 # Every other row is a shade darker than the window (as rgba, for the same reason).
 STRIPE_COLOR = "rgba(0, 0, 0, 12)"
 # Bordered and rounded like the inputs, but on the window's own background (the
@@ -133,36 +130,41 @@ class CompoundTableModel(QAbstractTableModel):
         return None
 
     def data(self, index, role=Qt.ItemDataRole.DisplayRole):
-        df = self.mdf.df
         row = index.row()
         key = self.COLUMNS[index.column()][1]
 
-        if (
-            role == Qt.ItemDataRole.BackgroundRole
-            and index.row() in self.highlighted_rows
-        ):
-            return HIGHLIGHT_COLOR
+        # Qt asks for many roles per cell on every paint; answer the cheap ones
+        # before touching the dataframe.
+        if role == Qt.ItemDataRole.BackgroundRole:
+            return HIGHLIGHT_COLOR if row in self.highlighted_rows else None
 
         if key == "structure":
             if role == Qt.ItemDataRole.DecorationRole:
-                return self._thumbnail(index.row())
+                return self._thumbnail(row)
             if role == SORT_ROLE:
                 # sorting this column sorts by size
-                return df["molecule_obj"][row].num_atoms_heavy
+                return self._heavy_atom_counts[row]
             if role == Qt.ItemDataRole.ToolTipRole:
-                return df["smiles"][row]
+                return self.mdf.df["smiles"][row]
             return None
 
-        value = df[key][row]
-        if role == Qt.ItemDataRole.DisplayRole:
-            return str(value)
-        if role == SORT_ROLE:
-            return value
-        if role == Qt.ItemDataRole.TextAlignmentRole and key in NUMERIC_COLUMNS:
-            return Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+        if role == Qt.ItemDataRole.TextAlignmentRole:
+            if key in NUMERIC_COLUMNS:
+                return Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+            return None
         if role == Qt.ItemDataRole.ForegroundRole and key == "status":
-            return QColor("#4caf50") if value == "Active" else QColor("#9e9e9e")
+            active = self.mdf.df[key][row] == "Active"
+            return QColor("#4caf50") if active else QColor("#9e9e9e")
+        if role == Qt.ItemDataRole.DisplayRole:
+            return str(self.mdf.df[key][row])
+        if role == SORT_ROLE:
+            return self.mdf.df[key][row]
         return None
+
+    @cached_property
+    def _heavy_atom_counts(self) -> list[int]:
+        # Computed once: sorting asks for every row's key many times over.
+        return [m.num_atoms_heavy for m in self.mdf.df["molecule_obj"]]
 
     def column(self, key: str) -> int:
         return [k for _, k in self.COLUMNS].index(key)
@@ -217,6 +219,10 @@ class CompoundFilterProxy(QSortFilterProxyModel):
         # By row index: which rows pass the user's filters / sit in the plot's view.
         self.passing = np.ones(0, dtype=bool)
         self.in_view = np.ones(0, dtype=bool)
+        # The last substructure query and its matches, by row index. Only the
+        # sketcher changes the query, so other filter edits reuse the search.
+        self._query = None
+        self._query_matches = None
 
     def setSourceModel(self, model: CompoundTableModel):
         super().setSourceModel(model)
@@ -246,9 +252,7 @@ class CompoundFilterProxy(QSortFilterProxyModel):
             checks.append(polars.col("status") == status)
         passing = self._mask(checks)
         if query is not None:
-            matches = np.zeros_like(passing)
-            matches[self.mdf.get_substructure_matches(query)] = True
-            passing &= matches
+            passing &= self._substructure_matches(query)
 
         self.beginFilterChange()
         self.passing = passing
@@ -259,6 +263,13 @@ class CompoundFilterProxy(QSortFilterProxyModel):
         self.beginFilterChange()
         self.in_view = in_view
         self.endFilterChange()
+
+    def _substructure_matches(self, query: Molecule) -> np.ndarray:
+        if query is not self._query:
+            self._query = query
+            self._query_matches = np.zeros(self.mdf.df.height, dtype=bool)
+            self._query_matches[self.mdf.get_substructure_matches(query)] = True
+        return self._query_matches
 
     def _mask(self, checks: list[polars.Expr]) -> np.ndarray:
         """Evaluate `checks` over every row: True where a row passes all of them."""
@@ -335,16 +346,11 @@ class _SortHeader(QHeaderView):
             points = [(0, height), (width / 2, 0), (width, height)]  # pointing up
         else:
             points = [(0, 0), (width / 2, height), (width, 0)]
-        chevron = QPainterPath(QPointF(left + points[0][0], top + points[0][1]))
-        for x, y in points[1:]:
-            chevron.lineTo(left + x, top + y)
+        chevron = polyline([(left + x, top + y) for x, y in points])
 
         painter.save()
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        pen = QPen(QColor(PRIMARY_COLOR), 1.6)
-        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-        pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
-        painter.setPen(pen)
+        painter.setPen(line_pen(PRIMARY_COLOR))
         painter.drawPath(chevron)
         painter.restore()
 
@@ -378,9 +384,11 @@ class CompoundTable(QTableView):
         header.setCursor(Qt.CursorShape.PointingHandCursor)  # click to sort
         for key in ("smiles", "tested"):
             self.setColumnHidden(model.column(key), True)
-        # Size text columns to fit. Skip the image column: measuring it would render every image.
+        # Size text columns to fit. Skip the image column (measuring it would render
+        # every image) and hidden ones (measuring them is wasted work).
         for column in range(1, model.columnCount()):
-            self.resizeColumnToContents(column)
+            if not self.isColumnHidden(column):
+                self.resizeColumnToContents(column)
         self.setColumnWidth(0, THUMBNAIL_SIZE.width() + 10)
         self.setMouseTracking(True)  # needed for the `entered` (hover) signal
 

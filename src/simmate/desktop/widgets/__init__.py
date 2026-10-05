@@ -10,7 +10,7 @@ from .compound_table import (
     CompoundTableModel,
 )
 from .filter_panel import FilterPanel
-from .inputs import input_style, style_combo
+from .inputs import StyledComboBox, input_style
 from .ketcher import KetcherWidget
 from .molecule_3d import Molecule3DView
 from .panel_tab import PanelTab, SidePanel, SideTabBar

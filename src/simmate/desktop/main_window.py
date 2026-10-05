@@ -5,16 +5,28 @@ from PySide6.QtGui import QAction, QIcon, QKeySequence, QPainter, QPainterPath
 from PySide6.QtWidgets import QMainWindow, QTabWidget
 
 from simmate.desktop.tabs import DashboardTab, PlaceholderTab
-from simmate.desktop.widgets import SystemMonitor, TitleBar
-from simmate.desktop.widgets.title_bar import (
+from simmate.desktop.theme import (
     CORNER_RADIUS,
     ICON_PATH,
     MUTED_COLOR,
     PRIMARY_COLOR,
 )
+from simmate.desktop.widgets import SystemMonitor, TitleBar
 
 # Width (px) of the invisible border you can drag to resize the window.
 RESIZE_MARGIN = 5
+
+# The resize cursor for each edge (or corner) of that border.
+EDGE_CURSORS = {
+    Qt.Edge.LeftEdge: Qt.CursorShape.SizeHorCursor,
+    Qt.Edge.RightEdge: Qt.CursorShape.SizeHorCursor,
+    Qt.Edge.TopEdge: Qt.CursorShape.SizeVerCursor,
+    Qt.Edge.BottomEdge: Qt.CursorShape.SizeVerCursor,
+    Qt.Edge.TopEdge | Qt.Edge.LeftEdge: Qt.CursorShape.SizeFDiagCursor,
+    Qt.Edge.BottomEdge | Qt.Edge.RightEdge: Qt.CursorShape.SizeFDiagCursor,
+    Qt.Edge.TopEdge | Qt.Edge.RightEdge: Qt.CursorShape.SizeBDiagCursor,
+    Qt.Edge.BottomEdge | Qt.Edge.LeftEdge: Qt.CursorShape.SizeBDiagCursor,
+}
 
 # Flat tabs with a teal underline on the selected one. Set on the window, so it
 # also covers tab widgets nested inside the tabs.
@@ -128,26 +140,11 @@ class MainWindow(QMainWindow):
         return edges
 
     def mouseMoveEvent(self, event):
-        edges = self._edges_at(event.position().toPoint())
-        horizontal = edges & (Qt.Edge.LeftEdge | Qt.Edge.RightEdge)
-        vertical = edges & (Qt.Edge.TopEdge | Qt.Edge.BottomEdge)
-        if horizontal and vertical:
-            forward = edges in (
-                Qt.Edge.TopEdge | Qt.Edge.LeftEdge,
-                Qt.Edge.BottomEdge | Qt.Edge.RightEdge,
-            )
-            cursor = (
-                Qt.CursorShape.SizeFDiagCursor
-                if forward
-                else Qt.CursorShape.SizeBDiagCursor
-            )
-            self.setCursor(cursor)
-        elif horizontal:
-            self.setCursor(Qt.CursorShape.SizeHorCursor)
-        elif vertical:
-            self.setCursor(Qt.CursorShape.SizeVerCursor)
-        else:
+        cursor = EDGE_CURSORS.get(self._edges_at(event.position().toPoint()))
+        if cursor is None:
             self.unsetCursor()
+        else:
+            self.setCursor(cursor)
         super().mouseMoveEvent(event)
 
     def mousePressEvent(self, event):

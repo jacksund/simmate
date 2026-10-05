@@ -1,5 +1,5 @@
 import threading
-from functools import partial
+from functools import cache, partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 from PySide6.QtCore import QFile, QIODevice, QObject, QTimer, Signal, Slot
@@ -34,10 +34,12 @@ class _QuietHandler(SimpleHTTPRequestHandler):
         pass
 
 
+@cache
 def serve_ketcher() -> int:
     """Serve the Ketcher standalone build on a free localhost port and return it.
 
     Ketcher loads Indigo as WASM, which doesn't work reliably over file:// URLs.
+    The server is started once and shared by every sketcher.
     """
     download_ketcher()
     ketcher_dir = settings.config_directory / "static_files" / "ketcher"

@@ -2,10 +2,11 @@ from PySide6.QtCore import QPointF, QRectF, QSize, Qt, Signal
 from PySide6.QtGui import QColor, QFontMetrics, QPainter, QPainterPath, QPen, QTransform
 from PySide6.QtWidgets import QAbstractButton, QStackedWidget, QVBoxLayout, QWidget
 
-from simmate.desktop.widgets.title_bar import (
+from simmate.desktop.theme import (
     PRIMARY_COLOR,
     PRIMARY_DARKER,
     PRIMARY_LIGHTER,
+    tint,
 )
 
 
@@ -71,9 +72,7 @@ class PanelTab(QAbstractButton):
             content_color = QColor("white")
         else:
             if self.isDown() or self.underMouse():
-                tint = QColor(PRIMARY_COLOR)
-                tint.setAlpha(60 if self.isDown() else 30)
-                painter.fillPath(path, tint)
+                painter.fillPath(path, tint(PRIMARY_COLOR, 60 if self.isDown() else 30))
             painter.setPen(QPen(QColor(PRIMARY_COLOR), self.OUTLINE_WIDTH))
             painter.drawPath(path)
             content_color = QColor(PRIMARY_COLOR)
@@ -153,7 +152,6 @@ class SidePanel(QStackedWidget):
         min_width: int,
     ):
         super().__init__()
-        self.side = side
         self.open_width = width  # restored when the collapsed panel is reopened
         self.min_width = min_width
         for _, page in pages:

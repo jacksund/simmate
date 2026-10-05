@@ -20,8 +20,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from simmate.desktop.theme import MUTED_COLOR
 from simmate.desktop.widgets.button import BUTTON_STYLE, PrimaryButton
-from simmate.desktop.widgets.title_bar import MUTED_COLOR
 
 PANEL_STYLE = f"""
 #settingsPanel {{
