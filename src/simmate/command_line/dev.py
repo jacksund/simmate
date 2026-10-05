@@ -12,10 +12,12 @@ from pathlib import Path
 
 import typer
 
+from simmate.command_line.utilities import AlphabeticalGroup
+
 from .k8s import k8s_app
 from .s3 import s3_app
 
-dev_app = typer.Typer(rich_markup_mode="markdown")
+dev_app = typer.Typer(rich_markup_mode="markdown", cls=AlphabeticalGroup)
 
 dev_app.add_typer(k8s_app, name="k8s")
 dev_app.add_typer(s3_app, name="s3")

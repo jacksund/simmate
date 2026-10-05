@@ -7,7 +7,9 @@ accessible through the "simmate compute" command.
 
 import typer
 
-compute_app = typer.Typer(rich_markup_mode="markdown")
+from simmate.command_line.utilities import AlphabeticalGroup
+
+compute_app = typer.Typer(rich_markup_mode="markdown", cls=AlphabeticalGroup)
 
 
 @compute_app.callback(no_args_is_help=True)

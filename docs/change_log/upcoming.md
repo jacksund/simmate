@@ -36,6 +36,7 @@
 - enabled updates for `@batch_bulk_create` decorator
 - added a fork of `simple_pid`
 - added an `on` keyword argument for weekly schedules
+- added a prototype Qt desktop app (`simmate.desktop`, via the new `desktop` extra deps) with a compound dashboard (linked scatter plot, compound detail card, and table, plus a filter column with a Ketcher sketcher for substructure search), plus `simmate desktop start` and `simmate desktop build` commands, where `build` packages the app into a single-file executable with PyInstaller
 
 **Refactors**
 

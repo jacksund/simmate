@@ -9,7 +9,9 @@ from pathlib import Path
 
 import typer
 
-database_app = typer.Typer(rich_markup_mode="markdown")
+from simmate.command_line.utilities import AlphabeticalGroup
+
+database_app = typer.Typer(rich_markup_mode="markdown", cls=AlphabeticalGroup)
 
 
 @database_app.callback(no_args_is_help=True)

@@ -4,15 +4,17 @@ import logging
 import os
 import shutil
 import zipfile
+from pathlib import Path
 
 import requests
 
 from simmate.config import settings
 
 
-def download_ketcher():
+def download_ketcher() -> Path:
     """
-    Downloads and extracts the Ketcher standalone zip to the static directory.
+    Downloads and extracts the Ketcher standalone zip to the static directory,
+    and returns that directory.
     This is required to avoid CORS issues when accessing the Ketcher API
     from an iframe.
     """
@@ -24,7 +26,7 @@ def download_ketcher():
     static_dir = settings.config_directory / "static_files" / "ketcher"
 
     if (static_dir / "index.html").exists():
-        return
+        return static_dir
 
     logging.info("Downloading Ketcher...")
 
@@ -42,7 +44,7 @@ def download_ketcher():
                 f.write(chunk)
     else:
         logging.error(f"Failed to download Ketcher (status {response.status_code})")
-        return
+        return static_dir
 
     with zipfile.ZipFile(zip_path, "r") as zip_ref:
         # The zip contains a 'standalone' folder, we want the contents of that folder
@@ -68,3 +70,4 @@ def download_ketcher():
 
     os.remove(zip_path)
     logging.info("Ketcher installation complete.")
+    return static_dir

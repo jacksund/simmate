@@ -12,12 +12,15 @@ import typer
 from simmate.command_line.compute import compute_app
 from simmate.command_line.config import config_app
 from simmate.command_line.database import database_app
+from simmate.command_line.desktop import desktop_app
 from simmate.command_line.dev import dev_app
+from simmate.command_line.utilities import AlphabeticalGroup
 from simmate.command_line.workflows import workflows_app
 
 simmate_app = typer.Typer(
     rich_markup_mode="markdown",
     add_completion=False,
+    cls=AlphabeticalGroup,
 )
 
 
@@ -120,6 +123,7 @@ def start_project():
 # # them to our base "simmate" command here.
 simmate_app.add_typer(config_app, name="config")
 simmate_app.add_typer(database_app, name="database")
+simmate_app.add_typer(desktop_app, name="desktop")
 simmate_app.add_typer(dev_app, name="dev")
 simmate_app.add_typer(compute_app, name="compute")
 simmate_app.add_typer(workflows_app, name="workflows")

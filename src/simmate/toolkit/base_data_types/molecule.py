@@ -16,11 +16,12 @@ from rdkit.Chem import (
     Descriptors,
     Draw,
     RDConfig,
+    rdDepictor,
     rdmolops,
     rdqueries,
     rdRGroupDecomposition,
 )
-from rdkit.Chem.Draw import IPythonConsole
+from rdkit.Chem.Draw import IPythonConsole, rdMolDraw2D
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
 # Automatically enable common settings for molecule printing
@@ -130,6 +131,13 @@ class Molecule:
         if not isinstance(other, self.__class__):
             return False  # catches things like `molecule == None`
         return self.to_inchi_key() == other.to_inchi_key()
+
+    def copy(self):  # -> Molecule
+        """
+        Gives a deep copy of this molecule. Useful before calling methods that
+        modify the molecule in place, such as `add_hydrogens` or `convert_to_3d`.
+        """
+        return self.__class__(AllChem.Mol(self.rdkit_molecule))
 
     @property
     def image(self):
@@ -835,6 +843,63 @@ class Molecule:
             svg_encoded = f"data:image/svg+xml;utf8,{urllib.parse.quote(svg)}"
             return svg_encoded
 
+    def draw(
+        self,
+        image_format: str = "svg",
+        size: tuple[int, int] = (300, 300),
+        highlight_query=None,  # Molecule
+        transparent: bool = True,
+        stereo_annotations: bool = False,
+    ) -> bytes:
+        """
+        Renders a 2D depiction of the molecule as SVG or PNG bytes.
+
+        #### Parameters
+
+        - `image_format`:
+            Either "svg" or "png". PNG is cheaper when rendering many small images.
+
+        - `size`:
+            The (width, height) of the image in pixels.
+
+        - `highlight_query`:
+            A substructure query (`Molecule`). When given and matched, the match
+            is highlighted and the molecule is laid out to line up with the
+            query's 2D coordinates (see `align_2d_to_substructure`).
+
+        - `transparent`:
+            Whether to skip the white background.
+
+        - `stereo_annotations`:
+            Whether to label stereocenters (e.g. R/S).
+        """
+        molecule = self
+        atoms, bonds = (), ()
+        if highlight_query is not None:
+            atoms, bonds = self.get_substructure_match(highlight_query)
+            if atoms:
+                molecule = self.align_2d_to_substructure(highlight_query, atoms)
+
+        if image_format == "svg":
+            drawer = rdMolDraw2D.MolDraw2DSVG(*size)
+        elif image_format == "png":
+            drawer = rdMolDraw2D.MolDraw2DCairo(*size)
+        else:
+            raise ValueError(f"Unknown image format: {image_format}")
+        options = drawer.drawOptions()
+        options.addStereoAnnotation = stereo_annotations
+        options.clearBackground = not transparent
+
+        rdMolDraw2D.PrepareAndDrawMolecule(
+            drawer,
+            molecule.rdkit_molecule,
+            highlightAtoms=list(atoms),
+            highlightBonds=list(bonds),
+        )
+        drawer.FinishDrawing()
+        image = drawer.GetDrawingText()
+        return image.encode() if image_format == "svg" else image
+
     def to_xyz(self):
         """
         Outputs the `Molecule` object to a XYZ file (*.xyz)
@@ -921,9 +986,15 @@ class Molecule:
         """
         self.rdkit_molecule = AllChem.RemoveHs(self.rdkit_molecule)
 
-    def convert_to_3d(self, keep_hydrogen: bool = False):
+    def convert_to_3d(
+        self,
+        keep_hydrogen: bool = False,
+        random_seed: int = -1,
+    ):
         """
         Converts the molecule to a roughly-optimized 3D conformer.
+
+        Raises a `ConformerGenerationError` if no conformer could be embedded.
 
         NOTES:
 
@@ -933,11 +1004,16 @@ class Molecule:
 
         2. If you are converting many molecules to 3D, it is more efficient to
         use the `convert_to_3d` method of the `MoleculeList` class.
+
+        3. Pass a `random_seed` for reproducible conformers (-1 is random).
         """
         # Add implicit hydrogens, which are required for 3D
         self.add_hydrogens()
         # create a single conformer using ETKDG
-        AllChem.EmbedMolecule(self.rdkit_molecule)
+        if AllChem.EmbedMolecule(self.rdkit_molecule, randomSeed=random_seed) != 0:
+            raise self.ConformerGenerationError(
+                f"Failed to embed a 3D conformer for {self.to_smiles()}"
+            )
         # optimize atomic positions using empirical force field (MMFF94)
         AllChem.MMFFOptimizeMolecule(self.rdkit_molecule)
         # optionally remove hydrogen after conversion
@@ -1587,6 +1663,72 @@ class Molecule:
         ]
         return sum(matches)
 
+    def get_substructure_match(self, query) -> tuple[tuple[int], tuple[int]]:
+        """
+        Given a substructure query (`Molecule`), gives the indices of the
+        matched atoms and the matched bonds in this molecule. Both are empty
+        when there is no match. Only the first match is used.
+
+        Atom indices are ordered like the query's atoms, so `atoms[i]` is the
+        atom matched by query atom `i`.
+        """
+        atoms = self.rdkit_molecule.GetSubstructMatch(query.rdkit_molecule)
+        if not atoms:
+            return (), ()
+        bonds = tuple(
+            self.rdkit_molecule.GetBondBetweenAtoms(
+                atoms[bond.GetBeginAtomIdx()],
+                atoms[bond.GetEndAtomIdx()],
+            ).GetIdx()
+            for bond in query.rdkit_molecule.GetBonds()
+        )
+        return atoms, bonds
+
+    def align_2d_to_substructure(self, query, atoms: tuple[int] = None):  # -> Molecule
+        """
+        Gives a copy of this molecule with a 2D depiction laid out so that the
+        part matching the substructure `query` sits like the query's own 2D
+        coordinates (e.g. to line up results with a structure drawn in a
+        sketcher).
+
+        The query's coordinates are rescaled to RDKit's depiction bond length,
+        so queries from other programs (with shorter or longer bonds) still
+        line up. If there is no match or the query has no coordinates, an
+        unchanged copy is returned.
+
+        `atoms` can be given to skip the substructure search when the match
+        (from `get_substructure_match`) is already known.
+        """
+        if atoms is None:
+            atoms, _ = self.get_substructure_match(query)
+        aligned = self.copy()
+        if not atoms or not query.num_conformers:
+            return aligned
+
+        template = AllChem.Mol(query.rdkit_molecule)
+        if template.GetNumBonds():
+            conformer = template.GetConformer()
+            positions = conformer.GetPositions()
+            mean_bond = numpy.mean(
+                [
+                    numpy.linalg.norm(
+                        positions[b.GetBeginAtomIdx()] - positions[b.GetEndAtomIdx()]
+                    )
+                    for b in template.GetBonds()
+                ]
+            )
+            if mean_bond > 0:
+                scale = 1.5 / mean_bond  # RDKit's depiction bond length
+                for i, position in enumerate(positions):
+                    conformer.SetAtomPosition(i, (position * scale).tolist())
+
+        rdDepictor.GenerateDepictionMatching2DStructure(
+            aligned.rdkit_molecule,
+            template,
+            atomMap=list(enumerate(atoms)),
+        )
+        return aligned
+
     # -------------------------------------------------------------------------
 
     # Fingerprints
@@ -1665,7 +1807,27 @@ class Molecule:
             for atom in self.rdkit_molecule.GetAtoms()
         ]
 
+    @property
+    def bond_list(self) -> list[dict]:
+        """
+        The molecule's bonds, each as a dictionary of its index, the indices
+        of the two atoms it joins (`begin` and `end`), and its bond order
+        (1.5 for aromatic bonds).
+        """
+        return [
+            {
+                "index": bond.GetIdx(),
+                "begin": bond.GetBeginAtomIdx(),
+                "end": bond.GetEndAtomIdx(),
+                "order": bond.GetBondTypeAsDouble(),
+            }
+            for bond in self.rdkit_molecule.GetBonds()
+        ]
+
     # -------------------------------------------------------------------------
 
     class EmptyMoleculeError(Exception):
+        pass
+
+    class ConformerGenerationError(Exception):
         pass
