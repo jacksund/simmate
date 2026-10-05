@@ -2,7 +2,7 @@ import psutil
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QLabel
 
-from simmate.desktop.theme import MUTED_COLOR
+from simmate.desktop import theme
 
 
 class SystemMonitor(QLabel):
@@ -12,7 +12,7 @@ class SystemMonitor(QLabel):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet(f"color: {MUTED_COLOR}; padding: 0 2px 0 8px;")
+        self.setStyleSheet(f"color: {theme.MUTED_COLOR}; padding: 0 2px 0 8px;")
         self.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.cores = psutil.cpu_count() or 1
         self.total_gb = psutil.virtual_memory().total / 1024**3

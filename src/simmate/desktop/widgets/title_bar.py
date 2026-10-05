@@ -7,11 +7,11 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from simmate.desktop.theme import CORNER_RADIUS, ICON_PATH, PRIMARY_COLOR
+from simmate.desktop import theme
 
-STYLE = f"""
-#titleBar QLabel {{ color: white; }}
-#titleBar #titleLabel {{ font-weight: bold; padding: 0 12px 0 8px; }}
+STYLE = """
+#titleBar QLabel { color: white; }
+#titleBar #titleLabel { font-weight: bold; padding: 0 12px 0 8px; }
 """
 
 
@@ -87,8 +87,9 @@ class TitleBar(QWidget):
         self.setFixedHeight(40)
 
         icon = QLabel()
-        icon.setPixmap(QIcon(str(ICON_PATH)).pixmap(22, 22))
-        title = QLabel("Simmate Desktop", objectName="titleLabel")
+        icon_path = theme.TITLE_ICON_PATH or theme.ICON_PATH
+        icon.setPixmap(QIcon(str(icon_path)).pixmap(22, 22))
+        title = QLabel(theme.APP_NAME, objectName="titleLabel")
 
         self._drag_offset = None
 
@@ -113,12 +114,12 @@ class TitleBar(QWidget):
         # meets the screen edges).
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        radius = 0 if self.window().isMaximized() else CORNER_RADIUS
+        radius = 0 if self.window().isMaximized() else theme.CORNER_RADIUS
         rect = QRectF(self.rect())
         path = QPainterPath()
         path.addRoundedRect(rect.adjusted(0, 0, 0, radius), radius, radius)
         painter.setClipRect(rect)
-        painter.fillPath(path, QColor(PRIMARY_COLOR))
+        painter.fillPath(path, QColor(theme.PRIMARY_COLOR))
 
     def toggle_maximized(self):
         if self.window().isMaximized():

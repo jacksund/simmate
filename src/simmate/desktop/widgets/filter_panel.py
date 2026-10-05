@@ -12,15 +12,17 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from simmate.desktop.theme import MUTED_COLOR
+from simmate.desktop import theme
 from simmate.desktop.widgets.button import PrimaryButton
 from simmate.desktop.widgets.compound_table import NUMERIC_COLUMNS, CompoundTableModel
 from simmate.desktop.widgets.inputs import StyledComboBox, input_style
 from simmate.desktop.widgets.ketcher import KetcherWidget
 from simmate.toolkit.dataframes import MoleculeDataFrame
 
-FILTER_STYLE = f"""
-#panelTitle {{ color: {MUTED_COLOR}; font-weight: bold; }}
+
+def filter_style() -> str:
+    return f"""
+#panelTitle {{ color: {theme.MUTED_COLOR}; font-weight: bold; }}
 #rangeSep {{ color: palette(placeholder-text); }}
 /* see-through, so the window shows behind the panel like the rest of the app */
 #filterScroll, #filterContent {{ background: transparent; }}
@@ -43,7 +45,7 @@ class FilterPanel(QWidget):
         super().__init__()
         self.mdf = mdf
         self.query = None
-        self.setStyleSheet(FILTER_STYLE + input_style())
+        self.setStyleSheet(filter_style() + input_style())
 
         # --- header -------------------------------------------------------------------
         title = QLabel("Filters", objectName="panelTitle")

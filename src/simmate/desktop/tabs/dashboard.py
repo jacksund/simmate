@@ -24,9 +24,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from simmate.desktop import theme
 from simmate.desktop.example_data.compounds import build_dataset
 from simmate.desktop.tabs.placeholder import PlaceholderTab
-from simmate.desktop.theme import MUTED_COLOR
 from simmate.desktop.widgets import (
     NUMERIC_COLUMNS,
     CompoundDetails,
@@ -56,6 +56,9 @@ class DashboardTab(QWidget):
     - Hovering a point (or a row) highlights its row, rings its point, and shows it in full
       in the detail card (the right panel's Compound tab). When the hover ends, the card goes back to the selected compound.
     - Clicking points (Ctrl+click to add/remove) selects rows; selecting rows rings their points.
+
+    Subclasses can add or swap side panel pages by overriding `get_left_pages` and
+    `get_right_pages`.
     """
 
     status = Signal(str)
@@ -144,12 +147,12 @@ class DashboardTab(QWidget):
 
         # --- detail card --------------------------------------------------------------
         self.details = CompoundDetails(self.mdf)
-        details_scroll = QScrollArea()
-        details_scroll.setWidget(self.details)
-        details_scroll.setWidgetResizable(True)
+        self.details_scroll = QScrollArea()
+        self.details_scroll.setWidget(self.details)
+        self.details_scroll.setWidgetResizable(True)
         # no frame, and the same padding as the filter panel (mirrored)
-        details_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        details_scroll.setContentsMargins(12, 8, 8, 8)
+        self.details_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self.details_scroll.setContentsMargins(12, 8, 8, 8)
 
         # --- table --------------------------------------------------------------------
         self.table = CompoundTable(self.proxy)
@@ -166,15 +169,13 @@ class DashboardTab(QWidget):
         self.filter_panel.query_changed.connect(self.model.set_highlight)
         self.filter_panel.query_changed.connect(self.details.set_query)
         self.left_panel = SidePanel(
-            [("Filters", self.filter_panel)]
-            + [(title, PlaceholderTab(title)) for title in LEFT_PLACEHOLDERS],
+            self.get_left_pages(),
             side="left",
             width=420,
             min_width=300,
         )
         self.right_panel = SidePanel(
-            [("Compound", details_scroll)]
-            + [(title, PlaceholderTab(title)) for title in RIGHT_PLACEHOLDERS],
+            self.get_right_pages(),
             side="right",
             width=340,
             min_width=280,
@@ -210,7 +211,7 @@ class DashboardTab(QWidget):
 
         # Same row of controls over the table, with its settings still to come.
         table_settings = QLabel("Table settings are coming soon.")
-        table_settings.setStyleSheet(f"color: {MUTED_COLOR}; padding: 12px;")
+        table_settings.setStyleSheet(f"color: {theme.MUTED_COLOR}; padding: 12px;")
         table_controls = QHBoxLayout()
         table_controls.addStretch()
         table_controls.addWidget(
@@ -262,6 +263,20 @@ class DashboardTab(QWidget):
         self._update_axes()
         # Again once the window is listening, so the count replaces its "Ready".
         QTimer.singleShot(0, self._update_count)
+
+    # --- side panel pages -----------------------------------------------------------------
+
+    def get_left_pages(self) -> list[tuple[str, QWidget]]:
+        """The (title, page) pairs of the left panel, for bulk / table operations."""
+        return [("Filters", self.filter_panel)] + [
+            (title, PlaceholderTab(title)) for title in LEFT_PLACEHOLDERS
+        ]
+
+    def get_right_pages(self) -> list[tuple[str, QWidget]]:
+        """The (title, page) pairs of the right panel, for single-compound work."""
+        return [("Compound", self.details_scroll)] + [
+            (title, PlaceholderTab(title)) for title in RIGHT_PLACEHOLDERS
+        ]
 
     # --- helpers --------------------------------------------------------------------------
 

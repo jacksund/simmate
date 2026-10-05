@@ -1,15 +1,17 @@
 from PySide6.QtCore import QPointF, QRectF, QSize, Qt, Signal
-from PySide6.QtGui import QColor, QFontMetrics, QPainter, QPainterPath, QPen, QTransform
+from PySide6.QtGui import (
+    QColor,
+    QFontMetrics,
+    QFontMetricsF,
+    QPainter,
+    QPainterPath,
+    QPen,
+    QTransform,
+)
 from PySide6.QtWidgets import QAbstractButton, QStackedWidget, QVBoxLayout, QWidget
 
-from simmate.desktop.theme import (
-    HOVER_ALPHA,
-    PRESSED_ALPHA,
-    PRIMARY_COLOR,
-    PRIMARY_DARKER,
-    PRIMARY_LIGHTER,
-    tint,
-)
+from simmate.desktop import theme
+from simmate.desktop.theme import tint
 
 
 class PanelTab(QAbstractButton):
@@ -65,29 +67,36 @@ class PanelTab(QAbstractButton):
 
         if self.isChecked():
             if self.isDown():
-                fill = QColor(PRIMARY_DARKER)
+                fill = QColor(theme.PRIMARY_DARKER)
             elif self.underMouse():
-                fill = QColor(PRIMARY_LIGHTER)
+                fill = QColor(theme.PRIMARY_LIGHTER)
             else:
-                fill = QColor(PRIMARY_COLOR)
+                fill = QColor(theme.PRIMARY_COLOR)
             painter.fillPath(path, fill)
             content_color = QColor("white")
         else:
             if self.isDown() or self.underMouse():
-                alpha = PRESSED_ALPHA if self.isDown() else HOVER_ALPHA
-                painter.fillPath(path, tint(PRIMARY_COLOR, alpha))
-            painter.setPen(QPen(QColor(PRIMARY_COLOR), self.OUTLINE_WIDTH))
+                alpha = theme.PRESSED_ALPHA if self.isDown() else theme.HOVER_ALPHA
+                painter.fillPath(path, tint(theme.PRIMARY_COLOR, alpha))
+            painter.setPen(QPen(QColor(theme.PRIMARY_COLOR), self.OUTLINE_WIDTH))
             painter.drawPath(path)
-            content_color = QColor(PRIMARY_COLOR)
+            content_color = QColor(theme.PRIMARY_COLOR)
 
-        # Label, rotated to read top-to-bottom, centered in the tab.
-        painter.setPen(content_color)
+        # Label, rotated to read top-to-bottom, centered in the tab. Filled as a path
+        # rather than drawn with drawText: Windows renders rotated glyphs upright
+        # and then turns the bitmap, which pixelates them (worse under display
+        # scaling). A path stays crisp at any angle.
         painter.translate(rect.center())
         painter.rotate(90)
-        text_rect = QRectF(
-            -rect.height() / 2, -rect.width() / 2, rect.height(), rect.width()
+        metrics = QFontMetricsF(self.font())
+        label = QPainterPath()
+        label.addText(
+            -metrics.horizontalAdvance(self.text()) / 2,
+            (metrics.ascent() - metrics.descent()) / 2,  # the baseline, centered
+            self.font(),
+            self.text(),
         )
-        painter.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, self.text())
+        painter.fillPath(label, content_color)
 
 
 class SideTabBar(QWidget):
@@ -136,7 +145,7 @@ class SideTabBar(QWidget):
         painter = QPainter(self)
         x = 0 if self.side == "left" else self.width() - self.LINE_WIDTH
         painter.fillRect(
-            QRectF(x, 0, self.LINE_WIDTH, self.height()), QColor(PRIMARY_COLOR)
+            QRectF(x, 0, self.LINE_WIDTH, self.height()), QColor(theme.PRIMARY_COLOR)
         )
 
 
