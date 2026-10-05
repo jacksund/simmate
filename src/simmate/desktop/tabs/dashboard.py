@@ -12,35 +12,47 @@ from PySide6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
     QComboBox,
+    QFormLayout,
+    QFrame,
     QHBoxLayout,
     QLabel,
     QScrollArea,
     QSplitter,
-    QTableView,
     QVBoxLayout,
     QWidget,
 )
 
 from simmate.desktop.example_data.compounds import build_dataset
-from simmate.desktop.utilities import PlotToolbar
+from simmate.desktop.tabs.placeholder import PlaceholderTab
 from simmate.desktop.widgets import (
     NUMERIC_COLUMNS,
-    THUMBNAIL_SIZE,
     CompoundDetails,
     CompoundFilterProxy,
+    CompoundTable,
     CompoundTableModel,
     FilterPanel,
+    PlotToolbar,
+    SettingsButton,
+    SidePanel,
+    input_style,
+    style_combo,
 )
+from simmate.desktop.widgets.title_bar import MUTED_COLOR
+
+# Side panel tabs not built yet; each opens a "coming soon" page for now.
+# Left: bulk / many-compound / table operations. Right: single-compound work.
+LEFT_PLACEHOLDERS = ["Featurizers", "Clustering", "ChemSpace", "ML/AI", "Diversity"]
+RIGHT_PLACEHOLDERS = ["Mutations", "Conformers", "Calculations"]
 
 
 class DashboardTab(QWidget):
-    """A scatter plot, a compound detail card, and a table, all kept in sync, plus filters.
+    """A scatter plot and a table, flanked by tabbed side panels, all kept in sync.
 
-    - The filter column (left) narrows everything: draw a substructure in the sketcher
-      and/or set column filters. Filtered-out points are hidden, or dimmed if toggled.
+    - The left panel holds bulk tools; its Filters tab narrows everything: draw a substructure in the sketcher
+      and/or set column filters. Filtered-out points show in grey, or are hidden (plot settings).
     - Zooming/panning the plot further narrows the table to the points in view.
     - Hovering a point (or a row) highlights its row, rings its point, and shows it in full
-      in the detail card. When the hover ends, the card goes back to the selected compound.
+      in the detail card (the right panel's Compound tab). When the hover ends, the card goes back to the selected compound.
     - Clicking points (Ctrl+click to add/remove) selects rows; selecting rows rings their points.
     """
 
@@ -70,14 +82,19 @@ class DashboardTab(QWidget):
             combo.addItems(NUMERIC_COLUMNS)
             combo.setCurrentText(default)
             combo.currentTextChanged.connect(self._update_axes)
+            style_combo(combo)
 
-        self.dim_checkbox = QCheckBox("Dim filtered-out")
-        self.dim_checkbox.setToolTip(
-            "Show compounds excluded by the filters as grey points instead of hiding them"
+        self.show_filtered_checkbox = QCheckBox("Show filtered-out points in grey")
+        self.show_filtered_checkbox.setToolTip(
+            "Keep compounds excluded by the filters on the plot as grey points,\n"
+            "instead of hiding them"
         )
-        self.dim_checkbox.toggled.connect(self._redraw_points)
+        self.show_filtered_checkbox.setChecked(True)
+        self.show_filtered_checkbox.toggled.connect(self._redraw_points)
 
-        self.plot = pg.PlotWidget()
+        self.plot = pg.PlotWidget(
+            background=None
+        )  # transparent: the window shows through
         self.plot.showGrid(x=True, y=True, alpha=0.3)
         self.view_box = self.plot.getPlotItem().getViewBox()
 
@@ -125,77 +142,118 @@ class DashboardTab(QWidget):
         details_scroll = QScrollArea()
         details_scroll.setWidget(self.details)
         details_scroll.setWidgetResizable(True)
+        # no frame, and the same padding as the filter panel (mirrored)
+        details_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        details_scroll.setContentsMargins(12, 8, 8, 8)
 
         # --- table --------------------------------------------------------------------
-        self.table = QTableView()
-        self.table.setModel(self.proxy)
-        self.table.setSortingEnabled(True)
-        self.table.sortByColumn(
-            self.model.column("pIC50"), Qt.SortOrder.DescendingOrder
-        )
-        self.table.setIconSize(THUMBNAIL_SIZE)
-        self.table.setAlternatingRowColors(True)
-        self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.table.setWordWrap(False)
-        self.table.verticalHeader().hide()
-        self.table.verticalHeader().setDefaultSectionSize(THUMBNAIL_SIZE.height() + 6)
-        self.table.horizontalHeader().setStretchLastSection(True)
-        for key in ("smiles", "tested"):
-            self.table.setColumnHidden(self.model.column(key), True)
-        # Size text columns to fit. Skip the image column: measuring it would render every image.
-        for column in range(1, self.model.columnCount()):
-            self.table.resizeColumnToContents(column)
-        self.table.setColumnWidth(0, THUMBNAIL_SIZE.width() + 10)
-
-        self.table.setMouseTracking(True)  # needed for the `entered` (hover) signal
+        self.table = CompoundTable(self.proxy)
         self.table.entered.connect(self._on_table_hover)
         # to notice the mouse leaving the table
         self.table.viewport().installEventFilter(self)
         self.table.selectionModel().selectionChanged.connect(self._on_table_selection)
 
-        # --- filter column ------------------------------------------------------------
+        # --- side panels --------------------------------------------------------------
+        # One page per tab; only the open tab's page shows.
         self.filter_panel = FilterPanel(self.rows)
         self.filter_panel.filters_changed.connect(self._apply_filters)
+        self.left_panel = SidePanel(
+            [("Filters", self.filter_panel)]
+            + [(title, PlaceholderTab(title)) for title in LEFT_PLACEHOLDERS],
+            side="left",
+            width=420,
+            min_width=300,
+        )
+        self.right_panel = SidePanel(
+            [("Compound", details_scroll)]
+            + [(title, PlaceholderTab(title)) for title in RIGHT_PLACEHOLDERS],
+            side="right",
+            width=340,
+            min_width=280,
+        )
+        for panel in (self.left_panel, self.right_panel):
+            panel.tabs.current_changed.connect(
+                lambda index, panel=panel: self._show_side_page(panel, index)
+            )
 
         # --- layout -------------------------------------------------------------------
-        self.count_label = QLabel()
+        # The plot settings drop down from the gear button.
+        plot_settings = QWidget()
+        plot_settings.setStyleSheet(input_style())  # same inputs as the filters
+        settings_layout = QFormLayout(plot_settings)
+        settings_layout.setContentsMargins(12, 12, 12, 12)
+        settings_layout.setHorizontalSpacing(12)
+        settings_layout.setVerticalSpacing(10)
+        settings_layout.addRow("X axis", self.x_combo)
+        settings_layout.addRow("Y axis", self.y_combo)
+        settings_layout.addRow(self.show_filtered_checkbox)
+
         controls = QHBoxLayout()
-        controls.addWidget(QLabel("X:"))
-        controls.addWidget(self.x_combo)
-        controls.addWidget(QLabel("Y:"))
-        controls.addWidget(self.y_combo)
         controls.addWidget(PlotToolbar(self.plot))
-        controls.addWidget(self.dim_checkbox)
         controls.addStretch()
-        controls.addWidget(self.count_label)
+        controls.addWidget(SettingsButton(plot_settings, tooltip="Plot settings"))
 
         plot_panel = QWidget()
         plot_layout = QVBoxLayout(plot_panel)
         plot_layout.setContentsMargins(0, 0, 0, 0)
+        plot_layout.setSpacing(14)  # between the toolbar and the plot
         plot_layout.addLayout(controls)
         plot_layout.addWidget(self.plot, stretch=1)
 
-        top = QSplitter(Qt.Orientation.Horizontal)
-        top.addWidget(plot_panel)
-        top.addWidget(details_scroll)
-        top.setSizes([640, 340])
+        # Same row of controls over the table, with its settings still to come.
+        table_settings = QLabel("Table settings are coming soon.")
+        table_settings.setStyleSheet(f"color: {MUTED_COLOR}; padding: 12px;")
+        table_controls = QHBoxLayout()
+        table_controls.addStretch()
+        table_controls.addWidget(
+            SettingsButton(table_settings, tooltip="Table settings")
+        )
+
+        table_panel = QWidget()
+        table_layout = QVBoxLayout(table_panel)
+        table_layout.setContentsMargins(0, 0, 0, 0)
+        table_layout.setSpacing(6)  # between the gear and the table
+        table_layout.addLayout(table_controls)
+        table_layout.addWidget(self.table, stretch=1)
 
         main = QSplitter(Qt.Orientation.Vertical)
-        main.addWidget(top)
-        main.addWidget(self.table)
+        # The handle doubles as the gap between the plot and the table (the table's
+        # gear row adds a bit more).
+        main.setHandleWidth(6)
+        main.addWidget(plot_panel)
+        main.addWidget(table_panel)
         main.setSizes([440, 420])
 
-        outer = QSplitter(Qt.Orientation.Horizontal)
-        outer.addWidget(self.filter_panel)
-        outer.addWidget(main)
-        outer.setSizes([420, 980])
+        # Each tab bar sits just inside its splitter handle, so it hugs its panel's
+        # edge when open and the window's edge when collapsed.
+        main_with_tabs = QWidget()
+        tabs_layout = QHBoxLayout(main_with_tabs)
+        tabs_layout.setContentsMargins(0, 0, 0, 0)
+        tabs_layout.setSpacing(14)
+        tabs_layout.addWidget(self.left_panel.tabs)
+        tabs_layout.addWidget(main, stretch=1)
+        tabs_layout.addWidget(self.right_panel.tabs)
+
+        # Only the side panels can collapse: by closing their open tab or by
+        # dragging their handle all the way to the window's edge.
+        self.outer_splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.outer_splitter.setHandleWidth(3)
+        self.outer_splitter.addWidget(self.left_panel)
+        self.outer_splitter.addWidget(main_with_tabs)
+        self.outer_splitter.addWidget(self.right_panel)
+        self.outer_splitter.setCollapsible(1, False)
+        self.outer_splitter.setSizes(
+            [self.left_panel.open_width, 640, self.right_panel.open_width]
+        )
+        self.outer_splitter.splitterMoved.connect(self._sync_side_tabs)
 
         layout = QVBoxLayout(self)
-        layout.addWidget(outer)
+        layout.addWidget(self.outer_splitter)
 
         self._apply_filters()
         self._update_axes()
+        # Again once the window is listening, so the count replaces its "Ready".
+        QTimer.singleShot(0, self._update_count)
 
     # --- helpers --------------------------------------------------------------------------
 
@@ -234,8 +292,46 @@ class DashboardTab(QWidget):
 
     def _update_count(self):
         shown = self.proxy.rowCount()
-        self.count_label.setText(f"{shown} of {len(self.rows)} compounds shown")
-        self.status.emit(f"{shown} compounds pass the filters and are in view")
+        self.status.emit(f"{shown} of {len(self.rows)} compounds shown")
+
+    # --- side panels -----------------------------------------------------------------------
+
+    def _show_side_page(self, panel: SidePanel, index: int):
+        """Open `panel` on page `index`, or collapse it when -1."""
+        self._update_min_widths(panel)
+        sizes = self.outer_splitter.sizes()
+        i = self.outer_splitter.indexOf(panel)
+        if index < 0:
+            if sizes[i] > 0:
+                panel.open_width = sizes[i]
+            sizes[1] += sizes[i]
+            sizes[i] = 0
+        else:
+            panel.setCurrentIndex(index)
+            if sizes[i] == 0:
+                # take the space from the center, but never more than half of it
+                sizes[i] = min(panel.open_width, sizes[1] // 2)
+                sizes[1] -= sizes[i]
+        self.outer_splitter.setSizes(sizes)
+
+    def _update_min_widths(self, panel: SidePanel):
+        # A panel's minimum width depends on whether it's open; have the splitter and
+        # the layouts above it re-read it.
+        panel.updateGeometry()
+        self.outer_splitter.updateGeometry()
+
+    def _sync_side_tabs(self, *_):
+        # The user dragged a handle: dragged shut closes the panel's open tab, and
+        # dragged back open re-opens the page that was showing.
+        for panel in (self.left_panel, self.right_panel):
+            width = self.outer_splitter.sizes()[self.outer_splitter.indexOf(panel)]
+            if width == 0:
+                panel.tabs.set_current(-1, emit=False)
+            else:
+                panel.open_width = width
+                if panel.tabs.current() < 0:
+                    panel.tabs.set_current(panel.currentIndex(), emit=False)
+            self._update_min_widths(panel)
 
     # --- filters ----------------------------------------------------------------------------
 
@@ -262,7 +358,7 @@ class DashboardTab(QWidget):
         self.scatter.setData(
             x=x, y=y, brush=[self.brushes[i] for i in shown], data=shown
         )
-        if self.dim_checkbox.isChecked():
+        if self.show_filtered_checkbox.isChecked():
             x, y = self._xy([i for i, ok in enumerate(self.passing) if not ok])
             self.dimmed_scatter.setData(x=x, y=y)
         else:
@@ -303,6 +399,8 @@ class DashboardTab(QWidget):
                 self._proxy_index(row), QAbstractItemView.ScrollHint.EnsureVisible
             )
             self.status.emit(f"{self.rows[row]['id']}: pIC50 {self.rows[row]['pIC50']}")
+        else:
+            self._update_count()  # back to the count once off the points
 
     def _on_plot_click(self, _item, points, event):
         clicked = self._nearest(points, event)

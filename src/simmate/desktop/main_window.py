@@ -5,10 +5,11 @@ from PySide6.QtGui import QAction, QIcon, QKeySequence, QPainter, QPainterPath
 from PySide6.QtWidgets import QMainWindow, QTabWidget
 
 from simmate.desktop.tabs import DashboardTab, PlaceholderTab
-from simmate.desktop.widgets import TitleBar
+from simmate.desktop.widgets import SystemMonitor, TitleBar
 from simmate.desktop.widgets.title_bar import (
     CORNER_RADIUS,
     ICON_PATH,
+    MUTED_COLOR,
     PRIMARY_COLOR,
 )
 
@@ -21,7 +22,7 @@ TAB_STYLE = f"""
 QTabWidget::pane {{ border: none; border-top: 1px solid palette(mid); top: -1px; }}
 QTabWidget::tab-bar {{ left: 8px; }}
 QTabBar::tab {{
-    background: transparent; color: #5f6368;
+    background: transparent; color: {MUTED_COLOR};
     border: none; border-bottom: 2px solid transparent;
     padding: 8px 16px; margin-right: 4px; font-weight: 600;
 }}
@@ -58,8 +59,7 @@ class MainWindow(QMainWindow):
 
         tabs = QTabWidget()
         for tab, title in [
-            (DashboardTab(), "Dashboard"),
-            (PlaceholderTab("Toolkit"), "Toolkit"),
+            (DashboardTab(), "Toolkit"),
             (PlaceholderTab("Datastores"), "Datastores"),
             (PlaceholderTab("Workers"), "Workers"),
             (PlaceholderTab("Settings"), "Settings"),
@@ -73,6 +73,17 @@ class MainWindow(QMainWindow):
         # normal arrow so they don't inherit that cursor once the mouse moves in.
         for child in [self.title_bar, tabs, self.statusBar()]:
             child.setCursor(Qt.CursorShape.ArrowCursor)
+        tabs.tabBar().setCursor(Qt.CursorShape.PointingHandCursor)
+
+        # Messages show on the left; machine usage stays on the right.
+        self.statusBar().addPermanentWidget(SystemMonitor())
+        # The window's edges already resize it, so skip the grip in the corner. That
+        # also lets the text on each side sit the same distance from the edge.
+        self.statusBar().setSizeGripEnabled(False)
+        # Extra room below the text, which otherwise sits low against the window's edge.
+        self.statusBar().setContentsMargins(0, 0, 0, 4)
+        # Messages in the same grey as the usage readout.
+        self.statusBar().setStyleSheet(f"QStatusBar {{ color: {MUTED_COLOR}; }}")
 
         self._add_shortcuts()
         self.statusBar().showMessage("Ready")

@@ -1,9 +1,7 @@
 """
-Shared helpers for the desktop app: molecule rendering and plot toolbars.
+Shared helpers for the desktop app: molecule rendering and 3D embedding.
 """
 
-import pyqtgraph as pg
-from PySide6.QtWidgets import QButtonGroup, QHBoxLayout, QPushButton, QWidget
 from rdkit import Chem
 from rdkit.Chem import AllChem, rdDepictor
 from rdkit.Chem.Draw import rdMolDraw2D
@@ -78,51 +76,3 @@ def embed_3d(mol: Chem.Mol) -> Chem.Mol | None:
         return None
     AllChem.MMFFOptimizeMolecule(mol_3d)
     return mol_3d
-
-
-class PlotToolbar(QWidget):
-    """Plotly-style controls for a PlotWidget.
-
-    - Zoom mode (default): left-drag draws a box and zooms to it.
-    - Pan mode: left-drag moves the view.
-    - Scroll zooms and middle-drag pans in either mode.
-    - "Reset view" or double-clicking the plot fits all the data again.
-    """
-
-    def __init__(self, plot: pg.PlotWidget):
-        super().__init__()
-        self.view_box = plot.getPlotItem().getViewBox()
-        plot.hideButtons()  # pyqtgraph's tiny "A" autorange button; Reset view replaces it
-        plot.scene().sigMouseClicked.connect(self._on_click)
-
-        zoom_button = QPushButton("Zoom")
-        pan_button = QPushButton("Pan")
-        mode_group = QButtonGroup(
-            self
-        )  # makes the two checkable buttons mutually exclusive
-        for button, mode in [
-            (zoom_button, pg.ViewBox.RectMode),
-            (pan_button, pg.ViewBox.PanMode),
-        ]:
-            button.setCheckable(True)
-            button.toggled.connect(
-                lambda on, m=mode: on and self.view_box.setMouseMode(m)
-            )
-            mode_group.addButton(button)
-        zoom_button.setChecked(True)
-
-        reset_button = QPushButton("Reset view")
-        reset_button.clicked.connect(self.reset_view)
-
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(zoom_button)
-        layout.addWidget(pan_button)
-        layout.addWidget(reset_button)
-
-    def reset_view(self):
-        self.view_box.autoRange()
-
-    def _on_click(self, event):
-        if event.double():
-            self.reset_view()

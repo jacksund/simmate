@@ -1,20 +1,30 @@
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
+    QAbstractSpinBox,
     QComboBox,
     QDoubleSpinBox,
-    QFormLayout,
     QFrame,
+    QGridLayout,
     QHBoxLayout,
     QLabel,
     QLineEdit,
-    QPushButton,
-    QSplitter,
+    QScrollArea,
     QVBoxLayout,
     QWidget,
 )
 
-from simmate.desktop.widgets.compound_table import NUMERIC_COLUMNS
+from simmate.desktop.widgets.button import PrimaryButton
+from simmate.desktop.widgets.compound_table import NUMERIC_COLUMNS, CompoundTableModel
+from simmate.desktop.widgets.inputs import input_style, style_combo
 from simmate.desktop.widgets.ketcher import KetcherWidget
+from simmate.desktop.widgets.title_bar import MUTED_COLOR
+
+FILTER_STYLE = f"""
+#panelTitle {{ color: {MUTED_COLOR}; font-weight: bold; }}
+#rangeSep {{ color: palette(placeholder-text); }}
+/* see-through, so the window shows behind the panel like the rest of the app */
+#filterScroll, #filterContent {{ background: transparent; }}
+"""
 
 
 class FilterPanel(QWidget):
@@ -25,40 +35,31 @@ class FilterPanel(QWidget):
 
     filters_changed = Signal()
 
+    SKETCHER_HEIGHT = 380
+
     def __init__(self, rows: list[dict]):
         super().__init__()
         self.rows = rows
         self.query = None
+        self.setStyleSheet(FILTER_STYLE + input_style())
+
+        # --- header -------------------------------------------------------------------
+        title = QLabel("Filters", objectName="panelTitle")
+        font = title.font()
+        font.setPointSizeF(font.pointSizeF() * 1.3)
+        title.setFont(font)
+        reset_button = PrimaryButton("Reset filters", muted=True)
+        reset_button.setToolTip("Clear the sketch and every filter below it")
+        reset_button.clicked.connect(self.reset_filters)
+
+        header = QHBoxLayout()
+        header.addWidget(title, stretch=1)
+        header.addWidget(reset_button)
 
         # --- substructure sketcher ----------------------------------------------------
         self.sketcher = KetcherWidget()
+        self.sketcher.setFixedHeight(self.SKETCHER_HEIGHT)
         self.sketcher.mol_changed.connect(self._on_query_changed)
-        clear_button = QPushButton("Clear sketch")
-        clear_button.clicked.connect(self.sketcher.clear)
-        self.query_label = QLabel()
-        self.query_label.setWordWrap(True)
-
-        sketch_footer = QHBoxLayout()
-        sketch_footer.addWidget(self.query_label, stretch=1)
-        sketch_footer.addWidget(clear_button)
-
-        # The sketcher's white canvas blends into the panel, so frame it.
-        sketch_frame = QFrame()
-        sketch_frame.setObjectName("sketchFrame")
-        sketch_frame.setStyleSheet(
-            "#sketchFrame { border: 1px solid palette(mid); border-radius: 4px;"
-            " background: palette(mid); }"
-        )
-        frame_layout = QVBoxLayout(sketch_frame)
-        frame_layout.setContentsMargins(1, 1, 1, 1)
-        frame_layout.addWidget(self.sketcher)
-
-        sketch_panel = QWidget()
-        sketch_layout = QVBoxLayout(sketch_panel)
-        sketch_layout.setContentsMargins(0, 0, 0, 0)
-        sketch_layout.addWidget(QLabel("<b>Substructure</b>"))
-        sketch_layout.addWidget(sketch_frame, stretch=1)
-        sketch_layout.addLayout(sketch_footer)
 
         # --- column filters -------------------------------------------------------------
         self.search_input = QLineEdit()
@@ -71,51 +72,72 @@ class FilterPanel(QWidget):
         self.status_combo = QComboBox()
         self.status_combo.addItems(["All", "Active", "Inactive"])
         for combo in (self.series_combo, self.status_combo):
+            style_combo(combo)
             combo.currentIndexChanged.connect(self.filters_changed)
 
-        form = QFormLayout()
-        form.addRow("Search:", self.search_input)
-        form.addRow("Series:", self.series_combo)
-        form.addRow("Status:", self.status_combo)
+        # A grid rather than a QFormLayout, which won't center labels on taller fields.
+        form = QGridLayout()
+        form.setContentsMargins(0, 0, 0, 0)
+        form.setHorizontalSpacing(12)
+        form.setVerticalSpacing(10)
+        form.setColumnStretch(1, 1)
 
+        def add_row(label: str, field: QWidget):
+            row = form.rowCount()
+            form.addWidget(QLabel(label), row, 0, Qt.AlignmentFlag.AlignVCenter)
+            form.addWidget(field, row, 1)
+
+        add_row("Search", self.search_input)
+        add_row("Series", self.series_combo)
+        add_row("Status", self.status_combo)
+
+        headers = {key: header for header, key in CompoundTableModel.COLUMNS}
         self.range_inputs: dict[str, tuple[QDoubleSpinBox, QDoubleSpinBox]] = {}
         for key in NUMERIC_COLUMNS:
             spins = (QDoubleSpinBox(), QDoubleSpinBox())
-            range_row = QHBoxLayout()
+            range_row = QWidget()
+            range_layout = QHBoxLayout(range_row)
+            range_layout.setContentsMargins(0, 0, 0, 0)
+            range_layout.setSpacing(6)
             for i, spin in enumerate(spins):
                 spin.setDecimals(2)
                 spin.setRange(-1e6, 1e6)
+                # arrow keys and the mouse wheel still step the value
+                spin.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
                 # apply when typing is done, not on every keystroke
                 spin.setKeyboardTracking(False)
                 spin.valueChanged.connect(self.filters_changed)
                 if i:
-                    range_row.addWidget(QLabel("to"))
-                range_row.addWidget(spin, stretch=1)
+                    range_layout.addWidget(QLabel("to", objectName="rangeSep"))
+                range_layout.addWidget(spin, stretch=1)
             self.range_inputs[key] = spins
-            form.addRow(f"{key}:", range_row)
+            add_row(headers.get(key, key), range_row)
 
-        reset_button = QPushButton("Reset filters")
-        reset_button.clicked.connect(self.reset_filters)
+        # --- layout -------------------------------------------------------------------
+        content = QWidget(objectName="filterContent")
+        content_layout = QVBoxLayout(content)
+        # breathing room from the window's edges and the pull tab's line (right)
+        content_layout.setContentsMargins(8, 8, 12, 8)
+        content_layout.addLayout(header)
+        content_layout.addSpacing(8)
+        content_layout.addWidget(self.sketcher)
+        content_layout.addSpacing(20)
+        content_layout.addLayout(form)
+        content_layout.addStretch()
 
-        filters_panel = QWidget()
-        filters_layout = QVBoxLayout(filters_panel)
-        filters_layout.setContentsMargins(0, 0, 0, 0)
-        filters_layout.addWidget(QLabel("<b>Filters</b>"))
-        filters_layout.addLayout(form)
-        filters_layout.addWidget(reset_button, alignment=Qt.AlignmentFlag.AlignRight)
-        filters_layout.addStretch()
-
-        splitter = QSplitter(Qt.Orientation.Vertical)
-        splitter.addWidget(sketch_panel)
-        splitter.addWidget(filters_panel)
-        splitter.setSizes([450, 350])
+        # Scrolls rather than squashing the fixed-height sketcher on short windows.
+        scroll = QScrollArea(objectName="filterScroll")
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.setWidget(content)
+        scroll.viewport().setAutoFillBackground(False)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(splitter)
+        layout.addWidget(scroll)
 
-        self.reset_filters()
-        self._update_query_label()
+        self._reset_form()
 
     def filters(self) -> dict:
         """The current filters, as keyword arguments for `CompoundFilterProxy.set_filters`."""
@@ -139,7 +161,12 @@ class FilterPanel(QWidget):
         )
 
     def reset_filters(self):
-        """Clear every column filter (the sketch is left alone; it has its own button)."""
+        """Clear the sketch and every column filter."""
+        # The sketcher reports its (now empty) canvas back through `mol_changed`.
+        self.sketcher.clear()
+        self._reset_form()
+
+    def _reset_form(self):
         widgets = [self.search_input, self.series_combo, self.status_combo]
         for spins in self.range_inputs.values():
             widgets.extend(spins)
@@ -161,12 +188,4 @@ class FilterPanel(QWidget):
 
     def _on_query_changed(self, query):
         self.query = query
-        self._update_query_label()
         self.filters_changed.emit()
-
-    def _update_query_label(self):
-        if self.query is None:
-            self.query_label.setText("Draw a structure to filter by substructure")
-            return
-        matches = sum(r["mol"].HasSubstructMatch(self.query) for r in self.rows)
-        self.query_label.setText(f"{matches} of {len(self.rows)} compounds match")

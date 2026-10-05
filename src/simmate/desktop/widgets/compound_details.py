@@ -3,7 +3,6 @@ from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import (
     QFormLayout,
     QLabel,
-    QPushButton,
     QStackedWidget,
     QTabWidget,
     QVBoxLayout,
@@ -12,6 +11,7 @@ from PySide6.QtWidgets import (
 from rdkit import Chem
 
 from simmate.desktop.utilities import align_to_query, embed_3d, mol_to_svg
+from simmate.desktop.widgets.button import PrimaryButton
 from simmate.desktop.widgets.compound_table import CompoundTableModel
 from simmate.desktop.widgets.molecule_3d import Molecule3DView
 
@@ -40,10 +40,9 @@ class CompoundDetails(QWidget):
 
         self.svg_widget = QSvgWidget()
         self.svg_widget.setMinimumSize(240, 180)
-        self.svg_widget.setStyleSheet("background: white;")
 
         # 3D tab: a "Generate 3D" page until this compound has a conformer
-        self.generate_button = QPushButton("Generate 3D")
+        self.generate_button = PrimaryButton("Generate 3D", filled=True)
         self.generate_button.clicked.connect(self.generate_3d)
         self.generate_label = QLabel()
         self.generate_label.setWordWrap(True)
@@ -65,6 +64,7 @@ class CompoundDetails(QWidget):
         self.structure_tabs = QTabWidget()
         self.structure_tabs.addTab(self.svg_widget, "2D")
         self.structure_tabs.addTab(self.stack_3d, "3D")
+        self.structure_tabs.tabBar().setCursor(Qt.CursorShape.PointingHandCursor)
 
         self.value_labels: dict[str, QLabel] = {}
         form = QFormLayout()

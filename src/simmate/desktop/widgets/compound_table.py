@@ -1,21 +1,88 @@
 from PySide6.QtCore import (
     QAbstractTableModel,
     QModelIndex,
+    QPointF,
     QSize,
+    QSizeF,
     QSortFilterProxyModel,
     Qt,
 )
-from PySide6.QtGui import QColor, QPixmap
+from PySide6.QtGui import (
+    QColor,
+    QFont,
+    QFontMetrics,
+    QPainter,
+    QPainterPath,
+    QPalette,
+    QPen,
+    QPixmap,
+)
+from PySide6.QtWidgets import (
+    QAbstractItemView,
+    QFrame,
+    QHeaderView,
+    QTableView,
+)
 from rdkit import Chem
 
 from simmate.desktop.utilities import align_to_query, mol_to_png
+from simmate.desktop.widgets.title_bar import (
+    MUTED_COLOR,
+    PRIMARY_COLOR,
+)
 
 # Raw values for sorting (so 10 sorts after 9), separate from the displayed text.
 SORT_ROLE = Qt.ItemDataRole.UserRole
 
 NUMERIC_COLUMNS = ["pIC50", "solubility", "MolWt", "cLogP", "TPSA"]
 THUMBNAIL_SIZE = QSize(180, 120)
-HIGHLIGHT_COLOR = QColor("#fff3b0")
+# Row colors, in line with the website (see website/core/static/css/simmate.css).
+# Hover matches --bs-primary-bg-subtle (the primary teal at 10% opacity).
+HIGHLIGHT_COLOR = QColor(0, 148, 133, 26)
+# Selection is the same teal at 25%, between the hover and the full primary color.
+SELECTION_COLOR = "rgba(0, 148, 133, 25%)"
+# Header cells get a light tint of the primary color (as rgba, so it works over a
+# light or dark background).
+HEADER_COLOR = QColor(0, 148, 133, 30)
+HEADER_RGBA = "rgba({}, {}, {}, {})".format(*HEADER_COLOR.getRgb())
+# Every other row is a shade darker than the window (as rgba, for the same reason).
+STRIPE_COLOR = "rgba(0, 0, 0, 12)"
+# Bordered and rounded like the inputs, but on the window's own background (the
+# rows, header and scroll bars alike): tinted headers, striped rows with no grid,
+# and a slim scroll bar.
+TABLE_STYLE = f"""
+QTableView {{
+    background: palette(window); alternate-background-color: {STRIPE_COLOR};
+    border: 1px solid palette(mid); border-radius: 6px;
+    gridline-color: transparent; outline: none;
+    selection-background-color: {SELECTION_COLOR}; selection-color: palette(text);
+}}
+/* room between columns, which have no grid lines to split them */
+QTableView::item {{ padding: 0 8px; }}
+QAbstractScrollArea::corner {{ background: transparent; }}
+/* the tint goes over the window color, which the header itself paints */
+QHeaderView {{ background: palette(window); border-top-left-radius: 6px;
+    border-top-right-radius: 6px; }}
+QHeaderView::section {{
+    background: {HEADER_RGBA}; color: palette(text); font-weight: 600;
+    border: none; border-bottom: 1px solid palette(mid);
+    padding: 8px;
+}}
+/* the header's first and last cells follow the card's rounded corners */
+QHeaderView::section:first {{ border-top-left-radius: 6px; }}
+QHeaderView::section:last {{ border-top-right-radius: 6px; }}
+QHeaderView::section:hover {{ color: {PRIMARY_COLOR}; }}
+/* hidden: `_SortHeader` draws the sort arrow beside its label instead */
+QHeaderView::up-arrow, QHeaderView::down-arrow {{ image: none; width: 0; }}
+QScrollBar:vertical {{ background: transparent; width: 10px; margin: 2px; }}
+QScrollBar:horizontal {{ background: transparent; height: 10px; margin: 2px; }}
+QScrollBar::handle {{ background: palette(mid); border-radius: 3px; }}
+QScrollBar::handle:vertical {{ min-height: 30px; }}
+QScrollBar::handle:horizontal {{ min-width: 30px; }}
+QScrollBar::handle:hover {{ background: {MUTED_COLOR}; }}
+QScrollBar::add-line, QScrollBar::sub-line {{ width: 0; height: 0; }}
+QScrollBar::add-page, QScrollBar::sub-page {{ background: transparent; }}
+"""
 
 
 class CompoundTableModel(QAbstractTableModel):
@@ -49,11 +116,18 @@ class CompoundTableModel(QAbstractTableModel):
         return 0 if parent.isValid() else len(self.COLUMNS)
 
     def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
-        if (
-            orientation == Qt.Orientation.Horizontal
-            and role == Qt.ItemDataRole.DisplayRole
-        ):
+        if orientation != Qt.Orientation.Horizontal:
+            return None
+        if role == Qt.ItemDataRole.DisplayRole:
             return self.COLUMNS[section][0]
+        if role == Qt.ItemDataRole.TextAlignmentRole:
+            # over its values: numbers on the right, everything else on the left
+            horizontal = (
+                Qt.AlignmentFlag.AlignRight
+                if self.COLUMNS[section][1] in NUMERIC_COLUMNS
+                else Qt.AlignmentFlag.AlignLeft
+            )
+            return horizontal | Qt.AlignmentFlag.AlignVCenter
         return None
 
     def data(self, index, role=Qt.ItemDataRole.DisplayRole):
@@ -178,3 +252,127 @@ class CompoundFilterProxy(QSortFilterProxyModel):
 
     def filterAcceptsRow(self, source_row, _parent):
         return self.accepts(self.sourceModel().rows[source_row])
+
+
+class _SortHeader(QHeaderView):
+    """Column headers with a small chevron to the right of the sorted column's label.
+
+    The stylesheet's own arrow sits at the section's edge, where it covers
+    right-aligned labels. Instead, every section has room for the arrow, and a
+    right-aligned label moves over to make way for it while it's sorted.
+    """
+
+    GAP = 5  # px between the label and the arrow
+    ARROW = QSizeF(8, 4.5)
+    PADDING = 8  # the section's side padding in the stylesheet
+
+    def __init__(self):
+        super().__init__(Qt.Orientation.Horizontal)
+        # Unlike the table's default header, a new one ignores clicks (i.e. sorting).
+        self.setSectionsClickable(True)
+
+    def _arrow_space(self) -> int:
+        return round(self.GAP + self.ARROW.width())
+
+    def sectionSizeFromContents(self, logical_index):
+        size = super().sectionSizeFromContents(logical_index)
+        return size + QSize(self._arrow_space(), 0)
+
+    def paintSection(self, painter, rect, logical_index):
+        if (
+            not self.isSortIndicatorShown()
+            or logical_index != self.sortIndicatorSection()
+        ):
+            super().paintSection(painter, rect, logical_index)
+            return
+
+        model = self.model()
+        label = model.headerData(logical_index, self.orientation())
+        alignment = model.headerData(
+            logical_index, self.orientation(), Qt.ItemDataRole.TextAlignmentRole
+        )
+        space = self._arrow_space()
+        if alignment & Qt.AlignmentFlag.AlignRight:
+            # Draw the section short, so its label ends before the arrow, then
+            # finish the background and bottom line under the arrow.
+            super().paintSection(painter, rect.adjusted(0, 0, -space, 0), logical_index)
+            strip = rect.adjusted(rect.width() - space, 0, 0, 0)
+            painter.fillRect(strip, HEADER_COLOR)
+            painter.setPen(self.palette().color(QPalette.ColorRole.Mid))
+            painter.drawLine(strip.bottomLeft(), strip.bottomRight())
+            left = rect.right() - self.PADDING - self.ARROW.width()
+        else:
+            super().paintSection(painter, rect, logical_index)
+            font = painter.font()
+            font.setWeight(QFont.Weight.DemiBold)  # as styled, for an accurate width
+            label_width = QFontMetrics(font).horizontalAdvance(label)
+            left = rect.left() + self.PADDING + label_width + self.GAP
+
+        top = rect.center().y() - self.ARROW.height() / 2 + 1
+        width, height = self.ARROW.width(), self.ARROW.height()
+        if self.sortIndicatorOrder() == Qt.SortOrder.AscendingOrder:
+            points = [(0, height), (width / 2, 0), (width, height)]  # pointing up
+        else:
+            points = [(0, 0), (width / 2, height), (width, 0)]
+        chevron = QPainterPath(QPointF(left + points[0][0], top + points[0][1]))
+        for x, y in points[1:]:
+            chevron.lineTo(left + x, top + y)
+
+        painter.save()
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        pen = QPen(QColor(PRIMARY_COLOR), 1.6)
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+        painter.setPen(pen)
+        painter.drawPath(chevron)
+        painter.restore()
+
+
+class CompoundTable(QTableView):
+    """The dataset as a sortable, read-only table, one row per compound with its image."""
+
+    def __init__(self, proxy: CompoundFilterProxy):
+        super().__init__()
+        model = proxy.sourceModel()
+        self.setHorizontalHeader(_SortHeader())
+        self.setModel(proxy)
+        self.setStyleSheet(TABLE_STYLE)
+        self.setFrameShape(QFrame.Shape.NoFrame)  # the stylesheet draws the border
+        self.setShowGrid(False)
+        self.setAlternatingRowColors(True)
+        self.setSortingEnabled(True)
+        self.sortByColumn(model.column("pIC50"), Qt.SortOrder.DescendingOrder)
+        self.setIconSize(THUMBNAIL_SIZE)
+        self.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.setWordWrap(False)
+        # Smooth scrolling, rather than jumping a whole (tall) row at a time.
+        self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+        self.setHorizontalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+        self.verticalHeader().hide()
+        self.verticalHeader().setDefaultSectionSize(THUMBNAIL_SIZE.height() + 6)
+        header = self.horizontalHeader()
+        header.setStretchLastSection(True)
+        header.setHighlightSections(False)  # no bold header over a selected row
+        header.setCursor(Qt.CursorShape.PointingHandCursor)  # click to sort
+        for key in ("smiles", "tested"):
+            self.setColumnHidden(model.column(key), True)
+        # Size text columns to fit. Skip the image column: measuring it would render every image.
+        for column in range(1, model.columnCount()):
+            self.resizeColumnToContents(column)
+        self.setColumnWidth(0, THUMBNAIL_SIZE.width() + 10)
+        self.setMouseTracking(True)  # needed for the `entered` (hover) signal
+
+    def wheelEvent(self, event):
+        # Shift+scroll moves sideways, as in most web tables. Qt otherwise uses Alt.
+        if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+            # Touchpads give exact pixels. Some systems already turn a shifted
+            # wheel sideways, so take whichever direction moved.
+            delta = event.pixelDelta()
+            if delta.isNull():
+                delta = event.angleDelta()  # 120 per notch, i.e. 120px
+            bar = self.horizontalScrollBar()
+            bar.setValue(bar.value() - (delta.y() or delta.x()))
+            event.accept()
+            return
+        super().wheelEvent(event)

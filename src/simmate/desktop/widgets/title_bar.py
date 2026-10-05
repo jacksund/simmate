@@ -15,6 +15,11 @@ import simmate
 PRIMARY_COLOR = "#009485"
 PRIMARY_DARKER = "#006b60"
 PRIMARY_LIGHTER = "#00a695"
+# Grey for secondary text and controls (e.g. unselected tabs), plus lighter
+# shades for the fill of a checked grey button (and its hover).
+MUTED_COLOR = "#5f6368"
+MUTED_LIGHTER = "#80868b"
+MUTED_LIGHTEST = "#9aa0a6"
 
 # Radius (px) of the window's rounded corners.
 CORNER_RADIUS = 10
@@ -38,14 +43,14 @@ class WindowButton(QAbstractButton):
     """A minimize, maximize, or close button with a thin line-drawn icon.
 
     The glyph is painted rather than taken from a font, so it looks the same
-    (and stays crisp) on every OS. Hovering shows a soft rounded highlight, or
+    (and stays crisp) on every OS. Hovering shows a soft circular highlight, or
     red for the close button.
     """
 
     def __init__(self, kind: str):
         super().__init__()
         self.kind = kind  # "minimize", "maximize", "restore", or "close"
-        self.setFixedSize(QSize(40, 28))
+        self.setFixedSize(QSize(34, 28))
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.setCursor(Qt.CursorShape.ArrowCursor)
         self.setAttribute(Qt.WidgetAttribute.WA_Hover)
@@ -61,14 +66,17 @@ class WindowButton(QAbstractButton):
                 color = QColor(255, 255, 255, 70 if self.isDown() else 40)
             painter.setPen(Qt.PenStyle.NoPen)
             painter.setBrush(color)
-            painter.drawRoundedRect(QRectF(self.rect()).adjusted(2, 2, -2, -2), 6, 6)
+            diameter = 24
+            circle = QRectF(0, 0, diameter, diameter)
+            circle.moveCenter(QRectF(self.rect()).center())
+            painter.drawEllipse(circle)
 
         pen = QPen(QColor("white"), 1.3)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         painter.setPen(pen)
         painter.setBrush(Qt.BrushStyle.NoBrush)
         center = QRectF(self.rect()).center()
-        size = 10
+        size = 9
         box = QRectF(center.x() - size / 2, center.y() - size / 2, size, size)
         if self.kind == "minimize":
             painter.drawLine(box.left(), center.y(), box.right(), center.y())
