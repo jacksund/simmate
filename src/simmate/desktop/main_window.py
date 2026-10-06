@@ -8,7 +8,7 @@ from PySide6.QtGui import QAction, QIcon, QKeySequence, QPainter, QPainterPath
 from PySide6.QtWidgets import QMainWindow, QTabWidget, QWidget
 
 from simmate.desktop import theme
-from simmate.desktop.tabs import DashboardTab, PlaceholderTab
+from simmate.desktop.tabs import DashboardTab, PlaceholderTab, WorkersTab
 from simmate.desktop.widgets import SystemMonitor, TitleBar
 
 # Width (px) of the invisible border you can drag to resize the window.
@@ -109,10 +109,8 @@ class MainWindow(QMainWindow):
         """
         return [
             ("Toolkit", DashboardTab),
-            *[
-                (title, partial(PlaceholderTab, title))
-                for title in ["Datastores", "Workers", "Settings"]
-            ],
+            ("Datastores", partial(PlaceholderTab, "Datastores")),
+            ("Workers", WorkersTab),
         ]
 
     def _add_shortcuts(self):

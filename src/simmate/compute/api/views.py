@@ -33,6 +33,21 @@ def check_worker_permissions(user) -> bool:
     return False
 
 
+@api_view(["GET"])
+@login_required
+def check_worker_access(request):
+    """
+    API endpoint that lets a client confirm its API key works and whether its
+    user may run API workers, without claiming a WorkItem.
+    """
+    return JsonResponse(
+        {
+            "username": request.user.username,
+            "can_run_workers": check_worker_permissions(request.user),
+        }
+    )
+
+
 @api_view(["POST"])
 @login_required
 def get_next_work_item(request):

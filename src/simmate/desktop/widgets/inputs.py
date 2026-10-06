@@ -20,19 +20,23 @@ def input_style() -> str:
     )
     check = _icon_file("check", (12, 12), [(2.5, 6.5), (5, 9), (9.5, 3.5)], "white")
     return f"""
-QLineEdit, QComboBox, QDoubleSpinBox {{
+QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox {{
     background: palette(base);
     border: 1px solid palette(mid);
     border-radius: 6px;
     padding: 4px 8px;
     min-height: 18px;
 }}
-QLineEdit:hover, QComboBox:hover, QDoubleSpinBox:hover,
-QLineEdit:focus, QComboBox:focus, QDoubleSpinBox:focus {{
+QLineEdit:hover, QComboBox:hover, QSpinBox:hover, QDoubleSpinBox:hover,
+QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDoubleSpinBox:focus {{
     border-color: {theme.PRIMARY_COLOR};
 }}
+/* set the "invalid" property on an input that needs a value (e.g. a missing setting) */
+QLineEdit[invalid="true"], QComboBox[invalid="true"] {{
+    border-color: {theme.ERROR_COLOR};
+}}
 /* spin boxes add their own inner margin; match the other inputs' height */
-QDoubleSpinBox {{ padding-top: 3px; padding-bottom: 2px; }}
+QSpinBox, QDoubleSpinBox {{ padding-top: 3px; padding-bottom: 2px; }}
 /* a plain list below the box, rather than a menu panel over it */
 QComboBox {{ combobox-popup: 0; }}
 QComboBox::drop-down {{ border: none; width: 24px; }}

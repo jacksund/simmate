@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
 )
 
 from simmate.desktop import theme
+from simmate.desktop.theme import rgba
 from simmate.desktop.widgets.button import PrimaryButton, button_style
 
 PANEL_STYLE = """
@@ -98,24 +99,44 @@ class _ClickCatcher(QWidget):
 class SettingsButton(QToolButton):
     """A gear button that toggles a floating panel of `content` (e.g. plot options).
 
-    Pass `icon` to show something other than the gear (e.g. `columns_icon()`).
+    Pass `icon` to show something other than the gear (e.g. `columns_icon()`), and/or
+    `text` to show a label, in the primary color (e.g. for a page's main action).
 
-    The panel floats inside the window, under the button's right edge, rather than
-    being a popup window: on Wayland, popup menus are positioned unreliably and can
+    `set_alert(True)` outlines the button in red (e.g. while a setting is missing).
+
+    The panel floats inside the window, under the button's right edge (or its left
+    edge, if there's no room on the left), rather than being a popup window: on Wayland, popup menus are positioned unreliably and can
     stop opening. While it's open, an invisible layer behind it covers the rest of
     the window, so clicking anywhere else (or the gear again) or pressing Escape
     closes it.
     """
 
     def __init__(
-        self, content: QWidget, tooltip: str = "Settings", icon: QIcon | None = None
+        self,
+        content: QWidget,
+        tooltip: str = "Settings",
+        icon: QIcon | None = None,
+        text: str = "",
     ):
         super().__init__()
-        self.setProperty("muted", True)  # grey, read by button_style
-        self.setStyleSheet(button_style())
+        self.setProperty("muted", not text)  # grey, read by button_style
+        self.setStyleSheet(
+            button_style()
+            # a text button is as wide as a PrimaryButton
+            + ("QToolButton { padding: 4px 14px; }" if text else "")
+            + f"""QToolButton[alert="true"] {{
+                border-color: {theme.ERROR_COLOR};
+                background: {rgba(theme.ERROR_COLOR, theme.HOVER_ALPHA)};
+            }}"""
+        )
         self.setToolTip(tooltip)
-        self.setIcon(icon or gear_icon())
-        self.setIconSize(QSize(GEAR_SIZE, GEAR_SIZE))
+        self.is_gear = not (text or icon)  # only the gear turns red with an alert
+        if text:
+            self.setText(text)
+            self.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+        if icon or not text:
+            self.setIcon(icon or gear_icon())
+            self.setIconSize(QSize(GEAR_SIZE, GEAR_SIZE))
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setCheckable(True)  # checked (filled) while the panel is open
         self.toggled.connect(self._set_panel_open)
@@ -141,6 +162,13 @@ class SettingsButton(QToolButton):
         for widget in (self.click_catcher, self.panel):
             widget.setCursor(Qt.CursorShape.ArrowCursor)
 
+    def set_alert(self, alert: bool):
+        """Outlines the button (and colors the gear) red, or back to normal."""
+        self.setProperty("alert", alert)
+        self.style().polish(self)  # re-read the stylesheet for the new property
+        if self.is_gear:
+            self.setIcon(gear_icon(color=theme.ERROR_COLOR if alert else None))
+
     def _set_panel_open(self, open: bool):
         window = self.window()
         if open:
@@ -164,7 +192,11 @@ class SettingsButton(QToolButton):
         self.click_catcher.setGeometry(self.window().rect())
         self.panel.adjustSize()
         bottom_right = self.mapTo(self.window(), self.rect().bottomRight())
-        self.panel.move(bottom_right.x() - self.panel.width() + 1, bottom_right.y() + 4)
+        x = bottom_right.x() - self.panel.width() + 1
+        if x < 0:  # no room on the left, so line up with the button's left edge
+            x = self.mapTo(self.window(), self.rect().topLeft()).x()
+        x = min(x, self.window().width() - self.panel.width())  # nor the right
+        self.panel.move(max(x, 0), bottom_right.y() + 4)
 
     def eventFilter(self, watched, event):
         if event.type() == QEvent.Type.Resize:
@@ -172,9 +204,9 @@ class SettingsButton(QToolButton):
         return False
 
 
-def gear_icon(size: int = GEAR_SIZE) -> QIcon:
-    """A gear in grey, or in white when the button is checked."""
-    return _icon(_gear_path(size), size)
+def gear_icon(size: int = GEAR_SIZE, color: str | None = None) -> QIcon:
+    """A gear in grey (or `color`), or in white when the button is checked."""
+    return _icon(_gear_path(size), size, color)
 
 
 def columns_icon(size: int = GEAR_SIZE) -> QIcon:
@@ -187,11 +219,26 @@ def reset_icon(size: int = GEAR_SIZE) -> QIcon:
     return _icon(_reset_path(size), size)
 
 
-def _icon(path: QPainterPath, size: int) -> QIcon:
-    """`path` filled in grey, or in white when the button is checked."""
+def plus_icon(size: int = GEAR_SIZE, color: str | None = None) -> QIcon:
+    """A plus sign, like `gear_icon` (e.g. for adding something)."""
+    return _icon(_plus_path(size), size, color)
+
+
+def stop_icon(size: int = GEAR_SIZE, color: str | None = None) -> QIcon:
+    """A rounded square, like `gear_icon` (e.g. for stopping something running)."""
+    return _icon(_stop_path(size), size, color)
+
+
+def trash_icon(size: int = GEAR_SIZE, color: str | None = None) -> QIcon:
+    """A trash can, like `gear_icon` (e.g. for deleting something)."""
+    return _icon(_trash_path(size), size, color)
+
+
+def _icon(path: QPainterPath, size: int, color: str | None = None) -> QIcon:
+    """`path` filled in grey (or `color`), or in white when the button is checked."""
     icon = QIcon()
     for color, state in [
-        (theme.MUTED_COLOR, QIcon.State.Off),
+        (color or theme.MUTED_COLOR, QIcon.State.Off),
         ("white", QIcon.State.On),
     ]:
         pixmap = _pixmap(path, size, QColor(color))
@@ -265,3 +312,55 @@ def _reset_path(size: int) -> QPainterPath:
     head.lineTo(end - outward * width * 1.6)
     head.closeSubpath()
     return ring.united(head)
+
+
+def _plus_path(size: int) -> QPainterPath:
+    length, width = size * 0.7, size * 0.14
+    plus = QPainterPath()
+    plus.addRoundedRect(
+        QRectF((size - length) / 2, (size - width) / 2, length, width),
+        width / 2,
+        width / 2,
+    )
+    vertical = QPainterPath()
+    vertical.addRoundedRect(
+        QRectF((size - width) / 2, (size - length) / 2, width, length),
+        width / 2,
+        width / 2,
+    )
+    return plus.united(vertical)
+
+
+def _stop_path(size: int) -> QPainterPath:
+    side = size * 0.56
+    stop = QPainterPath()
+    stop.addRoundedRect(
+        QRectF((size - side) / 2, (size - side) / 2, side, side),
+        size * 0.08,
+        size * 0.08,
+    )
+    return stop
+
+
+def _trash_path(size: int) -> QPainterPath:
+    # a lid with a handle, over a can that narrows to the bottom, with two slots
+    radius = size * 0.04
+    trash = QPainterPath()
+    trash.addRoundedRect(
+        QRectF(size * 0.16, size * 0.2, size * 0.68, size * 0.1), radius, radius
+    )
+    trash.addRoundedRect(
+        QRectF(size * 0.38, size * 0.1, size * 0.24, size * 0.14), radius, radius
+    )
+    can = QPainterPath(QPointF(size * 0.24, size * 0.36))
+    can.lineTo(size * 0.76, size * 0.36)
+    can.lineTo(size * 0.7, size * 0.9)
+    can.lineTo(size * 0.3, size * 0.9)
+    can.closeSubpath()
+    for x in (0.4, 0.55):
+        slot = QPainterPath()
+        slot.addRoundedRect(
+            QRectF(size * x, size * 0.46, size * 0.06, size * 0.34), radius, radius
+        )
+        can = can.subtracted(slot)
+    return trash.united(can)

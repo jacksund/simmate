@@ -26,6 +26,10 @@ MUTED_COLOR = "#5f6368"
 MUTED_LIGHTER = "#80868b"
 MUTED_LIGHTEST = "#9aa0a6"
 
+# Colors for status messages, e.g. "Connected" / "Failed".
+SUCCESS_COLOR = "#1e8e3e"
+ERROR_COLOR = "#d93025"
+
 # Radius (px) of the window's rounded corners.
 CORNER_RADIUS = 10
 

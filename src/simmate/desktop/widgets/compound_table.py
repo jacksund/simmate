@@ -84,6 +84,12 @@ QHeaderView::section:last {{ border-top-right-radius: 6px; }}
 QHeaderView::section:hover {{ color: {theme.PRIMARY_COLOR}; }}
 /* hidden: `_SortHeader` draws the sort arrow beside its label instead */
 QHeaderView::up-arrow, QHeaderView::down-arrow {{ image: none; width: 0; }}
+{scroll_bar_style()}"""
+
+
+def scroll_bar_style() -> str:
+    """Slim, rounded scroll bars on a transparent track, with no arrow buttons."""
+    return f"""
 QScrollBar:vertical {{ background: transparent; width: 10px; margin: 2px; }}
 QScrollBar:horizontal {{ background: transparent; height: 10px; margin: 2px; }}
 QScrollBar::handle {{ background: palette(mid); border-radius: 3px; }}

@@ -139,3 +139,4 @@ The web interface is built with Django and HTMX.
 
 - **Dependencies:** Verify `pyproject.toml` before assuming a library is available.
 - **Documentation:** Always refer to `docs/full_guides/` when building new apps or workflows. These guides provide essential architectural patterns, naming conventions, and best practices.
+- **Change Log:** Do not update `docs/change_log/` during sessions. The maintainer writes change log entries themselves.

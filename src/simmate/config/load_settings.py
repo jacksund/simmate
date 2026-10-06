@@ -51,6 +51,22 @@ class SimmateSettings:
         else:
             return setting
 
+    def reload(self):
+        """
+        Forgets all cached settings, so the next access re-reads them (e.g. after
+        the settings file was edited by the desktop app).
+
+        Note, this does not affect Django settings that were already loaded in
+        this process.
+        """
+        for name, attribute in vars(type(self)).items():
+            # the config directory is set by an env var, not the settings file
+            if isinstance(attribute, cached_property) and name not in [
+                "config_directory",
+                "django_directory",
+            ]:
+                self.__dict__.pop(name, None)
+
     def show_settings(self, user_only: bool = False):
         """
         Takes the final simmate settings and prints them in a yaml format that is
@@ -88,12 +104,7 @@ class SimmateSettings:
 
         # updates are only allowed if we have yaml config. This is bc we dont
         # want to set environment variables perminantly via Simmate.
-        if self.settings_source is None:
-            # default to most-specific config file
-            source = self.config_directory / "settings.yaml"
-        elif isinstance(self.settings_source, Path):
-            source = self.settings_source
-        else:
+        if self.settings_source == "environment variables":
             raise Exception(
                 "Updating your Simmate settings is only allowed when using"
                 f"a YAML config. You are using {self.settings_source}."
@@ -104,7 +115,7 @@ class SimmateSettings:
 
         final_user_settings = deep_update(self.user_settings, updates)
         self.write_settings(
-            filename=source,
+            filename=self.settings_file,
             settings=final_user_settings,
         )
 
@@ -172,6 +183,13 @@ class SimmateSettings:
             "client": {
                 "host": "http://127.0.0.1:8000",
                 "api_key": None,
+            },
+            # Containerized API workers launched by the desktop app
+            "desktop": {
+                "api_host": "https://simmate.org",
+                "api_key": None,
+                # also run other users' jobs, rather than only your own
+                "contribute": True,
             },
             "website": {
                 # Sometimes we lock down the website to registered/approved users.
@@ -453,6 +471,15 @@ class SimmateSettings:
         elif source == "environment variables":
             return self._get_env_settings()
 
+    @property
+    def settings_file(self) -> Path:
+        """
+        The YAML file that user settings are read from, or will be saved to.
+        """
+        if isinstance(self.settings_source, Path):
+            return self.settings_source
+        return self.config_directory / "settings.yaml"
+
     @cached_property
     def settings_source(self) -> str | Path:
         """
@@ -607,6 +634,7 @@ class SimmateSettings:
         "SIMMATE__DATABASE__PORT": int,
         "SIMMATE__CLIENT__HOST": str,
         "SIMMATE__CLIENT__API_KEY": str,
+        "SIMMATE__DESKTOP__CONTRIBUTE": bool,
         "SIMMATE__WEBSITE__ALLOWED_HOSTS": list[str],
         "SIMMATE__WEBSITE__CSRF_TRUSTED_ORIGINS": list[str],
         "SIMMATE__WEBSITE__DATA": dict,
