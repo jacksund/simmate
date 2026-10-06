@@ -153,7 +153,8 @@ class SidePanel(QStackedWidget):
     """A side panel's pages, plus the tab bar that switches between them.
 
     Add `self.tabs` to the layout right beside the panel (outside the splitter, so
-    the tabs stay visible when the panel collapses). The first page starts open.
+    the tabs stay visible when the panel collapses). Page `current` starts open, or
+    is shown when the panel is first opened if `open` is False.
     """
 
     def __init__(
@@ -162,6 +163,8 @@ class SidePanel(QStackedWidget):
         side: str,
         width: int,
         min_width: int,
+        current: int = 0,
+        open: bool = True,
     ):
         super().__init__()
         self.open_width = width  # restored when the collapsed panel is reopened
@@ -169,7 +172,8 @@ class SidePanel(QStackedWidget):
         for _, page in pages:
             self.addWidget(page)
         self.tabs = SideTabBar([title for title, _ in pages], side)
-        self.tabs.set_current(0, emit=False)
+        self.setCurrentIndex(current)
+        self.tabs.set_current(current if open else -1, emit=False)
 
     def minimumSizeHint(self) -> QSize:
         # While open, it can't be squeezed below `min_width` (it can still collapse

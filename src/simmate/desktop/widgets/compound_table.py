@@ -25,13 +25,17 @@ from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QFrame,
+    QHBoxLayout,
     QHeaderView,
     QTableView,
+    QVBoxLayout,
+    QWidget,
 )
 
 from simmate.desktop import theme
 from simmate.desktop.theme import rgba, tint
-from simmate.desktop.widgets.inputs import line_pen, polyline
+from simmate.desktop.widgets.button import PrimaryButton
+from simmate.desktop.widgets.inputs import StyledCheckBox, line_pen, polyline
 from simmate.toolkit import Molecule
 from simmate.toolkit.dataframes import MoleculeDataFrame
 
@@ -39,7 +43,9 @@ from simmate.toolkit.dataframes import MoleculeDataFrame
 SORT_ROLE = Qt.ItemDataRole.UserRole
 
 NUMERIC_COLUMNS = ["pIC50", "solubility", "MolWt", "cLogP", "TPSA"]
-THUMBNAIL_SIZE = QSize(180, 120)
+THUMBNAIL_SIZE = QSize(180, 120)  # the starting size; it follows the column's width
+MIN_THUMBNAIL_WIDTH = 60  # so images stay legible when the column is squeezed
+THUMBNAIL_PADDING = 10  # px of column width beside the image
 # Every other row is a shade darker than the window (as rgba, so it works over a
 # light or dark background).
 STRIPE_COLOR = "rgba(0, 0, 0, 12)"
@@ -113,6 +119,10 @@ class CompoundTableModel(QAbstractTableModel):
         # matches --bs-primary-bg-subtle (the primary color at 10% opacity).
         self.highlight_color = tint(theme.PRIMARY_COLOR, theme.HIGHLIGHT_ALPHA)
         self.highlight_query: Molecule | None = None
+        self.thumbnail_size = THUMBNAIL_SIZE
+        # By row index. Drawing the SVG (RDKit) is the slow part and doesn't depend on
+        # the display size, so a resize only re-rasterizes the cached SVGs.
+        self.svg_cache: dict[int, bytes] = {}
         self.pixmap_cache: dict[int, QPixmap] = {}
         self.highlighted_rows: set[int] = set()  # e.g. rows whose plot point is hovered
 
@@ -184,7 +194,18 @@ class CompoundTableModel(QAbstractTableModel):
 
     def set_highlight(self, query: Molecule | None):
         self.highlight_query = query
+        self.svg_cache.clear()
         self.pixmap_cache.clear()
+        self._images_changed()
+
+    def set_thumbnail_size(self, size: QSize):
+        if size == self.thumbnail_size:
+            return
+        self.thumbnail_size = size
+        self.pixmap_cache.clear()
+        self._images_changed()
+
+    def _images_changed(self):
         # Tell views the images changed; they'll re-request only the visible ones.
         self.dataChanged.emit(
             self.index(0, 0),
@@ -205,24 +226,27 @@ class CompoundTableModel(QAbstractTableModel):
 
     def _thumbnail(self, row_index: int) -> QPixmap:
         if row_index not in self.pixmap_cache:
-            molecule = self.mdf.df["molecule_obj"][row_index]
-            svg = molecule.draw(
-                "svg",
-                size=(THUMBNAIL_SIZE.width(), THUMBNAIL_SIZE.height()),
-                highlight_query=self.highlight_query,
-            )
+            if row_index not in self.svg_cache:
+                molecule = self.mdf.df["molecule_obj"][row_index]
+                # always drawn at THUMBNAIL_SIZE, then scaled as a vector below
+                self.svg_cache[row_index] = molecule.draw(
+                    "svg",
+                    size=(THUMBNAIL_SIZE.width(), THUMBNAIL_SIZE.height()),
+                    highlight_query=self.highlight_query,
+                )
+            size = self.thumbnail_size
             # Paint the vector image at the screen's real resolution. A PNG at
-            # THUMBNAIL_SIZE gets stretched, and so pixelated, under display
+            # this size gets stretched, and so pixelated, under display
             # scaling (e.g. 125%, common on Windows).
             ratio = QGuiApplication.instance().devicePixelRatio()
-            pixmap = QPixmap(THUMBNAIL_SIZE * ratio)
+            pixmap = QPixmap(size * ratio)
             pixmap.setDevicePixelRatio(ratio)
             pixmap.fill(Qt.GlobalColor.transparent)
             painter = QPainter(pixmap)
             # explicit bounds: by default the renderer fills the pixmap's size in
             # device pixels, which the ratio then scales up a second time
-            bounds = QRectF(0, 0, THUMBNAIL_SIZE.width(), THUMBNAIL_SIZE.height())
-            QSvgRenderer(QByteArray(svg)).render(painter, bounds)
+            bounds = QRectF(0, 0, size.width(), size.height())
+            QSvgRenderer(QByteArray(self.svg_cache[row_index])).render(painter, bounds)
             painter.end()
             self.pixmap_cache[row_index] = pixmap
         return self.pixmap_cache[row_index]
@@ -410,8 +434,22 @@ class CompoundTable(QTableView):
         for column in range(1, model.columnCount()):
             if not self.isColumnHidden(column):
                 self.resizeColumnToContents(column)
-        self.setColumnWidth(0, THUMBNAIL_SIZE.width() + 10)
+        self.setColumnWidth(0, THUMBNAIL_SIZE.width() + THUMBNAIL_PADDING)
+        # the images (and so the rows) grow and shrink with the column's width
+        header.sectionResized.connect(self._on_section_resized)
         self.setMouseTracking(True)  # needed for the `entered` (hover) signal
+
+    def _on_section_resized(self, column: int, _old_width: int, new_width: int):
+        model = self.model().sourceModel()
+        if column != model.column("structure"):
+            return
+        width = max(new_width - THUMBNAIL_PADDING, MIN_THUMBNAIL_WIDTH)
+        # keep THUMBNAIL_SIZE's aspect ratio
+        height = round(width * THUMBNAIL_SIZE.height() / THUMBNAIL_SIZE.width())
+        size = QSize(width, height)
+        self.setIconSize(size)
+        self.verticalHeader().setDefaultSectionSize(height + 6)
+        model.set_thumbnail_size(size)
 
     def wheelEvent(self, event):
         # Shift+scroll moves sideways, as in most web tables. Qt otherwise uses Alt.
@@ -426,3 +464,62 @@ class CompoundTable(QTableView):
             event.accept()
             return
         super().wheelEvent(event)
+
+
+class ColumnChooser(QWidget):
+    """A checklist of a `CompoundTable`'s columns, to show or hide each one.
+
+    The last visible column can't be unchecked, so the table never goes empty;
+    likewise "Deselect all" leaves the first column showing.
+    """
+
+    def __init__(self, table: CompoundTable):
+        super().__init__()
+        self.table = table
+        model = table.model().sourceModel()
+        # Columns hidden at startup were never sized; size them when first shown.
+        self.unsized = {
+            i for i in range(1, model.columnCount()) if table.isColumnHidden(i)
+        }
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(10)
+
+        select_all = PrimaryButton("Select all", muted=True)
+        select_all.clicked.connect(lambda: self._set_all(True))
+        deselect_all = PrimaryButton("Deselect all", muted=True)
+        deselect_all.clicked.connect(lambda: self._set_all(False))
+        buttons = QHBoxLayout()
+        buttons.setSpacing(6)
+        buttons.addWidget(select_all)
+        buttons.addWidget(deselect_all)
+        layout.addLayout(buttons)
+
+        self.checkboxes: list[StyledCheckBox] = []
+        for column, (label, _) in enumerate(model.COLUMNS):
+            checkbox = StyledCheckBox(label)
+            checkbox.setChecked(not table.isColumnHidden(column))
+            checkbox.toggled.connect(
+                lambda on, column=column: self._set_shown(column, on)
+            )
+            layout.addWidget(checkbox)
+            self.checkboxes.append(checkbox)
+        self._update_enabled()
+
+    def _set_shown(self, column: int, shown: bool):
+        self.table.setColumnHidden(column, not shown)
+        if shown and column in self.unsized:
+            self.unsized.discard(column)
+            self.table.resizeColumnToContents(column)
+        self._update_enabled()
+
+    def _set_all(self, shown: bool):
+        # the first column always stays, so the table never goes empty
+        self.checkboxes[0].setChecked(True)
+        for checkbox in self.checkboxes[1:]:
+            checkbox.setChecked(shown)
+
+    def _update_enabled(self):
+        checked = [box for box in self.checkboxes if box.isChecked()]
+        for box in self.checkboxes:
+            box.setEnabled(len(checked) > 1 or not box.isChecked())

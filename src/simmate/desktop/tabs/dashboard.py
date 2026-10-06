@@ -12,39 +12,35 @@ from PySide6.QtCore import (
 )
 from PySide6.QtWidgets import (
     QAbstractItemView,
-    QCheckBox,
     QFormLayout,
     QFrame,
     QGraphicsView,
     QHBoxLayout,
-    QLabel,
     QScrollArea,
     QSplitter,
     QVBoxLayout,
     QWidget,
 )
 
-from simmate.desktop import theme
 from simmate.desktop.example_data.compounds import build_dataset
 from simmate.desktop.tabs.placeholder import PlaceholderTab
 from simmate.desktop.widgets import (
     NUMERIC_COLUMNS,
+    ColumnChooser,
     CompoundDetails,
     CompoundFilterProxy,
     CompoundTable,
     CompoundTableModel,
     FilterPanel,
     PlotToolbar,
+    PointTooltip,
     SettingsButton,
     SidePanel,
+    StyledCheckBox,
     StyledComboBox,
+    columns_icon,
     input_style,
 )
-
-# Side panel tabs not built yet; each opens a "coming soon" page for now.
-# Left: bulk / many-compound / table operations. Right: single-compound work.
-LEFT_PLACEHOLDERS = ["Featurizers", "Clustering", "ChemSpace", "ML/AI", "Diversity"]
-RIGHT_PLACEHOLDERS = ["Mutations", "Conformers", "Calculations"]
 
 
 class DashboardTab(QWidget):
@@ -54,8 +50,13 @@ class DashboardTab(QWidget):
       and/or set column filters. Filtered-out points show in grey, or are hidden (plot settings).
     - Zooming/panning the plot further narrows the table to the points in view.
     - Hovering a point (or a row) highlights its row, rings its point, and shows it in full
-      in the detail card (the right panel's Compound tab). When the hover ends, the card goes back to the selected compound.
+      in the detail card (the right panel's Selection tab). When the hover ends, the card goes back to the selected compound.
+    - Hovering a point also shows a small card (structure + ID) beside the cursor
+      (can be turned off in the plot settings).
     - Clicking points (Ctrl+click to add/remove) selects rows; selecting rows rings their points.
+      Clicking empty plot space clears the selection.
+    - The table settings choose whether the table scrolls to hovered/selected points,
+      and the columns button beside them chooses which columns show.
 
     Subclasses can add or swap side panel pages by overriding `get_left_pages` and
     `get_right_pages`.
@@ -85,13 +86,23 @@ class DashboardTab(QWidget):
             combo.setCurrentText(default)
             combo.currentTextChanged.connect(self._update_axes)
 
-        self.show_filtered_checkbox = QCheckBox("Show filtered-out points in grey")
+        self.show_filtered_checkbox = StyledCheckBox("Show filtered-out points in grey")
         self.show_filtered_checkbox.setToolTip(
             "Keep compounds excluded by the filters on the plot as grey points,\n"
             "instead of hiding them"
         )
         self.show_filtered_checkbox.setChecked(True)
         self.show_filtered_checkbox.toggled.connect(self._redraw_points)
+
+        self.hover_card_checkbox = StyledCheckBox("Show structure on hover")
+        self.hover_card_checkbox.setToolTip(
+            "Show a small card with the compound's structure beside the cursor\n"
+            "while hovering a point"
+        )
+        self.hover_card_checkbox.setChecked(True)
+        self.hover_card_checkbox.toggled.connect(
+            lambda on: on or self.point_tooltip.hide()
+        )
 
         self.plot = pg.PlotWidget(
             background=None
@@ -129,6 +140,9 @@ class DashboardTab(QWidget):
         )
         self.scatter.sigHovered.connect(self._on_plot_hover)
         self.scatter.sigClicked.connect(self._on_plot_click)
+        # after the points get the click, so we can tell when none was hit
+        self.plot.scene().sigMouseClicked.connect(self._on_plot_background_click)
+        self.point_tooltip = PointTooltip(self.plot)
 
         # Overlays drawn under the data points so they never steal hovers or clicks.
         self.dimmed_scatter = self._overlay(
@@ -168,17 +182,26 @@ class DashboardTab(QWidget):
         # re-draw thumbnails and the card with the new substructure highlighted & aligned
         self.filter_panel.query_changed.connect(self.model.set_highlight)
         self.filter_panel.query_changed.connect(self.details.set_query)
+        left_pages = self.get_left_pages()
+        # Filters starts open (when a subclass's pages still include it)
+        left_widgets = [page for _, page in left_pages]
         self.left_panel = SidePanel(
-            self.get_left_pages(),
+            left_pages,
             side="left",
-            width=420,
-            min_width=300,
+            width=385,
+            min_width=385,
+            current=(
+                left_widgets.index(self.filter_panel)
+                if self.filter_panel in left_widgets
+                else 0
+            ),
         )
         self.right_panel = SidePanel(
             self.get_right_pages(),
             side="right",
-            width=340,
-            min_width=280,
+            width=385,
+            min_width=385,
+            open=False,  # starts collapsed
         )
         for panel in (self.left_panel, self.right_panel):
             panel.tabs.current_changed.connect(
@@ -196,6 +219,7 @@ class DashboardTab(QWidget):
         settings_layout.addRow("X axis", self.x_combo)
         settings_layout.addRow("Y axis", self.y_combo)
         settings_layout.addRow(self.show_filtered_checkbox)
+        settings_layout.addRow(self.hover_card_checkbox)
 
         controls = QHBoxLayout()
         controls.addWidget(PlotToolbar(self.plot))
@@ -209,11 +233,35 @@ class DashboardTab(QWidget):
         plot_layout.addLayout(controls)
         plot_layout.addWidget(self.plot, stretch=1)
 
-        # Same row of controls over the table, with its settings still to come.
-        table_settings = QLabel("Table settings are coming soon.")
-        table_settings.setStyleSheet(f"color: {theme.MUTED_COLOR}; padding: 12px;")
+        # Same row of controls over the table, with its own settings.
+        self.scroll_to_hover_checkbox = StyledCheckBox("Scroll to hovered plot point")
+        self.scroll_to_hover_checkbox.setToolTip(
+            "Scroll the table to a compound's row while its point is hovered"
+        )
+        self.scroll_to_selection_checkbox = StyledCheckBox(
+            "Scroll to selected plot point"
+        )
+        self.scroll_to_selection_checkbox.setToolTip(
+            "Scroll the table to a compound's row when its point is clicked"
+        )
+        self.scroll_to_selection_checkbox.setChecked(True)
+        table_settings = QWidget()
+        table_settings.setStyleSheet(input_style())
+        table_settings_layout = QFormLayout(table_settings)
+        table_settings_layout.setContentsMargins(12, 12, 12, 12)
+        table_settings_layout.setVerticalSpacing(10)
+        table_settings_layout.addRow(self.scroll_to_hover_checkbox)
+        table_settings_layout.addRow(self.scroll_to_selection_checkbox)
+        column_chooser = ColumnChooser(self.table)
+        column_chooser.setStyleSheet(input_style())
         table_controls = QHBoxLayout()
+        table_controls.setSpacing(2)  # the two buttons sit close together
         table_controls.addStretch()
+        table_controls.addWidget(
+            SettingsButton(
+                column_chooser, tooltip="Show/hide columns", icon=columns_icon()
+            )
+        )
         table_controls.addWidget(
             SettingsButton(table_settings, tooltip="Table settings")
         )
@@ -251,9 +299,15 @@ class DashboardTab(QWidget):
         self.outer_splitter.addWidget(main_with_tabs)
         self.outer_splitter.addWidget(self.right_panel)
         self.outer_splitter.setCollapsible(1, False)
-        self.outer_splitter.setSizes(
-            [self.left_panel.open_width, 640, self.right_panel.open_width]
+        # Extra width (e.g. a bigger window) goes to the center, so the side panels
+        # open at their set widths.
+        for index, stretch in enumerate([0, 1, 0]):
+            self.outer_splitter.setStretchFactor(index, stretch)
+        left, right = (
+            panel.open_width if panel.tabs.current() >= 0 else 0  # 0 = collapsed
+            for panel in (self.left_panel, self.right_panel)
         )
+        self.outer_splitter.setSizes([left, 640, right])
         self.outer_splitter.splitterMoved.connect(self._sync_side_tabs)
 
         layout = QVBoxLayout(self)
@@ -267,15 +321,27 @@ class DashboardTab(QWidget):
     # --- side panel pages -----------------------------------------------------------------
 
     def get_left_pages(self) -> list[tuple[str, QWidget]]:
-        """The (title, page) pairs of the left panel, for bulk / table operations."""
-        return [("Filters", self.filter_panel)] + [
-            (title, PlaceholderTab(title)) for title in LEFT_PLACEHOLDERS
+        """The (title, page) pairs of the left panel, for bulk / table operations.
+
+        Tabs not built yet open a "coming soon" page for now.
+        """
+        return [
+            ("Logs", PlaceholderTab("Logs")),
+            ("Filters", self.filter_panel),
+            ("Featurizers", PlaceholderTab("Featurizers")),
+            ("Analysis", PlaceholderTab("Analysis")),
         ]
 
     def get_right_pages(self) -> list[tuple[str, QWidget]]:
-        """The (title, page) pairs of the right panel, for single-compound work."""
-        return [("Compound", self.details_scroll)] + [
-            (title, PlaceholderTab(title)) for title in RIGHT_PLACEHOLDERS
+        """The (title, page) pairs of the right panel, for work on the selected compound(s).
+
+        Tabs not built yet open a "coming soon" page for now.
+        """
+        return [
+            ("Selection", self.details_scroll),
+            ("Transformations", PlaceholderTab("Transformations")),
+            ("Calculations", PlaceholderTab("Calculations")),
+            ("Enumeration", PlaceholderTab("Enumeration")),
         ]
 
     # --- helpers --------------------------------------------------------------------------
@@ -393,6 +459,7 @@ class DashboardTab(QWidget):
             self.dimmed_scatter.setData(x=[], y=[])
         self._refresh_selection_marks()
         self.table_hover_mark.setData(x=[], y=[])
+        self.point_tooltip.hide()
 
     # --- plot -> table ----------------------------------------------------------------------
 
@@ -403,6 +470,7 @@ class DashboardTab(QWidget):
         self.view_box.autoRange()  # triggers _filter_to_view via sigRangeChanged
 
     def _filter_to_view(self):
+        self.point_tooltip.hide()  # its point has moved out from under it
         (x_min, x_max), (y_min, y_max) = self.view_box.viewRange()
         with self._refiltering():
             self.proxy.set_view_ranges(
@@ -418,11 +486,19 @@ class DashboardTab(QWidget):
         row = self._nearest(points, event)
         self._show_hovered(row)
         if row is not None:
-            self.table.scrollTo(
-                self._proxy_index(row), QAbstractItemView.ScrollHint.EnsureVisible
-            )
+            if self.scroll_to_hover_checkbox.isChecked():
+                self.table.scrollTo(
+                    self._proxy_index(row), QAbstractItemView.ScrollHint.EnsureVisible
+                )
+            if self.hover_card_checkbox.isChecked():
+                self.point_tooltip.show_at(
+                    self.details.svg(row),
+                    self.df["id"][row],
+                    self.plot.mapFromScene(event.scenePos()),
+                )
             self.status.emit(f"{self.df['id'][row]}: pIC50 {self.df['pIC50'][row]}")
         else:
+            self.point_tooltip.hide()
             self._update_count()  # back to the count once off the points
 
     def _on_plot_click(self, _item, points, event):
@@ -431,8 +507,24 @@ class DashboardTab(QWidget):
             rows = self.selected_rows ^ {clicked}  # toggle
         else:
             rows = {clicked}
-        self._select_in_table(rows, scroll=True, current=clicked)
+        self._select_in_table(
+            rows, scroll=self.scroll_to_selection_checkbox.isChecked(), current=clicked
+        )
         event.accept()
+
+    def _on_plot_background_click(self, event):
+        # A click that no point accepted, inside the plot area (not on an axis or
+        # the color bar), clears the selection. Ctrl+click there keeps it, and a
+        # double-click is left to reset the view.
+        if (
+            event.button() != Qt.MouseButton.LeftButton
+            or event.isAccepted()
+            or event.double()
+            or event.modifiers() & Qt.KeyboardModifier.ControlModifier
+            or not self.view_box.sceneBoundingRect().contains(event.scenePos())
+        ):
+            return
+        self.table.clearSelection()
 
     def _select_in_table(
         self, rows: set[int], scroll: bool, current: int | None = None

@@ -94,6 +94,17 @@ class CompoundDetails(QWidget):
         if index != self.current:
             self._render(index)
 
+    def svg(self, index: int) -> bytes:
+        """The compound's 2D drawing (with any query highlighted), drawn once then cached."""
+        if index not in self.svg_cache:
+            self.svg_cache[index] = self.mdf.df["molecule_obj"][index].draw(
+                "svg",
+                size=(400, 300),
+                highlight_query=self.query,
+                stereo_annotations=True,
+            )
+        return self.svg_cache[index]
+
     def _render(self, index: int | None):
         self.current = index
         self._show_3d()
@@ -105,14 +116,7 @@ class CompoundDetails(QWidget):
             return
 
         row = self.mdf.df.row(index, named=True)
-        if index not in self.svg_cache:
-            self.svg_cache[index] = row["molecule_obj"].draw(
-                "svg",
-                size=(400, 300),
-                highlight_query=self.query,
-                stereo_annotations=True,
-            )
-        self.svg_widget.load(QByteArray(self.svg_cache[index]))
+        self.svg_widget.load(QByteArray(self.svg(index)))
         # load() swaps in a new renderer config, so re-apply the aspect ratio.
         self.svg_widget.renderer().setAspectRatioMode(
             Qt.AspectRatioMode.KeepAspectRatio

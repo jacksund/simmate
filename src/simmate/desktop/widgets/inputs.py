@@ -3,7 +3,7 @@ from pathlib import Path
 
 from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPixmap
-from PySide6.QtWidgets import QComboBox, QStyledItemDelegate
+from PySide6.QtWidgets import QCheckBox, QComboBox, QStyledItemDelegate
 
 from simmate.desktop import theme
 from simmate.desktop.theme import rgba
@@ -71,6 +71,14 @@ QCheckBox::indicator:checked {{
     image: url("{check}");
 }}
 """
+
+
+class StyledCheckBox(QCheckBox):
+    """A check box that shows a pointing hand on hover, like the buttons."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
 
 class StyledComboBox(QComboBox):

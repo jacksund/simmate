@@ -95,6 +95,8 @@ class _ClickCatcher(QWidget):
 class SettingsButton(QToolButton):
     """A gear button that toggles a floating panel of `content` (e.g. plot options).
 
+    Pass `icon` to show something other than the gear (e.g. `columns_icon()`).
+
     The panel floats inside the window, under the button's right edge, rather than
     being a popup window: on Wayland, popup menus are positioned unreliably and can
     stop opening. While it's open, an invisible layer behind it covers the rest of
@@ -102,12 +104,14 @@ class SettingsButton(QToolButton):
     closes it.
     """
 
-    def __init__(self, content: QWidget, tooltip: str = "Settings"):
+    def __init__(
+        self, content: QWidget, tooltip: str = "Settings", icon: QIcon | None = None
+    ):
         super().__init__()
         self.setProperty("muted", True)  # grey, read by button_style
         self.setStyleSheet(button_style())
         self.setToolTip(tooltip)
-        self.setIcon(gear_icon())
+        self.setIcon(icon or gear_icon())
         self.setIconSize(QSize(GEAR_SIZE, GEAR_SIZE))
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setCheckable(True)  # checked (filled) while the panel is open
@@ -129,6 +133,10 @@ class SettingsButton(QToolButton):
         close_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         close_shortcut.activated.connect(lambda: self.setChecked(False))
         self.panel.hide()
+        # The window shows a resize cursor over its edges, and children without a
+        # cursor of their own keep showing whichever one it set last.
+        for widget in (self.click_catcher, self.panel):
+            widget.setCursor(Qt.CursorShape.ArrowCursor)
 
     def _set_panel_open(self, open: bool):
         window = self.window()
@@ -163,23 +171,40 @@ class SettingsButton(QToolButton):
 
 def gear_icon(size: int = GEAR_SIZE) -> QIcon:
     """A gear in grey, or in white when the button is checked."""
+    return _icon(_gear_path(size), size)
+
+
+def columns_icon(size: int = GEAR_SIZE) -> QIcon:
+    """Three side-by-side columns, like `gear_icon` (e.g. for choosing table columns)."""
+    return _icon(_columns_path(size), size)
+
+
+def _icon(path: QPainterPath, size: int) -> QIcon:
+    """`path` filled in grey, or in white when the button is checked."""
     icon = QIcon()
     for color, state in [
         (theme.MUTED_COLOR, QIcon.State.Off),
         ("white", QIcon.State.On),
     ]:
-        pixmap = _gear_pixmap(size, QColor(color))
+        pixmap = _pixmap(path, size, QColor(color))
         for mode in (QIcon.Mode.Normal, QIcon.Mode.Active):
             icon.addPixmap(pixmap, mode, state)
     return icon
 
 
-def _gear_pixmap(size: int, color: QColor) -> QPixmap:
+def _pixmap(path: QPainterPath, size: int, color: QColor) -> QPixmap:
     scale = 3  # drawn large so it stays crisp on high-DPI screens
     pixmap = QPixmap(size * scale, size * scale)
     pixmap.setDevicePixelRatio(scale)
     pixmap.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(pixmap)
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+    painter.fillPath(path, color)
+    painter.end()
+    return pixmap
 
+
+def _gear_path(size: int) -> QPainterPath:
     center = QPointF(size / 2, size / 2)
     gear = QPainterPath()
     gear.addEllipse(center, size * 0.32, size * 0.32)
@@ -193,10 +218,15 @@ def _gear_pixmap(size: int, color: QColor) -> QPixmap:
         gear = gear.united(transform.map(tooth))
     hole = QPainterPath()
     hole.addEllipse(center, size * 0.14, size * 0.14)
-    gear = gear.subtracted(hole)
+    return gear.subtracted(hole)
 
-    painter = QPainter(pixmap)
-    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    painter.fillPath(gear, color)
-    painter.end()
-    return pixmap
+
+def _columns_path(size: int) -> QPainterPath:
+    width, gap, height = size * 0.24, size * 0.1, size * 0.8
+    left = (size - 3 * width - 2 * gap) / 2
+    top = (size - height) / 2
+    columns = QPainterPath()
+    for i in range(3):
+        rect = QRectF(left + i * (width + gap), top, width, height)
+        columns.addRoundedRect(rect, size * 0.06, size * 0.06)
+    return columns
