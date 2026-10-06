@@ -59,7 +59,7 @@ def table_style() -> str:
     Selection is the primary color at 25%, between the hover and the full color.
     """
     return f"""
-QTableView {{
+QTableView, QTreeView {{
     background: palette(window); alternate-background-color: {STRIPE_COLOR};
     border: 1px solid palette(mid); border-radius: 6px;
     gridline-color: transparent; outline: none;
@@ -67,7 +67,7 @@ QTableView {{
     selection-color: palette(text);
 }}
 /* room between columns, which have no grid lines to split them */
-QTableView::item {{ padding: 0 8px; }}
+QTableView::item, QTreeView::item {{ padding: 0 8px; }}
 QAbstractScrollArea::corner {{ background: transparent; }}
 /* the tint goes over the window color, which the header itself paints */
 QHeaderView {{ background: palette(window); border-top-left-radius: 6px;

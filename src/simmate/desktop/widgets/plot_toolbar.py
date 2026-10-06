@@ -234,6 +234,16 @@ def trash_icon(size: int = GEAR_SIZE, color: str | None = None) -> QIcon:
     return _icon(_trash_path(size), size, color)
 
 
+def folder_icon(size: int = GEAR_SIZE, color: str | None = None) -> QIcon:
+    """A folder."""
+    return _icon(_folder_path(size), size, color)
+
+
+def download_icon(size: int = GEAR_SIZE, color: str | None = None) -> QIcon:
+    """An arrow pointing down onto a tray."""
+    return _icon(_download_path(size), size, color)
+
+
 def _icon(path: QPainterPath, size: int, color: str | None = None) -> QIcon:
     """`path` filled in grey (or `color`), or in white when the button is checked."""
     icon = QIcon()
@@ -364,3 +374,36 @@ def _trash_path(size: int) -> QPainterPath:
         )
         can = can.subtracted(slot)
     return trash.united(can)
+
+
+def _folder_path(size: int) -> QPainterPath:
+    # a tab on the top-left, over the folder's body
+    radius = size * 0.06
+    folder = QPainterPath()
+    folder.addRoundedRect(
+        QRectF(size * 0.1, size * 0.2, size * 0.34, size * 0.2), radius, radius
+    )
+    folder.addRoundedRect(
+        QRectF(size * 0.1, size * 0.3, size * 0.8, size * 0.52), radius, radius
+    )
+    return folder.simplified()
+
+
+def _download_path(size: int) -> QPainterPath:
+    # a shaft and arrowhead pointing down, over an open tray
+    width = size * 0.12
+    arrow = QPainterPath()
+    arrow.addRect(QRectF((size - width) / 2, size * 0.1, width, size * 0.36))
+    head = QPainterPath(QPointF(size * 0.26, size * 0.42))
+    head.lineTo(size * 0.74, size * 0.42)
+    head.lineTo(size * 0.5, size * 0.68)
+    head.closeSubpath()
+    tray = QPainterPath(QPointF(size * 0.14, size * 0.64))
+    tray.lineTo(size * 0.14, size * 0.88)
+    tray.lineTo(size * 0.86, size * 0.88)
+    tray.lineTo(size * 0.86, size * 0.64)
+    stroker = QPainterPathStroker()
+    stroker.setWidth(width)
+    stroker.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+    stroker.setCapStyle(Qt.PenCapStyle.RoundCap)
+    return arrow.united(head).united(stroker.createStroke(tray))

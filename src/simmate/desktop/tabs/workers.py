@@ -14,7 +14,6 @@ from PySide6.QtWidgets import (
     QLabel,
     QMessageBox,
     QPlainTextEdit,
-    QProgressBar,
     QSpinBox,
     QSplitter,
     QTableWidget,
@@ -26,12 +25,13 @@ from PySide6.QtWidgets import (
 import simmate
 from simmate.config import settings
 from simmate.desktop import theme
-from simmate.desktop.theme import rgba
 from simmate.desktop.widgets import (
     PrimaryButton,
     SettingsButton,
     WorkerSettings,
+    callout_style,
     input_style,
+    loading_bar,
     note_label,
     plus_icon,
     reset_icon,
@@ -58,25 +58,6 @@ QPlainTextEdit {
     background: palette(window); border: 1px solid palette(mid);
     border-radius: 6px; padding: 8px;
 }
-"""
-# for the message saying why workers can't start yet
-# a slim, rounded bar in the primary color, on a tint of it
-LOADING_STYLE = f"""
-QProgressBar {{
-    background: {rgba(theme.PRIMARY_COLOR, theme.HOVER_ALPHA)};
-    border: none; border-radius: 4px;
-}}
-QProgressBar::chunk {{ background: {theme.PRIMARY_COLOR}; border-radius: 4px; }}
-"""
-
-
-def _callout_style(color: str) -> str:
-    """A tinted, outlined box of text in `color`, e.g. for an alert or a tip."""
-    return f"""
-QLabel {{
-    color: {color}; background: {rgba(color, theme.HOVER_ALPHA)};
-    border: 1px solid {color}; border-radius: 6px; padding: 8px 12px;
-}}
 """
 
 
@@ -132,7 +113,7 @@ class WorkersTab(QWidget):
             "jobs one at a time. Workers keep running after you close the app.",
             wordWrap=True,
         )
-        intro.setStyleSheet(_callout_style(theme.PRIMARY_COLOR))
+        intro.setStyleSheet(callout_style(theme.PRIMARY_COLOR))
         self.count = QSpinBox(minimum=1, maximum=self.max_workers)
         self.count_note = note_label("")
         self.contribute = ContributeToggle()
@@ -191,13 +172,10 @@ class WorkersTab(QWidget):
         buttons.addWidget(self.settings_button)
 
         self.alert = QLabel(wordWrap=True)
-        self.alert.setStyleSheet(_callout_style(theme.ERROR_COLOR))
+        self.alert.setStyleSheet(callout_style(theme.ERROR_COLOR))
         self.alert.hide()
 
-        self.loading_bar = QProgressBar(maximum=0, textVisible=False)  # busy
-        self.loading_bar.setStyleSheet(LOADING_STYLE)
-        self.loading_bar.setFixedHeight(8)
-        self.loading_bar.hide()
+        self.loading_bar = loading_bar()
 
         # --- worker list, styled like the Toolkit's compound table ---
         self.table = QTableWidget(0, 3)

@@ -11,6 +11,9 @@ from .compound_table import (
     scroll_bar_style,
     table_style,
 )
+from .dataset_browser import DatasetBrowser, get_datasets_dir
+from .dataset_chat import DatasetChat
+from .dataset_downloads import DatasetDownloads
 from .filter_panel import FilterPanel
 from .histogram import HistogramPlot
 from .inputs import StyledCheckBox, StyledComboBox, input_style
@@ -19,13 +22,15 @@ from .plot_toolbar import (
     PlotToolbar,
     SettingsButton,
     columns_icon,
+    download_icon,
+    folder_icon,
     plus_icon,
     reset_icon,
     stop_icon,
     trash_icon,
 )
 from .point_tooltip import PointTooltip
-from .status import note_label, set_status
+from .status import callout_style, loading_bar, note_label, set_status
 from .system_monitor import SystemMonitor
 from .title_bar import TitleBar
 from .worker_settings import WorkerSettings
