@@ -9,6 +9,7 @@ from .compound_table import (
     CompoundTableModel,
 )
 from .filter_panel import FilterPanel
+from .histogram import HistogramPlot
 from .inputs import StyledCheckBox, StyledComboBox, input_style
 from .panel_tab import SidePanel
 from .plot_toolbar import PlotToolbar, SettingsButton, columns_icon

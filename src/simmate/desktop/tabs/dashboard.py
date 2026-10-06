@@ -32,6 +32,7 @@ from simmate.desktop.widgets import (
     CompoundTable,
     CompoundTableModel,
     FilterPanel,
+    HistogramPlot,
     PlotToolbar,
     PointTooltip,
     SettingsButton,
@@ -44,17 +45,20 @@ from simmate.desktop.widgets import (
 
 
 class DashboardTab(QWidget):
-    """A scatter plot and a table, flanked by tabbed side panels, all kept in sync.
+    """A scatter plot and a histogram above a table, flanked by tabbed side panels, all kept in sync.
 
     - The left panel holds bulk tools; its Filters tab narrows everything: draw a substructure in the sketcher
-      and/or set column filters. Filtered-out points show in grey, or are hidden (plot settings).
-    - Zooming/panning the plot further narrows the table to the points in view.
-    - Hovering a point (or a row) highlights its row, rings its point, and shows it in full
-      in the detail card (the right panel's Selection tab). When the hover ends, the card goes back to the selected compound.
+      and/or set column filters. Filtered-out points/bars show in grey, or are hidden (plot settings).
+    - Zooming/panning either plot further narrows the table to the compounds in view.
+    - Hovering a point (or a row) highlights its row, rings its point, and outlines its histogram bin.
     - Hovering a point also shows a small card (structure + ID) beside the cursor
       (can be turned off in the plot settings).
-    - Clicking points (Ctrl+click to add/remove) selects rows; selecting rows rings their points.
-      Clicking empty plot space clears the selection.
+    - Hovering a histogram bin highlights all of its rows and rings their points
+      (can be turned off in the histogram settings).
+    - Clicking points or bins (Ctrl+click to add/remove) selects rows; selecting rows rings
+      their points and counts them in red in the histogram. Clicking empty plot space clears the selection.
+    - The selected compound shows in full in the detail card (the right panel's Selection tab).
+      It shows one compound at a time, so it shows a message instead while several are selected.
     - The table settings choose whether the table scrolls to hovered/selected points,
       and the columns button beside them chooses which columns show.
 
@@ -74,7 +78,7 @@ class DashboardTab(QWidget):
         # Our own record of the selection. The table's selection model forgets rows that
         # get filtered out, but we want them re-selected when they come back.
         self.selected_rows: set[int] = set()
-        # what the detail card shows when nothing is hovered
+        # the selected compound the detail card shows
         self.focus_row: int | None = None
         self._syncing = False
 
@@ -151,13 +155,47 @@ class DashboardTab(QWidget):
         self.selection_marks = self._overlay(
             size=19, pen=pg.mkPen("#ff5252", width=2.5)
         )
-        self.table_hover_mark = self._overlay(size=24, pen=pg.mkPen("k", width=2))
+        # rings the hovered row's point, or a hovered bin's points
+        self.hover_marks = self._overlay(size=24, pen=pg.mkPen("k", width=2))
         self.plot.addItem(self.scatter)
+
+        # --- histogram ----------------------------------------------------------------
+        self.hist_combo = StyledComboBox()
+        self.hist_combo.addItems(NUMERIC_COLUMNS)
+        self.hist_combo.setCurrentText("MolWt")
+        self.hist_combo.currentTextChanged.connect(self._update_histogram)
+        self.bins_combo = StyledComboBox()
+        self.bins_combo.addItems(["10", "20", "30", "50"])
+        self.bins_combo.setCurrentText("20")
+        self.bins_combo.currentTextChanged.connect(self._update_histogram)
+
+        self.hist_filtered_checkbox = StyledCheckBox(
+            "Show filtered-out compounds in grey"
+        )
+        self.hist_filtered_checkbox.setToolTip(
+            "Count compounds excluded by the filters in grey bars behind the others,\n"
+            "instead of leaving them out"
+        )
+        self.hist_filtered_checkbox.setChecked(True)
+        self.hist_filtered_checkbox.toggled.connect(self._redraw_histogram)
+
+        self.bin_hover_checkbox = StyledCheckBox("Highlight a bin's compounds on hover")
+        self.bin_hover_checkbox.setToolTip(
+            "While hovering a bar, highlight its compounds' rows and ring\n"
+            "their points in the scatter plot"
+        )
+        self.bin_hover_checkbox.setChecked(True)
+
+        self.histogram = HistogramPlot()
+        self.histogram.bin_hovered.connect(self._on_bin_hover)
+        self.histogram.bin_clicked.connect(self._on_bin_click)
+        self.histogram.background_clicked.connect(self._clear_selection)
 
         # Every pan/zoom step fires this; debounce so we filter once the view settles.
         self.range_timer = QTimer(self, singleShot=True, interval=80)
         self.range_timer.timeout.connect(self._filter_to_view)
         self.view_box.sigRangeChanged.connect(self.range_timer.start)
+        self.histogram.view_box.sigRangeChanged.connect(self.range_timer.start)
 
         # --- detail card --------------------------------------------------------------
         self.details = CompoundDetails(self.mdf)
@@ -233,6 +271,38 @@ class DashboardTab(QWidget):
         plot_layout.addLayout(controls)
         plot_layout.addWidget(self.plot, stretch=1)
 
+        # The histogram gets the same toolbar and its own settings.
+        hist_settings = QWidget()
+        hist_settings.setStyleSheet(input_style())
+        hist_settings_layout = QFormLayout(hist_settings)
+        hist_settings_layout.setContentsMargins(12, 12, 12, 12)
+        hist_settings_layout.setHorizontalSpacing(12)
+        hist_settings_layout.setVerticalSpacing(10)
+        hist_settings_layout.addRow("Column", self.hist_combo)
+        hist_settings_layout.addRow("Bins", self.bins_combo)
+        hist_settings_layout.addRow(self.hist_filtered_checkbox)
+        hist_settings_layout.addRow(self.bin_hover_checkbox)
+
+        hist_controls = QHBoxLayout()
+        hist_controls.addWidget(PlotToolbar(self.histogram))
+        hist_controls.addStretch()
+        hist_controls.addWidget(
+            SettingsButton(hist_settings, tooltip="Histogram settings")
+        )
+
+        hist_panel = QWidget()
+        hist_layout = QVBoxLayout(hist_panel)
+        hist_layout.setContentsMargins(0, 0, 0, 0)
+        hist_layout.setSpacing(14)
+        hist_layout.addLayout(hist_controls)
+        hist_layout.addWidget(self.histogram, stretch=1)
+
+        plots = QSplitter(Qt.Orientation.Horizontal)
+        plots.setHandleWidth(14)  # doubles as the gap between the two plots
+        plots.addWidget(plot_panel)
+        plots.addWidget(hist_panel)
+        plots.setSizes([500, 500])  # half each
+
         # Same row of controls over the table, with its own settings.
         self.scroll_to_hover_checkbox = StyledCheckBox("Scroll to hovered plot point")
         self.scroll_to_hover_checkbox.setToolTip(
@@ -277,7 +347,7 @@ class DashboardTab(QWidget):
         # The handle doubles as the gap between the plot and the table (the table's
         # gear row adds a bit more).
         main.setHandleWidth(6)
-        main.addWidget(plot_panel)
+        main.addWidget(plots)
         main.addWidget(table_panel)
         main.setSizes([440, 420])
 
@@ -313,6 +383,7 @@ class DashboardTab(QWidget):
         layout = QVBoxLayout(self)
         layout.addWidget(self.outer_splitter)
 
+        self._update_histogram()  # before the filters, which redraw its bars
         self._apply_filters()
         self._update_axes()
         # Again once the window is listening, so the count replaces its "Ready".
@@ -376,10 +447,26 @@ class DashboardTab(QWidget):
     def _proxy_index(self, row: int):
         return self.proxy.mapFromSource(self.model.index(row, 0))
 
-    def _show_hovered(self, row: int | None):
-        """Highlight `row` everywhere, or fall back to the focused selection when None."""
-        self.model.set_highlighted_rows(set() if row is None else {row})
-        self.details.show_row(self.focus_row if row is None else row)
+    def _show_hovered(self, rows: set[int]):
+        """Highlight `rows` in the table (none when empty)."""
+        self.model.set_highlighted_rows(rows)
+
+    def _show_selection_card(self):
+        if len(self.selected_rows) > 1:
+            self.details.show_many(len(self.selected_rows))
+        else:
+            self.details.show_row(self.focus_row)
+
+    def _mark_hovered(self, rows, size: int = 24):
+        """Ring the points of `rows` in the scatter plot (none when empty)."""
+        x, y = self._xy(sorted(rows))
+        self.hover_marks.setData(x=x, y=y, size=size)
+
+    def _focus_bin_of(self, row: int | None):
+        """Outline the histogram bin holding `row`, or no bin when None."""
+        self.histogram.set_focus_bin(
+            None if row is None else int(self.histogram.bin_of_row[row])
+        )
 
     def _update_count(self):
         shown = self.proxy.rowCount()
@@ -458,8 +545,58 @@ class DashboardTab(QWidget):
             # area the old points covered and they linger on screen.
             self.dimmed_scatter.setData(x=[], y=[])
         self._refresh_selection_marks()
-        self.table_hover_mark.setData(x=[], y=[])
+        self._mark_hovered([])
         self.point_tooltip.hide()
+        self._redraw_histogram()
+
+    # --- histogram ---------------------------------------------------------------------------
+
+    def _update_histogram(self):
+        """Re-bin the histogram after its column or bin count changed."""
+        key = self.hist_combo.currentText()
+        self.histogram.set_values(
+            self.df[key].to_numpy(), int(self.bins_combo.currentText())
+        )
+        self._redraw_histogram()
+        self.histogram.setLabel("bottom", key)
+        self.histogram.view_box.autoRange()  # triggers _filter_to_view via sigRangeChanged
+
+    def _redraw_histogram(self):
+        self.histogram.set_passing(
+            self.proxy.passing, self.hist_filtered_checkbox.isChecked()
+        )
+
+    def _on_bin_hover(self, bin: int | None):
+        self.histogram.set_focus_bin(bin)
+        if bin is None:
+            self._mark_hovered([])
+            self._show_hovered(set())
+            self._update_count()  # back to the count once off the bars
+            return
+        rows = set(self.histogram.rows_in_bin(bin))
+        low, high = self.histogram.bin_range(bin)
+        self.status.emit(
+            f"{self.hist_combo.currentText()} {low:.4g} to {high:.4g}: "
+            f"{len(rows)} compound(s)"
+        )
+        if self.bin_hover_checkbox.isChecked():
+            self._mark_hovered(rows, size=16)
+            self._show_hovered(rows)
+
+    def _on_bin_click(self, bin: int, modifiers):
+        rows = set(self.histogram.rows_in_bin(bin))
+        if modifiers & Qt.KeyboardModifier.ControlModifier:
+            # add the bin, or remove it when it's all selected already
+            if rows <= self.selected_rows:
+                rows = self.selected_rows - rows
+            else:
+                rows = self.selected_rows | rows
+        self._select_in_table(
+            rows, scroll=self.scroll_to_selection_checkbox.isChecked()
+        )
+
+    def _clear_selection(self):
+        self.table.clearSelection()
 
     # --- plot -> table ----------------------------------------------------------------------
 
@@ -472,11 +609,13 @@ class DashboardTab(QWidget):
     def _filter_to_view(self):
         self.point_tooltip.hide()  # its point has moved out from under it
         (x_min, x_max), (y_min, y_max) = self.view_box.viewRange()
+        (hist_min, hist_max), _ = self.histogram.view_box.viewRange()
         with self._refiltering():
             self.proxy.set_view_ranges(
                 [
                     (self.x_combo.currentText(), x_min, x_max),
                     (self.y_combo.currentText(), y_min, y_max),
+                    (self.hist_combo.currentText(), hist_min, hist_max),
                 ]
             )
         self._update_count()
@@ -484,7 +623,8 @@ class DashboardTab(QWidget):
     def _on_plot_hover(self, _item, points, event):
         # Empty when the cursor leaves the points; the card falls back to the selection.
         row = self._nearest(points, event)
-        self._show_hovered(row)
+        self._show_hovered(set() if row is None else {row})
+        self._focus_bin_of(row)
         if row is not None:
             if self.scroll_to_hover_checkbox.isChecked():
                 self.table.scrollTo(
@@ -524,7 +664,7 @@ class DashboardTab(QWidget):
             or not self.view_box.sceneBoundingRect().contains(event.scenePos())
         ):
             return
-        self.table.clearSelection()
+        self._clear_selection()
 
     def _select_in_table(
         self, rows: set[int], scroll: bool, current: int | None = None
@@ -568,7 +708,7 @@ class DashboardTab(QWidget):
             self.focus_row = min(self.selected_rows)
         else:
             self.focus_row = None
-        self.details.show_row(self.focus_row)
+        self._show_selection_card()
 
         self._refresh_selection_marks()
         if self.selected_rows:
@@ -578,15 +718,17 @@ class DashboardTab(QWidget):
         passing = self.proxy.passing
         x, y = self._xy(sorted(r for r in self.selected_rows if passing[r]))
         self.selection_marks.setData(x=x, y=y)
+        self.histogram.set_selected(self.selected_rows)
 
     def _on_table_hover(self, index):
         row = self.proxy.mapToSource(index).row()
-        x, y = self._xy([row])
-        self.table_hover_mark.setData(x=x, y=y)
-        self._show_hovered(row)
+        self._mark_hovered([row])
+        self._show_hovered({row})
+        self._focus_bin_of(row)
 
     def eventFilter(self, watched, event):
         if watched is self.table.viewport() and event.type() == QEvent.Type.Leave:
-            self.table_hover_mark.setData(x=[], y=[])
-            self._show_hovered(None)
+            self._mark_hovered([])
+            self._show_hovered(set())
+            self._focus_bin_of(None)
         return super().eventFilter(watched, event)
