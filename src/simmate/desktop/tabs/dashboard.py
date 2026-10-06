@@ -398,9 +398,9 @@ class DashboardTab(QWidget):
         """
         return [
             ("Logs", PlaceholderTab("Logs")),
-            ("Filters", self.filter_panel),
-            ("Featurizers", PlaceholderTab("Featurizers")),
-            ("Analysis", PlaceholderTab("Analysis")),
+            ("Filter", self.filter_panel),
+            ("Featurize", PlaceholderTab("Featurize")),
+            ("Analyze", PlaceholderTab("Analyze")),
         ]
 
     def get_right_pages(self) -> list[tuple[str, QWidget]]:
@@ -409,10 +409,10 @@ class DashboardTab(QWidget):
         Tabs not built yet open a "coming soon" page for now.
         """
         return [
-            ("Selection", self.details_scroll),
-            ("Transformations", PlaceholderTab("Transformations")),
-            ("Calculations", PlaceholderTab("Calculations")),
-            ("Enumeration", PlaceholderTab("Enumeration")),
+            ("Select", self.details_scroll),
+            ("Transform", PlaceholderTab("Transform")),
+            ("Calcs", PlaceholderTab("Calcs")),
+            ("Enumerate", PlaceholderTab("Enumerate")),
         ]
 
     # --- helpers --------------------------------------------------------------------------

@@ -1,3 +1,5 @@
+import math
+
 import pyqtgraph as pg
 from PySide6.QtCore import QEvent, QPointF, QRectF, QSize, Qt, Signal
 from PySide6.QtGui import (
@@ -6,6 +8,7 @@ from PySide6.QtGui import (
     QKeySequence,
     QPainter,
     QPainterPath,
+    QPainterPathStroker,
     QPixmap,
     QShortcut,
     QTransform,
@@ -179,6 +182,11 @@ def columns_icon(size: int = GEAR_SIZE) -> QIcon:
     return _icon(_columns_path(size), size)
 
 
+def reset_icon(size: int = GEAR_SIZE) -> QIcon:
+    """A circular arrow, like `gear_icon` (e.g. for resetting a value to its default)."""
+    return _icon(_reset_path(size), size)
+
+
 def _icon(path: QPainterPath, size: int) -> QIcon:
     """`path` filled in grey, or in white when the button is checked."""
     icon = QIcon()
@@ -230,3 +238,30 @@ def _columns_path(size: int) -> QPainterPath:
         rect = QRectF(left + i * (width + gap), top, width, height)
         columns.addRoundedRect(rect, size * 0.06, size * 0.06)
     return columns
+
+
+def _reset_path(size: int) -> QPainterPath:
+    # An open ring (counter-clockwise from its end at the top-right) with an
+    # arrowhead on that end. Qt angles run counter-clockwise from 3 o'clock.
+    radius, width = size * 0.3, size * 0.12
+    center = QPointF(size / 2, size / 2)
+    start, sweep = 70, 290
+    circle = QRectF(center.x() - radius, center.y() - radius, 2 * radius, 2 * radius)
+    arc = QPainterPath()
+    arc.arcMoveTo(circle, start)
+    arc.arcTo(circle, start, sweep)
+    stroker = QPainterPathStroker()
+    stroker.setWidth(width)
+    stroker.setCapStyle(Qt.PenCapStyle.FlatCap)
+    ring = stroker.createStroke(arc)
+
+    # The arrowhead sits on the ring's start and points back along it (clockwise).
+    angle = math.radians(start)
+    outward = QPointF(math.cos(angle), -math.sin(angle))
+    forward = QPointF(math.sin(angle), math.cos(angle))  # clockwise tangent
+    end = center + outward * radius
+    head = QPainterPath(end + outward * width * 1.6)
+    head.lineTo(end + forward * width * 2)
+    head.lineTo(end - outward * width * 1.6)
+    head.closeSubpath()
+    return ring.united(head)
