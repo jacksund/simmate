@@ -25,7 +25,7 @@ from .plot_toolbar import (
     trash_icon,
 )
 from .point_tooltip import PointTooltip
-from .status import set_status
+from .status import note_label, set_status
 from .system_monitor import SystemMonitor
 from .title_bar import TitleBar
 from .worker_settings import WorkerSettings

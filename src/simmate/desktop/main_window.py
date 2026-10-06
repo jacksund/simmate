@@ -109,7 +109,7 @@ class MainWindow(QMainWindow):
         """
         return [
             ("Toolkit", DashboardTab),
-            ("Datastores", partial(PlaceholderTab, "Datastores")),
+            ("Datasets", partial(PlaceholderTab, "Datasets")),
             ("Workers", WorkersTab),
         ]
 

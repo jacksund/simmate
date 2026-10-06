@@ -1,3 +1,4 @@
+import os
 import threading
 from collections.abc import Callable
 from functools import partial
@@ -7,7 +8,6 @@ from PySide6.QtCore import QProcess, QProcessEnvironment, Qt, Signal
 from PySide6.QtGui import QFontDatabase
 from PySide6.QtWidgets import (
     QAbstractItemView,
-    QFormLayout,
     QFrame,
     QHBoxLayout,
     QHeaderView,
@@ -32,6 +32,7 @@ from simmate.desktop.widgets import (
     SettingsButton,
     WorkerSettings,
     input_style,
+    note_label,
     plus_icon,
     reset_icon,
     scroll_bar_style,
@@ -67,10 +68,14 @@ QProgressBar {{
 }}
 QProgressBar::chunk {{ background: {theme.PRIMARY_COLOR}; border-radius: 4px; }}
 """
-ALERT_STYLE = f"""
+
+
+def _callout_style(color: str) -> str:
+    """A tinted, outlined box of text in `color`, e.g. for an alert or a tip."""
+    return f"""
 QLabel {{
-    color: {theme.ERROR_COLOR}; background: {rgba(theme.ERROR_COLOR, theme.HOVER_ALPHA)};
-    border: 1px solid {theme.ERROR_COLOR}; border-radius: 6px; padding: 8px 12px;
+    color: {color}; background: {rgba(color, theme.HOVER_ALPHA)};
+    border: 1px solid {color}; border-radius: 6px; padding: 8px 12px;
 }}
 """
 
@@ -111,24 +116,46 @@ class WorkersTab(QWidget):
         self.loading = False
         self._engine_found.connect(self._on_engine_found)
         self.containers: list[tuple[str, str, str]] = []  # (id, name, status)
+        self.starting = 0  # workers started but not yet listed
+        cores = os.cpu_count() or 1
+        # leave two cores free for this app and the rest of the desktop
+        self.max_workers = max(cores - 2, 1)
 
         # --- the "Start worker(s)" popout ---
         start_form = QWidget()
-        start_form.setMinimumWidth(380)
-        self.target = QLabel(wordWrap=True)
-        self.count = QSpinBox(minimum=1, maximum=64)
+        # the popout floats over the window, so it doesn't inherit this tab's style
+        start_form.setStyleSheet(input_style())
+        # fixed, so the wrapped text below gets its full height when the panel sizes
+        start_form.setFixedWidth(400)
+        intro = QLabel(
+            "Each worker runs in its own Podman or Docker container and completes "
+            "jobs one at a time. Workers keep running after you close the app.",
+            wordWrap=True,
+        )
+        intro.setStyleSheet(_callout_style(theme.PRIMARY_COLOR))
+        self.count = QSpinBox(minimum=1, maximum=self.max_workers)
+        self.count_note = note_label("")
         self.contribute = ContributeToggle()
         self.message = QLabel()
         self.start_button = PrimaryButton("Start", filled=True)
         self.start_button.clicked.connect(self.start_workers)
-        form = QFormLayout(start_form)
-        form.setContentsMargins(12, 12, 12, 12)
-        form.setVerticalSpacing(10)
-        form.addRow(self.target)
-        form.addRow("Workers", self.count)
-        form.addRow(self.contribute)
-        form.addRow(self.message)
-        form.addRow(self.start_button)
+        # evenly spaced sections: the intro, the count (with its note), the toggle
+        count_row = QHBoxLayout()
+        count_row.setSpacing(12)
+        count_row.addWidget(QLabel("Workers"))
+        count_row.addWidget(self.count, stretch=1)
+        count_section = QVBoxLayout()
+        count_section.setSpacing(4)
+        count_section.addLayout(count_row)
+        count_section.addWidget(self.count_note)
+        form = QVBoxLayout(start_form)
+        form.setContentsMargins(16, 16, 16, 16)
+        form.setSpacing(16)
+        form.addWidget(intro)
+        form.addLayout(count_section)
+        form.addWidget(self.contribute)
+        form.addWidget(self.message)
+        form.addWidget(self.start_button)
         self.start_popout = SettingsButton(
             start_form,
             tooltip="Start new workers",
@@ -164,7 +191,7 @@ class WorkersTab(QWidget):
         buttons.addWidget(self.settings_button)
 
         self.alert = QLabel(wordWrap=True)
-        self.alert.setStyleSheet(ALERT_STYLE)
+        self.alert.setStyleSheet(_callout_style(theme.ERROR_COLOR))
         self.alert.hide()
 
         self.loading_bar = QProgressBar(maximum=0, textVisible=False)  # busy
@@ -220,14 +247,12 @@ class WorkersTab(QWidget):
             self.check_engine()
 
     def _update_form(self):
-        desktop = settings.desktop
-        self.target.setText(
-            f"Connects to <b>{desktop.api_host}</b> (change this with the gear button)."
-        )
         if self.loading:
             set_status(self.message, "Loading…")
+            self.message.show()
             self.start_button.setEnabled(False)
             self.start_popout.setEnabled(False)
+            self.alert.hide()
             return
         missing = get_missing_settings()
         self.settings_button.set_alert(bool(missing))
@@ -247,7 +272,19 @@ class WorkersTab(QWidget):
         self.alert.setText(problem)
         self.alert.setVisible(bool(problem))
         self.start_popout.setEnabled(not problem)
+
+        # at most `max_workers` run at once (the cores, minus two left free)
+        running = sum(_is_running(status) for _, _, status in self.containers)
+        available = self.max_workers - running - self.starting
+        self.count.setMaximum(max(available, 1))
+        self.count_note.setText(
+            f"Up to {self.max_workers} at once: this computer's {os.cpu_count()} "
+            f"cores, minus two kept free for other apps. {running} running now."
+        )
+        if not problem and available <= 0:
+            problem = "All worker slots are in use. Stop a worker to start another."
         set_status(self.message, problem, False)
+        self.message.setVisible(bool(problem))  # no gap above Start when empty
         self.start_button.setEnabled(not problem)
 
     def start_workers(self):
@@ -258,6 +295,7 @@ class WorkersTab(QWidget):
         # TODO: pass on `self.contribute.isChecked()` once the server can limit an
         # API worker to its owner's jobs (work items don't record who submitted them)
         for _ in range(self.count.value()):
+            self.starting += 1
             name = f"simmate-worker-{uuid4().hex[:8]}"
             command = launcher.get_container_command(
                 self.engine, name, WORKER_IMAGE, [], env
@@ -268,6 +306,7 @@ class WorkersTab(QWidget):
             self._run(command, partial(self._started, name), env=env)
 
     def _started(self, name: str, exit_code: int, output: str):
+        self.starting -= 1
         if exit_code:
             self.status.emit(f"Couldn't start {name}: {output.strip()}")
         else:
@@ -336,6 +375,7 @@ class WorkersTab(QWidget):
         running = [id for id, _, status in self.containers if _is_running(status)]
         self.stop_all_button.setEnabled(bool(running))
         self.remove_all_button.setEnabled(bool(self.containers))
+        self._update_form()  # how many more workers can start
 
     def _row_actions(self, id: str, status: str) -> QWidget:
         """Stop and Remove buttons for one container."""

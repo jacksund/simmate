@@ -7,7 +7,7 @@ from simmate.config import settings
 from simmate.desktop import theme
 from simmate.desktop.widgets.button import PrimaryButton
 from simmate.desktop.widgets.inputs import StyledCheckBox, input_style
-from simmate.desktop.widgets.status import link, set_status
+from simmate.desktop.widgets.status import link, note_label, set_status
 
 REQUIRED_SETTINGS = {
     "api_host": "API server",
@@ -55,17 +55,15 @@ class ContributeToggle(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.check_box = StyledCheckBox("Run jobs from other users")
-        note = QLabel(
-            "Your workers help run jobs submitted by others, and you earn for the "
-            "compute you share. Turn this off to run only your own jobs.",
-            wordWrap=True,
+        self.check_box = StyledCheckBox("Help run community jobs (and earn)")
+        note = note_label(
+            "Your workers help run jobs submitted by others, and you earn USDC for "
+            "the compute you contribute. Turn this off to run only your own jobs."
         )
-        note.setStyleSheet(f"color: {theme.MUTED_COLOR}; font-size: 11px;")
         note.setContentsMargins(24, 0, 0, 0)  # lined up with the check box's text
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(2)
+        layout.setSpacing(4)
         layout.addWidget(self.check_box)
         layout.addWidget(note)
 

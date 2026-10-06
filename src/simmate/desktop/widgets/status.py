@@ -22,3 +22,10 @@ def link(url: str, text: str) -> str:
         f'<a href="{url}" style="color: {theme.PRIMARY_COLOR}; '
         f'text-decoration: none;">{text}&nbsp;↗</a>'
     )
+
+
+def note_label(text: str) -> QLabel:
+    """A label of small, muted text, e.g. explaining the input above it."""
+    label = QLabel(text, wordWrap=True)
+    label.setStyleSheet(f"color: {theme.MUTED_COLOR}; font-size: 11px;")
+    return label
