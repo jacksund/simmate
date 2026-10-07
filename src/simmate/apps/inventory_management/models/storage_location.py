@@ -23,10 +23,15 @@ class StorageLocation(DatabaseTable):
     """
 
     storage_type_options = [
+        "company",
+        "school",
+        "campus",
+        "department",
         "site",
         "building",
         "room",
         "lab",
+        "automated store",
         "fume hood",
         "glovebox",
         "cabinet",
@@ -89,3 +94,43 @@ class StorageLocation(DatabaseTable):
     Any additional data about the location that does not fit in the columns
     above.
     """
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_or_create_path(
+        cls,
+        path: list[tuple[str, str | None]],
+        cache: dict = None,
+    ) -> int | None:
+        """
+        Gives the id of the last location in a path, creating any locations
+        that don't exist yet. Gives None if the path is empty.
+
+        The `path` is a list of `(name, storage_type)` pairs, from the top
+        level down (e.g. `[("Building 1", "building"), ("Room 101", "room")]`).
+        Locations are matched by their name and parent. The `storage_type` is
+        only used when creating a location (existing ones are left as is).
+
+        Pass the same `cache` dict to repeated calls (e.g. in a bulk load) so
+        that each location is only looked up once.
+        """
+        if cache is None:
+            cache = {}
+
+        parent_id = None
+        for name, storage_type in path:
+            key = (parent_id, name)
+            if key not in cache:
+                location = cls.objects.filter(
+                    parent_location_id=parent_id,
+                    name=name,
+                ).first() or cls.objects.create(
+                    name=name,
+                    storage_type=storage_type,
+                    temperature_celsius=None,  # unknown
+                    parent_location_id=parent_id,
+                )
+                cache[key] = location.id
+            parent_id = cache[key]
+        return parent_id

@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from django.contrib.auth.models import User
+from django.db.models import Count, OuterRef, Subquery
+from django.db.models.functions import Coalesce
 
 from simmate.database.core import DatabaseTable, table_column
+from simmate.utils import chunk_list
 
 from .mixture import Mixture
 from .substance import Substance
@@ -130,13 +133,14 @@ class Batch(DatabaseTable):
 
     # cached properties calculated from linked containers
 
-    num_containers = table_column.IntegerField(blank=True, null=True)
+    num_available_containers = table_column.IntegerField(blank=True, null=True)
     """
-    The number of containers that this batch is stored in.
+    The number of containers of this batch that are not empty (i.e. not
+    depleted). See `update_num_available_containers`.
     """
 
     total_initial_amount = table_column.DecimalField(
-        max_digits=10,
+        max_digits=16,
         decimal_places=3,
         blank=True,
         null=True,
@@ -147,7 +151,7 @@ class Batch(DatabaseTable):
     """
 
     total_current_amount = table_column.DecimalField(
-        max_digits=10,
+        max_digits=16,
         decimal_places=3,
         blank=True,
         null=True,
@@ -197,5 +201,33 @@ class Batch(DatabaseTable):
     The batches used to make this batch (e.g. the starting materials of a
     synthesis). This allows the lineage of a batch to be tracked.
     """
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def update_num_available_containers(cls, batch_ids: list[int]):
+        """
+        Recalculates the cached `num_available_containers` column for the
+        given batches. Use this after their containers are added, removed, or
+        depleted (e.g. after bulk loads).
+        """
+        from .container import Container  # local import to avoid circular dep
+
+        num_available = Coalesce(
+            Subquery(
+                Container.objects.filter(batch=OuterRef("pk"))
+                .exclude(is_depleted=True)
+                .order_by()
+                .values("batch")
+                .annotate(count=Count("id"))
+                .values("count")
+            ),
+            0,
+        )
+        # done in chunks to stay under the database's limit on query params
+        for chunk in chunk_list(list(batch_ids), chunk_size=10_000):
+            cls.objects.filter(id__in=chunk).update(
+                num_available_containers=num_available
+            )
 
     # -------------------------------------------------------------------------

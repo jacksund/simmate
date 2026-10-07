@@ -42,7 +42,7 @@ class UsageLog(DatabaseTable):
     """
 
     amount_removed = table_column.DecimalField(
-        max_digits=10,
+        max_digits=16,
         decimal_places=3,
     )
     """
