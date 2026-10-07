@@ -16,17 +16,9 @@ from .dataset_browser import DatasetBrowser, get_datasets_dir
 from .dataset_chat import DatasetChat
 from .dataset_downloads import DatasetDownloads
 from .filter_panel import FilterPanel
-from .histogram import HistogramPlot
 from .inputs import StyledCheckBox, StyledComboBox, input_style
 from .pane_layout import Pane, PaneLayout
 from .panel_tab import SidePanel
-from .plot_panels import (
-    PLOT_TYPES,
-    HistogramPanel,
-    PlotPanel,
-    PlotTypeChooser,
-    ScatterPanel,
-)
 from .plot_toolbar import (
     MouseModeToggle,
     ResetViewButton,
@@ -40,6 +32,19 @@ from .plot_toolbar import (
     reset_icon,
     stop_icon,
     trash_icon,
+)
+from .plots import (
+    PLOT_TYPES,
+    AiPlotPanel,
+    BarPanel,
+    DataColumns,
+    GroupedBars,
+    HistogramPanel,
+    HistogramPlot,
+    LinePanel,
+    PlotPanel,
+    PlotTypeChooser,
+    ScatterPanel,
 )
 from .point_tooltip import PointTooltip
 from .status import callout_style, loading_bar, note_label, set_status

@@ -332,8 +332,9 @@ class CompoundFilterProxy(QSortFilterProxyModel):
         return bool(self.passing[source_row] and self.in_view[source_row])
 
 
-def _range_check(key: str, low: float, high: float) -> polars.Expr:
-    return polars.col(key).is_between(low, high)
+def _range_check(key: str, low, high) -> polars.Expr:
+    # lit: bounds can be strings (e.g. ISO dates), which would otherwise name columns
+    return polars.col(key).is_between(polars.lit(low), polars.lit(high))
 
 
 class SortHeader(QHeaderView):

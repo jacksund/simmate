@@ -51,20 +51,20 @@ class DashboardTab(QWidget):
     """Plots and a table, flanked by tabbed side panels, all kept in sync.
 
     - The plots and table sit in an editable layout. "Add plot" adds one (pick a type
-      in the new pane), and "Add table" (shown once the table's removed) puts it back.
+      in the new pane: scatter, histogram, bar or line; see `PLOT_TYPES`), and "Add table" (shown once the table's removed) puts it back.
       "Edit layout" unlocks it: drag a pane by its header onto another's edge to move
       it, or remove panes. By default, a scatter plot and a histogram sit above the table.
     - The left panel holds bulk tools; its Filters tab narrows everything: draw a substructure in the sketcher
       and/or set column filters. Filtered-out points/bars show in grey, or are hidden (plot settings).
     - Zooming/panning any plot further narrows the table to the compounds in view.
     - Hovering a point (or a row) highlights its row, rings its point in every scatter
-      plot, and outlines its bin in every histogram.
+      and line plot, and outlines its bin or bar in every histogram and bar chart.
     - Hovering a point also shows a small card (structure + ID) beside the cursor
       (can be turned off in the plot settings).
-    - Hovering a histogram bin highlights all of its rows and rings their points
-      (can be turned off in the histogram settings).
-    - Clicking points or bins (Ctrl+click to add/remove) selects rows; selecting rows rings
-      their points and counts them in red in the histograms. Clicking empty plot space clears the selection.
+    - Hovering a histogram bin (or a bar) highlights all of its rows and rings their
+      points (can be turned off in its settings).
+    - Clicking points, bins or bars (Ctrl+click to add/remove) selects rows; selecting rows
+      rings their points and counts them in red in the histograms and bar charts. Clicking empty plot space clears the selection.
     - The selected compound shows in full in the detail card (the right panel's Selection tab).
       It shows one compound at a time, so it shows a message instead while several are selected.
     - The table settings choose whether the table scrolls to hovered/selected points,
@@ -329,7 +329,7 @@ class DashboardTab(QWidget):
 
     def _add_plot_pane(self):
         """Add a new plot beside the last one, showing a choice of plot types."""
-        chooser = PlotTypeChooser(list(self.get_plot_types()))
+        chooser = PlotTypeChooser(self.get_plot_types())
         pane = Pane(chooser, "New plot")
         chooser.chosen.connect(lambda name: self._choose_plot(pane, name))
         others = [p for p in self.pane_layout.panes() if p is not self.table_pane]
