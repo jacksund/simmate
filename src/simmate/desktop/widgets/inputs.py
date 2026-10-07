@@ -3,7 +3,7 @@ from pathlib import Path
 
 from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPixmap
-from PySide6.QtWidgets import QComboBox, QStyledItemDelegate
+from PySide6.QtWidgets import QCheckBox, QComboBox, QStyledItemDelegate
 
 from simmate.desktop import theme
 from simmate.desktop.theme import rgba
@@ -18,21 +18,50 @@ def input_style() -> str:
     chevron = _icon_file(
         "chevron", (10, 6), [(1, 1), (5, 5), (9, 1)], theme.PRIMARY_COLOR
     )
+    chevron_up = _icon_file(
+        "chevron-up", (10, 6), [(1, 5), (5, 1), (9, 5)], theme.PRIMARY_COLOR
+    )
     check = _icon_file("check", (12, 12), [(2.5, 6.5), (5, 9), (9.5, 3.5)], "white")
     return f"""
-QLineEdit, QComboBox, QDoubleSpinBox {{
+QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox {{
     background: palette(base);
     border: 1px solid palette(mid);
     border-radius: 6px;
     padding: 4px 8px;
     min-height: 18px;
 }}
-QLineEdit:hover, QComboBox:hover, QDoubleSpinBox:hover,
-QLineEdit:focus, QComboBox:focus, QDoubleSpinBox:focus {{
+QLineEdit:hover, QComboBox:hover, QSpinBox:hover, QDoubleSpinBox:hover,
+QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDoubleSpinBox:focus {{
     border-color: {theme.PRIMARY_COLOR};
 }}
+/* set the "invalid" property on an input that needs a value (e.g. a missing setting) */
+QLineEdit[invalid="true"], QComboBox[invalid="true"] {{
+    border-color: {theme.ERROR_COLOR};
+}}
 /* spin boxes add their own inner margin; match the other inputs' height */
-QDoubleSpinBox {{ padding-top: 3px; padding-bottom: 2px; }}
+QSpinBox, QDoubleSpinBox {{ padding-top: 3px; padding-bottom: 2px; }}
+/* stacked chevrons, like the combo box's, in place of the native step buttons */
+QSpinBox::up-button, QSpinBox::down-button,
+QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {{
+    border: none; background: transparent; width: 24px;
+    subcontrol-origin: border;
+}}
+QSpinBox::up-button, QDoubleSpinBox::up-button {{
+    subcontrol-position: top right; margin-top: 4px;
+}}
+QSpinBox::down-button, QDoubleSpinBox::down-button {{
+    subcontrol-position: bottom right; margin-bottom: 4px;
+}}
+QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {{
+    image: url("{chevron_up}"); width: 8px; height: 5px;
+}}
+QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {{
+    image: url("{chevron}"); width: 8px; height: 5px;
+}}
+QSpinBox::up-arrow:disabled, QSpinBox::down-arrow:disabled,
+QDoubleSpinBox::up-arrow:disabled, QDoubleSpinBox::down-arrow:disabled {{
+    image: none;
+}}
 /* a plain list below the box, rather than a menu panel over it */
 QComboBox {{ combobox-popup: 0; }}
 QComboBox::drop-down {{ border: none; width: 24px; }}
@@ -71,6 +100,14 @@ QCheckBox::indicator:checked {{
     image: url("{check}");
 }}
 """
+
+
+class StyledCheckBox(QCheckBox):
+    """A check box that shows a pointing hand on hover, like the buttons."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
 
 class StyledComboBox(QComboBox):

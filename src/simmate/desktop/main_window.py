@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from collections.abc import Callable
-from functools import partial
 
 from PySide6.QtCore import QEvent, QRectF, Qt
 from PySide6.QtGui import QAction, QIcon, QKeySequence, QPainter, QPainterPath
 from PySide6.QtWidgets import QMainWindow, QTabWidget, QWidget
 
 from simmate.desktop import theme
-from simmate.desktop.tabs import DashboardTab, PlaceholderTab
+from simmate.desktop.tabs import DashboardTab, DatasetsTab, WorkersTab
 from simmate.desktop.widgets import SystemMonitor, TitleBar
 
 # Width (px) of the invisible border you can drag to resize the window.
@@ -108,11 +107,9 @@ class MainWindow(QMainWindow):
         `status = Signal(str)`, like `PlaceholderTab`.
         """
         return [
+            ("Datasets", DatasetsTab),
             ("Toolkit", DashboardTab),
-            *[
-                (title, partial(PlaceholderTab, title))
-                for title in ["Datastores", "Workers", "Settings"]
-            ],
+            ("Workers", WorkersTab),
         ]
 
     def _add_shortcuts(self):

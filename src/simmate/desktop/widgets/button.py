@@ -30,7 +30,9 @@ QPushButton:checked:hover, QToolButton:checked:hover,
 QPushButton[filled="true"]:hover {{ background: {theme.PRIMARY_LIGHTER}; }}
 QPushButton:checked:pressed, QToolButton:checked:pressed,
 QPushButton[filled="true"]:pressed {{ background: {theme.PRIMARY_DARKER}; }}
-QPushButton:disabled {{ color: palette(mid); border-color: palette(mid); }}
+QPushButton:disabled, QToolButton:disabled {{
+    color: palette(mid); border-color: palette(mid);
+}}
 QPushButton[filled="true"]:disabled {{ color: white; background: palette(mid); }}
 QPushButton[muted="true"], QToolButton[muted="true"] {{
     color: {theme.MUTED_COLOR}; border-color: palette(mid);

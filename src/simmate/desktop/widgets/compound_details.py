@@ -20,7 +20,10 @@ class CompoundDetails(QWidget):
     """One compound shown in full: its structure plus every table column, transposed.
 
     The structure has a 2D tab and a 3D tab; the 3D conformer is only generated when
-    asked for (then cached), so hovering through compounds stays fast.
+    asked for (then cached), so clicking through compounds stays fast.
+
+    When several compounds are selected at once, `show_many` greys the card
+    out with a message instead, since it shows one compound at a time.
     """
 
     def __init__(self, mdf: MoleculeDataFrame):
@@ -28,6 +31,7 @@ class CompoundDetails(QWidget):
         self.mdf = mdf
         self.query: Molecule | None = None
         self.current: int | None = None
+        self.showing_many = False  # the "N compounds" message is up
         self.svg_cache: dict[int, bytes] = {}
         # row index -> 3D molecule, or None when embedding failed
         self.mol_3d_cache: dict[int, Molecule | None] = {}
@@ -87,32 +91,50 @@ class CompoundDetails(QWidget):
     def set_query(self, query: Molecule | None):
         self.query = query
         self.svg_cache.clear()
-        self._render(self.current)
+        if not self.showing_many:
+            self._render(self.current)
 
     def show_row(self, index: int | None):
-        # Hovering fires for every mouse move, so skip re-showing the same compound.
-        if index != self.current:
+        # Skip re-showing the same compound (e.g. re-selecting it after a filter change).
+        if index != self.current or self.showing_many:
             self._render(index)
+
+    def show_many(self, count: int):
+        """Grey out the card with a note that `count` compounds are selected."""
+        self._render(None)
+        self.showing_many = True
+        self.structure_tabs.setEnabled(False)
+        self.title_label.setText(
+            f"{count} compounds selected\n\n"
+            "This panel shows one compound at a time. "
+            "Select a single compound to see it here."
+        )
+
+    def svg(self, index: int) -> bytes:
+        """The compound's 2D drawing (with any query highlighted), drawn once then cached."""
+        if index not in self.svg_cache:
+            self.svg_cache[index] = self.mdf.df["molecule_obj"][index].draw(
+                "svg",
+                size=(400, 300),
+                highlight_query=self.query,
+                stereo_annotations=True,
+            )
+        return self.svg_cache[index]
 
     def _render(self, index: int | None):
         self.current = index
+        self.showing_many = False
+        self.structure_tabs.setEnabled(True)
         self._show_3d()
         if index is None:
-            self.title_label.setText("Hover or select a compound to see it here")
+            self.title_label.setText("Select a compound to see it here")
             self.svg_widget.load(QByteArray())
             for label in self.value_labels.values():
                 label.setText("-")
             return
 
         row = self.mdf.df.row(index, named=True)
-        if index not in self.svg_cache:
-            self.svg_cache[index] = row["molecule_obj"].draw(
-                "svg",
-                size=(400, 300),
-                highlight_query=self.query,
-                stereo_annotations=True,
-            )
-        self.svg_widget.load(QByteArray(self.svg_cache[index]))
+        self.svg_widget.load(QByteArray(self.svg(index)))
         # load() swaps in a new renderer config, so re-apply the aspect ratio.
         self.svg_widget.renderer().setAspectRatioMode(
             Qt.AspectRatioMode.KeepAspectRatio

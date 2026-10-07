@@ -10,6 +10,11 @@ urlpatterns = [
     path(route="", view=views.home, name="home"),
     # REST endpoints used by remote `ApiWorker`s
     path(
+        route="workers/check/",
+        view=api_views.check_worker_access,
+        name="api_check_worker_access",
+    ),
+    path(
         route="work_items/next/",
         view=api_views.get_next_work_item,
         name="api_get_next_work_item",
