@@ -27,6 +27,7 @@ from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
     QHeaderView,
+    QStyle,
     QTableView,
     QVBoxLayout,
     QWidget,
@@ -82,7 +83,7 @@ QHeaderView::section {{
 QHeaderView::section:first {{ border-top-left-radius: 6px; }}
 QHeaderView::section:last {{ border-top-right-radius: 6px; }}
 QHeaderView::section:hover {{ color: {theme.PRIMARY_COLOR}; }}
-/* hidden: `_SortHeader` draws the sort arrow beside its label instead */
+/* hidden: `SortHeader` draws the sort arrow beside its label instead */
 QHeaderView::up-arrow, QHeaderView::down-arrow {{ image: none; width: 0; }}
 {scroll_bar_style()}"""
 
@@ -335,7 +336,7 @@ def _range_check(key: str, low: float, high: float) -> polars.Expr:
     return polars.col(key).is_between(low, high)
 
 
-class _SortHeader(QHeaderView):
+class SortHeader(QHeaderView):
     """Column headers with a small chevron to the right of the sorted column's label.
 
     The stylesheet's own arrow sits at the section's edge, where it covers
@@ -375,7 +376,8 @@ class _SortHeader(QHeaderView):
             logical_index, self.orientation(), Qt.ItemDataRole.TextAlignmentRole
         )
         space = self._arrow_space()
-        if alignment & Qt.AlignmentFlag.AlignRight:
+        # some models (e.g. QFileSystemModel's) give no alignment for their headers
+        if alignment is not None and alignment & Qt.AlignmentFlag.AlignRight:
             # Draw the section short, so its label ends before the arrow, then
             # finish the background and bottom line under the arrow.
             super().paintSection(painter, rect.adjusted(0, 0, -space, 0), logical_index)
@@ -390,6 +392,15 @@ class _SortHeader(QHeaderView):
             font.setWeight(QFont.Weight.DemiBold)  # as styled, for an accurate width
             label_width = QFontMetrics(font).horizontalAdvance(label)
             left = rect.left() + self.PADDING + label_width + self.GAP
+            # An icon (e.g. QFileSystemModel's blank one, which lines the label up
+            # with the file icons) is drawn before the label, 2px from it.
+            icon = model.headerData(
+                logical_index, self.orientation(), Qt.ItemDataRole.DecorationRole
+            )
+            if icon is not None:
+                left += (
+                    self.style().pixelMetric(QStyle.PixelMetric.PM_SmallIconSize) + 2
+                )
 
         top = rect.center().y() - self.ARROW.height() / 2 + 1
         width, height = self.ARROW.width(), self.ARROW.height()
@@ -412,7 +423,7 @@ class CompoundTable(QTableView):
     def __init__(self, proxy: CompoundFilterProxy):
         super().__init__()
         model = proxy.sourceModel()
-        self.setHorizontalHeader(_SortHeader())
+        self.setHorizontalHeader(SortHeader())
         self.setModel(proxy)
         self.setStyleSheet(table_style())
         self.setFrameShape(QFrame.Shape.NoFrame)  # the stylesheet draws the border

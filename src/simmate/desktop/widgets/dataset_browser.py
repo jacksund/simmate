@@ -22,7 +22,7 @@ from simmate.config import settings
 from simmate.desktop import theme
 from simmate.desktop.widgets.background import BackgroundTask
 from simmate.desktop.widgets.button import PrimaryButton
-from simmate.desktop.widgets.compound_table import table_style
+from simmate.desktop.widgets.compound_table import SortHeader, table_style
 from simmate.desktop.widgets.plot_toolbar import (
     folder_icon,
     plus_icon,
@@ -223,6 +223,8 @@ class DatasetBrowser(QWidget):
         self.message.hide()
 
         self.tree = QTreeView()
+        # the same chevron beside the sorted column's label as the compound table
+        self.tree.setHeader(SortHeader())
         self.tree.setModel(self.model)
         self.tree.setRootIndex(self.model.index(str(self.root)))
         # taller rows than the default, nearer the tables' 40px
@@ -233,6 +235,7 @@ class DatasetBrowser(QWidget):
         self.tree.sortByColumn(0, Qt.SortOrder.AscendingOrder)
         header = self.tree.header()
         header.setHighlightSections(False)
+        header.setCursor(Qt.CursorShape.PointingHandCursor)  # click to sort
         header.setStretchLastSection(False)
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         for column in (1, 2, 3):  # size, type and date modified

@@ -35,49 +35,66 @@ PANEL_STYLE = """
 GEAR_SIZE = 18  # px
 
 
-class PlotToolbar(QWidget):
-    """Plotly-style controls for a PlotWidget.
+class MouseModeToggle(QWidget):
+    """Plotly-style Zoom/Pan switch, shared by every plot it's connected to.
 
     - Zoom mode (default): left-drag draws a box and zooms to it.
     - Pan mode: left-drag moves the view.
     - Scroll zooms and middle-drag pans in either mode.
-    - "Reset" or double-clicking the plot fits all the data again.
+
+    Emits `mode_changed(mode)` with a `pg.ViewBox` mouse mode; `mode` is the current one.
     """
 
-    def __init__(self, plot: pg.PlotWidget):
+    mode_changed = Signal(int)
+
+    def __init__(self):
         super().__init__()
-        self.view_box = plot.getPlotItem().getViewBox()
-        plot.hideButtons()  # pyqtgraph's tiny "A" autorange button; Reset replaces it
-        plot.scene().sigMouseClicked.connect(self._on_click)
+        self.mode = pg.ViewBox.RectMode
 
         # Zoom and Pan are one segmented control: exactly one is on at a time.
         zoom_button = PrimaryButton("Zoom", muted=True, objectName="segmentLeft")
         pan_button = PrimaryButton("Pan", muted=True, objectName="segmentRight")
-        zoom_button.setToolTip("Drag a box to zoom into it")
-        pan_button.setToolTip("Drag to move the view")
+        zoom_button.setToolTip("Drag a box on a plot to zoom into it")
+        pan_button.setToolTip("Drag a plot to move its view")
         mode_group = QButtonGroup(self)
         for button, mode in [
             (zoom_button, pg.ViewBox.RectMode),
             (pan_button, pg.ViewBox.PanMode),
         ]:
             button.setCheckable(True)
-            button.toggled.connect(
-                lambda on, m=mode: on and self.view_box.setMouseMode(m)
-            )
+            button.toggled.connect(lambda on, m=mode: on and self._set_mode(m))
             mode_group.addButton(button)
         zoom_button.setChecked(True)
-
-        reset_button = PrimaryButton("Reset", muted=True)
-        reset_button.setToolTip("Fit all points (or double-click the plot)")
-        reset_button.clicked.connect(self.reset_view)
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.addWidget(zoom_button)
         layout.addWidget(pan_button)
-        layout.addSpacing(8)
-        layout.addWidget(reset_button)
+
+    def _set_mode(self, mode: int):
+        self.mode = mode
+        self.mode_changed.emit(mode)
+
+
+class ResetViewButton(QToolButton):
+    """A grey circular-arrow button that fits all of a PlotWidget's data again.
+
+    Double-clicking the plot does the same.
+    """
+
+    def __init__(self, plot: pg.PlotWidget):
+        super().__init__()
+        self.view_box = plot.getPlotItem().getViewBox()
+        plot.hideButtons()  # pyqtgraph's tiny "A" autorange button; this replaces it
+        plot.scene().sigMouseClicked.connect(self._on_click)
+        self.setProperty("muted", True)  # grey, read by button_style
+        self.setStyleSheet(button_style())
+        self.setIcon(reset_icon())
+        self.setIconSize(QSize(GEAR_SIZE, GEAR_SIZE))
+        self.setToolTip("Reset the view to fit all the data (or double-click the plot)")
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.clicked.connect(self.reset_view)
 
     def reset_view(self):
         self.view_box.autoRange()
@@ -244,6 +261,16 @@ def download_icon(size: int = GEAR_SIZE, color: str | None = None) -> QIcon:
     return _icon(_download_path(size), size, color)
 
 
+def lock_icon(size: int = GEAR_SIZE, color: str | None = None) -> QIcon:
+    """A padlock (e.g. for locking/unlocking a layout)."""
+    return _icon(_lock_path(size), size, color)
+
+
+def grip_icon(size: int = GEAR_SIZE, color: str | None = None) -> QIcon:
+    """Two columns of three dots (e.g. a handle to drag something by)."""
+    return _icon(_grip_path(size), size, color)
+
+
 def _icon(path: QPainterPath, size: int, color: str | None = None) -> QIcon:
     """`path` filled in grey (or `color`), or in white when the button is checked."""
     icon = QIcon()
@@ -407,3 +434,31 @@ def _download_path(size: int) -> QPainterPath:
     stroker.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
     stroker.setCapStyle(Qt.PenCapStyle.RoundCap)
     return arrow.united(head).united(stroker.createStroke(tray))
+
+
+def _lock_path(size: int) -> QPainterPath:
+    # a rounded body with a keyhole, under an arched shackle
+    radius = size * 0.08
+    body = QPainterPath()
+    body.addRoundedRect(
+        QRectF(size * 0.18, size * 0.44, size * 0.64, size * 0.46), radius, radius
+    )
+    keyhole = QPainterPath()
+    keyhole.addEllipse(QPointF(size * 0.5, size * 0.64), size * 0.07, size * 0.07)
+    body = body.subtracted(keyhole)
+    arch = QPainterPath(QPointF(size * 0.32, size * 0.46))
+    arch.lineTo(size * 0.32, size * 0.32)
+    arch.arcTo(QRectF(size * 0.32, size * 0.12, size * 0.36, size * 0.36), 180, -180)
+    arch.lineTo(size * 0.68, size * 0.46)
+    stroker = QPainterPathStroker()
+    stroker.setWidth(size * 0.11)
+    stroker.setCapStyle(Qt.PenCapStyle.FlatCap)
+    return body.united(stroker.createStroke(arch))
+
+
+def _grip_path(size: int) -> QPainterPath:
+    grip = QPainterPath()
+    for x in (0.38, 0.62):
+        for y in (0.26, 0.5, 0.74):
+            grip.addEllipse(QPointF(size * x, size * y), size * 0.08, size * 0.08)
+    return grip

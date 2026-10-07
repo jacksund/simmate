@@ -8,6 +8,7 @@ from .compound_table import (
     CompoundFilterProxy,
     CompoundTable,
     CompoundTableModel,
+    SortHeader,
     scroll_bar_style,
     table_style,
 )
@@ -17,13 +18,24 @@ from .dataset_downloads import DatasetDownloads
 from .filter_panel import FilterPanel
 from .histogram import HistogramPlot
 from .inputs import StyledCheckBox, StyledComboBox, input_style
+from .pane_layout import Pane, PaneLayout
 from .panel_tab import SidePanel
+from .plot_panels import (
+    PLOT_TYPES,
+    HistogramPanel,
+    PlotPanel,
+    PlotTypeChooser,
+    ScatterPanel,
+)
 from .plot_toolbar import (
-    PlotToolbar,
+    MouseModeToggle,
+    ResetViewButton,
     SettingsButton,
     columns_icon,
     download_icon,
     folder_icon,
+    grip_icon,
+    lock_icon,
     plus_icon,
     reset_icon,
     stop_icon,
