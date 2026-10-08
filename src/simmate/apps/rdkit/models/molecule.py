@@ -427,7 +427,17 @@ class Molecule(DatabaseTable):
         return self.to_toolkit().to_sdf().replace("\n", "\\n")
 
     @classmethod
-    def populate_fingerprint_database(cls, empty_columns_only: bool = True):
+    def populate_fingerprint_database(
+        cls,
+        empty_columns_only: bool = True,
+        ids: list = None,
+    ):
+        """
+        Calculates the `fingerprint_morganbv` column within postgres.
+
+        Use `ids` to limit this to specific rows, which avoids scanning the
+        full table (e.g. when only a few rows were just added).
+        """
         from django.db import connection  # local import bc of serialization bug
 
         query = (
@@ -435,12 +445,19 @@ class Molecule(DatabaseTable):
             f"SET       fingerprint_morganbv = morganbv_fp(rdkit_mol)"
         )  # TODO: update_only: bool = False, limit: int = 50
 
+        filters = []
+        params = []
         if empty_columns_only:
-            query += " WHERE fingerprint_morganbv IS NULL"
+            filters.append("fingerprint_morganbv IS NULL")
+        if ids is not None:
+            filters.append("id = ANY(%s)")
+            params.append(list(ids))
+        if filters:
+            query += " WHERE " + " AND ".join(filters)
 
         # BUG: injection risk here.
         #   https://docs.djangoproject.com/en/4.2/topics/db/sql/#passing-parameters-into-raw
         with connection.cursor() as cursor:
-            cursor.execute(query)
+            cursor.execute(query, params)
 
     # -------------------------------------------------------------------------

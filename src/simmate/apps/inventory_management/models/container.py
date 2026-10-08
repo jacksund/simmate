@@ -40,6 +40,7 @@ class Container(DatabaseTable):
         "ampoule",
         "centrifuge tube",
         "microcentrifuge tube",
+        "storage tube",
         "well plate",
         "well",
         "syringe",
@@ -95,7 +96,7 @@ class Container(DatabaseTable):
     # -------------------------------------------------------------------------
 
     initial_amount = table_column.DecimalField(
-        max_digits=10,
+        max_digits=16,
         decimal_places=3,
         blank=True,
         null=True,
@@ -106,7 +107,7 @@ class Container(DatabaseTable):
     """
 
     current_amount = table_column.DecimalField(
-        max_digits=10,
+        max_digits=16,
         decimal_places=3,
         blank=True,
         null=True,

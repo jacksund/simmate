@@ -4,8 +4,13 @@ import random
 import string
 
 from django.contrib.auth.models import User
+from django.db import transaction
 
+from simmate.config import settings
 from simmate.database.core import DatabaseTable, table_column
+from simmate.toolkit import Molecule as ToolkitMolecule
+
+from .molecule import Molecule
 
 
 class Substance(DatabaseTable):
@@ -612,5 +617,138 @@ class Substance(DatabaseTable):
         if check_digit is None:
             return True
         return check_digit.upper() == cls.calculate_check_digit(substance_id)
+
+    # -------------------------------------------------------------------------
+
+    # REGISTRATION
+
+    @classmethod
+    def register_molecule(
+        cls,
+        molecule: ToolkitMolecule | str = None,
+        **kwargs,
+    ) -> str:
+        """
+        Registers a single molecule and gives its substance ID. Any kwargs
+        are extra columns to set if a new substance is made.
+
+        See `register_molecules` for details.
+        """
+        return cls.register_molecules([dict(molecule=molecule, **kwargs)])[0]
+
+    @classmethod
+    def register_molecules(cls, entries: list[dict], level: int = 1) -> list[str]:
+        """
+        Registers many molecules at once and gives the substance ID of each
+        entry (in the same order).
+
+        Each entry is a dictionary with a `molecule` (a toolkit `Molecule`,
+        a str such as an SDF or SMILES, or None) plus any extra columns to set
+        if a new substance is made (e.g. `registered_by_id`).
+
+        - Molecules that are already registered give the existing substance ID.
+          The existing substance is left unchanged.
+        - New molecules get a new substance with an ID of the given `level`.
+          Repeated molecules within `entries` share one new substance.
+        - Entries without a molecule (`molecule=None`) are registered as
+          unknown substances (`is_unknown=True`). These are never matched and
+          always get a new level 3 ID.
+        """
+        with transaction.atomic():
+            # 1. Parse each molecule and get its inchi key. This is fast, so
+            # we wait to build the full database molecules (which calculates
+            # all of their columns) until we know which ones are new.
+            toolkit_molecules = [
+                (
+                    ToolkitMolecule.from_dynamic(entry["molecule"])
+                    if entry.get("molecule") is not None
+                    else None
+                )
+                for entry in entries
+            ]
+            inchi_keys = [m.to_inchi_key() if m else None for m in toolkit_molecules]
+
+            # 2. Give each entry a "match key", where entries with the same key
+            # share a substance. This is the inchi key, except for unknowns and
+            # molecules without one (e.g. organometallics where InChI fails).
+            # These can't be matched, so we use their position in the list.
+            match_keys = [
+                inchi_key or index for index, inchi_key in enumerate(inchi_keys)
+            ]
+            searchable_inchi_keys = {key for key in inchi_keys if key}
+
+            # 3. Find the keys that are already registered. If there are
+            # several substances for a key, the earliest one is used.
+            # TODO: an inchi key match does not always mean a substance match,
+            # such as with atropisomers or true inchi key clashes (which become
+            # possible in very large datasets, e.g. >1 trillion entries). This
+            # method is the single place to refine matching.
+            substance_ids = {}  # match key --> substance id
+            for inchi_key, substance_id in (
+                cls.objects.filter(molecule__inchi_key__in=searchable_inchi_keys)
+                .exclude(is_delisted=True)
+                .order_by("created_at")
+                .values_list("molecule__inchi_key", "id")
+            ):
+                substance_ids.setdefault(inchi_key, substance_id)
+
+            # 4. The remaining keys need a new substance. We use the first
+            # entry given for each key.
+            new_entries = {}  # match key --> (entry, toolkit molecule)
+            for key, entry, molecule in zip(match_keys, entries, toolkit_molecules):
+                if key not in substance_ids and key not in new_entries:
+                    new_entries[key] = (entry, molecule)
+
+            # 5. Get the database molecule of each new substance. We reuse
+            # existing molecules with the same inchi key (e.g. from a delisted
+            # substance), and build + save the rest.
+            molecule_ids = dict(  # match key --> molecule id
+                Molecule.objects.filter(
+                    inchi_key__in=searchable_inchi_keys.intersection(new_entries)
+                ).values_list("inchi_key", "id")
+            )
+            new_molecules = {
+                key: Molecule.from_toolkit(molecule=molecule)
+                for key, (_, molecule) in new_entries.items()
+                if molecule and key not in molecule_ids
+            }
+            Molecule.objects.bulk_create(new_molecules.values())
+            molecule_ids.update({key: m.id for key, m in new_molecules.items()})
+
+            # 6. Generate the IDs of the new substances. Unknowns always get
+            # level 3 IDs, while all others use the given `level`.
+            new_ids = {}  # match key --> new substance id
+            for id_level in {level, 3}:
+                keys = [
+                    key
+                    for key, (_, molecule) in new_entries.items()
+                    if (3 if molecule is None else level) == id_level
+                ]
+                ids = cls.generate_unique_ids(count=len(keys), level=id_level)
+                new_ids.update(zip(keys, ids))
+
+            # 7. Create the new substances. Extra columns given in an entry
+            # take priority over these defaults.
+            new_substances = []
+            for key, (entry, molecule) in new_entries.items():
+                columns = dict(
+                    id=new_ids[key],
+                    check_digit=cls.calculate_check_digit(new_ids[key]),
+                    substance_type="molecule" if molecule else None,
+                    is_unknown=molecule is None,
+                    molecule_id=molecule_ids.get(key),
+                )
+                columns.update({k: v for k, v in entry.items() if k != "molecule"})
+                new_substances.append(cls(**columns))
+            cls.objects.bulk_create(new_substances)
+            substance_ids.update(new_ids)
+
+            # 8. Add fingerprints to the new molecules (calculated by postgres)
+            if new_molecules and settings.postgres_rdkit_extension:
+                Molecule.populate_fingerprint_database(
+                    ids=[m.id for m in new_molecules.values()]
+                )
+
+        return [substance_ids[key] for key in match_keys]
 
     # -------------------------------------------------------------------------

@@ -546,7 +546,9 @@ for container, amount, date, user_id, destination_batch_id in pending_usage:
 # cached batch columns (calculated from containers) + batch numbers
 for batch in batches:
     batch_containers = containers_by_batch[batch["id"]]
-    batch["num_containers"] = len(batch_containers)
+    batch["num_available_containers"] = sum(
+        not c["is_depleted"] for c in batch_containers
+    )
     batch["total_initial_amount"] = sum(c["initial_amount"] for c in batch_containers)
     batch["total_current_amount"] = sum(c["current_amount"] for c in batch_containers)
     batch["is_depleted"] = all(c["is_depleted"] for c in batch_containers)
