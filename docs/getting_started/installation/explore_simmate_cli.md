@@ -21,15 +21,15 @@ The following output should be displayed:
 │ --help          Show this message and exit.                                                                            │
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ─────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ version        Displays the currently installed version of Simmate and checks for updates.                             │
-│ run-server     Starts a local development server for the Simmate Web UI.                                               │
-│ start-project  Initializes a new Simmate project directory from a template.                                            │
-│ config         Commands for managing Simmate settings, including viewing, updating, and testing app configurations.    │
-│ database       Commands for managing the Simmate database, including Postgres setup, schema migrations, and data I/O.  │
-│ dev            Commands for Simmate development (linting, testing, docs, and cleanup).                                 │
-│ compute        Commands for managing computational resources, including workers, clusters, and task scheduling.        │
-│ workflows      Commands for exploring, configuring, and executing Simmate workflows.                                   │
-│ utils          Miscellaneous utility commands for Simmate (e.g., file management and archiving).                       │
+│ compute    Commands for managing computational resources, including workers, clusters, and task scheduling.            │
+│ config     Commands for managing Simmate settings, including viewing, updating, and testing app configurations.        │
+│ database   Commands for managing the Simmate database, including Postgres setup, schema migrations, and data I/O.      │
+│ desktop    Commands for launching and building the Simmate desktop app.                                                │
+│ dev        Commands for Simmate development (linting, testing, docs, and cleanup).                                     │
+│ init       Initializes a new Simmate project directory from a template.                                                │
+│ version    Displays the currently installed version of Simmate and checks for updates.                                 │
+│ website    Commands for running the Simmate Web UI.                                                                    │
+│ workflows  Commands for exploring, configuring, and executing Simmate workflows.                                       │
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 ```

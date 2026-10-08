@@ -12,7 +12,7 @@ Simmate can be used to compute a material's energy, structure, or properties. Fo
 To view all available workflows, run:
 
 ``` shell
-simmate workflows list-all
+simmate workflows list
 ```
 
 The output will resemble the following:

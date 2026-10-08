@@ -4,7 +4,6 @@
 This defines the base "simmate" command that all other commands stem from.
 """
 
-import logging
 from pathlib import Path
 
 import typer
@@ -15,6 +14,7 @@ from simmate.command_line.database import database_app
 from simmate.command_line.desktop import desktop_app
 from simmate.command_line.dev import dev_app
 from simmate.command_line.utilities import AlphabeticalGroup
+from simmate.command_line.website import website_app
 from simmate.command_line.workflows import workflows_app
 
 simmate_app = typer.Typer(
@@ -49,41 +49,7 @@ def version():
 
 
 @simmate_app.command()
-def run_server(
-    port: int = typer.Option(
-        8000,
-        help="The port on which to run the local server. Default is 8000.",
-    )
-):
-    """
-    Starts a local development server for the Simmate Web UI.
-
-    While the server is running, you can access the interface in your browser
-    at http://localhost:8000/.
-
-    This server is intended for local testing and data exploration. It should
-    **not** be used for production deployments.
-    """
-
-    import subprocess
-
-    from simmate.config import settings
-    from simmate.website.core.utils import download_ketcher
-
-    logging.info("Setting up local test server...")
-
-    # Ensure Ketcher is available locally to avoid CORS issues
-    if not settings.website.get("chemdraw_js", False):
-        download_ketcher()
-
-    subprocess.run(
-        f"django-admin runserver {port} --settings=simmate.config.django.settings --insecure --noreload",
-        shell=True,
-    )
-
-
-@simmate_app.command()
-def start_project():
+def init():
     """
     Initializes a new Simmate project directory from a template.
 
@@ -126,4 +92,5 @@ simmate_app.add_typer(database_app, name="database")
 simmate_app.add_typer(desktop_app, name="desktop")
 simmate_app.add_typer(dev_app, name="dev")
 simmate_app.add_typer(compute_app, name="compute")
+simmate_app.add_typer(website_app, name="website")
 simmate_app.add_typer(workflows_app, name="workflows")

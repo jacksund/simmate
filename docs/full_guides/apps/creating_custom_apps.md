@@ -52,7 +52,7 @@ There are no restrictions on adding extra python modules to your app. In fact, s
 
 1. To start a new app, navigate to your desired folder for code storage and run:
 ``` bash
-simmate start-project
+simmate init
 ```
 
 2. You will then see a new folder named `my_simmate_project`:
@@ -73,7 +73,7 @@ my_simmate_project/
 3. Edit the files to start building out your new app
 
 !!! tip
-    Once you get the hang of building apps, all of the code in these files will be annoying to go through & delete. There's nothing wrong with building your app out one file at a time, and ingoring the `simmate start-project` command.
+    Once you get the hang of building apps, all of the code in these files will be annoying to go through & delete. There's nothing wrong with building your app out one file at a time, and ingoring the `simmate init` command.
 
 
 ## Register Your App

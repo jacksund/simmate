@@ -10,7 +10,7 @@ from simmate.workflows import Workflow
 
 def test_workflows_list_all(command_line_runner):
     # list the workflows
-    result = command_line_runner.invoke(workflows_app, ["list-all"])
+    result = command_line_runner.invoke(workflows_app, ["list"])
     assert result.exit_code == 0
 
 
@@ -18,14 +18,14 @@ def test_workflows_show_config(command_line_runner):
     # list the config for one workflow
     result = command_line_runner.invoke(
         workflows_app,
-        ["show-config", "static-energy.vasp.mit"],
+        ["config", "static-energy.vasp.mit"],
     )
     assert result.exit_code == 0
 
     # ensure the flow fails when a incorrect name is given
     result = command_line_runner.invoke(
         workflows_app,
-        ["show-config", "non-existant-flow"],
+        ["config", "non-existant-flow"],
     )
     assert result.exit_code == 1
 

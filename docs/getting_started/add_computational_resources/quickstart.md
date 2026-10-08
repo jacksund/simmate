@@ -29,13 +29,13 @@ simmate workflows run-cloud example.yaml
 ### 3. Start One Worker
 Before starting a full cluster, try starting a single worker to process your job. This worker will stay "on duty" until you stop it (Ctrl+C).
 ``` bash
-simmate compute start-worker
+simmate compute worker start
 ```
 
 ### 4. Start a Cluster
 Once you're comfortable with one worker, you can start a cluster of workers to process many jobs at once. On your local machine, this command starts 3 workers that will run in parallel:
 ``` bash
-simmate compute start-cluster 3 --type local
+simmate compute cluster start 3 --type local
 ```
 
 ### 5. HPC Clusters (Optional)
@@ -46,7 +46,7 @@ If you are on a SLURM cluster, you can submit workers to the cluster queue direc
 
 ``` bash
 # Submits 3 workers to the SLURM queue using submit.sh
-simmate compute start-cluster 3 --type slurm
+simmate compute cluster start 3 --type slurm
 ```
 
 !!! tip "Single-Flow Workers"
@@ -54,13 +54,13 @@ simmate compute start-cluster 3 --type slurm
     ```bash
     #!/bin/bash
     # (Your SBATCH settings here...)
-    simmate compute start-worker --nitems-max 1 --close-on-empty-queue
+    simmate compute worker start --nitems-max 1 --close-on-empty-queue
     ```
 
 ### 6. Monitor Your Jobs
 You can check the status of your submitted jobs at any time:
 ```bash
-simmate compute stats
+simmate compute workitems stats
 ```
 
 For more details on managing clusters and monitoring jobs, see the **Full Guides** on Compute.

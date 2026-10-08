@@ -10,7 +10,7 @@ To start a Simmate server on your local computer, use the following command:
 
 === "command line"
     ``` bash
-    simmate run-server
+    simmate website start
     ```
 
 While this command is running, open your preferred browser (Chrome, Firefox, etc.) and navigate to [http://127.0.0.1:8000/](http://127.0.0.1:8000/).

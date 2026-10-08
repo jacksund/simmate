@@ -196,7 +196,7 @@ def explore(
     print(f"{prefix}==================================================================")
 
 
-@workflows_app.command()
+@workflows_app.command("list")
 def list_all(
     include_subflows: bool = typer.Option(
         False,
@@ -216,7 +216,7 @@ def list_all(
         print(f"\t({workflow_number}) {workflow}")  # gives "(01) example-flow"
 
 
-@workflows_app.command()
+@workflows_app.command("config")
 def show_config(
     workflow_name: str = typer.Argument(
         ...,

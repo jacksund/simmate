@@ -13,11 +13,11 @@ Most supercomputers use a scheduler called **SLURM** to manage jobs. Simmate has
 To start 100 workers on a supercomputer:
 ```bash
 # Submits 100 workers to the SLURM queue
-simmate compute start-cluster 100 --type slurm
+simmate compute cluster start 100 --type slurm
 ```
 
 ### The `submit.sh` Template
-To use the `slurm` type, you need a `submit.sh` file in your current directory. This file is your "recipe" for how to run a job on your cluster. Simmate will take this file and automatically swap out the command at the end for `simmate compute start-worker`.
+To use the `slurm` type, you need a `submit.sh` file in your current directory. This file is your "recipe" for how to run a job on your cluster. Simmate will take this file and automatically swap out the command at the end for `simmate compute worker start`.
 
 Here's a simple `submit.sh` example:
 ```bash
@@ -32,7 +32,7 @@ Here's a simple `submit.sh` example:
 # (Any other setup you need, like module loads)
 module load vasp
 
-# Simmate will add "simmate compute start-worker" here
+# Simmate will add "simmate compute worker start" here
 ```
 
 ---

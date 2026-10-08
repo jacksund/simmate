@@ -12,7 +12,7 @@ If you have a workstation with 8 cores, you might want to run 4 jobs in parallel
 
 ```bash
 # Starts 4 workers on your local machine
-simmate compute start-cluster 4 --type local
+simmate compute cluster start 4 --type local
 ```
 
 This command will open 4 separate background processes. Each process is its own worker, and each will pick up a job from the queue and run it.
@@ -33,12 +33,12 @@ How many workers should you start? This depends on two things:
 
 ## 3. Persistent Clusters
 
-By default, `start-cluster` will start the requested number of workers and then finish. However, you can make the cluster "persistent" by using the `--continuous` flag:
+By default, `cluster start` will start the requested number of workers and then finish. However, you can make the cluster "persistent" by using the `--continuous` flag:
 
 ```bash
 # Keeps exactly 4 workers running at all times. 
 # If one finishes and exits, a new one will automatically start!
-simmate compute start-cluster 4 --type local --continuous
+simmate compute cluster start 4 --type local --continuous
 ```
 
 This is the most common way to run a cluster on a local workstation. It ensures your machine is always busy as long as there is work in the queue.

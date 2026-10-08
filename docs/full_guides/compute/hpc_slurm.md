@@ -32,10 +32,10 @@ You can create a standard SLURM `submit.sh` script that launches a Simmate worke
 module load vasp
 
 # Start a worker that runs one job and then exits.
-simmate compute start-worker --nitems-max 1 --close-on-empty-queue
+simmate compute worker start --nitems-max 1 --close-on-empty-queue
 
 # To use custom tags, append the tag option:
-# simmate compute start-worker --tag my-tag --nitems-max 1 --close-on-empty-queue
+# simmate compute worker start --tag my-tag --nitems-max 1 --close-on-empty-queue
 ```
 
 Submit this script multiple times to start multiple workers:
@@ -43,12 +43,12 @@ Submit this script multiple times to start multiple workers:
 sbatch submit.sh
 ```
 
-### Automatic Submission (`start-cluster`)
+### Automatic Submission (`cluster start`)
 Simmate provides a convenience command to submit many workers to SLURM at once.
 
 ```bash
 # Submits 100 workers to SLURM
-simmate compute start-cluster 100 --type slurm
+simmate compute cluster start 100 --type slurm
 ```
 
 !!! note

@@ -6,7 +6,7 @@
 
 === "command line"
     ``` bash
-    simmate workflows list-all
+    simmate workflows list
     ```
 
 === "python"
@@ -136,7 +136,7 @@ Workflows can also be executed on a remote cluster. The `run_cloud` command adds
       B --> C[waits for a worker to pick up job];
       C --> D[worker selects job from queue];
       D --> E[runs the job where the worker is];
-      F[launch a worker with 'start-worker' command] --> D;
+      F[launch a worker with 'worker start' command] --> D;
     ```
 
 To schedule a workflow, ensure your computational resources are configured, then use `run_cloud`:
@@ -236,7 +236,7 @@ You can view the data directly via SQL. For example:
 In the `simmate_summary.yaml` output file, there is the `_WEBSITE_URL_`. You can copy/paste this URL into your browser and view your results in an interactive format. Just make sure you are running your local server first:
 
 ``` shell
-simmate run-server
+simmate website start
 ```
 
 Then open the link given by `_WEBSITE_URL_`:

@@ -59,23 +59,23 @@ simmate workflows explore
 simmate workflows run my_search.yaml
 ```
 
-5) Start workers by submitting the `start-worker` command to a cluster's queue (e.g., SLURM) or wherever you want jobs to run. Submit as many workers as the number of workflows you want to run in parallel:
+5) Start workers by submitting the `simmate compute worker start` command to a cluster's queue (e.g., SLURM) or wherever you want jobs to run. Submit as many workers as the number of workflows you want to run in parallel:
 === "Basic Worker"
     ``` shell
-    simmate compute start-worker
+    simmate compute worker start
     ```
 === "Best-Practice Worker"
     ``` shell
     # (1)
-    simmate compute start-worker --close-on-empty-queue --nitems-max 10
+    simmate compute worker start --close-on-empty-queue --nitems-max 10
     ```
     
     1. `--close-on-empty-queue` shuts down the worker when the queue is empty, freeing up computational resources. `--nitems-max` limits the number of workflows each worker will run. Short-lived workers help maintain the health of a cluster and allow other SLURM jobs to cycle through the queue, preventing resource hogging.
 
 6) Monitor the output and log files for any issues. Important error information can also be accessed via the command line:
 ``` bash
-simmate compute stats
-simmate compute error-summary
+simmate compute workitems stats
+simmate compute workitems errors
 ```
 
 7) Submit new workers or cancel stale workers as needed.
@@ -97,7 +97,7 @@ simmate workflows run my_search.yaml
 
 4. Submit workers as needed
 ``` shell
-simmate compute start-worker
+simmate compute worker start
 ```
 
 -------------------------------------------------------------------------------
