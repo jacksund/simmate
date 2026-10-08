@@ -8,7 +8,7 @@ function add_mol_sketcher(sketcher_id) {
     iframe.id = sketcher_id + "-iframe";
     
     // We point to a local version of Ketcher. 
-    // This is downloaded automatically by 'simmate run-server'
+    // This is downloaded automatically by 'simmate website start'
     iframe.src = "/static/ketcher/index.html";
     
     iframe.width = "100%";

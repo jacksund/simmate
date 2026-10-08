@@ -11,6 +11,6 @@ def test_start_worker_cli(command_line_runner):
     # load the database to json
     result = command_line_runner.invoke(
         compute_app,
-        ["start-worker", "--nitems-max", "1", "--close-on-empty-queue"],
+        ["worker", "start", "--nitems-max", "1", "--close-on-empty-queue"],
     )
     assert result.exit_code == 0

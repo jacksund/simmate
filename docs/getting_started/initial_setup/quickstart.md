@@ -12,7 +12,7 @@
 
 2. Start the Simmate local web server:
     ``` bash
-    simmate run-server
+    simmate website start
     ```
 
 3. Visit your local dashboard by opening your web browser to [http://127.0.0.1:8000/](http://127.0.0.1:8000/). 

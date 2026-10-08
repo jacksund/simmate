@@ -254,7 +254,7 @@ def get_workflow(workflow_name: str) -> Workflow:
         raise Exception(
             "The workflow you provided isn't known. Make sure you don't have any "
             "typos! If you want a list of all available workflows, use the command "
-            "`simmate workflows list-all`. You can also interactively explore "
+            "`simmate workflows list`. You can also interactively explore "
             "workflows with `simmate workflows explore`"
         )
 

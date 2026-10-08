@@ -11,7 +11,7 @@ Think of apps like **plugins** or **extensions** for your favorite web browser. 
 Simmate comes with a built-in website that you can run locally to explore these apps. Run this command:
 
 ``` bash
-simmate run-server
+simmate website start
 ```
 
 Open your web browser and go to [http://127.0.0.1:8000/](http://127.0.0.1:8000/). You will see your local Simmate dashboard.

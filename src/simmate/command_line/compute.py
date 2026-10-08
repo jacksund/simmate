@@ -21,8 +21,51 @@ def compute():
     pass
 
 
-@compute_app.command()
-def start_schedules():
+worker_app = typer.Typer(rich_markup_mode="markdown", cls=AlphabeticalGroup)
+cluster_app = typer.Typer(rich_markup_mode="markdown", cls=AlphabeticalGroup)
+scheduler_app = typer.Typer(rich_markup_mode="markdown", cls=AlphabeticalGroup)
+workitems_app = typer.Typer(rich_markup_mode="markdown", cls=AlphabeticalGroup)
+
+compute_app.add_typer(worker_app, name="worker")
+compute_app.add_typer(cluster_app, name="cluster")
+compute_app.add_typer(scheduler_app, name="scheduler")
+compute_app.add_typer(workitems_app, name="workitems")
+
+
+@worker_app.callback(no_args_is_help=True)
+def worker():
+    """
+    Commands for starting individual Simmate Workers.
+    """
+    pass
+
+
+@cluster_app.callback(no_args_is_help=True)
+def cluster():
+    """
+    Commands for starting and managing clusters of Simmate Workers.
+    """
+    pass
+
+
+@scheduler_app.callback(no_args_is_help=True)
+def scheduler():
+    """
+    Commands for running the scheduler of periodic tasks.
+    """
+    pass
+
+
+@workitems_app.callback(no_args_is_help=True)
+def workitems():
+    """
+    Commands for viewing and managing jobs (WorkItems) in the queue.
+    """
+    pass
+
+
+@scheduler_app.command("start")
+def start_scheduler():
     """
     Starts the main scheduler process for periodic tasks.
 
@@ -35,7 +78,7 @@ def start_schedules():
     SimmateScheduler.start()
 
 
-@compute_app.command()
+@worker_app.command("start")
 def start_worker(
     nitems_max: int = typer.Option(
         None,
@@ -102,7 +145,7 @@ def start_worker(
     worker.start()
 
 
-@compute_app.command()
+@cluster_app.command("start")
 def start_cluster(
     nworkers: int = typer.Argument(
         ...,
@@ -131,56 +174,8 @@ def start_cluster(
     )
 
 
-@compute_app.command()
-def error_summary():
-    """
-    Displays a summary of error messages for all failed jobs in the database.
-    """
-
-    from simmate.database import connect  # isort:skip
-    from simmate.compute import SimmateExecutor
-
-    SimmateExecutor.show_error_summary()
-
-
-@compute_app.command()
-def stats():
-    """
-    Displays high-level statistics for all jobs (Pending, Running, Finished, etc.).
-    """
-
-    from simmate.database import connect  # isort:skip
-    from simmate.compute import SimmateExecutor
-
-    SimmateExecutor.show_stats()
-
-
-@compute_app.command()
-def stats_detail(
-    tag: list[str] = typer.Option(
-        [],
-        help="Filter statistics by job tags.",
-    ),
-    recent: float = typer.Option(
-        None,
-        help="Filter statistics to jobs updated within the last N hours.",
-    ),
-):
-    """
-    Displays detailed job statistics with optional filtering by tags and time.
-    """
-
-    from simmate.database import connect  # isort:skip
-    from simmate.compute import SimmateExecutor
-
-    SimmateExecutor.show_stats_detail(
-        tags=tag,
-        recent=recent,
-    )
-
-
-@compute_app.command()
-def workitems(
+@workitems_app.command("list")
+def list_workitems(
     tag: list[str] = typer.Option(
         [],
         help="Filter the job list by tags.",
@@ -208,47 +203,65 @@ def workitems(
     )
 
 
-@compute_app.command()
-def delete_finished(
-    confirm: bool = typer.Option(
+@workitems_app.command()
+def stats(
+    detail: bool = typer.Option(
         False,
-        "--confirm",
-        help="Automatically confirm deletion.",
-    )
+        "--detail",
+        help="Show detailed statistics. Implied when `--tag` or `--recent` is given.",
+    ),
+    tag: list[str] = typer.Option(
+        [],
+        help="Filter statistics by job tags.",
+    ),
+    recent: float = typer.Option(
+        None,
+        help="Filter statistics to jobs updated within the last N hours.",
+    ),
 ):
     """
-    Deletes all jobs with a 'Finished' status from the database.
+    Displays statistics for all jobs (Pending, Running, Finished, etc.).
     """
 
     from simmate.database import connect  # isort:skip
     from simmate.compute import SimmateExecutor
 
-    SimmateExecutor.delete_finished(confirm)
+    if detail or tag or recent is not None:
+        SimmateExecutor.show_stats_detail(
+            tags=tag,
+            recent=recent,
+        )
+    else:
+        SimmateExecutor.show_stats()
 
 
-@compute_app.command()
-def delete_all(
-    confirm: bool = typer.Option(
-        False,
-        "--confirm",
-        help="Automatically confirm deletion.",
-    )
-):
+@workitems_app.command()
+def errors():
     """
-    Deletes ALL jobs from the database, regardless of status.
+    Displays a summary of error messages for all failed jobs in the database.
     """
 
     from simmate.database import connect  # isort:skip
     from simmate.compute import SimmateExecutor
 
-    SimmateExecutor.delete_all(confirm)
+    SimmateExecutor.show_error_summary()
 
 
-@compute_app.command()
+@workitems_app.command()
 def delete(
     tag: list[str] = typer.Option(
         [],
-        help="The tags of the jobs to be deleted.",
+        help="Delete jobs that match these tags.",
+    ),
+    finished: bool = typer.Option(
+        False,
+        "--finished",
+        help="Delete all jobs with a 'Finished' status.",
+    ),
+    all: bool = typer.Option(
+        False,
+        "--all",
+        help="Delete ALL jobs, regardless of status.",
     ),
     confirm: bool = typer.Option(
         False,
@@ -257,10 +270,23 @@ def delete(
     ),
 ):
     """
-    Deletes jobs from the database that match the provided tags.
+    Deletes jobs from the database.
+
+    By default, this deletes jobs that match the provided tags (or jobs with
+    no tags if none are given). Use `--finished` or `--all` for bulk deletion.
     """
+
+    if sum([bool(tag), finished, all]) > 1:
+        raise typer.BadParameter(
+            "Only one of `--tag`, `--finished`, or `--all` can be given."
+        )
 
     from simmate.database import connect  # isort:skip
     from simmate.compute import SimmateExecutor
 
-    SimmateExecutor.delete(tags=tag, confirm=confirm)
+    if finished:
+        SimmateExecutor.delete_finished(confirm)
+    elif all:
+        SimmateExecutor.delete_all(confirm)
+    else:
+        SimmateExecutor.delete(tags=tag, confirm=confirm)

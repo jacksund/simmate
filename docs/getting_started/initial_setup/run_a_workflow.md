@@ -16,7 +16,7 @@ Many apps come with their own standardized workflows. By using these built-in wo
 
 If your server isn't running, start it up:
 ```bash
-simmate run-server
+simmate website start
 ```
 
 Open your dashboard at [http://127.0.0.1:8000/](http://127.0.0.1:8000/). 

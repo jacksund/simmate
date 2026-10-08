@@ -46,7 +46,7 @@ services:
   # SCHEDULER
   simmate-scheduler-service:
     image: simmate:latest
-    command: ["simmate", "compute", "start-schedules"]
+    command: ["simmate", "compute", "scheduler", "start"]
     environment: *simmate-env
     depends_on:
       - simmate-postgres-service
@@ -56,7 +56,7 @@ services:
   # WORKER(s)
   simmate-worker-service:
     image: simmate:latest
-    command: ["simmate", "compute", "start-worker"]
+    command: ["simmate", "compute", "worker", "start"]
     environment: *simmate-env
     volumes:
       - worker-data:/simmate_workers

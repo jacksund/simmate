@@ -94,22 +94,22 @@ Once jobs are submitted, they stay in the `Pending` state until a worker picks t
 A persistent worker will stay alive and continue to check for new jobs indefinitely.
 
 ```bash
-simmate compute start-worker
+simmate compute worker start
 ```
 
 ### Starting a "Single-Flow" Worker
 A "single-flow" worker will pull **one** job from the queue, execute it, and then shut down. If the queue is empty, it shuts down immediately. This is highly recommended as a best practice for HPC clusters where you submit many individual jobs to a scheduler like SLURM.
 
 ```bash
-simmate compute start-worker --nitems-max 1 --close-on-empty-queue
+simmate compute worker start --nitems-max 1 --close-on-empty-queue
 ```
 
 ### Starting a Local Cluster
-If you are on a powerful workstation and want to start multiple workers at once, use the `start-cluster` command.
+If you are on a powerful workstation and want to start multiple workers at once, use the `cluster start` command.
 
 ```bash
 # Starts 4 workers on your local machine
-simmate compute start-cluster 4 --type local
+simmate compute cluster start 4 --type local
 ```
 
 ---

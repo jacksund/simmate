@@ -13,7 +13,7 @@ class LocalCluster(Cluster):
     Submits workers via subprocesses
     """
 
-    worker_command: str = "simmate compute start-worker"
+    worker_command: str = "simmate compute worker start"
 
     @classmethod
     def submit_job(cls) -> subprocess.Popen:

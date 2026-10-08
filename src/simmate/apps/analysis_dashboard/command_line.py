@@ -18,7 +18,7 @@ def base_command():
 
 
 @simmate_analysis_dashboard_app.command()
-def run_server(
+def start(
     port: int = typer.Option(
         8501,
         help="The port to run the dashboard on. Default is 8501.",

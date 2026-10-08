@@ -71,7 +71,7 @@ def get_container_command(
     ]
     for key in env:
         command += ["--env", key]
-    command += [image, "simmate", "compute", "start-worker", "--api"]
+    command += [image, "simmate", "compute", "worker", "start", "--api"]
     for tag in tags:
         command += ["--tag", tag]
     return command

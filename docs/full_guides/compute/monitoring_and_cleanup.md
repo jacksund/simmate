@@ -7,43 +7,43 @@ Simmate provides several CLI commands to monitor the status of your queue and ma
 To get a quick overview of how many jobs are in each state (Pending, Running, Finished, Errored, Canceled), use:
 
 ```bash
-simmate compute stats
+simmate compute workitems stats
 ```
 
 For a more detailed breakdown, including stats for each specific workflow (categorized by tags), use:
 
 ```bash
-simmate compute stats-detail
+simmate compute workitems stats --detail
 ```
 
 You can also filter these stats by time to see recent activity:
 
 ```bash
 # Show stats for jobs updated in the last 24 hours
-simmate compute stats-detail --recent 24
+simmate compute workitems stats --detail --recent 24
 ```
 
 ---
 
 ## Inspecting WorkItems
 
-To see a list of individual jobs and their current status in a table format, use the `workitems` command:
+To see a list of individual jobs and their current status in a table format, use the `workitems list` command:
 
 ```bash
-simmate compute workitems
+simmate compute workitems list
 ```
 
 You can filter the list by status, tags, or recency:
 
 ```bash
 # Show only errored jobs
-simmate compute workitems --status E
+simmate compute workitems list --status E
 
 # Show jobs with a specific tag
-simmate compute workitems --tag my-tag
+simmate compute workitems list --tag my-tag
 
 # Show jobs updated in the last 12 hours
-simmate compute workitems --recent 12
+simmate compute workitems list --recent 12
 ```
 
 ---
@@ -53,7 +53,7 @@ simmate compute workitems --recent 12
 When jobs fail, they are marked as `Errored` (E). To see a quick summary of the error messages for all failed jobs without digging into individual log files, run:
 
 ```bash
-simmate compute error-summary
+simmate compute workitems errors
 ```
 
 This command will print the WorkItem ID followed by the exception message, making it easy to identify common failure modes across your cluster.
@@ -65,31 +65,31 @@ This command will print the WorkItem ID followed by the exception message, makin
 Over time, the `WorkItem` table can grow very large, which may eventually slow down database queries. It's a good practice to periodically delete old or unnecessary entries.
 
 !!! warning
-    All `delete` commands require the `--confirm` flag to execute.
+    The `workitems delete` command requires the `--confirm` flag to execute.
 
 ### Deleting Finished Jobs
 This is the most common cleanup task. It removes entries for jobs that completed successfully.
 
 ```bash
-simmate compute delete-finished --confirm
+simmate compute workitems delete --finished --confirm
 ```
 
 ### Deleting by Tag
 If you ran a test batch or a specific project that is now complete, you can delete those specific entries:
 
 ```bash
-simmate compute delete --tag test-runs --confirm
+simmate compute workitems delete --tag test-runs --confirm
 ```
 
 !!! note
-    If you run `simmate compute delete --confirm` without any tags, it will delete all jobs that have **no** tags assigned to them.
+    If you run `simmate compute workitems delete --confirm` without any tags, it will delete all jobs that have **no** tags assigned to them.
 
 ### Deleting Everything
 !!! danger
     This will delete **ALL** jobs from the queue, including those that are currently `Pending` or `Running`. Use this with caution.
 
 ```bash
-simmate compute delete-all --confirm
+simmate compute workitems delete --all --confirm
 ```
 
 ---

@@ -21,7 +21,7 @@ A custom Simmate app gives you several powerful features:
 To start a new app, navigate to a folder where you want to keep your code and run:
 
 ``` bash
-simmate start-project
+simmate init
 ```
 
 This will create a new folder named `my_new_project`. Inside, you'll find a standardized structure:

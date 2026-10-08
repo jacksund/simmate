@@ -11,7 +11,7 @@ In addition to one-off workflows, Simmate supports **periodic tasks** (schedules
 Simmate uses a single "scheduler" process to manage all periodic tasks. You only need to run one of these for your entire project.
 
 ```bash
-simmate compute start-schedules
+simmate compute scheduler start
 ```
 
 The scheduler process will:
@@ -49,11 +49,11 @@ def run_weekly_cleanup():
     print("Running weekly cleanup...")
 ```
 
-As long as `my_app` is in your `settings.yaml` under `apps`, the `start-schedules` command will find and register these tasks automatically.
+As long as `my_app` is in your `settings.yaml` under `apps`, the `scheduler start` command will find and register these tasks automatically.
 
 ---
 
 ## Best Practices
 
-- **Workers Required:** Since the `SimmateScheduler` does not run the tasks itself, you must ensure you have at least one worker running (`simmate compute start-worker`) to process the scheduled jobs from the database queue.
+- **Workers Required:** Since the `SimmateScheduler` does not run the tasks itself, you must ensure you have at least one worker running (`simmate compute worker start`) to process the scheduled jobs from the database queue.
 - **Task Delegation:** Decorating a task ensures that whenever the schedule interval hits, the scheduler submits the job directly as a `WorkItem`. Heavy lifting is naturally offloaded, preventing the scheduler loop from ever clogging.

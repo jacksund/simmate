@@ -20,7 +20,7 @@ spec:
         - name: simmate-worker
           image: docker.io/jacksund/simmate-worker:{{ .Values.version }}
           imagePullPolicy: Always
-          command: ["simmate", "compute", "start-worker"]
+          command: ["simmate", "compute", "worker", "start"]
           env:
             {{- include "simmate.env_config" . | indent 12 }}
           volumeMounts:

@@ -15,11 +15,12 @@ def test_container_command_keeps_secrets_out():
     assert ["--env", "SIMMATE__CLIENT__API_KEY"] == command[
         command.index("SIMMATE__CLIENT__API_KEY") - 1 :
     ][:2]
-    assert command[-7:] == [
+    assert command[-8:] == [
         "image:v1",
         "simmate",
         "compute",
-        "start-worker",
+        "worker",
+        "start",
         "--api",
         "--tag",
         "simmate",

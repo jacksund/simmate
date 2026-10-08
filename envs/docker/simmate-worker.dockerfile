@@ -84,4 +84,4 @@ RUN simmate-qe setup sssp
 RUN mkdir /simmate_workers
 WORKDIR /simmate_workers
 
-CMD ["simmate", "compute", "start-worker"]
+CMD ["simmate", "compute", "worker", "start"]

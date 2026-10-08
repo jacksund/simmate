@@ -21,7 +21,7 @@ simmate database reset
 View a list of all available workflows and explore them interactively:
 ```bash
 # List all names
-simmate workflows list-all
+simmate workflows list
 
 # Explore documentation and parameters
 simmate workflows explore

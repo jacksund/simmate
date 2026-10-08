@@ -8,7 +8,7 @@ This page provides a concise summary of creating a custom app, workflows, and da
 
 ``` bash
 # Create a new app project
-simmate start-project my_project
+simmate init
 
 # Update project name in pyproject.toml and renaming folder/apps.py
 # (See 'Create a Custom App' page for details)
