@@ -32,6 +32,12 @@ class TrinoDB:
     Port that the host accepts tcp connections on (e.g. 5432)
     """
 
+    source: str = None
+    """
+    Client name sent with each query (e.g. "my-app"). If None, the trino
+    client's default is used.
+    """
+
     # ------------------------------------------------------
     # Settings below are only for non-interactive auth
     # ------------------------------------------------------
@@ -93,11 +99,13 @@ class TrinoDB:
         # fetch_type: str = "fetchall",
         # chunk_size: str = None,
 
+        connect_kwargs = dict(source=self.source) if self.source else {}
         with connect(
             host=self.host,
             port=self.port,
             auth=self.auth,
             http_scheme="https",
+            **connect_kwargs,
         ) as connection:
             with connection.cursor() as cursor:
                 cursor.execute(query)
