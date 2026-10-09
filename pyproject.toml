@@ -69,7 +69,7 @@ dev = [
     "coverage>=7.13.4,<8.0.0",
     # Formatting & Linting
     "black>=26.1.0,<27.0.0",
-    "isort>=8.0.0,<9.0.0",
+    "isort>=8.0.0,<10.0.0",
     "djlint>=1.36.4,<2.0.0",
     # Docs
     "mkdocs-material>=9.7.3,<10.0.0",
