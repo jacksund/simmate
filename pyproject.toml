@@ -32,7 +32,7 @@ dependencies = [
     "faiss-cpu>=1.15.0,<2.0.0",
     # Material/Crystal-based dependencies
     "pymatgen>=2025.10.7,<2026.5.5",
-    "pymatgen-analysis-diffusion>=2025.11.15,<2025.11.16",
+    "pymatgen-analysis-diffusion>=2025.11.15,<2026.9.24",
     "matminer>=0.10.0,<0.11.0",
     "ase>=3.28.0,<3.29.0",
     "ase-ga>=1.0.3",
