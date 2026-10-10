@@ -21,4 +21,4 @@ build-backend= "setuptools.build_meta"
 name = "my_simmate_project"
 version = "0.0.0"
 dependencies = ["simmate"]
-requires-python=">=3.10"
+requires-python="==3.13.*"

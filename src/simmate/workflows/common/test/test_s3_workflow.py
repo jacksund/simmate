@@ -17,6 +17,7 @@
 # catch error with a non-monitor
 # test max_errors limit
 
+import sys
 from sys import platform
 
 import pytest
@@ -224,7 +225,9 @@ def test_s3workflow_7(tmp_path):
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
         use_database = False
-        command = "echo dummy"
+        # the command must outlive the first monitor check, otherwise the
+        # non-monitor pass catches the error first and triggers a retry
+        command = f'"{sys.executable}" -c "import time; time.sleep(0.5)"'
         polling_timestep = 0
         monitor_freq = 2
         error_handlers = [AlwaysFailsSpecialMonitorNoRetry()]

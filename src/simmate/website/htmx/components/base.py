@@ -8,6 +8,7 @@ import pandas
 from cachetools import LRUCache
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
+from django.utils.functional import classproperty
 
 from simmate.toolkit import Molecule, Structure
 from simmate.utils import dotdict, str_to_datatype
@@ -191,8 +192,7 @@ class HtmxComponent:
 
     _on_change_hooks_cache: list[str] = False
 
-    @classmethod
-    @property
+    @classproperty
     def on_change_hooks(cls):
         if cls._on_change_hooks_cache == False:
             cls._on_change_hooks_cache = [
@@ -204,8 +204,7 @@ class HtmxComponent:
 
     _search_hooks_cache: list[str] = False
 
-    @classmethod
-    @property
+    @classproperty
     def search_hooks(cls):
         if cls._search_hooks_cache == False:
             cls._search_hooks_cache = [
@@ -264,8 +263,7 @@ class HtmxComponent:
 
     # -------------------------------------------------------------------------
 
-    @classmethod
-    @property
+    @classproperty
     def component_name(cls) -> str:
         # adds a hyphen between each capital letter (ExampleName --> example-name)
         # copied from https://stackoverflow.com/questions/199059/

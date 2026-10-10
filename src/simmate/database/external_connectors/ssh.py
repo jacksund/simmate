@@ -6,6 +6,7 @@ from pathlib import Path, PurePosixPath
 from stat import S_ISDIR
 
 import paramiko
+from django.utils.functional import classproperty
 from rich.progress import track
 
 from simmate.utils import chunk_list
@@ -27,8 +28,7 @@ class SshServer:
     password: str = None
 
     # OPTIMIZE: Should I cache this...?
-    @classmethod
-    @property
+    @classproperty
     def client(cls):
 
         if not cls.host or not cls.user or not cls.password:

@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
+from django.utils.functional import classproperty
+
 from simmate.utils import dispatch
 
 
 class Validator:
-    @classmethod
-    @property
+    @classproperty
     def name(cls):
         """
         A nice string name for the validator. By default it just returns the name
