@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pandas
+from django.utils.functional import classproperty
 
 from simmate.toolkit import Molecule
 
@@ -64,8 +65,7 @@ class SmartsSet:
 
     # -------------------------------------------------------------------------
 
-    @classmethod
-    @property
+    @classproperty
     def smarts_data(cls) -> pandas.DataFrame:
         # check for cached version first
         if cls._smarts_data is not None:
@@ -109,8 +109,7 @@ class SmartsSet:
 
     # -------------------------------------------------------------------------
 
-    @classmethod
-    @property
+    @classproperty
     def smarts_dict(cls) -> pandas.DataFrame:
         # check for cached version first
         if cls._smarts_dict is not None:

@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+from django.utils.functional import classproperty
+
 from simmate.config import settings
 from simmate.toolkit import Structure
 from simmate.workflows.common import S3Workflow, StructureWorkflow
@@ -72,8 +74,7 @@ class PwscfWorkflow(S3Workflow, StructureWorkflow):
     key-value pairs for the `&RISM` section of `pwscf.in`
     """
 
-    @classmethod
-    @property
+    @classproperty
     def full_settings(cls) -> dict:
         # TODO: consider making this use PwscfInput class
         return dict(
@@ -94,8 +95,7 @@ class PwscfWorkflow(S3Workflow, StructureWorkflow):
     Can be either 'SSSP_PBE_PRECISION' or 'SSSP_PBE_EFFICIENCY'
     """
 
-    @classmethod
-    @property
+    @classproperty
     def pseudo_mappings(cls) -> dict:
         if cls.pseudo_mappings_set == "SSSP_PBE_PRECISION":
             return SSSP_PBE_PRECISION_MAPPINGS

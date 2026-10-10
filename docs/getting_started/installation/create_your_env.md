@@ -15,7 +15,7 @@ Choose your preferred tool to create an environment. You can name it anything (e
 
 === "conda"
     ``` bash
-    conda create -n my_env -c conda-forge python=3.11
+    conda create -n my_env -c conda-forge python=3.13
     ```
 
 ---

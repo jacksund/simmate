@@ -8,6 +8,7 @@ import warnings
 from pathlib import Path
 
 import polars
+from django.utils.functional import classproperty
 
 from simmate.config import settings
 from simmate.utils import dispatch
@@ -57,8 +58,7 @@ class ArchiveMixin:
         """
         cls.objects.all().to_archive(filename, format=format, columns=columns)
 
-    @classmethod
-    @property
+    @classproperty
     def archive_exclude_fieldset(cls) -> list[str]:
         exclude_fields = []
         for mixin in cls.get_mixins():
@@ -70,8 +70,7 @@ class ArchiveMixin:
                 exclude_fields.append(field.removeprefix("--"))
         return list(set(exclude_fields))
 
-    @classmethod
-    @property
+    @classproperty
     def archive_fieldset(cls) -> list[str]:
         all_fields = ["id", "updated_at", "created_at", "source"]
 

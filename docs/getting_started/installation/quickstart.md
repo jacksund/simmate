@@ -24,7 +24,7 @@
 
     === "conda"
         ``` bash
-        conda create -n my_env -c conda-forge python=3.11 simmate
+        conda create -n my_env -c conda-forge python=3.13 simmate
         conda activate my_env
         ```
 
