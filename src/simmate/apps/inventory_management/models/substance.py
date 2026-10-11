@@ -5,12 +5,16 @@ import string
 
 from django.contrib.auth.models import User
 from django.db import transaction
+from django.db.models import Q
+from django.utils.functional import classproperty
 
 from simmate.config import settings
 from simmate.database.core import DatabaseTable, table_column
+from simmate.database.mixins import ThirdPartyData
 from simmate.toolkit import Molecule as ToolkitMolecule
 
 from .molecule import Molecule
+from .substance_id_change import SubstanceIdChange
 
 
 class Substance(DatabaseTable):
@@ -19,9 +23,11 @@ class Substance(DatabaseTable):
     molecular salt, or material.
 
     Each substance gets a human-readable ID (e.g. `BCD-012-3456`) and can be
-    linked to its molecular or crystal structure, to entries in third-party
-    datasets (e.g. PubChem or the Materials Project), and to related substances
-    (e.g. stereoisomers or phases via `parent`). Physical samples of a
+    linked to its molecular or crystal structure and to related substances
+    (e.g. stereoisomers or phases via `parent`). This table is the central
+    registry that other apps link to. For example, entries in third-party
+    datasets (e.g. ChEMBL or the Materials Project) each point to their
+    matching substance, available in reverse via `<app>_entries`. Physical samples of a
     substance are tracked as `Batch` entries, and substances can also be
     combined into a `Mixture`.
     """
@@ -144,6 +150,23 @@ class Substance(DatabaseTable):
     place (to avoid future conflicts/confusion), and set the entry as `is_delisted=True`.
     
     This can happen with accidental duplicates, typos, and general cleanup.
+    """
+
+    replaced_by = table_column.ForeignKey(
+        "Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="replaces",
+        blank=True,
+        null=True,
+    )
+    """
+    For delisted substances, the substance that this ID now redirects to
+    (e.g. after a merge or promotion).
+
+    This always points to the *current* substance, so there is never a chain
+    of redirects to follow (i.e. if A was merged into B and later B into C,
+    then A points directly to C). See `resolve_id` and the
+    `SubstanceIdChange` table for the full history.
     """
 
     is_private = table_column.BooleanField(blank=True, null=True, default=False)
@@ -370,128 +393,10 @@ class Substance(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # Molecular datasets
-    # Each of these links to the matching entry in a third-party dataset, if
-    # one exists. Note `pubchem` stores the PubChem CID rather than a link.
-
-    bcpc = table_column.ForeignKey(
-        "bcpc.BcpcIsoPesticide",
-        on_delete=table_column.SET_NULL,
-        related_name="substances",
-        blank=True,
-        null=True,
-    )
-
-    cas_registry = table_column.ForeignKey(
-        "cas_registry.CasRegistryMolecule",
-        on_delete=table_column.SET_NULL,
-        related_name="substances",
-        blank=True,
-        null=True,
-    )
-
-    chembl = table_column.ForeignKey(
-        "chembl.ChemblMolecule",
-        on_delete=table_column.SET_NULL,
-        related_name="substances",
-        blank=True,
-        null=True,
-    )
-
-    chemspace = table_column.ForeignKey(
-        "chemspace.ChemSpaceFreedomSpaceMolecule",
-        on_delete=table_column.SET_NULL,
-        related_name="substances",
-        blank=True,
-        null=True,
-    )
-
-    emolecules = table_column.ForeignKey(
-        "emolecules.EmoleculesMolecule",
-        on_delete=table_column.SET_NULL,
-        related_name="substances",
-        blank=True,
-        null=True,
-    )
-
-    enamine = table_column.ForeignKey(
-        "enamine.EnamineRealMolecule",
-        on_delete=table_column.SET_NULL,
-        related_name="substances",
-        blank=True,
-        null=True,
-    )
-
-    pdb = table_column.ForeignKey(
-        "pdb.PdbLigand",
-        on_delete=table_column.SET_NULL,
-        related_name="substances",
-        blank=True,
-        null=True,
-    )
-
-    ppdb = table_column.ForeignKey(
-        "ppdb.PpdbMolecule",
-        on_delete=table_column.SET_NULL,
-        related_name="substances",
-        blank=True,
-        null=True,
-    )
-
-    pubchem = table_column.CharField(
-        max_length=20,
-        blank=True,
-        null=True,
-    )
-    """
-    The PubChem compound ID (CID) of the substance.
-    """
-
-    # -------------------------------------------------------------------------
-
-    # Crystalline datasets
-    # Each of these links to the matching entry in a third-party dataset, if
-    # one exists.
-
-    aflow = table_column.ForeignKey(
-        "aflow.AflowStructure",
-        on_delete=table_column.SET_NULL,
-        related_name="substances",
-        blank=True,
-        null=True,
-    )
-
-    cod = table_column.ForeignKey(
-        "cod.CodStructure",
-        on_delete=table_column.SET_NULL,
-        related_name="substances",
-        blank=True,
-        null=True,
-    )
-
-    jarvis = table_column.ForeignKey(
-        "jarvis.JarvisStructure",
-        on_delete=table_column.SET_NULL,
-        related_name="substances",
-        blank=True,
-        null=True,
-    )
-
-    materials_project = table_column.ForeignKey(
-        "materials_project.MatprojStructure",
-        on_delete=table_column.SET_NULL,
-        related_name="substances",
-        blank=True,
-        null=True,
-    )
-
-    oqmd = table_column.ForeignKey(
-        "oqmd.OqmdStructure",
-        on_delete=table_column.SET_NULL,
-        related_name="substances",
-        blank=True,
-        null=True,
-    )
+    # Entries in third-party datasets (e.g. ChEMBL or the Materials Project)
+    # link to this table via their own `substance` column, so that many entries
+    # can point to the same substance. These are available in reverse via
+    # `<app>_entries` (e.g. `substance.chembl_entries.all()`).
 
     # -------------------------------------------------------------------------
 
@@ -500,6 +405,77 @@ class Substance(DatabaseTable):
     Any additional data about the substance that does not fit in the columns
     above.
     """
+
+    # -------------------------------------------------------------------------
+
+    @classproperty
+    def linked_dataset_relations(cls) -> list:
+        """
+        The reverse relations from third-party dataset tables (e.g. ChEMBL or
+        the Materials Project) that link to this table via a `substance` column.
+
+        Only installed apps are included, so this list depends on your settings.
+        """
+        return [
+            relation
+            for relation in cls._meta.related_objects
+            if relation.one_to_many
+            and relation.field.name == "substance"
+            and issubclass(relation.related_model, ThirdPartyData)
+        ]
+
+    def get_linked_entries(self, include_empty: bool = False) -> dict[str, list]:
+        """
+        Gives the ids of all third-party dataset entries linked to this substance.
+
+        Args:
+            include_empty: Whether to include tables that have no linked entries.
+
+        Returns:
+            A dictionary of table names (e.g. "ChemblMolecule") mapped to a list
+            of linked entry ids.
+        """
+        linked_entries = {}
+        for relation in self.linked_dataset_relations:
+            table = relation.related_model
+            entry_ids = list(
+                table.objects.filter(substance_id=self.id).values_list("id", flat=True)
+            )
+            if entry_ids or include_empty:
+                linked_entries[table.table_name] = entry_ids
+        return linked_entries
+
+    @classmethod
+    def get_linked_entries_bulk(
+        cls,
+        substance_ids: list[str],
+    ) -> dict[str, dict[str, list]]:
+        """
+        Gives the ids of all third-party dataset entries linked to each of the
+        given substances.
+
+        This makes one query per dataset table (rather than per substance), so
+        it should be used instead of `get_linked_entries` when working with
+        many substances.
+
+        Args:
+            substance_ids: The ids of the substances to search for.
+
+        Returns:
+            A dictionary of substance ids mapped to dictionaries of table names
+            and linked entry ids (same format as `get_linked_entries`).
+            Substances without any linked entries are given an empty dictionary.
+        """
+        linked_entries = {substance_id: {} for substance_id in substance_ids}
+        for relation in cls.linked_dataset_relations:
+            table = relation.related_model
+            entries = table.objects.filter(substance_id__in=substance_ids).values_list(
+                "substance_id", "id"
+            )
+            for substance_id, entry_id in entries:
+                linked_entries[substance_id].setdefault(table.table_name, [])
+                linked_entries[substance_id][table.table_name].append(entry_id)
+        return linked_entries
 
     # -------------------------------------------------------------------------
 
@@ -750,5 +726,286 @@ class Substance(DatabaseTable):
                 )
 
         return [substance_ids[key] for key in match_keys]
+
+    # -------------------------------------------------------------------------
+
+    # ID CHANGES
+
+    # Substance IDs are never deleted or reused. Instead, retired IDs are kept
+    # as tombstones (`is_delisted=True`) that redirect to their successor via
+    # `replaced_by`, and every change is logged in `SubstanceIdChange`. All
+    # changes should go through the methods below so that linked tables and
+    # the log stay consistent.
+
+    @property
+    def id_changes(self):
+        """
+        All logged ID changes that involve this substance, oldest first.
+        """
+        return SubstanceIdChange.objects.filter(
+            Q(old_id=self.id) | Q(new_id=self.id)
+        ).order_by("created_at")
+
+    @classmethod
+    def resolve_id(cls, substance_id: str) -> str:
+        """
+        Gives the current ID for the given one, following any merges or
+        promotions. IDs that are active (or not found) are returned unchanged.
+        """
+        replaced_by = (
+            cls.objects.filter(id=substance_id)
+            .values_list("replaced_by_id", flat=True)
+            .first()
+        )
+        return replaced_by or substance_id
+
+    @classmethod
+    def _repoint_references(cls, old_ids: list[str], new_id: str):
+        """
+        Moves everything that links to the old substances over to the new
+        one. This includes all foreign keys (e.g. batches, child substances,
+        and third-party dataset entries) and many-to-many links (e.g. mixtures
+        and projects) from any installed app.
+        """
+
+        # foreign keys from other tables (and from this table, e.g. `parent`
+        # and `replaced_by`, which keeps redirects pointing to the newest ID)
+        for relation in cls._meta.related_objects:
+            if not relation.one_to_many:
+                continue
+            column = relation.field.attname  # e.g. "substance_id"
+            entries = relation.related_model.objects.filter(
+                **{f"{column}__in": old_ids}
+            )
+            if relation.related_model is cls:
+                entries = entries.exclude(id=new_id)
+            entries.update(**{column: new_id})
+
+        # the new substance can't be its own parent or replacement
+        cls.objects.filter(id=new_id, parent_id__in=old_ids).update(parent=None)
+
+        # many-to-many links, both those defined on this table (e.g. projects)
+        # and those pointing to it (e.g. mixtures). We delete + recreate the
+        # links because the new substance may already have some of them.
+        m2m_links = [
+            (field, field.m2m_field_name(), field.m2m_reverse_field_name())
+            for field in cls._meta.many_to_many
+        ] + [
+            (
+                relation.field,
+                relation.field.m2m_reverse_field_name(),
+                relation.field.m2m_field_name(),
+            )
+            for relation in cls._meta.related_objects
+            if relation.many_to_many
+        ]
+        for field, substance_column, other_column in m2m_links:
+            through = field.remote_field.through
+            links = through.objects.filter(**{f"{substance_column}_id__in": old_ids})
+            other_ids = set(links.values_list(f"{other_column}_id", flat=True))
+            links.delete()
+            through.objects.bulk_create(
+                [
+                    through(
+                        **{
+                            f"{substance_column}_id": new_id,
+                            f"{other_column}_id": other_id,
+                        }
+                    )
+                    for other_id in other_ids
+                ],
+                ignore_conflicts=True,
+            )
+
+    @classmethod
+    def _get_active(cls, substance_ids: list[str]) -> list["Substance"]:
+        """
+        Loads the given substances, raising an error if any are missing or
+        already delisted.
+        """
+        substances = list(cls.objects.filter(id__in=substance_ids))
+        missing = set(substance_ids) - {s.id for s in substances}
+        if missing:
+            raise ValueError(f"Substances not found: {sorted(missing)}")
+        delisted = [s.id for s in substances if s.is_delisted]
+        if delisted:
+            raise ValueError(f"Substances are already delisted: {delisted}")
+        return substances
+
+    @classmethod
+    def merge(
+        cls,
+        substance_ids: list[str],
+        into: str,
+        reason: str = None,
+        matching_version: str = None,
+    ) -> str:
+        """
+        Merges duplicate substances into a single one.
+
+        All batches, mixtures, dataset entries, etc. of the duplicates are
+        moved to the `into` substance, and the duplicates are delisted with
+        `replaced_by` pointing to it.
+
+        In most cases, `into` should be the most widely used ID (e.g. the
+        oldest one, or the one with the lowest ID level).
+
+        Args:
+            substance_ids: The IDs of the duplicate substances to retire.
+            into: The ID of the substance to keep.
+            reason: Why the substances are being merged.
+            matching_version: The version of the matching rules that found
+                these duplicates (if any).
+
+        Returns:
+            The ID of the kept substance (i.e. `into`).
+        """
+        old_ids = [i for i in set(substance_ids) if i != into]
+        with transaction.atomic():
+            cls._get_active(old_ids + [into])
+            cls._repoint_references(old_ids, into)
+            cls.objects.filter(id__in=old_ids).update(
+                is_delisted=True,
+                replaced_by_id=into,
+            )
+            SubstanceIdChange.objects.bulk_create(
+                [
+                    SubstanceIdChange(
+                        change_type="merge",
+                        old_id=old_id,
+                        new_id=into,
+                        reason=reason,
+                        matching_version=matching_version,
+                    )
+                    for old_id in old_ids
+                ]
+            )
+        return into
+
+    @classmethod
+    def promote(
+        cls,
+        substance_id: str,
+        level: int = 1,
+        reason: str = None,
+    ) -> str:
+        """
+        Moves a substance to a new ID at a different level. For example, a
+        virtual level 2 compound that has been synthesized can be promoted to
+        level 1.
+
+        The substance (and everything linked to it) is copied to the new ID,
+        and the old ID is delisted with `replaced_by` pointing to the new one.
+
+        Args:
+            substance_id: The ID of the substance to promote.
+            level: The ID level to move the substance to.
+            reason: Why the substance is being promoted.
+
+        Returns:
+            The new substance ID.
+        """
+        if cls.get_id_level(substance_id) == level:
+            raise ValueError(f"{substance_id} is already a level {level} ID")
+
+        with transaction.atomic():
+            substance = cls._get_active([substance_id])[0]
+            created_at = substance.created_at
+
+            new_id = cls.generate_unique_id(level=level)
+            substance.id = new_id
+            substance.check_digit = cls.calculate_check_digit(new_id)
+            substance._state.adding = True
+            substance.save(force_insert=True)
+            # the registration date stays the same as the original
+            cls.objects.filter(id=new_id).update(created_at=created_at)
+
+            cls._repoint_references([substance_id], new_id)
+            cls.objects.filter(id=substance_id).update(
+                is_delisted=True,
+                replaced_by_id=new_id,
+            )
+            SubstanceIdChange.objects.create(
+                change_type="promote",
+                old_id=substance_id,
+                new_id=new_id,
+                reason=reason,
+            )
+        return new_id
+
+    @classmethod
+    def split(
+        cls,
+        substance_id: str,
+        entries: list[dict],
+        reason: str = None,
+        matching_version: str = None,
+    ) -> list[str]:
+        """
+        Registers more specific substances that were previously covered by
+        a single ID (e.g. stereoisomers or polymorphs that were not told apart
+        by older matching rules).
+
+        The original ID is kept and becomes the `parent` of the new substances,
+        so existing references to it stay valid (just less specific). Nothing
+        linked to the original (e.g. batches) is moved, as only a person can
+        say which new substance each batch actually is.
+
+        Args:
+            substance_id: The ID of the substance being split.
+            entries: The new substances, in the same format as
+                `register_molecules`. Molecules that are already registered
+                give their existing ID and are left unchanged.
+            reason: Why the substance is being split.
+            matching_version: The version of the matching rules that led to
+                the split (if any).
+
+        Returns:
+            The substance IDs of each entry (in the same order).
+        """
+        with transaction.atomic():
+            cls._get_active([substance_id])
+            new_ids = cls.register_molecules(
+                [dict(parent_id=substance_id, **entry) for entry in entries],
+                level=cls.get_id_level(substance_id),
+            )
+            SubstanceIdChange.objects.bulk_create(
+                [
+                    SubstanceIdChange(
+                        change_type="split",
+                        old_id=substance_id,
+                        new_id=new_id,
+                        reason=reason,
+                        matching_version=matching_version,
+                    )
+                    for new_id in dict.fromkeys(new_ids)  # unique, keeps order
+                    if new_id != substance_id
+                ]
+            )
+        return new_ids
+
+    @classmethod
+    def delist(
+        cls,
+        substance_id: str,
+        reason: str = None,
+    ):
+        """
+        Removes a substance from the catalog without a replacement (e.g. a
+        junk entry or typo). The ID is kept as a tombstone so that it is
+        never reused. Use `merge` instead if the substance is a duplicate.
+
+        Args:
+            substance_id: The ID of the substance to delist.
+            reason: Why the substance is being delisted.
+        """
+        with transaction.atomic():
+            cls._get_active([substance_id])
+            cls.objects.filter(id=substance_id).update(is_delisted=True)
+            SubstanceIdChange.objects.create(
+                change_type="delist",
+                old_id=substance_id,
+                reason=reason,
+            )
 
     # -------------------------------------------------------------------------

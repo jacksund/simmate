@@ -32,6 +32,17 @@ class PpdbMolecule(ThirdPartyData, Molecule):
     source_doi = "https://sitem.herts.ac.uk/aeru/ppdb/en/atoz.htm"
     is_redistribution_allowed = False
 
+    substance = table_column.ForeignKey(
+        "inventory_management.Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="ppdb_entries",
+        blank=True,
+        null=True,
+    )
+    """
+    The registered substance that this entry corresponds to, if any.
+    """
+
     name = table_column.TextField(blank=True, null=True)
     """
     Chemical or common name of the compound

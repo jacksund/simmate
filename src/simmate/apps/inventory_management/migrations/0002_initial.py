@@ -13,21 +13,8 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("aflow", "0002_aflowprototype_is_invalid_structure_and_more"),
-        ("bcpc", "0002_initial"),
-        ("cas_registry", "0003_remove_casregistrymolecule_physical_state_and_more"),
-        ("chembl", "0005_remove_chemblassayresult_source_and_more"),
-        ("chemspace", "0002_initial"),
-        ("cod", "0003_alter_codstructure_id"),
         ("core", "0007_feedback"),
-        ("emolecules", "0002_initial"),
-        ("enamine", "0002_initial"),
         ("inventory_management", "0001_setup"),
-        ("jarvis", "0002_jarvisstructure_is_invalid_structure"),
-        ("materials_project", "0003_matprojstructure_is_invalid_structure"),
-        ("oqmd", "0004_remove_oqmdstructure_formation_energy_and_more"),
-        ("pdb", "0003_rename_type_pdbligand_monomer_type_and_more"),
-        ("ppdb", "0002_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -356,106 +343,6 @@ class Migration(migrations.Migration):
                 ("pubchem", models.CharField(blank=True, max_length=20, null=True)),
                 ("extra_metadata", models.JSONField(blank=True, null=True)),
                 (
-                    "aflow",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="substances",
-                        to="aflow.aflowstructure",
-                    ),
-                ),
-                (
-                    "bcpc",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="substances",
-                        to="bcpc.bcpcisopesticide",
-                    ),
-                ),
-                (
-                    "cas_registry",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="substances",
-                        to="cas_registry.casregistrymolecule",
-                    ),
-                ),
-                (
-                    "chembl",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="substances",
-                        to="chembl.chemblmolecule",
-                    ),
-                ),
-                (
-                    "chemspace",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="substances",
-                        to="chemspace.chemspacefreedomspacemolecule",
-                    ),
-                ),
-                (
-                    "cod",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="substances",
-                        to="cod.codstructure",
-                    ),
-                ),
-                (
-                    "emolecules",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="substances",
-                        to="emolecules.emoleculesmolecule",
-                    ),
-                ),
-                (
-                    "enamine",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="substances",
-                        to="enamine.enaminerealmolecule",
-                    ),
-                ),
-                (
-                    "jarvis",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="substances",
-                        to="jarvis.jarvisstructure",
-                    ),
-                ),
-                (
-                    "materials_project",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="substances",
-                        to="materials_project.matprojstructure",
-                    ),
-                ),
-                (
                     "molecule",
                     models.ForeignKey(
                         blank=True,
@@ -466,16 +353,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "oqmd",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="substances",
-                        to="oqmd.oqmdstructure",
-                    ),
-                ),
-                (
                     "parent",
                     models.ForeignKey(
                         blank=True,
@@ -483,26 +360,6 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="children",
                         to="inventory_management.substance",
-                    ),
-                ),
-                (
-                    "pdb",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="substances",
-                        to="pdb.pdbligand",
-                    ),
-                ),
-                (
-                    "ppdb",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="substances",
-                        to="ppdb.ppdbmolecule",
                     ),
                 ),
                 (

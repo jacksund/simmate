@@ -32,6 +32,17 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
     is_redistribution_allowed = False
 
     # emol_versions_id --> set to id in the table
+    substance = table_column.ForeignKey(
+        "inventory_management.Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="emolecules_entries",
+        blank=True,
+        null=True,
+    )
+    """
+    The registered substance that this entry corresponds to, if any.
+    """
+
     emol_parent_id = table_column.IntegerField(blank=True, null=True)
 
     is_active_listing = table_column.BooleanField(blank=True, null=True, default=True)

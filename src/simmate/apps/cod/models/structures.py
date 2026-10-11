@@ -51,6 +51,17 @@ class CodStructure(ThirdPartyData, Structure):
 
     # -------------------------------------------------------------------------
 
+    substance = table_column.ForeignKey(
+        "inventory_management.Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="cod_entries",
+        blank=True,
+        null=True,
+    )
+    """
+    The registered substance that this entry corresponds to, if any.
+    """
+
     is_ordered = table_column.BooleanField(blank=True, null=True)
     """
     whether the structure contains disordered sites (i.e. mixed occupancies)

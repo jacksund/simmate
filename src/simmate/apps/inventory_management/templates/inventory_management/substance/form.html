@@ -55,32 +55,5 @@
             <div class="col-12">{% htmx_structure_input name="structure" label="Structure" %}</div>
         </div>
     </div>
-    <div class="container mt-4 border border-3 border-secondary rounded py-2">
-        <h3>
-            <span class="badge bg-secondary">5. External References</span>
-        </h3>
-        <div class="row">
-            <div class="col-md-3">{% htmx_text_input name="cas_number" label="CAS Number" %}</div>
-            <div class="col-md-3">{% htmx_text_input name="pubchem_cid" label="PubChem CID" %}</div>
-            <div class="col-md-3">{% htmx_text_input name="chembl" label="ChEMBL" %}</div>
-            <div class="col-md-3">{% htmx_text_input name="chemspace" label="ChemSpace" %}</div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">{% htmx_text_input name="materials_project" label="Materials Project" %}</div>
-            <div class="col-md-3">{% htmx_text_input name="oqmd" label="OQMD" %}</div>
-            <div class="col-md-3">{% htmx_text_input name="aflow" label="AFLOW" %}</div>
-            <div class="col-md-3">{% htmx_text_input name="cod" label="COD" %}</div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">{% htmx_text_input name="jarvis" label="JARVIS" %}</div>
-            <div class="col-md-3">{% htmx_text_input name="pdb" label="PDB" %}</div>
-            <div class="col-md-3">{% htmx_text_input name="ppdb" label="PPDB" %}</div>
-            <div class="col-md-3">{% htmx_text_input name="emolecules" label="eMolecules" %}</div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">{% htmx_text_input name="enamine" label="Enamine" %}</div>
-            <div class="col-md-3">{% htmx_text_input name="bcpc" label="BCPC" %}</div>
-        </div>
-    </div>
     {% include "data_explorer/dynamic_submit_button.html" %}
 {% endblock %}

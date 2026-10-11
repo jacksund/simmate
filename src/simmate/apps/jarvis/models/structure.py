@@ -48,6 +48,17 @@ class JarvisStructure(ThirdPartyData, Structure):
     The id used to represent the structure (ex: "jvasp-12345")
     """
 
+    substance = table_column.ForeignKey(
+        "inventory_management.Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="jarvis_entries",
+        blank=True,
+        null=True,
+    )
+    """
+    The registered substance that this entry corresponds to, if any.
+    """
+
     # TODO: contact their team to ask about reporting energy instead. That way
     # we can use the Thermodynamics mixin instead of manually listing this.
     energy_above_hull = table_column.FloatField(blank=True, null=True)

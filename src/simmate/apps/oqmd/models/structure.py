@@ -50,6 +50,17 @@ class OqmdStructure(ThirdPartyData, Structure):
 
     # -------------------------------------------------------------------------
 
+    substance = table_column.ForeignKey(
+        "inventory_management.Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="oqmd_entries",
+        blank=True,
+        null=True,
+    )
+    """
+    The registered substance that this entry corresponds to, if any.
+    """
+
     energy_per_atom = table_column.FloatField(blank=True, null=True)
     """
     The final energy per atom of the structure as provided by the OQMD.

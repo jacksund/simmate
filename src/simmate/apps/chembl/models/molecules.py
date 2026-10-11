@@ -62,6 +62,17 @@ class ChemblMolecule(ThirdPartyData, Molecule):
 
     # Note: 'id' is set to the 'molregno' from the ChEMBL database.
 
+    substance = table_column.ForeignKey(
+        "inventory_management.Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="chembl_entries",
+        blank=True,
+        null=True,
+    )
+    """
+    The registered substance that this entry corresponds to, if any.
+    """
+
     chembl_id = table_column.CharField(max_length=25, blank=True, null=True)
     """
     The ChEMBL ID used to represent the molecule (e.g., "CHEMBL3183843"). 

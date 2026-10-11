@@ -7,4 +7,5 @@ from .molecule import Molecule
 from .storage_location import StorageLocation
 from .structure import Structure
 from .substance import Substance
+from .substance_id_change import SubstanceIdChange
 from .usage_log import UsageLog

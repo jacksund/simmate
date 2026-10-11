@@ -60,6 +60,17 @@ class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
     The id used to represent the structure (ex: "mp-12345")
     """
 
+    substance = table_column.ForeignKey(
+        "inventory_management.Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="materials_project_entries",
+        blank=True,
+        null=True,
+    )
+    """
+    The registered substance that this entry corresponds to, if any.
+    """
+
     energy_uncorrected = table_column.FloatField(blank=True, null=True)
     """
     The reported energy of the system BEFORE Materials Project applies
