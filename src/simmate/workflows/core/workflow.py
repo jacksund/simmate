@@ -14,6 +14,7 @@ import cloudpickle
 import toml
 import yaml
 from django.utils import timezone
+from django.utils.functional import classproperty
 
 import simmate
 from simmate.compute import SimmateExecutor
@@ -86,8 +87,7 @@ class Workflow:
     # required files from previous calculations
     # -------------------------------------------------------------------------
 
-    @classmethod
-    @property
+    @classproperty
     def has_prerequisite(cls) -> bool:
         """
         Whether there is a prerequisite workflow for this one to work.
@@ -394,8 +394,7 @@ class Workflow:
     # Methods that help with accessing the database and saving results
     # -------------------------------------------------------------------------
 
-    @classmethod
-    @property
+    @classproperty
     def database_table(cls) -> Calculation:
         """
         The database table where calculation information (such as the run_id)
@@ -453,8 +452,7 @@ class Workflow:
             "workflow as shown in the 'basic' example workflow from the guides."
         )
 
-    @classmethod
-    @property
+    @classproperty
     def all_results(cls):  # -> SearchResults
         """
         Filters results from the database table down to the results from this
@@ -523,8 +521,7 @@ class Workflow:
     # Properties that enforce the naming convention for workflows
     # -------------------------------------------------------------------------
 
-    @classmethod
-    @property
+    @classproperty
     def name_full(cls) -> str:
         """
         Standardized name of the workflow. This converts the class name like so:
@@ -548,8 +545,7 @@ class Workflow:
 
         return name.lower()
 
-    @classmethod
-    @property
+    @classproperty
     def name_type(cls) -> str:
         """
         Name of the Project this workflow is associated with. This is the first
@@ -557,8 +553,7 @@ class Workflow:
         """
         return cls.name_full.split(".")[0]
 
-    @classmethod
-    @property
+    @classproperty
     def name_app(cls) -> str:
         """
         Name of the app this workflow is associated with. This is the second
@@ -566,8 +561,7 @@ class Workflow:
         """
         return cls.name_full.split(".")[1]
 
-    @classmethod
-    @property
+    @classproperty
     def name_preset(cls) -> str:
         """
         Name of the settings/preset this workflow is associated with. This is the third
@@ -575,8 +569,7 @@ class Workflow:
         """
         return cls.name_full.split(".")[2]
 
-    @classmethod
-    @property
+    @classproperty
     def name_python(cls) -> str:
         """
         Standardized name of the workflow in python, which is just the class name.
@@ -586,8 +579,7 @@ class Workflow:
         """
         return str(cls.__name__)
 
-    @classmethod
-    @property
+    @classproperty
     def python_path(cls) -> str:
         """
         Python path to the source code of the workflow
@@ -596,8 +588,7 @@ class Workflow:
         """
         return str(cls.__module__)
 
-    @classmethod
-    @property
+    @classproperty
     def tags(cls) -> list[str]:
         """
         Lists of tags to submit a the workflow with when using run_cloud.
@@ -616,8 +607,7 @@ class Workflow:
 
     # BUG: naming this `description` causes issues.
     # See https://github.com/PrefectHQ/prefect/issues/3911
-    @classmethod
-    @property
+    @classproperty
     def description_doc(cls) -> str:
         """
         This simply returns the documentation string of this workflow -- so this
@@ -626,8 +616,7 @@ class Workflow:
         """
         return cls.__doc__ or "No description provided"
 
-    @classmethod
-    @property
+    @classproperty
     def parameter_names(cls) -> list[str]:
         """
         Gives a list of all the parameter names for this workflow.
@@ -643,8 +632,7 @@ class Workflow:
         parameters.sort()
         return parameters
 
-    @classmethod
-    @property
+    @classproperty
     def parameter_names_required(cls) -> list[str]:
         """
         Gives a list of all the required parameter names for this workflow.
@@ -678,8 +666,7 @@ class Workflow:
         print(yaml.dump(as_list))
         print("*** 'null' indicates the parameter is set with advanced logic\n")
 
-    @classmethod
-    @property
+    @classproperty
     def parameter_defaults(cls):
         """
         Inspect the run_config and other methods to see what the default
@@ -996,8 +983,7 @@ class Workflow:
         unique_id = str(uuid.uuid4())
         return unique_id
 
-    @classmethod
-    @property
+    @classproperty
     def _parameters_to_register(cls) -> list[str]:
         """
         A list of input parameters that should be used to register the calculation.
@@ -1268,8 +1254,7 @@ class Workflow:
     https://jacksund.github.io/simmate/full_guides/workflows/accuracy_ratings/
     """
 
-    @classmethod
-    @property
+    @classproperty
     def median_cost_usdc(cls) -> float:
         """
         Gives the median cost in USDC for all past workflow runs.
@@ -1278,8 +1263,7 @@ class Workflow:
         """
         return None  # TODO
 
-    @classmethod
-    @property
+    @classproperty
     def median_real_time(cls) -> float:
         """
         Gives the median real time in seconds for all past workflow runs. This
@@ -1289,8 +1273,7 @@ class Workflow:
         """
         return None  # TODO
 
-    @classmethod
-    @property
+    @classproperty
     def median_cpu_time(cls) -> float:
         """
         Gives the median CPU time in seconds for all past workflow runs.
@@ -1347,8 +1330,7 @@ class Workflow:
 
     # -------------------------------------------------------------------------
 
-    @classmethod
-    @property
+    @classproperty
     def source_code_link(cls) -> str:
         """
         Gives the link to the source code in github

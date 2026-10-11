@@ -5,6 +5,7 @@ from pathlib import Path
 
 import boto3
 from botocore.config import Config
+from django.utils.functional import classproperty
 from rich.progress import track
 
 from simmate.config import settings
@@ -54,13 +55,11 @@ class S3Bucket:
             warnings.filterwarnings("ignore")
         return kwargs
 
-    @classmethod
-    @property
+    @classproperty
     def client(cls):
         return boto3.client("s3", **cls._get_boto_kwargs())
 
-    @classmethod
-    @property
+    @classproperty
     def bucket_obj(cls):
         """
         The boto3 resource-level Bucket object for `cls.bucket`.

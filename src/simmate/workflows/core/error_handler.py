@@ -10,6 +10,8 @@ import subprocess
 from abc import ABC, abstractmethod
 from pathlib import Path
 
+from django.utils.functional import classproperty
+
 
 class ErrorHandler(ABC):
     """
@@ -154,8 +156,7 @@ class ErrorHandler(ABC):
         # SupervisedStagedTask and other features
         return
 
-    @classmethod
-    @property
+    @classproperty
     def name(cls):
         """
         A nice string name for the handler. By default it just returns the name

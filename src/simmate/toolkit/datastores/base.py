@@ -6,6 +6,7 @@ from collections import defaultdict
 from pathlib import Path
 
 import polars
+from django.utils.functional import classproperty
 
 from simmate.config import settings
 from simmate.utils import (
@@ -70,8 +71,7 @@ class Datastore:
 
     # file/dir names
 
-    @classmethod
-    @property
+    @classproperty
     def base_directory(cls) -> Path:
         """
         Path object of the directory where all datastore components (live, staging, old) are stored.
@@ -88,34 +88,29 @@ class Datastore:
 
         return get_directory(path)
 
-    @classmethod
-    @property
+    @classproperty
     def directory(cls) -> Path:
         """
         Alias for base_directory for backwards compatibility.
         """
         return cls.base_directory
 
-    @classmethod
-    @property
+    @classproperty
     def live_directory(cls) -> Path:
         """Directory for active parquet chunk files."""
         return cls.base_directory / "live"
 
-    @classmethod
-    @property
+    @classproperty
     def staging_directory(cls) -> Path:
         """Directory for staging new/updated parquet chunk files."""
         return get_directory(cls.base_directory / "staging")
 
-    @classmethod
-    @property
+    @classproperty
     def old_directory(cls) -> Path:
         """Directory for backing up previous live parquet chunk files."""
         return cls.base_directory / "old"
 
-    @classmethod
-    @property
+    @classproperty
     def chunk_files(cls) -> list[Path]:
         """
         Returns a sorted list of existing parquet chunk files in the live directory.
@@ -123,8 +118,7 @@ class Datastore:
         chunk_files = [f for f in cls.live_directory.rglob("*.parquet") if f.is_file()]
         return sorted(chunk_files, key=lambda f: f.name)
 
-    @classmethod
-    @property
+    @classproperty
     def chunk_files_wildcard(cls) -> Path:
         """
         Wildcard path object for the live directory + all parquet files in it.
@@ -205,8 +199,7 @@ class Datastore:
 
     # -------------------------------------------------------------------------
 
-    @classmethod
-    @property
+    @classproperty
     def lf(cls) -> polars.LazyFrame:
         """
         Returns a polars.LazyFrame for the datastore using scan_parquet.

@@ -3,6 +3,8 @@
 import shutil
 from pathlib import Path
 
+from django.utils.functional import classproperty
+
 from simmate.apps.vasp.inputs import Incar, Kpoints, Poscar, Potcar
 from simmate.config import settings
 from simmate.toolkit import Structure
@@ -48,8 +50,7 @@ class VaspWorkflow(S3Workflow, StructureWorkflow):
 
     # INCAR configuration
 
-    @classmethod
-    @property
+    @classproperty
     def incar(cls) -> dict:
         """
         The INCAR configuration settings that will be used for this workflow.

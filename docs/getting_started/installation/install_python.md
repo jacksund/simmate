@@ -30,7 +30,7 @@ We recommend choosing based on your comfort level with coding:
 
 In an ideal world, you could download Simmate like any other desktop app and be ready to go. However, Python projects often require specific versions of different tools. For instance:
 
-1. **Simmate** requires Python version 3.11.
+1. **Simmate** requires Python version 3.13.
 2. **Another program** might require an older version, like Python 3.8.
 
 An environment manager (like uv or Anaconda) isolates these projects into separate "folders" or **environments**. This prevents them from conflicting and ensures your software always works as expected.

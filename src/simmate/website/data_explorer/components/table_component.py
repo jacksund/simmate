@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.shortcuts import redirect
+from django.utils.functional import classproperty
 
 from simmate.database.core import DatabaseTable
 from simmate.website.htmx.components import HtmxComponent
@@ -98,13 +99,11 @@ class TableComponent(
 
     # -------------------------------------------------------------------------
 
-    @classmethod
-    @property
+    @classproperty
     def display_name(cls):
         return cls.table.table_name
 
-    @classmethod
-    @property
+    @classproperty
     def description_short(cls):
         return ""
 

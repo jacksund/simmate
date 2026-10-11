@@ -3,6 +3,8 @@
 import logging
 import time
 
+from django.utils.functional import classproperty
+
 from simmate.toolkit import Structure
 
 
@@ -91,8 +93,7 @@ class Transformation:
             "your Transformation class"
         )
 
-    @classmethod
-    @property
+    @classproperty
     def name(cls):
         """
         A nice string name for the transformation. By default it just returns

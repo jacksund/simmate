@@ -3,6 +3,8 @@
 import logging
 from abc import ABC, abstractmethod
 
+from django.utils.functional import classproperty
+
 from simmate.utils import dispatch
 
 
@@ -20,8 +22,7 @@ class StructureCreator(ABC):
         """
         pass
 
-    @classmethod
-    @property
+    @classproperty
     def name(cls):
         """
         A nice string name for the creator. By default it just returns the name

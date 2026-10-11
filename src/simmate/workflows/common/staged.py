@@ -7,6 +7,7 @@ from pathlib import Path
 
 import numpy
 import plotly.graph_objects as plotly_go
+from django.utils.functional import classproperty
 from plotly.subplots import make_subplots
 
 from simmate.toolkit import Structure
@@ -82,8 +83,7 @@ class StagedWorkflow(Workflow):
             "lattice_stress": getattr(result, "lattice_stress", None),
         }
 
-    @classmethod
-    @property
+    @classproperty
     @cache
     def subworkflows(cls):
         # import locally to avoid circular import
@@ -94,8 +94,7 @@ class StagedWorkflow(Workflow):
             for name in cls.subworkflow_names
         ]
 
-    @classmethod
-    @property
+    @classproperty
     @cache
     def subworkflow_tables(cls):
         return list(

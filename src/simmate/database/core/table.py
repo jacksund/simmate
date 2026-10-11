@@ -15,6 +15,7 @@ from django.forms.models import model_to_dict
 from django.http import HttpRequest, JsonResponse, QueryDict
 from django.shortcuts import get_object_or_404
 from django.urls import resolve, reverse
+from django.utils.functional import classproperty
 from django.utils.module_loading import import_string
 
 from simmate.config import settings
@@ -108,8 +109,7 @@ class DatabaseTable(models.Model, ArchiveMixin):
     # Core methods accessing key information and writing summary files
     # -------------------------------------------------------------------------
 
-    @classmethod
-    @property
+    @classproperty
     def table_name(cls) -> str:
         """
         Returns the name of this database table, which will simply match the
@@ -121,8 +121,7 @@ class DatabaseTable(models.Model, ArchiveMixin):
         """
         return cls.__name__
 
-    @classmethod
-    @property
+    @classproperty
     def columns(cls):
         return cls._meta.get_fields()
 
@@ -783,8 +782,7 @@ class DatabaseTable(models.Model, ArchiveMixin):
     # issue with >1mil rows in the dataset.
     # We still allow users to set "None" disable this feature.
 
-    @classmethod
-    @property
+    @classproperty
     @cache
     def filter_methods(cls) -> list[str]:
         """
@@ -802,8 +800,7 @@ class DatabaseTable(models.Model, ArchiveMixin):
             if method.startswith("filter_") and method not in excluded_methods
         ]  # dir() looks to be faster than inspect.getmembers
 
-    @classmethod
-    @property
+    @classproperty
     @cache
     def filter_methods_extra_args(cls) -> list[str]:
         """
@@ -1006,8 +1003,7 @@ class DatabaseTable(models.Model, ArchiveMixin):
     # Methods that link to the website UI
     # -------------------------------------------------------------------------
 
-    @classmethod
-    @property
+    @classproperty
     def url_table(self) -> str:
         """
         Provides the URL link to the database table page in the Simmate website

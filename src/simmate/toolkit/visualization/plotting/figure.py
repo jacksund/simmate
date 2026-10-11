@@ -3,12 +3,13 @@
 import re
 from pathlib import Path
 
+from django.utils.functional import classproperty
+
 
 class Figure:
     method_type: str = "objectmethod"  # or "classmethod"
 
-    @classmethod
-    @property
+    @classproperty
     def name(cls):
         # https://stackoverflow.com/questions/1175208/
         name = re.sub(r"(?<!^)(?=[A-Z])", "_", cls.__name__).lower()

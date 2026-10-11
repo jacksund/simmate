@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pandas
+from django.utils.functional import classproperty
 
 
 class Selector:
@@ -40,8 +41,7 @@ class Selector:
             "You must add a custom select method for your Selector subclass"
         )
 
-    @classmethod
-    @property
+    @classproperty
     def name(cls):
         """
         A nice string name for the selector. By default it just returns the name
