@@ -101,7 +101,7 @@ def update_work_item(request, work_item_id):
     API endpoint for remote workers to submit the result of a WorkItem.
     Expects JSON data:
     {
-        "status": "F" or "E" or "P",
+        "status": "F" or "E" or "P" or "I",
         "result": "<base64_encoded_pickled_result>"
     }
     """
@@ -110,6 +110,9 @@ def update_work_item(request, work_item_id):
 
     if not status or not result_b64:
         return JsonResponse({"detail": "Missing status or result data."}, status=400)
+
+    if status not in WorkItem.StatusOptions.values:
+        return JsonResponse({"detail": f"Invalid status '{status}'."}, status=400)
 
     if not check_worker_permissions(request.user):
         return JsonResponse(
@@ -126,6 +129,14 @@ def update_work_item(request, work_item_id):
             workitem = WorkItem.objects.select_for_update().get(pk=work_item_id)
         except WorkItem.DoesNotExist:
             return JsonResponse({"detail": "WorkItem not found."}, status=404)
+
+        # an interrupted worker may report late, after the item already
+        # completed. Only running items can be interrupted.
+        if status == "I" and workitem.status != "R":
+            return JsonResponse(
+                {"detail": "WorkItem is not running. Ignoring interruption."},
+                status=200,
+            )
 
         workitem.result_binary = result_binary
         workitem.status = status

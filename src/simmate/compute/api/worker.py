@@ -12,6 +12,9 @@ from rich import print
 from simmate.config import settings
 from simmate.utils import get_class
 
+from ..utils import handle_sigterm
+from ..work_item import WorkerInterruptedError
+
 HEADER_ART = r"""
 =====================================================================
    _____                  __        _      __         __
@@ -53,122 +56,164 @@ class ApiWorker:
             )
 
         self.nitems_completed = 0
+        self.current_workitem_id = None
 
     def start(self):
         """
         Starts the worker process to begin working through WorkItems
         """
 
+        # SIGTERM (e.g. from k8s or docker stopping the container) is treated
+        # the same as crtl+c
+        with handle_sigterm():
+            try:
+                self._run_loop()
+            except KeyboardInterrupt:
+                logging.info("Stop signal recieved. Shutting down.")
+                self._shutdown_on_interrupt()
+
+    def _shutdown_on_interrupt(self):
+        """
+        Reports any WorkItem that was still running as INTERRUPTED.
+        """
+        if not self.current_workitem_id:
+            return
+
+        logging.warning(
+            "Shut down worker while WorkItem was still running. "
+            "It will be marked as INTERRUPTED."
+        )
+        result = WorkerInterruptedError(
+            "API worker was stopped while running this item."
+        )
+        self._report_result(
+            self.current_workitem_id,
+            status="I",
+            result_pickled=cloudpickle.dumps(result),
+            timeout=10,
+        )
+
+    def _report_result(
+        self,
+        workitem_id: str,
+        status: str,
+        result_pickled: bytes,
+        timeout: float = None,
+    ):
+        """
+        Sends the status and pickled result of a WorkItem back to the API.
+        Failures are logged rather than raised.
+        """
         try:
-            print("[bold dark_cyan]" + HEADER_ART)
-            logging.info(
-                f"Starting API worker with tags {self.tags} pointing to {self.server_url}"
+            response = self.session.post(
+                f"{self.server_url}/apps/compute/work_items/{workitem_id}/update/",
+                json={
+                    "status": status,
+                    "result": base64.b64encode(result_pickled).decode("utf-8"),
+                },
+                timeout=timeout,
+            )
+            response.raise_for_status()
+        except requests.exceptions.RequestException as exc:
+            logging.error(
+                f"Failed to update WorkItem {workitem_id} result via API: {exc}"
             )
 
-            if self.startup_method:
-                logging.info(f"Running startup method: '{self.startup_method}'")
-                startup_method = get_class(self.startup_method)
-                startup_method()
+    def _run_loop(self):
+        """
+        The main loop of `start`, which runs until a stop condition is hit.
+        """
+        print("[bold dark_cyan]" + HEADER_ART)
+        logging.info(
+            f"Starting API worker with tags {self.tags} pointing to {self.server_url}"
+        )
 
-            time_start = time.time()
-            self.nitems_completed = 0
-            empty_queue_streak = 0
+        if self.startup_method:
+            logging.info(f"Running startup method: '{self.startup_method}'")
+            startup_method = get_class(self.startup_method)
+            startup_method()
 
-            logging.info("Worker is ready & listening for WorkItems via API")
+        time_start = time.time()
+        self.nitems_completed = 0
+        empty_queue_streak = 0
 
-            while True:
-                if (time.time() - time_start) > self.timeout:
-                    logging.info(
-                        "The time-limit for this worker has been hit. Shutting down."
-                    )
+        logging.info("Worker is ready & listening for WorkItems via API")
+
+        while True:
+            if (time.time() - time_start) > self.timeout:
+                logging.info(
+                    "The time-limit for this worker has been hit. Shutting down."
+                )
+                return
+
+            if self.nitems_completed >= self.nitems_max:
+                logging.info(
+                    f"Maximum number of WorkItems reached ({self.nitems_max}). "
+                    "Shutting down."
+                )
+                return
+
+            # Request the next work item
+            try:
+                response = self.session.post(
+                    f"{self.server_url}/apps/compute/work_items/next/",
+                    json={"tags": self.tags},
+                    timeout=10,
+                )
+                response.raise_for_status()
+            except requests.exceptions.RequestException as exc:
+                logging.warning(
+                    f"Failed to connect to API: {exc}. Retrying in {self.waittime_on_empty_queue}s..."
+                )
+                time.sleep(self.waittime_on_empty_queue)
+                continue
+
+            if response.status_code == 204:
+                # Queue is empty
+                empty_queue_streak += 1
+                time.sleep(self.waittime_on_empty_queue)
+                if self.close_on_empty_queue and empty_queue_streak >= 2:
+                    logging.info("The task queue is empty. Shutting down.")
                     return
+                continue
+            else:
+                empty_queue_streak = 0
 
-                if self.nitems_completed >= self.nitems_max:
-                    logging.info(
-                        f"Maximum number of WorkItems reached ({self.nitems_max}). "
-                        "Shutting down."
-                    )
-                    return
+            workitem_data = response.json()
+            workitem_id = workitem_data["id"]
+            self.current_workitem_id = workitem_id
 
-                # Request the next work item
-                try:
-                    response = self.session.post(
-                        f"{self.server_url}/apps/compute/work_items/next/",
-                        json={"tags": self.tags},
-                        timeout=10,
-                    )
-                    response.raise_for_status()
-                except requests.exceptions.RequestException as exc:
-                    logging.warning(
-                        f"Failed to connect to API: {exc}. Retrying in {self.waittime_on_empty_queue}s..."
-                    )
-                    time.sleep(self.waittime_on_empty_queue)
-                    continue
+            logging.info(f"Running WorkItem with id {workitem_id}")
 
-                if response.status_code == 204:
-                    # Queue is empty
-                    empty_queue_streak += 1
-                    time.sleep(self.waittime_on_empty_queue)
-                    if self.close_on_empty_queue and empty_queue_streak >= 2:
-                        logging.info("The task queue is empty. Shutting down.")
-                        return
-                    continue
-                else:
-                    empty_queue_streak = 0
+            try:
+                fxn = cloudpickle.loads(base64.b64decode(workitem_data["fxn"]))
+                args = cloudpickle.loads(base64.b64decode(workitem_data["args"]))
+                kwargs = cloudpickle.loads(base64.b64decode(workitem_data["kwargs"]))
+                result = fxn(*args, **kwargs)
+                status = "F"
+            except Exception as exception:
+                traceback.print_exc()
 
-                workitem_data = response.json()
-                workitem_id = workitem_data["id"]
+                logging.warning(
+                    "Task failed with the error shown above. \n\n"
+                    "If you are unfamilar with error tracebacks and find this error "
+                    "difficult to read, you can learn more about these errors "
+                    "here:\n https://realpython.com/python-traceback/\n\n"
+                    "Please open a new issue on our github page if you believe "
+                    "this is a bug:\n https://github.com/jacksund/simmate/issues/\n\n"
+                )
 
-                logging.info(f"Running WorkItem with id {workitem_id}")
+                result = exception
+                status = "E"
 
-                try:
-                    fxn = cloudpickle.loads(base64.b64decode(workitem_data["fxn"]))
-                    args = cloudpickle.loads(base64.b64decode(workitem_data["args"]))
-                    kwargs = cloudpickle.loads(
-                        base64.b64decode(workitem_data["kwargs"])
-                    )
-                    result = fxn(*args, **kwargs)
-                    status = "F"
-                except Exception as exception:
-                    traceback.print_exc()
+            try:
+                result_pickled = cloudpickle.dumps(result)
+            except Exception as exception:
+                result_pickled = cloudpickle.dumps(exception)
+                status = "E"
 
-                    logging.warning(
-                        "Task failed with the error shown above. \n\n"
-                        "If you are unfamilar with error tracebacks and find this error "
-                        "difficult to read, you can learn more about these errors "
-                        "here:\n https://realpython.com/python-traceback/\n\n"
-                        "Please open a new issue on our github page if you believe "
-                        "this is a bug:\n https://github.com/jacksund/simmate/issues/\n\n"
-                    )
+            self._report_result(workitem_id, status, result_pickled)
 
-                    result = exception
-                    status = "E"
-
-                try:
-                    result_pickled = cloudpickle.dumps(result)
-                except Exception as exception:
-                    result_pickled = cloudpickle.dumps(exception)
-                    status = "E"
-
-                result_b64 = base64.b64encode(result_pickled).decode("utf-8")
-
-                # Send result back to API
-                try:
-                    update_response = self.session.post(
-                        f"{self.server_url}/apps/compute/work_items/{workitem_id}/update/",
-                        json={
-                            "status": status,
-                            "result": result_b64,
-                        },
-                    )
-                    update_response.raise_for_status()
-                except requests.exceptions.RequestException as exc:
-                    logging.error(
-                        f"Failed to update WorkItem {workitem_id} result via API: {exc}"
-                    )
-
-                logging.info("Completed WorkItem")
-                self.nitems_completed += 1
-
-        except KeyboardInterrupt:
-            logging.info("Stop signal recieved. Shutting down.")
+            self.current_workitem_id = None
+            logging.info("Completed WorkItem")
+            self.nitems_completed += 1

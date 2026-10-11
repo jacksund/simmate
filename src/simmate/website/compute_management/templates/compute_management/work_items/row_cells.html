@@ -17,6 +17,8 @@
         {% status_bar "Cancelled" "warning" %}
     {% elif entry.status == "E" %}
         {% status_bar "Errored" "danger" %}
+    {% elif entry.status == "I" %}
+        {% status_bar "Interrupted" "warning" %}
     {% elif entry.status == "F" %}
         {% status_bar "Finished" "success" %}
     {% endif %}
