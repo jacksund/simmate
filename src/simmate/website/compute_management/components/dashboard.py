@@ -45,6 +45,7 @@ STATUS_FILTERS = [
     ("R", "Running"),
     ("P", "Pending"),
     ("E", "Errored"),
+    ("I", "Interrupted"),
 ]
 
 CATALOGS = [

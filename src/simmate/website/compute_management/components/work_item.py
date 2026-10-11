@@ -18,6 +18,7 @@ TIMELINE_COLORS = {
     "Running": "#0d6efd",
     "Cancelled": "#fd7e14",
     "Errored": "#dc3545",
+    "Interrupted": "#ffc107",
     "Finished": "#009485",
     "Submitted": "#6c757d",
     "Started": "#0dcaf0",
@@ -128,9 +129,9 @@ class WorkItemComponent(TableComponent):
         df["status_label"] = df["status"].map(STATUS_LABELS)
         df["short_id"] = df["id"].astype(str).str[:8]
 
-        # finished/errored/cancelled items end at their last update. Everything
-        # else is still ongoing.
-        is_done = df["status"].isin(["F", "E", "C"])
+        # finished/errored/cancelled/interrupted items end at their last
+        # update. Everything else is still ongoing.
+        is_done = df["status"].isin(["F", "E", "C", "I"])
         df["ended_at"] = df["updated_at"].where(is_done, now)
 
         # Items from before `started_at` existed: running items were started
@@ -190,7 +191,7 @@ class WorkItemComponent(TableComponent):
             return counts.reindex(bins, fill_value=0)
 
         figure = plotly_go.Figure()
-        for status in ["F", "E", "C"]:
+        for status in ["F", "E", "C", "I"]:
             label = STATUS_LABELS[status]
             counts = count_per_bin(df.loc[df["status"] == status, "ended_at"])
             figure.add_bar(
@@ -235,7 +236,7 @@ class WorkItemComponent(TableComponent):
         )
 
         # running: started -> ended (legacy rows: submitted -> ended)
-        running_mask = df["status"].isin(["R", "F", "E"])
+        running_mask = df["status"].isin(["R", "F", "E", "I"])
         running_starts = df.loc[running_mask, "started_at"].fillna(
             df.loc[running_mask, "created_at"]
         )

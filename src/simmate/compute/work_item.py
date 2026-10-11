@@ -5,6 +5,7 @@ import uuid
 
 import cloudpickle
 from django.db import transaction
+from django.utils import timezone
 
 from simmate.database.core import DatabaseTable, table_column
 
@@ -48,6 +49,7 @@ class WorkItem(DatabaseTable):
         CANCELLED = "C"
         ERRORED = "E"
         FINISHED = "F"
+        INTERRUPTED = "I"
 
     # TODO -- I should consider indexing this column for speed because it's
     # the most queried column by far.
@@ -137,6 +139,27 @@ class WorkItem(DatabaseTable):
         The full workflow name of this item (see `get_workflow_name`).
         """
         return self.get_workflow_name(self.tags)
+
+    @classmethod
+    def requeue_interrupted(cls, **filters) -> int:
+        """
+        Resets INTERRUPTED WorkItems back to PENDING so that another worker
+        will pick them up. These items start over from scratch.
+
+        Args:
+            **filters: Extra filters to limit which items are requeued
+                (e.g. `worker_id=123`).
+
+        Returns:
+            The number of WorkItems requeued.
+        """
+        return cls.objects.filter(status="I", **filters).update(
+            status="P",
+            worker=None,
+            started_at=None,
+            result_binary=None,
+            updated_at=timezone.now(),
+        )
 
     # -------------------------------------------------------------------------
     # The methods below turn this into a future-like object
@@ -255,7 +278,8 @@ class WorkItem(DatabaseTable):
             workitem = WorkItem.objects.only("status", "result_binary").get(pk=self.pk)
             status = workitem.status
 
-            if status == "F" or status == "E":  # FINISHED or ERRORED
+            # FINISHED, ERRORED, or INTERRUPTED
+            if status == "F" or status == "E" or status == "I":
                 # grab the result, unpickle it, and return it
                 result = cloudpickle.loads(workitem.result_binary)
                 # if the result is an Error or Exception, raise it
@@ -281,3 +305,10 @@ class WorkItem(DatabaseTable):
 
 class CancelledError(Exception):
     pass
+
+
+class WorkerInterruptedError(Exception):
+    """
+    Stored as the result of a WorkItem when its worker was stopped (e.g. via
+    SIGTERM or ctrl+c) before the item could finish.
+    """

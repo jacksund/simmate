@@ -1,27 +1,36 @@
 # -*- coding: utf-8 -*-
 
-from .cluster import LocalCluster, SlurmCluster
+import signal
+import threading
+from contextlib import contextmanager
 
 
-def start_cluster(
-    nworkers: int,
-    cluster_type: str = "local",
-    continuous: bool = False,
-):
+@contextmanager
+def handle_sigterm():
     """
-    Utilitiy that helps set up common cluster types with a specific number of
-    workers and optionally run a single-submit of workers
-    """
-    if cluster_type == "local":
-        cluster = LocalCluster
-    elif cluster_type == "slurm":
-        cluster = SlurmCluster
-    else:
-        raise Exception(f"Unknown cluster type {cluster_type}. Choose local or slurm.")
+    Converts SIGTERM into a `KeyboardInterrupt` so that it is handled the same
+    way as crtl+c (SIGINT).
 
-    if continuous:
-        cluster.start_cluster(nworkers)
-    else:
-        jobs = cluster.submit_jobs(nworkers)
-        if cluster_type == "local":
-            cluster.wait_for_jobs(jobs)
+    This is needed in containers (docker, k8s) because they stop processes
+    with SIGTERM. Python does not handle SIGTERM by default, and when running
+    as PID 1 in a container, the signal is ignored entirely -- meaning the
+    process is eventually force-killed (SIGKILL) without any clean up.
+
+    The handler is only installed when called from the main thread, as python
+    only allows signal handlers to be set there. The original handler is
+    restored on exit.
+    """
+    if threading.current_thread() is not threading.main_thread():
+        yield
+        return
+
+    def _raise_interrupt(signum, frame):
+        # ignore any repeated SIGTERMs so they don't interrupt our clean up
+        signal.signal(signal.SIGTERM, signal.SIG_IGN)
+        raise KeyboardInterrupt("SIGTERM received")
+
+    original_handler = signal.signal(signal.SIGTERM, _raise_interrupt)
+    try:
+        yield
+    finally:
+        signal.signal(signal.SIGTERM, original_handler)

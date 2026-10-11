@@ -165,7 +165,7 @@ def start_cluster(
     """
 
     from simmate.database import connect  # isort:skip
-    from simmate.compute.utils import start_cluster
+    from simmate.compute.cluster.utils import start_cluster
 
     start_cluster(
         nworkers=nworkers,

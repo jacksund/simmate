@@ -16,7 +16,8 @@ from rich import print
 from simmate.database.core import DatabaseTable, table_column
 from simmate.utils import get_class
 
-from .work_item import WorkItem
+from .utils import handle_sigterm
+from .work_item import WorkerInterruptedError, WorkItem
 
 # This string is just something fancy to display in the console when a worker
 # starts up.
@@ -171,188 +172,218 @@ class SimmateWorker(DatabaseTable):
         Starts the worker process to begin working through WorkItems
         """
 
-        # all within a try clause so that we can catch crtl+c shutdowns
-        try:
+        # all within a try clause so that we can catch crtl+c shutdowns. SIGTERM
+        # (e.g. from k8s or docker stopping the container) is treated the same.
+        with handle_sigterm():
+            try:
+                self._run_loop()
+            # if the user signals to stop with crtl+c (SIGINT = signal interrupt)
+            # or the process is terminated (SIGTERM)
+            except KeyboardInterrupt:
+                logging.info("Stop signal recieved. Shutting down.")
+                self._shutdown_on_interrupt()
 
-            # separate vars so that we aren't saving 'inf' to database
-            nitems_max = self.nitems_max if self.nitems_max else float("inf")
-            timeout = self.timeout if self.timeout else float("inf")
+    def _shutdown_on_interrupt(self):
+        """
+        Marks this worker as stopped and any WorkItem it was running as
+        INTERRUPTED.
+        """
+        # we were stopped before the worker was even saved to the database
+        if self.pk is None:
+            return
 
-            if not self.tags:
-                self.tags = ["simmate"]
+        ninterrupted = WorkItem.objects.filter(status="R", worker=self).update(
+            status="I",
+            result_binary=cloudpickle.dumps(
+                WorkerInterruptedError(
+                    f"Worker {self.id} was stopped while running this item."
+                )
+            ),
+            updated_at=timezone.now(),
+        )
+        if ninterrupted:
+            logging.warning(
+                "Shut down worker while WorkItem was still running. "
+                "It has been marked as INTERRUPTED and can be requeued "
+                "with `WorkItem.requeue_interrupted()`."
+            )
 
-            # save worker entry to database
-            self.status = "Setting Up"
-            self.save()  # creates initial object
+        self.status = "Stopped"
+        self.save(update_fields=["status", "updated_at"])
 
-            # print the header in the console to let the user know the worker started
-            print("[bold dark_cyan]" + HEADER_ART)
+    def _run_loop(self):
+        """
+        The main loop of `start`, which runs until a stop condition is hit.
+        """
 
-            logging.info(f"Starting worker with tags {list(self.tags)}")
+        # separate vars so that we aren't saving 'inf' to database
+        nitems_max = self.nitems_max if self.nitems_max else float("inf")
+        timeout = self.timeout if self.timeout else float("inf")
 
-            if self.startup_method:
-                logging.info(f"Running startup method: '{self.startup_method}'")
-                startup_method = get_class(self.startup_method)
-                startup_method()
+        if not self.tags:
+            self.tags = ["simmate"]
 
-            # establish starting point for the worker
-            time_start = time.time()
-            self.nitems_completed = 0
+        # save worker entry to database
+        self.status = "Setting Up"
+        self.save()  # creates initial object
 
-            logging.info("Worker is ready & listening for WorkItems")
-            # Loop endlessly until one of the following happens...
-            #   the timeout limit is hit
-            #   the queue is empty
-            #   the nitems limit is hit
-            while True:
-                # check for timeout before starting a new workitem and exit
-                # if we've hit the limit.
-                if (time.time() - time_start) > timeout:
-                    logging.info(
-                        "The time-limit for this worker has been hit. Shutting down."
-                    )
-                    self.status = "Stopped"
-                    self.save(update_fields=["status", "updated_at"])
-                    return
+        # print the header in the console to let the user know the worker started
+        print("[bold dark_cyan]" + HEADER_ART)
 
-                # check the number of jobs completed so far, and exit if we hit
-                # the limit
-                if self.nitems_completed >= nitems_max:
-                    logging.info(
-                        f"Maximum number of WorkItems reached ({nitems_max}). "
-                        "Shutting down."
-                    )
-                    self.status = "Stopped"
-                    self.save(update_fields=["status", "updated_at"])
-                    return
+        logging.info(f"Starting worker with tags {list(self.tags)}")
 
-                # check if a shutdown was requested (e.g. from the web UI)
+        if self.startup_method:
+            logging.info(f"Running startup method: '{self.startup_method}'")
+            startup_method = get_class(self.startup_method)
+            startup_method()
+
+        # establish starting point for the worker
+        time_start = time.time()
+        self.nitems_completed = 0
+
+        logging.info("Worker is ready & listening for WorkItems")
+        # Loop endlessly until one of the following happens...
+        #   the timeout limit is hit
+        #   the queue is empty
+        #   the nitems limit is hit
+        while True:
+            # check for timeout before starting a new workitem and exit
+            # if we've hit the limit.
+            if (time.time() - time_start) > timeout:
+                logging.info(
+                    "The time-limit for this worker has been hit. Shutting down."
+                )
+                self.status = "Stopped"
+                self.save(update_fields=["status", "updated_at"])
+                return
+
+            # check the number of jobs completed so far, and exit if we hit
+            # the limit
+            if self.nitems_completed >= nitems_max:
+                logging.info(
+                    f"Maximum number of WorkItems reached ({nitems_max}). "
+                    "Shutting down."
+                )
+                self.status = "Stopped"
+                self.save(update_fields=["status", "updated_at"])
+                return
+
+            # check if a shutdown was requested (e.g. from the web UI)
+            if self.check_shutdown_flag():
+                return
+
+            # check the length of the queue and while it is empty, we want to
+            # loop. The exception of looping endlessly is if we want the worker
+            # to shutdown instead.
+            while self.queue_size() == 0:
+
+                # if it is empty, we want to sleep for a little and check again
+                self.status = "Idle"
+                self.save(update_fields=["status", "updated_at"])
+                time.sleep(self.waittime_on_empty_queue)
+
                 if self.check_shutdown_flag():
                     return
 
-                # check the length of the queue and while it is empty, we want to
-                # loop. The exception of looping endlessly is if we want the worker
-                # to shutdown instead.
-                while self.queue_size() == 0:
-
-                    # if it is empty, we want to sleep for a little and check again
-                    self.status = "Idle"
-                    self.save(update_fields=["status", "updated_at"])
-                    time.sleep(self.waittime_on_empty_queue)
-
-                    if self.check_shutdown_flag():
+                # This is a special condition where we may want to close the
+                # worker if the queue stays empty
+                if self.close_on_empty_queue:
+                    # after we just waited, let's check the queue size again
+                    if self.queue_size() == 0:
+                        # if it's still empty, we should close the worker
+                        logging.info("The task queue is empty. Shutting down.")
+                        self.status = "Stopped"
+                        self.save(update_fields=["status", "updated_at"])
                         return
 
-                    # This is a special condition where we may want to close the
-                    # worker if the queue stays empty
-                    if self.close_on_empty_queue:
-                        # after we just waited, let's check the queue size again
-                        if self.queue_size() == 0:
-                            # if it's still empty, we should close the worker
-                            logging.info("The task queue is empty. Shutting down.")
-                            self.status = "Stopped"
-                            self.save(update_fields=["status", "updated_at"])
-                            return
-
-                # make this atomic so that multiple workers don't accidentally
-                # grab the same job.
-                with transaction.atomic():
-                    # If we've made it this far, we're ready to grab a new WorkItem
-                    # and run it!
-                    # Query for PENDING WorkItems, lock it for editting, and update
-                    # the status to RUNNING. And grab the first result
-                    workitem = (
-                        WorkItem.objects.select_for_update(skip_locked=True)
-                        .filter(status="P")
-                        .filter_by_tags(self.tags)
-                        .order_by("created_at")
-                        .first()
-                    )
-
-                    # Catch race condition where no workitems are available any more.
-                    # If this is the case, we just restart the while loop.
-                    if not workitem:
-                        continue
-
-                    # we now have a workitem to start
-                    self.status = "Running"
-                    self.save(update_fields=["status", "updated_at"])
-
-                    # update the status to running before starting it so no other
-                    # worker tries to grab the same WorkItem
-                    workitem.status = "R"
-                    workitem.worker = self
-                    workitem.started_at = timezone.now()
-                    workitem.save(
-                        update_fields=["status", "worker", "started_at", "updated_at"]
-                    )
-
-                # Print out the job ID that is being ran for the user to see
-                logging.info(f"Running WorkItem with id {workitem.id}")
-
-                # now let's unpickle the WorkItem components
-                fxn = cloudpickle.loads(workitem.fxn)
-                args = cloudpickle.loads(workitem.args)
-                kwargs = cloudpickle.loads(workitem.kwargs)
-
-                # Try running the WorkItem. A heartbeat thread keeps our
-                # `updated_at` fresh so long jobs aren't mistaken for dead workers.
-                try:
-                    with WorkerHeartbeat(worker_id=self.id):
-                        result = fxn(*args, **kwargs)
-                # if it fails, we want to "capture" the error and return it
-                # rather than have the Worker fail itself.
-                except Exception as exception:
-                    traceback.print_exc()
-
-                    logging.warning(
-                        "Task failed with the error shown above. \n\n"
-                        "If you are unfamilar with error tracebacks and find this error "
-                        "difficult to read, you can learn more about these errors "
-                        "here:\n https://realpython.com/python-traceback/\n\n"
-                        "Please open a new issue on our github page if you believe "
-                        "this is a bug:\n https://github.com/jacksund/simmate/issues/\n\n"
-                    )
-
-                    # will be saved to database instead of raised
-                    result = exception
-
-                # whatever the result, we need to try to pickle it now
-                try:
-                    result_pickled = cloudpickle.dumps(result)
-                # if this fails, we even want to pickle the error and return it
-                except Exception as exception:
-                    # otherwise package the full error
-                    result_pickled = cloudpickle.dumps(exception)
-
-                # our lock exists only within this transation
-                with transaction.atomic():
-                    # requery the WorkItem to restart our lock
-                    workitem = WorkItem.objects.select_for_update().get(pk=workitem.pk)
-
-                    # pickle the result and update the workitem's result and status
-                    # !!! should I have the pickle inside of a Try?
-                    workitem.result_binary = result_pickled
-                    # mark as finished or errored depending on result value
-                    workitem.status = "E" if isinstance(result, Exception) else "F"
-                    workitem.save()
-
-                # mark down that we've completed one WorkItem
-                # status stays as running
-                logging.info("Completed WorkItem")
-                self.nitems_completed += 1
-                self.save(update_fields=["nitems_completed", "updated_at"])
-
-        # if the user signals to stop with crtl+c (SIGINT = signal interrupt)
-        except KeyboardInterrupt:
-            logging.info("Stop signal recieved. Shutting down.")
-            if "workitem" in locals() and workitem and workitem.status == "R":
-                logging.warning(
-                    "Shut down worker while WorkItem was still running. "
-                    "This can lead to undesired consequences. "
+            # make this atomic so that multiple workers don't accidentally
+            # grab the same job.
+            with transaction.atomic():
+                # If we've made it this far, we're ready to grab a new WorkItem
+                # and run it!
+                # Query for PENDING WorkItems, lock it for editting, and update
+                # the status to RUNNING. And grab the first result
+                workitem = (
+                    WorkItem.objects.select_for_update(skip_locked=True)
+                    .filter(status="P")
+                    .filter_by_tags(self.tags)
+                    .order_by("created_at")
+                    .first()
                 )
-            self.status = "Stopped"
-            self.save(update_fields=["status", "updated_at"])
+
+                # Catch race condition where no workitems are available any more.
+                # If this is the case, we just restart the while loop.
+                if not workitem:
+                    continue
+
+                # we now have a workitem to start
+                self.status = "Running"
+                self.save(update_fields=["status", "updated_at"])
+
+                # update the status to running before starting it so no other
+                # worker tries to grab the same WorkItem
+                workitem.status = "R"
+                workitem.worker = self
+                workitem.started_at = timezone.now()
+                workitem.save(
+                    update_fields=["status", "worker", "started_at", "updated_at"]
+                )
+
+            # Print out the job ID that is being ran for the user to see
+            logging.info(f"Running WorkItem with id {workitem.id}")
+
+            # now let's unpickle the WorkItem components
+            fxn = cloudpickle.loads(workitem.fxn)
+            args = cloudpickle.loads(workitem.args)
+            kwargs = cloudpickle.loads(workitem.kwargs)
+
+            # Try running the WorkItem. A heartbeat thread keeps our
+            # `updated_at` fresh so long jobs aren't mistaken for dead workers.
+            try:
+                with WorkerHeartbeat(worker_id=self.id):
+                    result = fxn(*args, **kwargs)
+            # if it fails, we want to "capture" the error and return it
+            # rather than have the Worker fail itself.
+            except Exception as exception:
+                traceback.print_exc()
+
+                logging.warning(
+                    "Task failed with the error shown above. \n\n"
+                    "If you are unfamilar with error tracebacks and find this error "
+                    "difficult to read, you can learn more about these errors "
+                    "here:\n https://realpython.com/python-traceback/\n\n"
+                    "Please open a new issue on our github page if you believe "
+                    "this is a bug:\n https://github.com/jacksund/simmate/issues/\n\n"
+                )
+
+                # will be saved to database instead of raised
+                result = exception
+
+            # whatever the result, we need to try to pickle it now
+            try:
+                result_pickled = cloudpickle.dumps(result)
+            # if this fails, we even want to pickle the error and return it
+            except Exception as exception:
+                # otherwise package the full error
+                result_pickled = cloudpickle.dumps(exception)
+
+            # our lock exists only within this transation
+            with transaction.atomic():
+                # requery the WorkItem to restart our lock
+                workitem = WorkItem.objects.select_for_update().get(pk=workitem.pk)
+
+                # pickle the result and update the workitem's result and status
+                # !!! should I have the pickle inside of a Try?
+                workitem.result_binary = result_pickled
+                # mark as finished or errored depending on result value
+                workitem.status = "E" if isinstance(result, Exception) else "F"
+                workitem.save()
+
+            # mark down that we've completed one WorkItem
+            # status stays as running
+            logging.info("Completed WorkItem")
+            self.nitems_completed += 1
+            self.save(update_fields=["nitems_completed", "updated_at"])
 
     def queue_size(self) -> int:
         """
