@@ -33,12 +33,10 @@ apps:
 - simmate.apps.configs.BcpcConfig
 - simmate.apps.configs.CodConfig
 - simmate.apps.configs.EvolutionConfig
-- simmate.apps.configs.InventoryManagementConfig
 - simmate.apps.configs.JarvisConfig
 - simmate.apps.configs.MaterialsProjectConfig
 - simmate.apps.configs.OqmdConfig
 - simmate.apps.configs.PriceCatalogConfig
-- simmate.apps.configs.ProjectManagementConfig
 - simmate.apps.configs.QuantumEspressoConfig
 - simmate.apps.configs.VaspConfig
 ```

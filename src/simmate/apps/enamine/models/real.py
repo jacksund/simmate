@@ -34,6 +34,17 @@ class EnamineRealMolecule(ThirdPartyData, Molecule):
     ex: "Z4184403259" or "PV-002887495120"
     """
 
+    substance = table_column.ForeignKey(
+        "inventory_management.Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="enamine_entries",
+        blank=True,
+        null=True,
+    )
+    """
+    The registered substance that this entry corresponds to, if any.
+    """
+
     smiles_type = table_column.CharField(blank=True, null=True, max_length=5)
     """
     Honestly... Not sure what this entry means because everything I see is

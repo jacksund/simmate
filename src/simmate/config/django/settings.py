@@ -78,6 +78,10 @@ INSTALLED_APPS = [
     "simmate.website.configs.WorkflowExplorerConfig",
     "simmate.website.configs.ComputeManagementConfig",
     "simmate.apps.configs.RdkitConfig",  # enables rdkit ext when using postgres
+    # Many other apps depend on these. For example, third-party datasets link
+    # their entries to the central `Substance` registry.
+    "simmate.apps.configs.ProjectManagementConfig",
+    "simmate.apps.configs.InventoryManagementConfig",
     *settings.apps,
 ]
 # OPTIMIZE: for now, I just load everything, but I will want to allow users to

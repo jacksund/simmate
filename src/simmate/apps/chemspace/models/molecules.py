@@ -30,6 +30,17 @@ class ChemSpaceFreedomSpaceMolecule(ThirdPartyData, Molecule):
     """
     The id used to represent the molecule (ex: "a1_101109_29635")
     """
+    substance = table_column.ForeignKey(
+        "inventory_management.Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="chemspace_entries",
+        blank=True,
+        null=True,
+    )
+    """
+    The registered substance that this entry corresponds to, if any.
+    """
+
     # BUG: this is catalog number, but we really want ChemSpaceID
 
     @property

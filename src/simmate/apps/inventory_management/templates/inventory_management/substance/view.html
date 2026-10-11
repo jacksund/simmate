@@ -12,6 +12,18 @@
             </div>
         </div>
     </div>
+    {% if table_entry.replaced_by_id %}
+        <div class="row py-2">
+            <div class="col-12">
+                <div class="alert alert-warning mb-0">
+                    <i class="mdi mdi-swap-horizontal"></i>
+                    This ID has been retired and replaced by
+                    <a href="{% url 'data_explorer:table-entry' 'inventory_management__substances' table_entry.replaced_by_id %}">{{ table_entry.replaced_by_id }}</a>.
+                    See the ID history below for details.
+                </div>
+            </div>
+        </div>
+    {% endif %}
     <div class="row py-2">
         <div class="col-12">
             <table class="table table-centered table-striped mb-0 border">
@@ -86,43 +98,175 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>CAS Number</td>
-                        <td>{{ table_entry.cas_number|default:"--" }}</td>
+                        <td>BCPC</td>
+                        <td>
+                            {% for entry in table_entry.bcpc_entries.all %}
+                                {% foreign_key_link entry mode="pill" %}
+                            {% empty %}
+                                --
+                            {% endfor %}
+                        </td>
                     </tr>
                     <tr>
-                        <td>PubChem CID</td>
-                        <td>{{ table_entry.pubchem_cid|default:"--" }}</td>
+                        <td>CAS Registry</td>
+                        <td>
+                            {% for entry in table_entry.cas_registry_entries.all %}
+                                {% foreign_key_link entry mode="pill" %}
+                            {% empty %}
+                                --
+                            {% endfor %}
+                        </td>
                     </tr>
                     <tr>
                         <td>ChEMBL</td>
-                        <td>{{ table_entry.chembl|default:"--" }}</td>
+                        <td>
+                            {% for entry in table_entry.chembl_entries.all %}
+                                {% foreign_key_link entry mode="pill" %}
+                            {% empty %}
+                                --
+                            {% endfor %}
+                        </td>
                     </tr>
                     <tr>
                         <td>ChemSpace</td>
-                        <td>{{ table_entry.chemspace|default:"--" }}</td>
+                        <td>
+                            {% for entry in table_entry.chemspace_entries.all %}
+                                {% foreign_key_link entry mode="pill" %}
+                            {% empty %}
+                                --
+                            {% endfor %}
+                        </td>
                     </tr>
                     <tr>
-                        <td>Materials Project</td>
-                        <td>{{ table_entry.materials_project|default:"--" }}</td>
+                        <td>eMolecules</td>
+                        <td>
+                            {% for entry in table_entry.emolecules_entries.all %}
+                                {% foreign_key_link entry mode="pill" %}
+                            {% empty %}
+                                --
+                            {% endfor %}
+                        </td>
                     </tr>
                     <tr>
-                        <td>OQMD</td>
-                        <td>{{ table_entry.oqmd|default:"--" }}</td>
+                        <td>Enamine</td>
+                        <td>
+                            {% for entry in table_entry.enamine_entries.all %}
+                                {% foreign_key_link entry mode="pill" %}
+                            {% empty %}
+                                --
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>PDB</td>
+                        <td>
+                            {% for entry in table_entry.pdb_entries.all %}
+                                {% foreign_key_link entry mode="pill" %}
+                            {% empty %}
+                                --
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>PPDB</td>
+                        <td>
+                            {% for entry in table_entry.ppdb_entries.all %}
+                                {% foreign_key_link entry mode="pill" %}
+                            {% empty %}
+                                --
+                            {% endfor %}
+                        </td>
                     </tr>
                     <tr>
                         <td>AFLOW</td>
-                        <td>{{ table_entry.aflow|default:"--" }}</td>
+                        <td>
+                            {% for entry in table_entry.aflow_entries.all %}
+                                {% foreign_key_link entry mode="pill" %}
+                            {% empty %}
+                                --
+                            {% endfor %}
+                        </td>
                     </tr>
                     <tr>
                         <td>COD</td>
-                        <td>{{ table_entry.cod|default:"--" }}</td>
+                        <td>
+                            {% for entry in table_entry.cod_entries.all %}
+                                {% foreign_key_link entry mode="pill" %}
+                            {% empty %}
+                                --
+                            {% endfor %}
+                        </td>
                     </tr>
                     <tr>
                         <td>JARVIS</td>
-                        <td>{{ table_entry.jarvis|default:"--" }}</td>
+                        <td>
+                            {% for entry in table_entry.jarvis_entries.all %}
+                                {% foreign_key_link entry mode="pill" %}
+                            {% empty %}
+                                --
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Materials Project</td>
+                        <td>
+                            {% for entry in table_entry.materials_project_entries.all %}
+                                {% foreign_key_link entry mode="pill" %}
+                            {% empty %}
+                                --
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>OQMD</td>
+                        <td>
+                            {% for entry in table_entry.oqmd_entries.all %}
+                                {% foreign_key_link entry mode="pill" %}
+                            {% empty %}
+                                --
+                            {% endfor %}
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
+    {% with id_changes=table_entry.id_changes %}
+        {% if id_changes %}
+            <div class="row py-2 mt-3">
+                <div class="col-12">
+                    <table class="table table-centered table-striped mb-0 border">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>ID History</th>
+                                <th>Old ID</th>
+                                <th>New ID</th>
+                                <th>Reason</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for change in id_changes %}
+                                <tr>
+                                    <td>{{ change.change_type|title }}</td>
+                                    <td>
+                                        <a href="{% url 'data_explorer:table-entry' 'inventory_management__substances' change.old_id %}">{{ change.old_id }}</a>
+                                    </td>
+                                    <td>
+                                        {% if change.new_id %}
+                                            <a href="{% url 'data_explorer:table-entry' 'inventory_management__substances' change.new_id %}">{{ change.new_id }}</a>
+                                        {% else %}
+                                            --
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ change.reason|default:"--" }}</td>
+                                    <td>{{ change.created_at|date:"Y-m-d" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
 {% endblock %}

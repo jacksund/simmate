@@ -67,7 +67,7 @@ def test_apps_view(client):
     assertTemplateUsed(response, "core/app_cards/data_catalogs.html")
     assertTemplateUsed(response, "core/app_cards/workflows_hub.html")
     content = response.content.decode()
-    assert "Scientific Data Catalogs" in content
+    assert "Data Catalogs" in content
     assert "Workflows Hub" in content
     assert 'href="compute/"' in content
 

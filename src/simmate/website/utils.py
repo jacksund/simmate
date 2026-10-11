@@ -246,7 +246,11 @@ def parse_request_get(
     )
 
 
-BUILTIN_WEBSITE_APPS = ["simmate.website.configs.ComputeManagementConfig"]
+BUILTIN_WEBSITE_APPS = [
+    "simmate.website.configs.ComputeManagementConfig",
+    "simmate.apps.configs.ProjectManagementConfig",
+    "simmate.apps.configs.InventoryManagementConfig",
+]
 """
 Built-in website apps that are exposed under `apps/` alongside `settings.apps`.
 """

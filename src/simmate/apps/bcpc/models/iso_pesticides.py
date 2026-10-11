@@ -36,6 +36,17 @@ class BcpcIsoPesticide(ThirdPartyData, Molecule):
     external_website = "http://www.bcpcpesticidecompendium.org/index.html"
     source_doi = "http://www.bcpcpesticidecompendium.org/index_cn_frame.html"
 
+    substance = table_column.ForeignKey(
+        "inventory_management.Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="bcpc_entries",
+        blank=True,
+        null=True,
+    )
+    """
+    The registered substance that this entry corresponds to, if any.
+    """
+
     name = table_column.TextField(blank=True, null=True)
 
     approval_source = table_column.TextField(blank=True, null=True)

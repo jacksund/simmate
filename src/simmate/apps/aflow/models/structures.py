@@ -24,6 +24,17 @@ class AflowStructure(ThirdPartyData, Structure, Thermodynamics):
     The id used to represent the structure (ex: "aflow-12345")
     """
 
+    substance = table_column.ForeignKey(
+        "inventory_management.Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="aflow_entries",
+        blank=True,
+        null=True,
+    )
+    """
+    The registered substance that this entry corresponds to, if any.
+    """
+
     @property
     def external_link(self) -> str:
         """

@@ -39,6 +39,17 @@ class PdbLigand(ThirdPartyData, Molecule):
     name = table_column.TextField()
     """Chemical name of the molecule."""
 
+    substance = table_column.ForeignKey(
+        "inventory_management.Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="pdb_entries",
+        blank=True,
+        null=True,
+    )
+    """
+    The registered substance that this entry corresponds to, if any.
+    """
+
     type_code = table_column.TextField()
     """A preliminary classification used by PDB (ex: "HETAIN")"""
 

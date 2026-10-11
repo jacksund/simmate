@@ -37,6 +37,17 @@ class CasRegistryMolecule(ThirdPartyData, Molecule):
     The CAS Registry Number used to represent the compound (ex: "1039987-26-2")
     """
 
+    substance = table_column.ForeignKey(
+        "inventory_management.Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="cas_registry_entries",
+        blank=True,
+        null=True,
+    )
+    """
+    The registered substance that this entry corresponds to, if any.
+    """
+
     common_name = table_column.TextField(blank=True, null=True)
     """
     The name of this compound that is used most often. This pulls from the
