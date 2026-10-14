@@ -155,6 +155,7 @@ def add_item(workflow: tuple, created_at: datetime, **kwargs):
         created_at=created_at,
         updated_at=created_at,
         tags=[queue, name],
+        name=name,
         status="Pending",
         fxn=FXN,
         args=ARGS,

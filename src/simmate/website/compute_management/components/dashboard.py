@@ -364,7 +364,7 @@ class ComputeDashboardComponent(HtmxComponent):
                     updated_at__gte=timezone.now() - timedelta(days=days),
                 )
             )
-            .values("tags", "status")
+            .values("name", "status")
             .annotate(n=Count("id"))
             .order_by()
         )
@@ -373,7 +373,7 @@ class ComputeDashboardComponent(HtmxComponent):
             lambda: {"Pending": 0, "Running": 0, "Completed": 0, "Failed": 0}
         )
         for group in groups:
-            name = WorkItem.get_workflow_name(group["tags"])
+            name = group["name"] or "-"
             counts[name][group["status"]] += group["n"]
 
         health = []
@@ -414,6 +414,7 @@ class ComputeDashboardComponent(HtmxComponent):
         # BUG: `only` is required to avoid loading the pickled binary columns
         work_items = WorkItem.objects.select_related("worker").only(
             "id",
+            "name",
             "status",
             "tags",
             "created_at",

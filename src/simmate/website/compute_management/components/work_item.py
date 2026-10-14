@@ -42,6 +42,7 @@ class WorkItemComponent(TableComponent):
     # report query
     report_df_columns = [
         "id",
+        "name",
         "status",
         "tags",
         "created_at",
@@ -121,7 +122,7 @@ class WorkItemComponent(TableComponent):
             df[column] = cls._to_local(df[column])
         now = cls._to_local(timezone.now())
 
-        df["workflow"] = df["tags"].apply(WorkItem.get_workflow_name)
+        df["workflow"] = df["name"].fillna("-")
         df["short_id"] = df["id"].astype(str).str[:8]
 
         # completed/failed/cancelled/interrupted items end at their last

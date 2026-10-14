@@ -1,8 +1,8 @@
 {# Shared WorkItem table cells (data explorer + compute dashboard) -- expects `entry` #}
-{# Column order: ID | Workflow | Status | Elapsed | Worker #}
+{# Column order: ID | Name | Status | Elapsed | Worker #}
 <td>{% foreign_key_link entry "id" truncate_chars=10 %}</td>
 <td>
-    <code>{{ entry.workflow_name }}</code>
+    <code>{{ entry.name|default:"-" }}</code>
     {# only set by views that load errors (e.g. the compute dashboard) #}
     {% if entry.error_message %}
         <div class="text-danger font-monospace text-break small">{{ entry.error_message }}</div>

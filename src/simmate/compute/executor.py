@@ -46,6 +46,7 @@ class SimmateExecutor:
         fxn: callable,
         *args,
         tags: list[str] = [],
+        name: str = None,
         **kwargs,
     ) -> WorkItem:
 
@@ -67,6 +68,12 @@ class SimmateExecutor:
         # Pull the run_id and use it as this item's UUID
         run_id = kwargs["run_id"] if "run_id" in kwargs else uuid.uuid4()
 
+        # label the item (e.g. for the web UI) using the function's name
+        # unless one was given (e.g. a workflow's full name)
+        if not name:
+            name = getattr(fxn, "__name__", None) or str(fxn)
+        name = name[:200]
+
         # make the WorkItem where all of the provided inputs are pickled and
         # save the workitem to the database.
         # Pickling is just converting them to a byte string format
@@ -80,6 +87,7 @@ class SimmateExecutor:
             args=cloudpickle.dumps(args),
             kwargs=cloudpickle.dumps(kwargs),
             tags=tags,  # should be json serializable already
+            name=name,
         )
 
         # and return the workitem/future for use
@@ -341,6 +349,7 @@ class SimmateExecutor:
 
         all_items = query.values(
             "id",
+            "name",
             "created_at",
             "updated_at",
             "status",

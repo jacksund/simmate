@@ -40,6 +40,18 @@ class WorkItem(DatabaseTable):
     for a specific type of task/workflow. (e.g. ["simmate", "custom"])
     """
 
+    name = table_column.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        db_index=True,
+    )
+    """
+    A label for the item, such as the full workflow name (e.g.
+    "relaxation.vasp.matproj") or the name of the submitted function. Used to
+    group items in the web UI.
+    """
+
     active_statuses = ["Pending", "Running"]
     status_options = [
         "Pending",
@@ -112,31 +124,6 @@ class WorkItem(DatabaseTable):
     """
 
     # -------------------------------------------------------------------------
-
-    @staticmethod
-    def get_workflow_name(tags: list[str]) -> str:
-        """
-        Recovers the full workflow name (e.g. "relaxation.vasp.matproj") from the
-        tags of a WorkItem. Workflows submitted via `run_cloud` include their full
-        name as a tag, except on SQLite where only "simmate" is used.
-
-        Args:
-            tags: The tags of a WorkItem.
-
-        Returns:
-            The full workflow name, or "Unlabeled" if it could not be determined.
-        """
-        for tag in tags or []:
-            if tag.count(".") == 2:
-                return tag
-        return "Unlabeled"
-
-    @property
-    def workflow_name(self) -> str:
-        """
-        The full workflow name of this item (see `get_workflow_name`).
-        """
-        return self.get_workflow_name(self.tags)
 
     @classmethod
     def requeue_interrupted(cls, **filters) -> int:
