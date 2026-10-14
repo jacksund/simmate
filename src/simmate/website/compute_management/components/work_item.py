@@ -151,7 +151,11 @@ class WorkItemComponent(TableComponent):
     @staticmethod
     def _get_frequency(start, end) -> str:
         span = end - start
-        if span <= pandas.Timedelta(days=2):
+        if span <= pandas.Timedelta(hours=1):
+            return "2min"
+        elif span <= pandas.Timedelta(hours=6):
+            return "15min"
+        elif span <= pandas.Timedelta(days=2):
             return "1h"
         elif span <= pandas.Timedelta(days=14):
             return "6h"

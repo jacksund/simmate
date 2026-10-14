@@ -22,6 +22,8 @@ table, and catalog counts) are rebuilt. Everything else updates on every `refres
 """
 
 TIMELINE_PERIODS = {
+    "1h": timedelta(hours=1),
+    "6h": timedelta(hours=6),
     "24h": timedelta(days=1),
     "7d": timedelta(days=7),
     "30d": timedelta(days=30),
