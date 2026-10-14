@@ -75,6 +75,13 @@ CATALOGS = [
         "250 MB",
         f"{ASSETS_URL}/chembl/archive/ChemblMolecule-full-2026-08-17.parquet",
     ),
+    (
+        "Molecular",
+        "Protein Data Bank (PDB) Ligands",
+        "~50,000",
+        "20 MB",
+        f"{ASSETS_URL}/pdb/archive/PdbLigand-full-2026-10-14.parquet",
+    ),
 ]
 """
 The ready-made datasets offered for download: snapshots of popular catalogs,

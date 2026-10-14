@@ -50,7 +50,7 @@ simmate database download pdb
 
 | Dataset          | Disk Space | Rows (#) | SQL Table      | Python Class |
 | ---------------- | ---------- | -------- | -------------- | ------------ |
-| Ligand Molecules | ---        | ---      | `pdb__ligands` | `PdbLigand`  |
+| Ligand Molecules | ---        | ~50,000  | `pdb__ligands` | `PdbLigand`  |
 
 !!! tip
     Read through [our database guide](/full_guides/database/basic_use.md) to learn how to work with these datasets

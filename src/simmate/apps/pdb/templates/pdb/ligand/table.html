@@ -9,6 +9,7 @@
     <td class="text-center">
         {% draw_molecule entry width=150 height=150 %}
         {% foreign_key_link entry "id" %}
+        {% if entry.is_delisted %}<span class="badge bg-secondary">obsolete</span>{% endif %}
     </td>
     <td>{{ entry.name|default:"--" }}</td>
     <td>{{ entry.type_code|default:"--" }}</td>
