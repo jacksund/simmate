@@ -13,7 +13,7 @@ def test_compute_fake_data(fake_data, client):
     assert counts["compute_management.WorkItem"] == WorkItem.objects.count() > 0
 
     # binary columns are kept
-    item = WorkItem.objects.filter(status="E").first()
+    item = WorkItem.objects.filter(status="Failed").first()
     assert "Error" in ComputeDashboardComponent.get_error_messages([item.id])[item.id]
 
     # dates are shifted so that workers have fresh (or stale) heartbeats
@@ -26,7 +26,7 @@ def test_compute_fake_data(fake_data, client):
     assert ComputeDashboardComponent.get_unserved_queues(active_tags)
 
     # every finished item ran on a worker that was alive at the time
-    for item in WorkItem.objects.filter(status="F").select_related("worker"):
+    for item in WorkItem.objects.filter(status="Completed").select_related("worker"):
         assert item.worker.created_at <= item.started_at < item.updated_at
         assert item.updated_at <= item.worker.updated_at
     assert WorkItem.objects.order_by("created_at").first().created_at < (

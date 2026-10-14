@@ -86,8 +86,8 @@
                                             </td>
                                             <td class="text-end">{{ row.npending }}</td>
                                             <td class="text-end">{{ row.nrunning }}</td>
-                                            <td class="text-end">{{ row.nfinished }}</td>
-                                            <td class="text-end {% if row.nerrored %}text-danger fw-semibold{% endif %}">{{ row.nerrored }}</td>
+                                            <td class="text-end">{{ row.ncompleted }}</td>
+                                            <td class="text-end {% if row.nfailed %}text-danger fw-semibold{% endif %}">{{ row.nfailed }}</td>
                                             <td class="text-end pe-3 {% if row.error_percent >= 25 %}text-danger fw-semibold{% endif %}">
                                                 {% if row.error_percent is None %}
                                                     -
@@ -156,7 +156,7 @@
                                             {% include "compute_management/work_items/row_cells.html" %}
                                             {% if can_manage %}
                                                 <td class="text-end">
-                                                    {% if entry.status == "P" %}
+                                                    {% if entry.status == "Pending" %}
                                                         <button type="button"
                                                                 class="btn btn-sm btn-outline-danger py-0"
                                                                 title="Cancel"

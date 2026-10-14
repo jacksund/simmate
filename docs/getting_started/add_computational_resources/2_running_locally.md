@@ -66,7 +66,7 @@ Switch back to your **first terminal** (where the worker is running). You'll see
 
 1. The `run-cloud` command created a **WorkItem** in your database with a status of `Pending`.
 2. The **Worker** saw the `Pending` job, changed its status to `Running`, and executed the workflow.
-3. When finished, the **Worker** updated the status to `Finished` (or `Completed`) and saved the results.
+3. When finished, the **Worker** updated the status to `Completed` and saved the results.
 
 This simple workflow is the foundation for everything you'll do with Simmate. Whether you're running 1 job on your laptop or 10,000 jobs on a supercomputer, the process is the same.
 

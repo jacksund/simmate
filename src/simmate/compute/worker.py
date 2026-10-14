@@ -194,8 +194,8 @@ class SimmateWorker(DatabaseTable):
         if self.pk is None:
             return
 
-        ninterrupted = WorkItem.objects.filter(status="R", worker=self).update(
-            status="I",
+        ninterrupted = WorkItem.objects.filter(status="Running", worker=self).update(
+            status="Interrupted",
             result_binary=cloudpickle.dumps(
                 WorkerInterruptedError(
                     f"Worker {self.id} was stopped while running this item."
@@ -309,7 +309,7 @@ class SimmateWorker(DatabaseTable):
                 # the status to RUNNING. And grab the first result
                 workitem = (
                     WorkItem.objects.select_for_update(skip_locked=True)
-                    .filter(status="P")
+                    .filter(status="Pending")
                     .filter_by_tags(self.tags)
                     .order_by("created_at")
                     .first()
@@ -326,7 +326,7 @@ class SimmateWorker(DatabaseTable):
 
                 # update the status to running before starting it so no other
                 # worker tries to grab the same WorkItem
-                workitem.status = "R"
+                workitem.status = "Running"
                 workitem.worker = self
                 workitem.started_at = timezone.now()
                 workitem.save(
@@ -380,7 +380,9 @@ class SimmateWorker(DatabaseTable):
                 # !!! should I have the pickle inside of a Try?
                 workitem.result_binary = result_pickled
                 # mark as finished or errored depending on result value
-                workitem.status = "E" if isinstance(result, Exception) else "F"
+                workitem.status = (
+                    "Failed" if isinstance(result, Exception) else "Completed"
+                )
                 workitem.save()
 
             # mark down that we've completed one WorkItem
@@ -396,9 +398,9 @@ class SimmateWorker(DatabaseTable):
         # Count the number of WorkItem(s) that have a status of PENDING
         # !!! Should I include RUNNING in the count? If so I do that with...
         #   from django.db.models import Q
-        #   ...filter(Q(status="P") | Q(status="R"))
+        #   ...filter(Q(status="Pending") | Q(status="Running"))
         queue_size = (
-            WorkItem.objects.filter(status="P").filter_by_tags(self.tags).count()
+            WorkItem.objects.filter(status="Pending").filter_by_tags(self.tags).count()
         )
         return queue_size
 
@@ -469,10 +471,10 @@ class SimmateWorker(DatabaseTable):
                 ).values_list("id", flat=True)
             )
             ninterrupted = WorkItem.objects.filter(
-                status="R",
+                status="Running",
                 worker_id__in=crashed_ids,
             ).update(
-                status="I",
+                status="Interrupted",
                 result_binary=cloudpickle.dumps(
                     WorkerInterruptedError(
                         "Worker stopped sending heartbeats while running this "

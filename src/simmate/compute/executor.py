@@ -123,8 +123,8 @@ class SimmateExecutor:
         # Count the number of WorkItem(s) that have a status of PENDING
         # !!! Should I include RUNNING in the count? If so I do that with...
         #   from django.db.models import Q
-        #   ...filter(Q(status="P") | Q(status="R"))
-        queue_size = WorkItem.objects.filter(status="P").count()
+        #   ...filter(Q(status="Pending") | Q(status="Running"))
+        queue_size = WorkItem.objects.filter(status="Pending").count()
         return queue_size
 
     @classmethod
@@ -165,32 +165,31 @@ class SimmateExecutor:
             WorkItem.objects.all().delete()
 
     @staticmethod
-    def delete_finished(confirm: bool = False):
+    def delete_completed(confirm: bool = False):
         """
-        Empties the WorkItem database table and delete everything. This will
-        not stop the workers if they are in the middle of a job though.
+        Deletes all WorkItems with a "Completed" status.
         """
         # Make sure the user ment to do this, otherwise raise an exception
         if not confirm:
             raise Exception(
-                "Are you sure you want to do this? This deletes finished "
+                "Are you sure you want to do this? This deletes completed "
                 "entries from your queue-table and you can't get them back. "
                 "If so, run this method again with confirmation."
             )
         else:
-            WorkItem.objects.filter(status="F").delete()
+            WorkItem.objects.filter(status="Completed").delete()
 
     @staticmethod
     def show_error_summary():
-        errored_jobs = WorkItem.objects.filter(status="E").all()
+        failed_jobs = WorkItem.objects.filter(status="Failed").all()
 
-        if not errored_jobs:
-            print("No errored jobs found. Everything looks good.")
+        if not failed_jobs:
+            print("No failed jobs found. Everything looks good.")
             return
 
         print("ID | ERROR")
 
-        for job in errored_jobs:
+        for job in failed_jobs:
             try:
                 job.result()
             except Exception as error:
@@ -206,8 +205,8 @@ class SimmateExecutor:
             since: Only count WorkItems updated after this time.
 
         Returns:
-            A dictionary of counts, plus the error percentage (errored out of
-            all finished + errored items).
+            A dictionary of counts, plus the error percentage (failed out of
+            all completed + failed items).
         """
         query = WorkItem.objects.all()
         if tags:
@@ -216,22 +215,22 @@ class SimmateExecutor:
             query = query.filter(updated_at__gte=since)
 
         stats = query.aggregate(
-            npending=Count("id", filter=Q(status="P")),
-            nrunning=Count("id", filter=Q(status="R")),
-            ncanceled=Count("id", filter=Q(status="C")),
-            nfinished=Count("id", filter=Q(status="F")),
-            nerrored=Count("id", filter=Q(status="E")),
+            npending=Count("id", filter=Q(status="Pending")),
+            nrunning=Count("id", filter=Q(status="Running")),
+            ncanceled=Count("id", filter=Q(status="Cancelled")),
+            ncompleted=Count("id", filter=Q(status="Completed")),
+            nfailed=Count("id", filter=Q(status="Failed")),
             nrunning_long=Count(
                 "id",
                 filter=Q(
-                    status="R",
+                    status="Running",
                     updated_at__lte=timezone.now() - timedelta(days=1),
                 ),
             ),
         )
 
-        ndone = stats["nerrored"] + stats["nfinished"]
-        stats["error_percent"] = stats["nerrored"] / ndone * 100 if ndone else 0
+        ndone = stats["nfailed"] + stats["ncompleted"]
+        stats["error_percent"] = stats["nfailed"] / ndone * 100 if ndone else 0
 
         return stats
 
@@ -240,9 +239,9 @@ class SimmateExecutor:
         stats = cls.get_stats(tags=tags)
         print(f"PENDING:   {stats['npending']}")
         print(f"RUNNING:   {stats['nrunning']} ({stats['nrunning_long']} for +24hrs)")
-        print(f"FINISHED:  {stats['nfinished']}")
-        print(f"ERRORED:   {stats['nerrored']} ({stats['error_percent']:.2f}%)")
-        print(f"CANCELED:  {stats['ncanceled']}")
+        print(f"COMPLETED: {stats['ncompleted']}")
+        print(f"FAILED:    {stats['nfailed']} ({stats['error_percent']:.2f}%)")
+        print(f"CANCELLED: {stats['ncanceled']}")
 
     @classmethod
     def show_stats_detail(
@@ -283,9 +282,9 @@ class SimmateExecutor:
                     stats["npending"],
                     stats["nrunning"],
                     stats["nrunning_long"],
-                    stats["nfinished"],
+                    stats["ncompleted"],
                     stats["ncanceled"],
-                    stats["nerrored"],
+                    stats["nfailed"],
                     stats["error_percent"],
                 ]
             )
@@ -298,9 +297,9 @@ class SimmateExecutor:
                 stats["npending"],
                 stats["nrunning"],
                 stats["nrunning_long"],
-                stats["nfinished"],
+                stats["ncompleted"],
                 stats["ncanceled"],
-                stats["nerrored"],
+                stats["nfailed"],
                 stats["error_percent"],
             ]
         )
@@ -312,10 +311,10 @@ class SimmateExecutor:
                 "pending (#)",
                 "running (#)",
                 "running >24hrs (#)",
-                "finished (#)",
+                "completed (#)",
                 "canceled (#)",
-                "errored (#)",
-                "errored (%)",
+                "failed (#)",
+                "failed (%)",
             ],
         )
         print(tag_data.to_markdown(index=False))

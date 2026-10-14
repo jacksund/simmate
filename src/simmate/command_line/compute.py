@@ -182,7 +182,7 @@ def list_workitems(
     ),
     status: str = typer.Option(
         None,
-        help="Filter by job status (P=Pending, R=Running, F=Finished, E=Error, C=Cancelled).",
+        help="Filter by job status (Pending, Running, Completed, Failed, Cancelled, Interrupted).",
     ),
     recent: float = typer.Option(
         None,
@@ -253,10 +253,10 @@ def delete(
         [],
         help="Delete jobs that match these tags.",
     ),
-    finished: bool = typer.Option(
+    completed: bool = typer.Option(
         False,
-        "--finished",
-        help="Delete all jobs with a 'Finished' status.",
+        "--completed",
+        help="Delete all jobs with a 'Completed' status.",
     ),
     all: bool = typer.Option(
         False,
@@ -273,19 +273,19 @@ def delete(
     Deletes jobs from the database.
 
     By default, this deletes jobs that match the provided tags (or jobs with
-    no tags if none are given). Use `--finished` or `--all` for bulk deletion.
+    no tags if none are given). Use `--completed` or `--all` for bulk deletion.
     """
 
-    if sum([bool(tag), finished, all]) > 1:
+    if sum([bool(tag), completed, all]) > 1:
         raise typer.BadParameter(
-            "Only one of `--tag`, `--finished`, or `--all` can be given."
+            "Only one of `--tag`, `--completed`, or `--all` can be given."
         )
 
     from simmate.database import connect  # isort:skip
     from simmate.compute import SimmateExecutor
 
-    if finished:
-        SimmateExecutor.delete_finished(confirm)
+    if completed:
+        SimmateExecutor.delete_completed(confirm)
     elif all:
         SimmateExecutor.delete_all(confirm)
     else:

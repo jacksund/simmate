@@ -11,17 +11,13 @@ from simmate.compute import WorkItem
 from simmate.website.data_explorer.components import TableComponent
 from simmate.website.htmx.components.utils import style_dashboard_figure
 
-STATUS_LABELS = dict(WorkItem.StatusOptions.choices)
-
 TIMELINE_COLORS = {
     "Pending": "#adb5bd",
     "Running": "#0d6efd",
     "Cancelled": "#fd7e14",
-    "Errored": "#dc3545",
+    "Failed": "#dc3545",
     "Interrupted": "#ffc107",
-    "Finished": "#009485",
-    "Submitted": "#6c757d",
-    "Started": "#0dcaf0",
+    "Completed": "#009485",
     "Queue wait": "#adb5bd",
     "Run time": "#0d6efd",
 }
@@ -118,7 +114,7 @@ class WorkItemComponent(TableComponent):
     def prepare_report_df(cls, df: pandas.DataFrame) -> pandas.DataFrame:
         """
         Adds the derived columns used by the report figures: local timestamps,
-        workflow name, status label, row label, and a start/end for every item.
+        workflow name, row label, and a start/end for every item.
         """
         df = df.rename(columns={"worker__computer_system": "host"}).copy()
         for column in ["created_at", "started_at", "updated_at"]:
@@ -126,22 +122,21 @@ class WorkItemComponent(TableComponent):
         now = cls._to_local(timezone.now())
 
         df["workflow"] = df["tags"].apply(WorkItem.get_workflow_name)
-        df["status_label"] = df["status"].map(STATUS_LABELS)
         df["short_id"] = df["id"].astype(str).str[:8]
 
-        # finished/errored/cancelled/interrupted items end at their last
+        # completed/failed/cancelled/interrupted items end at their last
         # update. Everything else is still ongoing.
-        is_done = df["status"].isin(["F", "E", "C", "I"])
+        is_done = ~df["status"].isin(WorkItem.active_statuses)
         df["ended_at"] = df["updated_at"].where(is_done, now)
 
         # Items from before `started_at` existed: running items were started
         # at `updated_at`, but for finished ones the start is unknown.
         df["started_at"] = df["started_at"].fillna(
-            df["updated_at"].where(df["status"] == "R")
+            df["updated_at"].where(df["status"] == "Running")
         )
 
         def row_label(row) -> str:
-            if row["status"] == "P":
+            if row["status"] == "Pending":
                 return "(queue)"
             elif pandas.notna(row["worker_id"]):
                 host = row["host"] if pandas.notna(row["host"]) else "unknown host"
@@ -177,8 +172,9 @@ class WorkItemComponent(TableComponent):
     @classmethod
     def get_activity_figure(cls, df: pandas.DataFrame, start, end):
         """
-        Stacked bars of items finishing, erroring, or being cancelled in each
-        time bin, with lines for items submitted and started.
+        Stacked bars of items completing, failing, or being cancelled in each
+        time bin. Items that are still pending or running are stacked on top
+        in the current (rightmost) bin.
         """
         freq = cls._get_frequency(start, end)
         bins = pandas.date_range(start.floor(freq), end, freq=freq)
@@ -191,24 +187,22 @@ class WorkItemComponent(TableComponent):
             return counts.reindex(bins, fill_value=0)
 
         figure = plotly_go.Figure()
-        for status in ["F", "E", "C", "I"]:
-            label = STATUS_LABELS[status]
+        # ongoing items have `ended_at` set to now, so they land in the last bin
+        for status in [
+            "Completed",
+            "Failed",
+            "Cancelled",
+            "Interrupted",
+            "Running",
+            "Pending",
+        ]:
             counts = count_per_bin(df.loc[df["status"] == status, "ended_at"])
             figure.add_bar(
                 x=bins + bin_width / 2,  # center bars within their bin
                 y=counts.values,
                 width=bin_width.total_seconds() * 1000 * 0.85,
-                name=label,
-                marker_color=TIMELINE_COLORS[label],
-            )
-        for label, column in [("Submitted", "created_at"), ("Started", "started_at")]:
-            counts = count_per_bin(df[column])
-            figure.add_scatter(
-                x=bins + bin_width / 2,
-                y=counts.values,
-                name=label,
-                mode="lines",
-                line=dict(color=TIMELINE_COLORS[label], width=2, dash="dot"),
+                name=status,
+                marker_color=TIMELINE_COLORS[status],
             )
         figure.update_layout(
             barmode="stack",
@@ -229,14 +223,16 @@ class WorkItemComponent(TableComponent):
         known_start = df["started_at"].notna()
 
         # pending: submitted -> started (or -> cancelled/now if never started)
-        pending_mask = known_start | df["status"].isin(["P", "C"])
+        pending_mask = known_start | df["status"].isin(["Pending", "Cancelled"])
         pending_starts = df.loc[pending_mask, "created_at"]
         pending_ends = df.loc[pending_mask, "started_at"].fillna(
             df.loc[pending_mask, "ended_at"]
         )
 
         # running: started -> ended (legacy rows: submitted -> ended)
-        running_mask = df["status"].isin(["R", "F", "E", "I"])
+        running_mask = df["status"].isin(
+            ["Running", "Completed", "Failed", "Interrupted"]
+        )
         running_starts = df.loc[running_mask, "started_at"].fillna(
             df.loc[running_mask, "created_at"]
         )
@@ -289,10 +285,10 @@ class WorkItemComponent(TableComponent):
         if jobs.empty:
             return None
 
-        is_pending = jobs["status"] == "P"
+        is_pending = jobs["status"] == "Pending"
         jobs["bar_start"] = jobs["started_at"].fillna(jobs["created_at"])
         jobs.loc[is_pending, "bar_start"] = jobs.loc[is_pending, "created_at"]
-        jobs = jobs[jobs["status"] != "C"]  # never ran, so nothing to show
+        jobs = jobs[jobs["status"] != "Cancelled"]  # never ran, so nothing to show
         if jobs.empty:
             return None
 
@@ -308,19 +304,19 @@ class WorkItemComponent(TableComponent):
             x_start="bar_start",
             x_end="ended_at",
             y="row_label",
-            color="status_label",
+            color="status",
             color_discrete_map=TIMELINE_COLORS,
             hover_name="short_id",
             hover_data={
                 "workflow": True,
                 "queue_wait": True,
                 "run_time": True,
-                "status_label": False,
+                "status": False,
                 "row_label": False,
                 "bar_start": False,
                 "ended_at": False,
             },
-            labels={"status_label": "Status", "row_label": ""},
+            labels={"status": "Status", "row_label": ""},
         )
         figure.update_yaxes(autorange="reversed")
         figure.update_layout(xaxis_range=[start, end])
@@ -331,10 +327,10 @@ class WorkItemComponent(TableComponent):
     def get_durations_figure(cls, df: pandas.DataFrame, start, end, ntop: int = 10):
         """
         Box plot of queue-wait and run time (in minutes) for the most common
-        workflows. Only includes finished/errored items with a known start.
+        workflows. Only includes completed/failed items with a known start.
         """
         done = df[
-            df["status"].isin(["F", "E"])
+            df["status"].isin(["Completed", "Failed"])
             & df["started_at"].notna()
             & (df["ended_at"] >= start)
         ]

@@ -9,24 +9,24 @@
     {% endif %}
 </td>
 <td>
-    {% if entry.status == "P" %}
+    {% if entry.status == "Pending" %}
         {% status_bar "Pending" "secondary" %}
-    {% elif entry.status == "R" %}
+    {% elif entry.status == "Running" %}
         {% status_bar "Running" "primary" %}
-    {% elif entry.status == "C" %}
+    {% elif entry.status == "Cancelled" %}
         {% status_bar "Cancelled" "warning" %}
-    {% elif entry.status == "E" %}
-        {% status_bar "Errored" "danger" %}
-    {% elif entry.status == "I" %}
+    {% elif entry.status == "Failed" %}
+        {% status_bar "Failed" "danger" %}
+    {% elif entry.status == "Interrupted" %}
         {% status_bar "Interrupted" "warning" %}
-    {% elif entry.status == "F" %}
-        {% status_bar "Finished" "success" %}
+    {% elif entry.status == "Completed" %}
+        {% status_bar "Completed" "success" %}
     {% endif %}
 </td>
 <td class="text-muted text-nowrap">
-    {% if entry.status == "R" %}
+    {% if entry.status == "Running" %}
         {{ entry.updated_at|timesince }}
-    {% elif entry.status == "P" %}
+    {% elif entry.status == "Pending" %}
         queued {{ entry.created_at|timesince }}
     {% else %}
         {{ entry.created_at|timesince:entry.updated_at }}

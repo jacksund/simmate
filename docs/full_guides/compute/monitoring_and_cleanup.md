@@ -4,7 +4,7 @@ Simmate provides several CLI commands to monitor the status of your queue and ma
 
 ## Checking Queue Stats
 
-To get a quick overview of how many jobs are in each state (Pending, Running, Finished, Errored, Canceled), use:
+To get a quick overview of how many jobs are in each state (Pending, Running, Completed, Failed, Cancelled), use:
 
 ```bash
 simmate compute workitems stats
@@ -50,7 +50,7 @@ simmate compute workitems list --recent 12
 
 ## Error Summaries
 
-When jobs fail, they are marked as `Errored` (E). To see a quick summary of the error messages for all failed jobs without digging into individual log files, run:
+When jobs fail, they are marked as `Failed`. To see a quick summary of the error messages for all failed jobs without digging into individual log files, run:
 
 ```bash
 simmate compute workitems errors
@@ -92,11 +92,11 @@ Over time, the `WorkItem` table can grow very large, which may eventually slow d
 !!! warning
     The `workitems delete` command requires the `--confirm` flag to execute.
 
-### Deleting Finished Jobs
+### Deleting Completed Jobs
 This is the most common cleanup task. It removes entries for jobs that completed successfully.
 
 ```bash
-simmate compute workitems delete --finished --confirm
+simmate compute workitems delete --completed --confirm
 ```
 
 ### Deleting by Tag
