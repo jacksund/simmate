@@ -2,19 +2,20 @@
 
 import json
 import logging
-import urllib
+import urllib.request
 from datetime import datetime
+from pathlib import Path
 
-import pandas
 import requests
 from django.utils.timezone import make_aware
-from pymatgen.io.cif import CifFile
+from pymatgen.io.cif import CifBlock
 from rich.progress import track
 
 from simmate.apps.rdkit.models import Molecule
 from simmate.config import settings
 from simmate.database.core import table_column
 from simmate.database.mixins import ThirdPartyData
+from simmate.database.utils import batch_bulk_create
 from simmate.toolkit import Molecule as ToolkitMolecule
 
 
@@ -33,6 +34,24 @@ class PdbLigand(ThirdPartyData, Molecule):
     source_doi = "https://www.wwpdb.org/data/ccd"
     is_redistribution_allowed = True
 
+    remote_archive_link = (
+        "https://assets.simmate.org/pdb/archive/PdbLigand-minimal-2026-10-14.csv.zip"
+    )
+    archive_fields = [
+        "name",
+        "type_code",
+        "monomer_type",
+        "is_delisted",
+        "replaced_by",
+        "is_invalid_molecule",
+        "created_at_original",
+        "updated_at_original",
+        "protein_ids_original",
+        # to keep size down
+        "--created_at",
+        "--updated_at",
+    ]
+
     id = table_column.CharField(max_length=5, primary_key=True)
     """The id used to represent the molecule (ex: "ZZZ")"""
 
@@ -50,11 +69,32 @@ class PdbLigand(ThirdPartyData, Molecule):
     The registered substance that this entry corresponds to, if any.
     """
 
-    type_code = table_column.TextField()
+    type_code = table_column.TextField(blank=True, null=True)
     """A preliminary classification used by PDB (ex: "HETAIN")"""
 
-    monomer_type = table_column.TextField()
+    monomer_type = table_column.TextField(blank=True, null=True)
     """The type of monomer (ex: "NON-POLYMER")"""
+
+    is_invalid_molecule = table_column.BooleanField(blank=True, null=True)
+    """
+    Whether the molecule failed to load into the Simmate database. Invalid
+    molecules may be missing a SMILES string or have issues with structure
+    processing.
+    """
+
+    is_delisted = table_column.BooleanField(blank=True, null=True, default=False)
+    """
+    Whether the PDB has retired this ligand (a release status of "OBS" for
+    "obsolete" in the PDB). The ID is kept in place and is never reused.
+
+    Active entries have a release status of "REL" for "released".
+    """
+
+    replaced_by = table_column.CharField(max_length=5, blank=True, null=True)
+    """
+    For delisted ligands, the PDB ID of the ligand that replaces this one
+    (if any).
+    """
 
     created_at_original = table_column.DateTimeField(
         blank=True, null=True, db_index=True
@@ -73,7 +113,10 @@ class PdbLigand(ThirdPartyData, Molecule):
     def external_link(self) -> str:
         return f"https://www.ebi.ac.uk/pdbe-srv/pdbechem/chemicalCompound/complete/{self.id}"
 
+    # -------------------------------------------------------------------------
+
     @classmethod
+    @batch_bulk_create(batch_size=1_000)
     def load_source_data(cls, include_protein_ids: bool = False):
         """
         Downloads and loads all ligand data from the PDB.
@@ -89,104 +132,115 @@ class PdbLigand(ThirdPartyData, Molecule):
         pdb_config_dir = settings.config_directory / "pdb"
         pdb_config_dir.mkdir(parents=True, exist_ok=True)
 
-        # 1. Download and read the listing of all ligands
+        # 1. Download the listing of all ligands
         data_filename = pdb_config_dir / "components.cif"
         if not data_filename.exists():
             logging.info("Downloading ligands from PDB...")
             data_url = "https://files.wwpdb.org/pub/pdb/data/monomers/components.cif"
             urllib.request.urlretrieve(data_url, data_filename)
 
-        logging.info("Reading ligands file (this may take a minute)...")
-        data = CifFile.from_file(data_filename).data
-
         # 2. Map ligands to the proteins they are found in
         # This is a VERY slow process if it hasn't been done before.
         map_filename = pdb_config_dir / "cc_to_pdb_map.json"
         if map_filename.exists():
-            with open(map_filename, "r") as f:
+            with map_filename.open() as f:
                 pdb_id_map = json.load(f)
         elif include_protein_ids:
             logging.info("Fetching ligand-to-protein mappings (this is slow)...")
-            ligand_ids = [e.data.get("_chem_comp.id") for e in data.values()]
+            with data_filename.open() as f:
+                ligand_ids = [
+                    line[5:].strip() for line in f if line.startswith("data_")
+                ]
             pdb_id_map = {
                 lid: cls._get_pdb_ids(lid, silence_errors=True)
                 for lid in track(ligand_ids)
             }
-            with open(map_filename, "w") as f:
+            with map_filename.open("w") as f:
                 json.dump(pdb_id_map, f)
         else:
             pdb_id_map = {}
 
         # 3. Parse metadata and molecules
         logging.info("Parsing metadata and molecules...")
-        db_objs = []
-        failed = 0
-        for entry in track(data.values()):
+        for entry_data in track(cls._iter_cif_blocks(data_filename)):
+
+            smiles_str = cls._get_smiles(entry_data)
             try:
-                # convert CIF object to python dict
-                entry_data = entry.data
-
-                # grab the SMILES string and convert to a Molecule.
-                # All SMILES are stored in a table-like format in the CIF
-                df = pandas.DataFrame(
-                    data={
-                        "type": entry_data.get("_pdbx_chem_comp_descriptor.type"),
-                        "program": entry_data.get("_pdbx_chem_comp_descriptor.program"),
-                        "smiles": entry_data.get(
-                            "_pdbx_chem_comp_descriptor.descriptor"
-                        ),
-                    }
-                )
-                smiles_row = df[
-                    (df.type == "SMILES_CANONICAL")
-                    & (df.program == "OpenEye OEToolkits")
-                ].iloc[0]
-                smiles_str = smiles_row.smiles
                 molecule = ToolkitMolecule.from_smiles(smiles_str)
-
-                # pull timestamps and convert to proper format
-                created_at_raw = entry_data.get("_chem_comp.pdbx_initial_date")
-                updated_at_raw = entry_data.get("_chem_comp.pdbx_modified_date")
-                created_at_original = (
-                    make_aware(datetime.strptime(created_at_raw, "%Y-%m-%d"))
-                    if created_at_raw
-                    else None
-                )
-                updated_at_original = (
-                    make_aware(datetime.strptime(updated_at_raw, "%Y-%m-%d"))
-                    if updated_at_raw
-                    else None
-                )
-
-                # finalize the metadata and molecule into a database object
-                ligand_id = entry_data.get("_chem_comp.id")
-                db_obj = PdbLigand.from_toolkit(
+                molecule_kwargs = cls.from_toolkit(
                     molecule=molecule,
-                    molecule_original=smiles_str,
                     is_3d=False,
-                    id=ligand_id,
-                    type_code=entry_data.get("_chem_comp.pdbx_type"),
-                    monomer_type=entry_data.get("_chem_comp.type"),
-                    name=entry_data.get("_chem_comp.name"),
-                    created_at_original=created_at_original,
-                    updated_at_original=updated_at_original,
-                    protein_ids_original=pdb_id_map.get(ligand_id),
+                    is_invalid_molecule=False,
+                    as_dict=True,
                 )
-                db_objs.append(db_obj)
             except Exception:
-                failed += 1
+                molecule_kwargs = {"is_invalid_molecule": True}
 
-        # 4. Save to database
-        logging.info(f"Saving {len(db_objs)} rows to database...")
-        cls.objects.bulk_create(
-            db_objs,
-            batch_size=1000,
-            ignore_conflicts=True,
-        )
+            ligand_id = entry_data["_chem_comp.id"]
+            yield cls.from_toolkit(
+                id=ligand_id,
+                molecule_original=smiles_str,
+                type_code=_clean(entry_data.get("_chem_comp.pdbx_type")),
+                monomer_type=_clean(entry_data.get("_chem_comp.type")),
+                name=_clean(entry_data.get("_chem_comp.name")),
+                is_delisted=(entry_data.get("_chem_comp.pdbx_release_status") == "OBS"),
+                replaced_by=_clean(entry_data.get("_chem_comp.pdbx_replaced_by")),
+                created_at_original=_parse_date(
+                    entry_data.get("_chem_comp.pdbx_initial_date")
+                ),
+                updated_at_original=_parse_date(
+                    entry_data.get("_chem_comp.pdbx_modified_date")
+                ),
+                protein_ids_original=pdb_id_map.get(ligand_id),
+                **molecule_kwargs,
+            )
+
         if settings.postgres_rdkit_extension:
             cls.populate_fingerprint_database()
-        logging.info("Done.")
-        return failed
+
+    @staticmethod
+    def _iter_cif_blocks(filename: Path):
+        """
+        Streams the (very large) CIF file one `data_` block at a time and
+        yields each block as a dictionary. This avoids loading the entire
+        file into memory at once.
+        """
+        lines = []
+        with filename.open() as f:
+            for line in f:
+                if line.startswith("data_") and lines:
+                    yield CifBlock.from_str("".join(lines)).data
+                    lines = []
+                lines.append(line)
+        if lines:
+            yield CifBlock.from_str("".join(lines)).data
+
+    @staticmethod
+    def _get_smiles(entry_data: dict) -> str | None:
+        """
+        Grabs the best available SMILES string from a CIF block. All
+        descriptors are stored in a table-like format in the CIF, so we
+        check in order of preference.
+        """
+        types = entry_data.get("_pdbx_chem_comp_descriptor.type", [])
+        programs = entry_data.get("_pdbx_chem_comp_descriptor.program", [])
+        descriptors = entry_data.get("_pdbx_chem_comp_descriptor.descriptor", [])
+
+        # single-row tables are given as strings rather than lists
+        if isinstance(types, str):
+            types, programs, descriptors = [types], [programs], [descriptors]
+
+        rows = list(zip(types, programs, descriptors))
+        preferences = [
+            ("SMILES_CANONICAL", "OpenEye OEToolkits"),
+            ("SMILES_CANONICAL", "CACTVS"),
+            ("SMILES", None),
+        ]
+        for target_type, target_program in preferences:
+            for row_type, row_program, smiles in rows:
+                if row_type == target_type and target_program in (None, row_program):
+                    return smiles
+        return None
 
     @staticmethod
     def _get_pdb_ids(cc_id: str, silence_errors: bool = False):
@@ -223,3 +277,14 @@ class PdbLigand(ThirdPartyData, Molecule):
             return None
         else:
             response.raise_for_status()
+
+
+def _clean(value: str | None) -> str | None:
+    """Converts CIF null values ("?" and ".") to None."""
+    return None if value in (None, "?", ".") else value
+
+
+def _parse_date(value: str | None) -> datetime | None:
+    """Converts a CIF date (ex: "2010-04-27") to a timezone-aware datetime."""
+    value = _clean(value)
+    return make_aware(datetime.strptime(value, "%Y-%m-%d")) if value else None

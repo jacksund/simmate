@@ -36,6 +36,30 @@
                                 <td>{{ table_entry.monomer_type|default:"--" }}</td>
                             </tr>
                             <tr>
+                                <td>Delisted (obsolete)</td>
+                                <td>{{ table_entry.is_delisted|yesno:"Yes,No,--" }}</td>
+                            </tr>
+                            {% if table_entry.replaced_by %}
+                                <tr>
+                                    <td>Replaced By</td>
+                                    <td>
+                                        <a href="{% url 'data_explorer:table-entry' table_entry.table_name table_entry.replaced_by %}">
+                                            {{ table_entry.replaced_by }} <small><i class="bi bi-box-arrow-up-right"></i></small>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            <tr>
+                                <td>Valid Molecule</td>
+                                <td>
+                                    {% if table_entry.is_invalid_molecule is None %}
+                                        --
+                                    {% else %}
+                                        {{ table_entry.is_invalid_molecule|yesno:"No,Yes" }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
                                 <td>Created At (original)</td>
                                 <td>{{ table_entry.created_at_original|date:"Y-m-d"|default:"--" }}</td>
                             </tr>
