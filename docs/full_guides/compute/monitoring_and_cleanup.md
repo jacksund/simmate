@@ -60,6 +60,31 @@ This command will print the WorkItem ID followed by the exception message, makin
 
 ---
 
+## Stale & Crashed Workers
+
+Workers check in with the database regularly (a "heartbeat"). If a worker is killed without a clean shutdown (e.g. by SLURM, an OOM error, or a node failure), it stops checking in:
+
+- After **5 minutes** without a check-in, the worker is marked as `Stale Heartbeat`. If it starts checking in again, it recovers on its own.
+- After **1 hour** without a check-in, the worker is marked as `Crashed`. Any `WorkItem`s it was running are marked as `INTERRUPTED`.
+
+This check runs every 5 minutes as a schedule, so you'll need the scheduler running (`simmate compute scheduler start`, see [Schedules](schedules.md)). You can also run it yourself:
+
+```python
+from simmate.compute import SimmateWorker
+
+SimmateWorker.update_stale_workers()
+```
+
+Interrupted items are not retried automatically. To put them back in the queue so they start over from scratch:
+
+```python
+from simmate.compute import WorkItem
+
+WorkItem.requeue_interrupted()
+```
+
+---
+
 ## Cleaning Up the Queue
 
 Over time, the `WorkItem` table can grow very large, which may eventually slow down database queries. It's a good practice to periodically delete old or unnecessary entries.

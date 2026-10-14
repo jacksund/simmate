@@ -11,7 +11,6 @@ from django.db.models import Count, Q
 from django.utils import timezone
 
 from simmate.compute import SimmateExecutor, SimmateWorker, WorkItem
-from simmate.compute.worker import STALE_AFTER
 from simmate.website.htmx.components import HtmxComponent
 
 from .work_item import WorkItemComponent
@@ -252,10 +251,10 @@ class ComputeDashboardComponent(HtmxComponent):
                     "message": (
                         f"{nstale} worker{'s' if nstale != 1 else ''} "
                         f"haven't checked in for over "
-                        f"{int(STALE_AFTER.total_seconds() // 60)} minutes "
-                        "and were likely killed."
+                        f"{int(SimmateWorker.stale_after.total_seconds() // 60)} minutes "
+                        "and were likely killed. They will be marked as stale "
+                        "automatically by the scheduler."
                     ),
-                    "action": {"method": "mark_stale", "label": "Mark stale"},
                 }
             )
 
@@ -580,9 +579,3 @@ class ComputeDashboardComponent(HtmxComponent):
             )
         else:
             self.action_error = f"Unknown worker: {worker}"
-
-    def mark_stale(self):
-        if not self._check_can_manage():
-            return
-        nmarked = SimmateWorker.mark_stale_workers()
-        self.action_message = f"Marked {nmarked} worker(s) as stale"

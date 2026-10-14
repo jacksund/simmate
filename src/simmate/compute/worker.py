@@ -32,19 +32,6 @@ HEADER_ART = r"""
 =====================================================================
 """
 
-ACTIVE_STATUSES = ["Setting Up", "Idle", "Running"]
-
-HEARTBEAT_INTERVAL = 60
-"""
-Seconds between heartbeats while a worker is busy running a WorkItem.
-"""
-
-STALE_AFTER = timedelta(minutes=5)
-"""
-An active worker that hasn't checked in for this long is considered stale
-(e.g. it was killed by SLURM, OOM, or a node failure).
-"""
-
 
 class SimmateWorker(DatabaseTable):
     """
@@ -58,6 +45,7 @@ class SimmateWorker(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
+    active_statuses = ["Setting Up", "Idle", "Running"]
     status_options = [
         "Setting Up",
         "Idle",
@@ -167,6 +155,20 @@ class SimmateWorker(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
+    stale_after = timedelta(minutes=5)
+    """
+    An active worker that hasn't checked in for this long is considered stale
+    (e.g. it was killed by SLURM, OOM, or a node failure).
+    """
+
+    crashed_after = timedelta(hours=1)
+    """
+    A worker that hasn't checked in for this long is considered crashed. Any
+    WorkItems it was running are marked as INTERRUPTED.
+    """
+
+    # -------------------------------------------------------------------------
+
     def start(self):
         """
         Starts the worker process to begin working through WorkItems
@@ -235,7 +237,9 @@ class SimmateWorker(DatabaseTable):
         if self.startup_method:
             logging.info(f"Running startup method: '{self.startup_method}'")
             startup_method = get_class(self.startup_method)
-            startup_method()
+            # keep our heartbeat alive in case of a long warmup
+            with WorkerHeartbeat(worker_id=self.id):
+                startup_method()
 
         # establish starting point for the worker
         time_start = time.time()
@@ -422,36 +426,72 @@ class SimmateWorker(DatabaseTable):
         Workers that are active and have checked in recently.
         """
         return cls.objects.filter(
-            status__in=ACTIVE_STATUSES,
-            updated_at__gte=timezone.now() - STALE_AFTER,
+            status__in=cls.active_statuses,
+            updated_at__gte=timezone.now() - cls.stale_after,
         )
 
     @classmethod
     def get_stale(cls):
         """
         Workers that claim to be active but haven't checked in within
-        `STALE_AFTER`. These have most likely been killed without a clean
+        `stale_after`. These have most likely been killed without a clean
         shutdown.
         """
         return cls.objects.filter(
-            status__in=ACTIVE_STATUSES,
-            updated_at__lt=timezone.now() - STALE_AFTER,
+            status__in=cls.active_statuses,
+            updated_at__lt=timezone.now() - cls.stale_after,
         )
 
     @classmethod
-    def mark_stale_workers(cls) -> int:
+    def update_stale_workers(cls) -> dict:
         """
-        Sets the status of all stale workers to "Stale Heartbeat". Any WorkItems
-        these workers were running are left untouched, but can be found with
-        `WorkItem.objects.filter(status="R", worker__status="Stale Heartbeat")`.
+        Updates the status of workers that have stopped checking in:
+
+        - no check-in for `stale_after` (5 min) --> "Stale Heartbeat"
+        - no check-in for `crashed_after` (1 hr) --> "Crashed", and any
+          WorkItems they were running are marked as INTERRUPTED so they can be
+          requeued with `WorkItem.requeue_interrupted()`.
+
+        Note, `updated_at` is left untouched on workers so that it continues
+        to reflect their last heartbeat.
 
         Returns:
-            The number of workers updated.
+            The number of workers marked as stale and crashed, as well as the
+            number of WorkItems interrupted.
         """
-        return cls.get_stale().update(
-            status="Stale Heartbeat",
-            updated_at=timezone.now(),
-        )
+        now = timezone.now()
+        with transaction.atomic():
+            # workers silent for over an hour are treated as dead
+            crashed_ids = list(
+                cls.objects.filter(
+                    status__in=cls.active_statuses + ["Stale Heartbeat"],
+                    updated_at__lt=now - cls.crashed_after,
+                ).values_list("id", flat=True)
+            )
+            ninterrupted = WorkItem.objects.filter(
+                status="R",
+                worker_id__in=crashed_ids,
+            ).update(
+                status="I",
+                result_binary=cloudpickle.dumps(
+                    WorkerInterruptedError(
+                        "Worker stopped sending heartbeats while running this "
+                        "item and is presumed crashed."
+                    )
+                ),
+                updated_at=now,
+            )
+            ncrashed = cls.objects.filter(id__in=crashed_ids).update(status="Crashed")
+            nstale = cls.get_stale().update(status="Stale Heartbeat")
+
+        if ncrashed or ninterrupted:
+            logging.warning(
+                f"Marked {ncrashed} worker(s) as crashed and {ninterrupted} "
+                "WorkItem(s) as INTERRUPTED. These items can be requeued "
+                "with `WorkItem.requeue_interrupted()`."
+            )
+
+        return {"stale": nstale, "crashed": ncrashed, "interrupted": ninterrupted}
 
 
 class WorkerHeartbeat(ContextDecorator):
@@ -463,7 +503,7 @@ class WorkerHeartbeat(ContextDecorator):
     not kill the WorkItem.
     """
 
-    def __init__(self, worker_id: int, interval: float = HEARTBEAT_INTERVAL):
+    def __init__(self, worker_id: int, interval: float = 60):
         self.worker_id = worker_id
         self.interval = interval
         self.stop_signal = threading.Event()
@@ -476,6 +516,11 @@ class WorkerHeartbeat(ContextDecorator):
                     SimmateWorker.objects.filter(pk=self.worker_id).update(
                         updated_at=timezone.now()
                     )
+                    # recover if we were marked stale (e.g. after a db blip)
+                    SimmateWorker.objects.filter(
+                        pk=self.worker_id,
+                        status="Stale Heartbeat",
+                    ).update(status="Running")
                 except Exception as error:
                     logging.warning(f"Worker heartbeat failed: {error}")
         finally:
