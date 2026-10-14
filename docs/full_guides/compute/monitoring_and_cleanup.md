@@ -4,7 +4,7 @@ Simmate provides several CLI commands to monitor the status of your queue and ma
 
 ## Checking Queue Stats
 
-To get a quick overview of how many jobs are in each state (Pending, Running, Finished, Errored, Canceled), use:
+To get a quick overview of how many jobs are in each state (Pending, Running, Completed, Failed, Cancelled), use:
 
 ```bash
 simmate compute workitems stats
@@ -50,13 +50,38 @@ simmate compute workitems list --recent 12
 
 ## Error Summaries
 
-When jobs fail, they are marked as `Errored` (E). To see a quick summary of the error messages for all failed jobs without digging into individual log files, run:
+When jobs fail, they are marked as `Failed`. To see a quick summary of the error messages for all failed jobs without digging into individual log files, run:
 
 ```bash
 simmate compute workitems errors
 ```
 
 This command will print the WorkItem ID followed by the exception message, making it easy to identify common failure modes across your cluster.
+
+---
+
+## Stale & Crashed Workers
+
+Workers check in with the database regularly (a "heartbeat"). If a worker is killed without a clean shutdown (e.g. by SLURM, an OOM error, or a node failure), it stops checking in:
+
+- After **5 minutes** without a check-in, the worker is marked as `Stale Heartbeat`. If it starts checking in again, it recovers on its own.
+- After **1 hour** without a check-in, the worker is marked as `Crashed`. Any `WorkItem`s it was running are marked as `INTERRUPTED`.
+
+This check runs every 5 minutes as a schedule, so you'll need the scheduler running (`simmate compute scheduler start`, see [Schedules](schedules.md)). You can also run it yourself:
+
+```python
+from simmate.compute import SimmateWorker
+
+SimmateWorker.update_stale_workers()
+```
+
+Interrupted items are not retried automatically. To put them back in the queue so they start over from scratch:
+
+```python
+from simmate.compute import WorkItem
+
+WorkItem.requeue_interrupted()
+```
 
 ---
 
@@ -67,11 +92,11 @@ Over time, the `WorkItem` table can grow very large, which may eventually slow d
 !!! warning
     The `workitems delete` command requires the `--confirm` flag to execute.
 
-### Deleting Finished Jobs
+### Deleting Completed Jobs
 This is the most common cleanup task. It removes entries for jobs that completed successfully.
 
 ```bash
-simmate compute workitems delete --finished --confirm
+simmate compute workitems delete --completed --confirm
 ```
 
 ### Deleting by Tag

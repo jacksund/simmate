@@ -43,6 +43,11 @@ def run_daily_maintenance():
 def check_for_updates():
     print("Checking for updates...")
 
+# Run every 5 minutes
+@schedule(interval="minute", every=5)
+def check_for_alerts():
+    print("Checking for alerts...")
+
 # Run every Saturday at 1:00am
 @schedule(interval="weekly", on="saturday", at="01:00")
 def run_weekly_cleanup():

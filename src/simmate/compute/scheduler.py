@@ -91,10 +91,14 @@ class SimmateScheduler(Scheduler):
     def _register_app_schedules(apps_to_search: list[str] = settings.apps):
         """
         Goes through a list of apps and imports the "schedules" module in each.
-        By default, this will grab all installed 'settings.apps'
+        By default, this will grab all installed 'settings.apps' as well as
+        Simmate's built-in apps that have schedules
         """
         logging.info("Searching for registrations...")
-        for app_name in apps_to_search:
+        for app_name in apps_to_search + [
+            "simmate.website.configs.DataExplorerConfig",
+            "simmate.website.configs.ComputeManagementConfig",
+        ]:
             # check if there is a schedule module for this app and load it if so
             schedule_path = get_app_submodule(app_name, "schedules")
             if not schedule_path:
@@ -136,6 +140,7 @@ class SimmateScheduler(Scheduler):
 
 def schedule(
     interval: Literal["minute", "hourly", "daily", "weekly"],
+    every: int = 1,
     at: str = None,
     on: str = None,
     tags: list[str] = ["simmate"],
@@ -148,6 +153,8 @@ def schedule(
 
     Args:
         interval: How often to run. One of "minute", "hourly", "daily", "weekly".
+        every: Run every N intervals (e.g. `interval="minute", every=5` runs
+            every 5 minutes).
         at: Time of day to run (e.g. "10:30"). Used with "daily" or "weekly".
         on: Day of the week to run (e.g. "saturday"). Only used with "weekly".
         tags: Tags to attach to the submitted WorkItem.
@@ -163,17 +170,17 @@ def schedule(
 
         # Map our simple interval string to schedule's syntax
         if interval == "minute":
-            job = schedule_lib.every().minute
+            job = schedule_lib.every(every).minutes
         elif interval == "hourly":
-            job = schedule_lib.every().hour
+            job = schedule_lib.every(every).hours
         elif interval == "daily":
-            job = schedule_lib.every().day
+            job = schedule_lib.every(every).days
         elif interval == "weekly":
             if on:
                 # Use the day-of-week property (e.g. every().saturday)
-                job = getattr(schedule_lib.every(), on.lower())
+                job = getattr(schedule_lib.every(every), on.lower())
             else:
-                job = schedule_lib.every().week
+                job = schedule_lib.every(every).weeks
         else:
             raise ValueError(f"Unknown interval: {interval}")
 

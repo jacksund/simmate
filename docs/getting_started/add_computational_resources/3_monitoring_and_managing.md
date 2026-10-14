@@ -9,7 +9,7 @@ Once you've submitted a few dozen (or hundred) jobs, you'll want to see how they
 The `simmate compute workitems` command group includes several tools to help you see what's happening in your queue:
 
 ### `workitems stats`
-This gives you a quick overview of how many jobs are in each state (Pending, Running, Finished, etc.):
+This gives you a quick overview of how many jobs are in each state (Pending, Running, Completed, etc.):
 ```bash
 simmate compute workitems stats
 ```
@@ -20,10 +20,10 @@ This shows a detailed table of every job in the queue, including its name, statu
 simmate compute workitems list
 ```
 
-### `workitems delete --finished`
-If your queue gets too cluttered with finished jobs, you can clean them up:
+### `workitems delete --completed`
+If your queue gets too cluttered with completed jobs, you can clean them up:
 ```bash
-simmate compute workitems delete --finished
+simmate compute workitems delete --completed
 ```
 
 ---

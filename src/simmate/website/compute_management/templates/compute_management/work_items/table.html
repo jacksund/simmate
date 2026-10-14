@@ -31,7 +31,7 @@
 {% endblock %}
 {% block table_headers %}
     {% table_header "id" "ID" min_width=150 %}
-    <th style="min-width:200px">Workflow</th>
+    {% table_header "name" min_width=200 %}
     {% table_header "status" min_width=150 %}
     {% table_header "updated_at" "Elapsed" min_width=125 %}
     {% table_header "worker" min_width=150 %}

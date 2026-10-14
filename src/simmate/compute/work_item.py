@@ -40,23 +40,33 @@ class WorkItem(DatabaseTable):
     for a specific type of task/workflow. (e.g. ["simmate", "custom"])
     """
 
-    # These states were originally based on the python queue module, but we
-    # updated them to match Prefect states that have more flexibility:
-    # https://docs.prefect.io/concepts/states/
-    class StatusOptions(table_column.TextChoices):
-        PENDING = "P"
-        RUNNING = "R"
-        CANCELLED = "C"
-        ERRORED = "E"
-        FINISHED = "F"
-        INTERRUPTED = "I"
+    name = table_column.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        db_index=True,
+    )
+    """
+    A label for the item, such as the full workflow name (e.g.
+    "relaxation.vasp.matproj") or the name of the submitted function. Used to
+    group items in the web UI.
+    """
 
-    # TODO -- I should consider indexing this column for speed because it's
-    # the most queried column by far.
+    active_statuses = ["Pending", "Running"]
+    status_options = [
+        "Pending",
+        "Running",
+        "Cancelled",
+        "Failed",
+        "Completed",
+        # for items whose worker was stopped or crashed mid-run
+        "Interrupted",
+    ]
+    # indexed because workers constantly poll for pending items
     status = table_column.CharField(
-        max_length=1,
-        choices=StatusOptions.choices,
-        default=StatusOptions.PENDING,
+        max_length=20,
+        default="Pending",
+        db_index=True,
     )
     """
     the status/state of the workitem
@@ -115,35 +125,10 @@ class WorkItem(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    @staticmethod
-    def get_workflow_name(tags: list[str]) -> str:
-        """
-        Recovers the full workflow name (e.g. "relaxation.vasp.matproj") from the
-        tags of a WorkItem. Workflows submitted via `run_cloud` include their full
-        name as a tag, except on SQLite where only "simmate" is used.
-
-        Args:
-            tags: The tags of a WorkItem.
-
-        Returns:
-            The full workflow name, or "Unlabeled" if it could not be determined.
-        """
-        for tag in tags or []:
-            if tag.count(".") == 2:
-                return tag
-        return "Unlabeled"
-
-    @property
-    def workflow_name(self) -> str:
-        """
-        The full workflow name of this item (see `get_workflow_name`).
-        """
-        return self.get_workflow_name(self.tags)
-
     @classmethod
     def requeue_interrupted(cls, **filters) -> int:
         """
-        Resets INTERRUPTED WorkItems back to PENDING so that another worker
+        Resets Interrupted WorkItems back to Pending so that another worker
         will pick them up. These items start over from scratch.
 
         Args:
@@ -153,8 +138,8 @@ class WorkItem(DatabaseTable):
         Returns:
             The number of WorkItems requeued.
         """
-        return cls.objects.filter(status="I", **filters).update(
-            status="P",
+        return cls.objects.filter(status="Interrupted", **filters).update(
+            status="Pending",
             worker=None,
             started_at=None,
             result_binary=None,
@@ -184,7 +169,7 @@ class WorkItem(DatabaseTable):
             workitem = WorkItem.objects.select_for_update().get(pk=self.pk)
 
             # check if the status is *not* PENDING
-            if workitem.status != "P":
+            if workitem.status != "Pending":
                 # if so, the job is already running or finished, in which case
                 # we can't cancel it.
                 return False
@@ -192,7 +177,7 @@ class WorkItem(DatabaseTable):
             else:
                 # If it is still pending, we can go ahead and cancel it.
                 # This does not delete the task from the queue database though
-                workitem.status = "C"
+                workitem.status = "Cancelled"
                 workitem.save()
                 return True
 
@@ -204,7 +189,7 @@ class WorkItem(DatabaseTable):
         workitem = WorkItem.objects.only("status").get(pk=self.pk)
 
         # check the status and indicate whether it is CANCELED or not
-        if workitem.status == "P":
+        if workitem.status == "Pending":
             return True
         else:
             return False
@@ -217,7 +202,7 @@ class WorkItem(DatabaseTable):
         workitem = WorkItem.objects.only("status").get(pk=self.pk)
 
         # check the status and indicate whether it is CANCELED or not
-        if workitem.status == "C":
+        if workitem.status == "Cancelled":
             return True
         else:
             return False
@@ -230,7 +215,7 @@ class WorkItem(DatabaseTable):
         workitem = WorkItem.objects.only("status").get(pk=self.pk)
 
         # check the status and indicate whether it is RUNNING or not
-        if workitem.status == "R":
+        if workitem.status == "Running":
             return True
         else:
             return False
@@ -242,8 +227,8 @@ class WorkItem(DatabaseTable):
         # I don't use a lock to check the status here
         workitem = WorkItem.objects.only("status").get(pk=self.pk)
 
-        # check the status and indicate whether it is FINISHED or CANCELED
-        if workitem.status == "F" or workitem.status == "C":
+        # check the status and indicate whether it is COMPLETED or CANCELLED
+        if workitem.status in ["Completed", "Cancelled"]:
             return True
         else:
             return False
@@ -278,8 +263,8 @@ class WorkItem(DatabaseTable):
             workitem = WorkItem.objects.only("status", "result_binary").get(pk=self.pk)
             status = workitem.status
 
-            # FINISHED, ERRORED, or INTERRUPTED
-            if status == "F" or status == "E" or status == "I":
+            # COMPLETED, FAILED, or INTERRUPTED
+            if status in ["Completed", "Failed", "Interrupted"]:
                 # grab the result, unpickle it, and return it
                 result = cloudpickle.loads(workitem.result_binary)
                 # if the result is an Error or Exception, raise it
@@ -289,13 +274,13 @@ class WorkItem(DatabaseTable):
                 else:
                     return result
 
-            elif status == "C":  # CANCELED
+            elif status == "Cancelled":
                 raise CancelledError(
                     "This item was cancelled and has no result. If this is unexpected, "
                     "be sure to check your worker logs."
                 )
 
-            elif status == "P" or status == "R":  # PENDING or RUNNING
+            elif status in ["Pending", "Running"]:
                 # sleep the set amount before restarting the while loop
                 time.sleep(sleep_step)
 

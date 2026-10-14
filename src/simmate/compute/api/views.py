@@ -66,7 +66,7 @@ def get_next_work_item(request):
         # Query for PENDING WorkItems, lock it for editing, and update status
         workitem = (
             WorkItem.objects.select_for_update(skip_locked=True)
-            .filter(status="P")
+            .filter(status="Pending")
             .filter_by_tags(tags)
             .order_by("created_at")
             .first()
@@ -78,7 +78,7 @@ def get_next_work_item(request):
             return JsonResponse({"detail": "No pending work items found."}, status=204)
 
         # Update status to running
-        workitem.status = "R"
+        workitem.status = "Running"
         workitem.started_at = timezone.now()
         # We don't have a worker object for API workers at the moment, so worker is null
         workitem.save(update_fields=["status", "started_at", "updated_at"])
@@ -101,7 +101,7 @@ def update_work_item(request, work_item_id):
     API endpoint for remote workers to submit the result of a WorkItem.
     Expects JSON data:
     {
-        "status": "F" or "E" or "P" or "I",
+        "status": "Completed" or "Failed" or "Pending" or "Interrupted",
         "result": "<base64_encoded_pickled_result>"
     }
     """
@@ -111,7 +111,7 @@ def update_work_item(request, work_item_id):
     if not status or not result_b64:
         return JsonResponse({"detail": "Missing status or result data."}, status=400)
 
-    if status not in WorkItem.StatusOptions.values:
+    if status not in WorkItem.status_options:
         return JsonResponse({"detail": f"Invalid status '{status}'."}, status=400)
 
     if not check_worker_permissions(request.user):
@@ -132,7 +132,7 @@ def update_work_item(request, work_item_id):
 
         # an interrupted worker may report late, after the item already
         # completed. Only running items can be interrupted.
-        if status == "I" and workitem.status != "R":
+        if status == "Interrupted" and workitem.status != "Running":
             return JsonResponse(
                 {"detail": "WorkItem is not running. Ignoring interruption."},
                 status=200,

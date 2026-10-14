@@ -155,7 +155,8 @@ def add_item(workflow: tuple, created_at: datetime, **kwargs):
         created_at=created_at,
         updated_at=created_at,
         tags=[queue, name],
-        status="P",
+        name=name,
+        status="Pending",
         fxn=FXN,
         args=ARGS,
         kwargs=KWARGS,
@@ -180,7 +181,7 @@ for created_at in sorted(
     if not match:
         if NOW - created_at > timedelta(hours=6):
             # nobody picked it up, so someone cancelled it
-            add_item(workflow, created_at, status="C", updated_at=created_at + timedelta(hours=6))  # fmt: skip
+            add_item(workflow, created_at, status="Cancelled", updated_at=created_at + timedelta(hours=6))  # fmt: skip
         continue
     worker, started_at = match
 
@@ -195,7 +196,7 @@ for created_at in sorted(
     add_item(
         workflow,
         created_at,
-        status="E" if is_error else "F",
+        status="Failed" if is_error else "Completed",
         started_at=started_at,
         updated_at=finished_at,
         worker_id=worker["id"],
@@ -216,12 +217,12 @@ for worker in workers:
         add_item(
             workflow,
             started_at - timedelta(minutes=random.uniform(1, 30)),
-            status="R",
+            status="Running",
             started_at=started_at,
             updated_at=started_at,
             worker_id=worker["id"],
         )
-long_item = next(i for i in work_items if i["status"] == "R")
+long_item = next(i for i in work_items if i["status"] == "Running")
 long_item["started_at"] = long_item["updated_at"] = NOW - timedelta(hours=30)
 long_item["created_at"] = NOW - timedelta(hours=31)
 
@@ -238,7 +239,7 @@ work_items.sort(key=lambda i: i["created_at"])
 
 for worker in workers:
     items = [i for i in work_items if i["worker_id"] == worker["id"]]
-    done = [i for i in items if i["status"] in ("F", "E")]
+    done = [i for i in items if i["status"] in ("Completed", "Failed")]
     up_time = (worker["_end"] - worker["_start"]).total_seconds()
     workflow_time = sum(
         (i["updated_at"] - i["started_at"]).total_seconds() for i in done

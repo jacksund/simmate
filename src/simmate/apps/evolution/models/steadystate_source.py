@@ -42,11 +42,11 @@ class SteadystateSource(DatabaseTable):
         """
 
         # Before updating our run ids, we first want to see if any of them
-        # failed (or "E" for ERRORED) -- so that we can warn the use to
+        # failed (or were cancelled) -- so that we can warn the use to
         # check their logs.
         failed_ids = WorkItem.objects.filter(
             id__in=self.workitem_ids,
-            status__in=["E", "C"],
+            status__in=["Failed", "Cancelled"],
         ).values_list("id", flat=True)
 
         if failed_ids:
@@ -109,7 +109,7 @@ class SteadystateSource(DatabaseTable):
         # within an async context).
         still_running_ids = WorkItem.objects.filter(
             id__in=workitem_ids,
-            status__in=["P", "R"],
+            status__in=["Pending", "Running"],
         ).values_list("id", flat=True)
         return list(still_running_ids)
 

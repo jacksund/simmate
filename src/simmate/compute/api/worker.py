@@ -88,7 +88,7 @@ class ApiWorker:
         )
         self._report_result(
             self.current_workitem_id,
-            status="I",
+            status="Interrupted",
             result_pickled=cloudpickle.dumps(result),
             timeout=10,
         )
@@ -190,7 +190,7 @@ class ApiWorker:
                 args = cloudpickle.loads(base64.b64decode(workitem_data["args"]))
                 kwargs = cloudpickle.loads(base64.b64decode(workitem_data["kwargs"]))
                 result = fxn(*args, **kwargs)
-                status = "F"
+                status = "Completed"
             except Exception as exception:
                 traceback.print_exc()
 
@@ -204,13 +204,13 @@ class ApiWorker:
                 )
 
                 result = exception
-                status = "E"
+                status = "Failed"
 
             try:
                 result_pickled = cloudpickle.dumps(result)
             except Exception as exception:
                 result_pickled = cloudpickle.dumps(exception)
-                status = "E"
+                status = "Failed"
 
             self._report_result(workitem_id, status, result_pickled)
 

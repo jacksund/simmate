@@ -11,7 +11,6 @@ from django.db.models import Count, Q
 from django.utils import timezone
 
 from simmate.compute import SimmateExecutor, SimmateWorker, WorkItem
-from simmate.compute.worker import STALE_AFTER
 from simmate.website.htmx.components import HtmxComponent
 
 from .work_item import WorkItemComponent
@@ -23,6 +22,8 @@ table, and catalog counts) are rebuilt. Everything else updates on every `refres
 """
 
 TIMELINE_PERIODS = {
+    "1h": timedelta(hours=1),
+    "6h": timedelta(hours=6),
     "24h": timedelta(days=1),
     "7d": timedelta(days=7),
     "30d": timedelta(days=30),
@@ -42,10 +43,10 @@ The maximum number of WorkItems loaded for the activity timeline.
 
 STATUS_FILTERS = [
     ("", "All"),
-    ("R", "Running"),
-    ("P", "Pending"),
-    ("E", "Errored"),
-    ("I", "Interrupted"),
+    ("Running", "Running"),
+    ("Pending", "Pending"),
+    ("Failed", "Failed"),
+    ("Interrupted", "Interrupted"),
 ]
 
 CATALOGS = [
@@ -117,7 +118,7 @@ class ComputeDashboardComponent(HtmxComponent):
         )
         nstale = SimmateWorker.get_stale().count()
         norphaned = (
-            WorkItem.objects.filter(status="R", worker__isnull=False)
+            WorkItem.objects.filter(status="Running", worker__isnull=False)
             .exclude(worker__in=SimmateWorker.get_active())
             .count()
         )
@@ -202,7 +203,7 @@ class ComputeDashboardComponent(HtmxComponent):
             number of pending items.
         """
         pending_groups = (
-            WorkItem.objects.filter(status="P")
+            WorkItem.objects.filter(status="Pending")
             .values("tags")
             .annotate(n=Count("id"))
             .order_by("-n")
@@ -252,10 +253,10 @@ class ComputeDashboardComponent(HtmxComponent):
                     "message": (
                         f"{nstale} worker{'s' if nstale != 1 else ''} "
                         f"haven't checked in for over "
-                        f"{int(STALE_AFTER.total_seconds() // 60)} minutes "
-                        "and were likely killed."
+                        f"{int(SimmateWorker.stale_after.total_seconds() // 60)} minutes "
+                        "and were likely killed. They will be marked as stale "
+                        "automatically by the scheduler."
                     ),
-                    "action": {"method": "mark_stale", "label": "Mark stale"},
                 }
             )
 
@@ -307,7 +308,7 @@ class ComputeDashboardComponent(HtmxComponent):
             )
 
         # only flag an error spike when there is enough data to be meaningful
-        ndone_24h = stats_24h["nfinished"] + stats_24h["nerrored"]
+        ndone_24h = stats_24h["ncompleted"] + stats_24h["nfailed"]
         rate_24h = stats_24h["error_percent"]
         rate_7d = stats_7d["error_percent"]
         if ndone_24h >= 10 and rate_24h > max(2 * rate_7d, rate_7d + 10):
@@ -337,7 +338,9 @@ class ComputeDashboardComponent(HtmxComponent):
             A dataframe with the columns needed by `WorkItemComponent` reports.
         """
         return (
-            WorkItem.objects.filter(Q(updated_at__gte=start) | Q(status__in=["P", "R"]))
+            WorkItem.objects.filter(
+                Q(updated_at__gte=start) | Q(status__in=["Pending", "Running"])
+            )
             .order_by("-updated_at")
             .to_dataframe(WorkItemComponent.report_df_columns, limit=TIMELINE_LIMIT)
         )
@@ -357,36 +360,40 @@ class ComputeDashboardComponent(HtmxComponent):
         """
         groups = (
             WorkItem.objects.filter(
-                Q(status__in=["P", "R"])
+                Q(status__in=["Pending", "Running"])
                 | Q(
-                    status__in=["F", "E"],
+                    status__in=["Completed", "Failed"],
                     updated_at__gte=timezone.now() - timedelta(days=days),
                 )
             )
-            .values("tags", "status")
+            .values("name", "status")
             .annotate(n=Count("id"))
             .order_by()
         )
 
-        counts = defaultdict(lambda: {"P": 0, "R": 0, "F": 0, "E": 0})
+        counts = defaultdict(
+            lambda: {"Pending": 0, "Running": 0, "Completed": 0, "Failed": 0}
+        )
         for group in groups:
-            name = WorkItem.get_workflow_name(group["tags"])
+            name = group["name"] or "-"
             counts[name][group["status"]] += group["n"]
 
         health = []
         for name, c in counts.items():
-            ndone = c["F"] + c["E"]
+            ndone = c["Completed"] + c["Failed"]
             health.append(
                 {
                     "name": name,
-                    "npending": c["P"],
-                    "nrunning": c["R"],
-                    "nfinished": c["F"],
-                    "nerrored": c["E"],
-                    "error_percent": round(c["E"] / ndone * 100) if ndone else None,
+                    "npending": c["Pending"],
+                    "nrunning": c["Running"],
+                    "ncompleted": c["Completed"],
+                    "nfailed": c["Failed"],
+                    "error_percent": (
+                        round(c["Failed"] / ndone * 100) if ndone else None
+                    ),
                 }
             )
-        health.sort(key=lambda row: (-row["nerrored"], -row["npending"], row["name"]))
+        health.sort(key=lambda row: (-row["nfailed"], -row["npending"], row["name"]))
         return health
 
     @classmethod
@@ -396,7 +403,7 @@ class ComputeDashboardComponent(HtmxComponent):
         limit: int = 10,
     ) -> list[WorkItem]:
         """
-        Grabs the most recently updated WorkItems for the live table. Errored
+        Grabs the most recently updated WorkItems for the live table. Failed
         items also get an `error_message` attribute.
 
         Args:
@@ -409,6 +416,7 @@ class ComputeDashboardComponent(HtmxComponent):
         # BUG: `only` is required to avoid loading the pickled binary columns
         work_items = WorkItem.objects.select_related("worker").only(
             "id",
+            "name",
             "status",
             "tags",
             "created_at",
@@ -420,7 +428,7 @@ class ComputeDashboardComponent(HtmxComponent):
         work_items = list(work_items.order_by("-updated_at")[:limit])
 
         errors = cls.get_error_messages(
-            [item.id for item in work_items if item.status == "E"]
+            [item.id for item in work_items if item.status == "Failed"]
         )
 
         for item in work_items:
@@ -564,7 +572,9 @@ class ComputeDashboardComponent(HtmxComponent):
         if not isinstance(tags, list):
             self.action_error = f"Invalid tags: {tags}"
             return
-        ncanceled = WorkItem.objects.filter(status="P", tags=tags).update(status="C")
+        ncanceled = WorkItem.objects.filter(status="Pending", tags=tags).update(
+            status="Cancelled"
+        )
         self.action_message = f"Canceled {ncanceled:,} pending work items"
 
     def shutdown_worker(self, worker: int = None):
@@ -580,9 +590,3 @@ class ComputeDashboardComponent(HtmxComponent):
             )
         else:
             self.action_error = f"Unknown worker: {worker}"
-
-    def mark_stale(self):
-        if not self._check_can_manage():
-            return
-        nmarked = SimmateWorker.mark_stale_workers()
-        self.action_message = f"Marked {nmarked} worker(s) as stale"

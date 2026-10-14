@@ -11,7 +11,7 @@ Every time you submit a workflow for "cloud" execution, Simmate creates a **Work
 
 - The function to be executed (serialized using `cloudpickle`).
 - The input arguments and keyword arguments.
-- Metadata like `status` (Pending, Running, Finished, etc.) and `tags`.
+- Metadata like `status` (Pending, Running, Completed, etc.) and `tags`.
 
 
 The database acts as the single source of truth and the communication bridge between different computers.
@@ -27,7 +27,7 @@ A `SimmateWorker` is a process that sits on a compute resource and waits for wor
 1. Poll the database for any `Pending` WorkItems.
 2. If it finds one (and it matches its `tags`), it marks it as `Running`.
 3. It downloads the task, executes it, and captures the result.
-4. It saves the result back to the database and marks the WorkItem as `Finished` or `Errored`.
+4. It saves the result back to the database and marks the WorkItem as `Completed` or `Failed`.
 
 ---
 
@@ -75,7 +75,7 @@ elif workitem.is_pending():
 result = workitem.result()
 ```
 
-If you need to stop a job that is still `Pending`, you can use `workitem.cancel()`. Jobs that are already `Running` or `Finished` cannot be canceled.
+If you need to stop a job that is still `Pending`, you can use `workitem.cancel()`. Jobs that are already `Running` or `Completed` cannot be canceled.
 
 ### From the CLI
 Use the `run-cloud` command followed by your workflow name and inputs (either as arguments or a YAML file).

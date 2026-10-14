@@ -307,6 +307,7 @@ class Workflow:
         state = SimmateExecutor.submit(
             cls.run,
             tags=tags,
+            name=cls.name_full,
             **parameters_serialized,
         )
 
