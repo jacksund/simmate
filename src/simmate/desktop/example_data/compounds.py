@@ -6,7 +6,6 @@ import numpy as np
 import polars
 
 from simmate.toolkit import Molecule
-from simmate.toolkit.dataframes import MoleculeDataFrame
 
 # Each scaffold has two substitution sites; "({R1})" / "({R2})" are dropped entirely for H.
 SCAFFOLDS = {
@@ -41,7 +40,9 @@ def _fill(template: str, r1: str, r2: str) -> str:
     return template
 
 
-def build_dataset(n=400, seed=42) -> MoleculeDataFrame:
+def build_dataset(n=400, seed=42) -> polars.DataFrame:
+    """A table of `n` compounds from the `SCAFFOLDS` series, with random assay results.
+    Open it in the Toolkit tab as a `ToolkitDataset`."""
     rng = np.random.default_rng(seed)
     combos = [
         (series, r1, r2) for series in SCAFFOLDS for r1 in R1_GROUPS for r2 in R2_GROUPS
@@ -56,7 +57,6 @@ def build_dataset(n=400, seed=42) -> MoleculeDataFrame:
         rows.append(
             {
                 "id": f"CMP-{10000 + i}",
-                "molecule_obj": molecule,
                 "series": series,
                 "smiles": molecule.to_smiles(),
                 "pIC50": round(pic50, 2),
@@ -71,7 +71,4 @@ def build_dataset(n=400, seed=42) -> MoleculeDataFrame:
                 ).isoformat(),
             }
         )
-    return MoleculeDataFrame(
-        polars.DataFrame(rows, schema_overrides={"molecule_obj": polars.Object}),
-        init_substructure_lib=True,
-    )
+    return polars.DataFrame(rows)

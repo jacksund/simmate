@@ -9,26 +9,29 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from simmate.desktop.data import CATEGORY, ToolkitDataset
 from simmate.desktop.widgets.button import PrimaryButton
-from simmate.desktop.widgets.compound_table import CompoundTableModel
+from simmate.desktop.widgets.compound_table import format_value
 from simmate.desktop.widgets.molecule_3d import Molecule3DView
 from simmate.toolkit import Molecule
-from simmate.toolkit.dataframes import MoleculeDataFrame
+
+MAX_TEXT = 200  # characters shown of long text values (see `DataColumns.long_text`)
 
 
 class CompoundDetails(QWidget):
-    """One compound shown in full: its structure plus every table column, transposed.
+    """One compound (row) shown in full: its structure plus every column, transposed.
 
     The structure has a 2D tab and a 3D tab; the 3D conformer is only generated when
-    asked for (then cached), so clicking through compounds stays fast.
+    asked for (then cached), so clicking through compounds stays fast. Datasets
+    without molecules show only the columns.
 
     When several compounds are selected at once, `show_many` greys the card
     out with a message instead, since it shows one compound at a time.
     """
 
-    def __init__(self, mdf: MoleculeDataFrame):
+    def __init__(self, dataset: ToolkitDataset):
         super().__init__()
-        self.mdf = mdf
+        self.dataset = dataset
         self.query: Molecule | None = None
         self.current: int | None = None
         self.showing_many = False  # the "N compounds" message is up
@@ -72,19 +75,23 @@ class CompoundDetails(QWidget):
 
         self.value_labels: dict[str, QLabel] = {}
         form = QFormLayout()
-        for header, key in CompoundTableModel.COLUMNS:
-            if key == "structure":
-                continue
+        for key in dataset.columns.shown:
             label = QLabel("-")
             label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+            label.setWordWrap(True)  # e.g. long SMILES or names
             self.value_labels[key] = label
-            form.addRow(f"{header}:", label)
-        self.value_labels["smiles"].setWordWrap(True)
+            form.addRow(f"{key}:", label)
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.title_label)
         layout.addWidget(self.structure_tabs, stretch=1)
+        self.structure_tabs.setVisible(dataset.has_molecules)
         layout.addLayout(form)
+        if not dataset.has_molecules:
+            layout.addStretch()
+        # the first category column (e.g. a series) is named in the title
+        categories = dataset.columns.of_kind(CATEGORY)
+        self.title_category = categories[0] if categories else None
 
         self._render(None)
 
@@ -111,13 +118,19 @@ class CompoundDetails(QWidget):
         )
 
     def svg(self, index: int) -> bytes:
-        """The compound's 2D drawing (with any query highlighted), drawn once then cached."""
+        """The compound's 2D drawing (with any query highlighted), drawn once then
+        cached. Empty when the row has no (readable) structure."""
         if index not in self.svg_cache:
-            self.svg_cache[index] = self.mdf.df["molecule_obj"][index].draw(
-                "svg",
-                size=(400, 300),
-                highlight_query=self.query,
-                stereo_annotations=True,
+            molecule = self.dataset.molecule(index)
+            self.svg_cache[index] = (
+                b""
+                if molecule is None
+                else molecule.draw(
+                    "svg",
+                    size=(400, 300),
+                    highlight_query=self.query,
+                    stereo_annotations=True,
+                )
             )
         return self.svg_cache[index]
 
@@ -133,26 +146,38 @@ class CompoundDetails(QWidget):
                 label.setText("-")
             return
 
-        row = self.mdf.df.row(index, named=True)
-        self.svg_widget.load(QByteArray(self.svg(index)))
-        # load() swaps in a new renderer config, so re-apply the aspect ratio.
-        self.svg_widget.renderer().setAspectRatioMode(
-            Qt.AspectRatioMode.KeepAspectRatio
-        )
+        row = self.dataset.df.row(index, named=True)
+        if self.dataset.has_molecules:
+            self.svg_widget.load(QByteArray(self.svg(index)))
+            # load() swaps in a new renderer config, so re-apply the aspect ratio.
+            self.svg_widget.renderer().setAspectRatioMode(
+                Qt.AspectRatioMode.KeepAspectRatio
+            )
 
-        self.title_label.setText(f"{row['id']}  ({row['series']})")
+        title = self.dataset.columns.label(index)
+        if self.title_category and row[self.title_category] is not None:
+            title += f"  ({row[self.title_category]})"
+        if self.dataset.has_molecules and self.dataset.molecule(index) is None:
+            title += "\nNo valid structure"
+        self.title_label.setText(title)
+        long_text = self.dataset.columns.long_text
         for key, label in self.value_labels.items():
-            label.setText(str(row[key]))
+            text = format_value(row[key]) or "-"
+            if key in long_text and len(text) > MAX_TEXT:
+                text = text[:MAX_TEXT] + "…"  # e.g. a whole mol block
+            label.setText(text)
 
     def generate_3d(self):
         """Embed the current compound in 3D and show it."""
         if self.current is None:
             return
-        molecule = self.mdf.df["molecule_obj"][self.current].copy()
-        try:
-            molecule.convert_to_3d(keep_hydrogen=True, random_seed=0xF00D)
-        except Molecule.ConformerGenerationError:
-            molecule = None
+        molecule = self.dataset.molecule(self.current)
+        if molecule is not None:
+            molecule = molecule.copy()
+            try:
+                molecule.convert_to_3d(keep_hydrogen=True, random_seed=0xF00D)
+            except Molecule.ConformerGenerationError:
+                molecule = None
         self.mol_3d_cache[self.current] = molecule
         self._show_3d()
 

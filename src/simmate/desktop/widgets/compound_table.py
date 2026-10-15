@@ -13,7 +13,6 @@ from PySide6.QtCore import (
     Qt,
 )
 from PySide6.QtGui import (
-    QColor,
     QFont,
     QFontMetrics,
     QGuiApplication,
@@ -34,19 +33,18 @@ from PySide6.QtWidgets import (
 )
 
 from simmate.desktop import theme
+from simmate.desktop.data import NUMBER, ToolkitDataset
 from simmate.desktop.theme import rgba, tint
 from simmate.desktop.widgets.button import PrimaryButton
 from simmate.desktop.widgets.inputs import StyledCheckBox, line_pen, polyline
 from simmate.toolkit import Molecule
-from simmate.toolkit.dataframes import MoleculeDataFrame
 
-# Raw values for sorting (so 10 sorts after 9), separate from the displayed text.
-SORT_ROLE = Qt.ItemDataRole.UserRole
-
-NUMERIC_COLUMNS = ["pIC50", "solubility", "MolWt", "cLogP", "TPSA"]
 THUMBNAIL_SIZE = QSize(180, 120)  # the starting size; it follows the column's width
 MIN_THUMBNAIL_WIDTH = 60  # so images stay legible when the column is squeezed
 THUMBNAIL_PADDING = 10  # px of column width beside the image
+TEXT_ROW_HEIGHT = 32  # px, for datasets without images
+MAX_COLUMN_WIDTH = 300  # px, when first sized to fit
+RESIZE_PRECISION = 200  # rows measured when sizing a column to fit
 # Every other row is a shade darker than the window (as rgba, so it works over a
 # light or dark background).
 STRIPE_COLOR = "rgba(0, 0, 0, 12)"
@@ -103,25 +101,39 @@ QScrollBar::add-page, QScrollBar::sub-page {{ background: transparent; }}
 
 
 class CompoundTableModel(QAbstractTableModel):
-    """Exposes the dataset to Qt views. The view only asks for cells it's about to paint."""
+    """Exposes the dataset to Qt views. The view only asks for cells it's about to paint.
 
-    COLUMNS = [
-        ("Structure", "structure"),
-        ("ID", "id"),
-        ("Series", "series"),
-        ("SMILES", "smiles"),
-        ("pIC50", "pIC50"),
-        ("Solubility (µM)", "solubility"),
-        ("MolWt", "MolWt"),
-        ("cLogP", "cLogP"),
-        ("TPSA", "TPSA"),
-        ("Status", "status"),
-        ("Tested", "tested"),
-    ]
+    Its columns are the dataset's own (see `DataColumns.shown`), after a "Structure"
+    column of images when the dataset has molecules.
 
-    def __init__(self, mdf: MoleculeDataFrame):
+    The model sorts itself (`sort`), with polars, which is far faster for large
+    datasets than Qt's proxy asking for every row's value. So its rows are in sorted
+    order: `order` gives the dataset row shown at each model row, and `position`
+    the reverse. Everything outside the table (plots, filters, the selection) works
+    in dataset rows.
+    """
+
+    STRUCTURE = "structure"  # the key of the image column
+
+    def __init__(self, dataset: ToolkitDataset):
         super().__init__()
-        self.mdf = mdf
+        self.dataset = dataset
+        # the ID (if any), then the images, then the other columns
+        self.keys = dataset.columns.shown
+        if dataset.has_molecules:
+            first = 1 if dataset.columns.id_column is not None else 0
+            self.keys.insert(first, self.STRUCTURE)
+        self.structure_column = (
+            self.keys.index(self.STRUCTURE) if dataset.has_molecules else None
+        )
+        # Plain ints: Qt asks for these constantly (e.g. ~a million times while
+        # sorting a large dataset).
+        self.n_rows = dataset.height
+        self.n_columns = len(self.keys)
+        # by model row: its dataset row, and by dataset row: its model row
+        self.order: list[int] = list(range(self.n_rows))
+        self.position: list[int] = list(self.order)
+        self.numeric = set(dataset.columns.of_kind(NUMBER))
         # Hovered rows, in line with the website (see website/core/static/css/simmate.css):
         # matches --bs-primary-bg-subtle (the primary color at 10% opacity).
         self.highlight_color = tint(theme.PRIMARY_COLOR, theme.HIGHLIGHT_ALPHA)
@@ -134,70 +146,109 @@ class CompoundTableModel(QAbstractTableModel):
         self.highlighted_rows: set[int] = set()  # e.g. rows whose plot point is hovered
 
     def rowCount(self, parent=QModelIndex()):
-        return 0 if parent.isValid() else self.mdf.df.height
+        return 0 if parent.isValid() else self.n_rows
 
     def columnCount(self, parent=QModelIndex()):
-        return 0 if parent.isValid() else len(self.COLUMNS)
+        return 0 if parent.isValid() else self.n_columns
 
     def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
         if orientation != Qt.Orientation.Horizontal:
             return None
+        key = self.keys[section]
         if role == Qt.ItemDataRole.DisplayRole:
-            return self.COLUMNS[section][0]
+            return "Structure" if key == self.STRUCTURE else key
         if role == Qt.ItemDataRole.TextAlignmentRole:
             # over its values: numbers on the right, everything else on the left
             horizontal = (
                 Qt.AlignmentFlag.AlignRight
-                if self.COLUMNS[section][1] in NUMERIC_COLUMNS
+                if key in self.numeric
                 else Qt.AlignmentFlag.AlignLeft
             )
             return horizontal | Qt.AlignmentFlag.AlignVCenter
         return None
 
     def data(self, index, role=Qt.ItemDataRole.DisplayRole):
-        row = index.row()
-        key = self.COLUMNS[index.column()][1]
+        row = self.order[index.row()]
+        key = self.keys[index.column()]
 
         # Qt asks for many roles per cell on every paint; answer the cheap ones
         # before touching the dataframe.
         if role == Qt.ItemDataRole.BackgroundRole:
             return self.highlight_color if row in self.highlighted_rows else None
 
-        if key == "structure":
+        if key == self.STRUCTURE:
             if role == Qt.ItemDataRole.DecorationRole:
                 return self._thumbnail(row)
-            if role == SORT_ROLE:
-                # sorting this column sorts by size
-                return self._heavy_atom_counts[row]
             if role == Qt.ItemDataRole.ToolTipRole:
-                return self._columns["smiles"][row]
+                return self.dataset.smiles(row)
             return None
 
         if role == Qt.ItemDataRole.TextAlignmentRole:
-            if key in NUMERIC_COLUMNS:
+            if key in self.numeric:
                 return Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
             return None
-        if role == Qt.ItemDataRole.ForegroundRole and key == "status":
-            active = self._columns[key][row] == "Active"
-            return QColor("#4caf50") if active else QColor("#9e9e9e")
         if role == Qt.ItemDataRole.DisplayRole:
-            return str(self._columns[key][row])
-        if role == SORT_ROLE:
-            return self._columns[key][row]
+            return format_value(self._columns[key][row])
         return None
 
-    # Plain lists, computed once: Qt asks for cells on every paint, and sorting
-    # asks for every row's key many times over.
+    # Plain lists, computed once per column as it's first needed: Qt asks for cells
+    # on every paint.
     @cached_property
     def _columns(self) -> dict[str, list]:
-        return {key: self.mdf.df[key].to_list() for _, key in self.COLUMNS[1:]}
-
-    @cached_property
-    def _heavy_atom_counts(self) -> list[int]:
-        return [m.num_atoms_heavy for m in self.mdf.df["molecule_obj"]]
+        return _LazyColumns(lambda key: self.dataset.df[key].to_list())
 
     def column(self, key: str) -> int:
-        return [k for _, k in self.COLUMNS].index(key)
+        return self.keys.index(key)
+
+    def index_of(self, row: int, column: int = 0) -> QModelIndex:
+        """The model index of dataset row `row` (wherever sorting has put it)."""
+        return self.index(self.position[row], column)
+
+    def sort(self, column: int, order=Qt.SortOrder.AscendingOrder):
+        """Reorder the rows by `column` (nulls last), or back to the dataset's own
+        order when it's -1. The Structure column sorts by SMILES length, roughly by
+        size."""
+        if column < 0:
+            new_order = list(range(self.n_rows))
+        else:
+            key = self.keys[column]
+            if key == self.STRUCTURE:
+                sort_key = polars.col(self.dataset.molecule_column).str.len_chars()
+            else:
+                sort_key = polars.col(key)
+            try:
+                new_order = (
+                    self.dataset.df.select(
+                        polars.arg_sort_by(
+                            sort_key,
+                            descending=order == Qt.SortOrder.DescendingOrder,
+                            nulls_last=True,
+                            maintain_order=True,  # ties keep the dataset's order
+                        )
+                    )
+                    .to_series()
+                    .to_list()
+                )
+            except polars.exceptions.PolarsError:
+                return  # a column that can't be sorted (e.g. of structs)
+        if new_order == self.order:
+            return
+        self.layoutAboutToBeChanged.emit()
+        # keep the views' current/selected cells on the same dataset rows
+        old_indexes = self.persistentIndexList()
+        rows = [self.order[index.row()] for index in old_indexes]
+        self.order = new_order
+        self.position = [0] * self.n_rows
+        for model_row, row in enumerate(new_order):
+            self.position[row] = model_row
+        self.changePersistentIndexList(
+            old_indexes,
+            [
+                self.index_of(row, index.column())
+                for row, index in zip(rows, old_indexes)
+            ],
+        )
+        self.layoutChanged.emit()
 
     def set_highlight(self, query: Molecule | None):
         self.highlight_query = query
@@ -214,27 +265,31 @@ class CompoundTableModel(QAbstractTableModel):
 
     def _images_changed(self):
         # Tell views the images changed; they'll re-request only the visible ones.
+        if not self.dataset.has_molecules:
+            return
         self.dataChanged.emit(
-            self.index(0, 0),
-            self.index(self.rowCount() - 1, 0),
+            self.index(0, self.structure_column),
+            self.index(self.rowCount() - 1, self.structure_column),
             [Qt.ItemDataRole.DecorationRole],
         )
 
     def set_highlighted_rows(self, rows: set[int]):
         changed = self.highlighted_rows ^ rows
         self.highlighted_rows = rows
-        last_column = len(self.COLUMNS) - 1
+        last_column = len(self.keys) - 1
         for row in changed:
             self.dataChanged.emit(
-                self.index(row, 0),
-                self.index(row, last_column),
+                self.index_of(row, 0),
+                self.index_of(row, last_column),
                 [Qt.ItemDataRole.BackgroundRole],
             )
 
-    def _thumbnail(self, row_index: int) -> QPixmap:
+    def _thumbnail(self, row_index: int) -> QPixmap | None:
         if row_index not in self.pixmap_cache:
             if row_index not in self.svg_cache:
-                molecule = self.mdf.df["molecule_obj"][row_index]
+                molecule = self.dataset.molecule(row_index)
+                if molecule is None:
+                    return None  # no (readable) structure: an empty cell
                 # always drawn at THUMBNAIL_SIZE, then scaled as a vector below
                 self.svg_cache[row_index] = molecule.draw(
                     "svg",
@@ -259,48 +314,89 @@ class CompoundTableModel(QAbstractTableModel):
         return self.pixmap_cache[row_index]
 
 
+class _LazyColumns(dict):
+    """A dict that fills in each key on first lookup, with `make(key)`."""
+
+    def __init__(self, make):
+        super().__init__()
+        self.make = make
+
+    def __missing__(self, key):
+        self[key] = self.make(key)
+        return self[key]
+
+
+def format_value(value) -> str:
+    """A cell's value as text: floats to 6 significant figures, nulls blank."""
+    if value is None:
+        return ""
+    if isinstance(value, float):
+        return f"{value:.6g}"
+    return str(value)
+
+
 class CompoundFilterProxy(QSortFilterProxyModel):
-    """Sits between model and view: decides which rows are visible and in what order.
+    """Sits between model and view: decides which rows are visible.
 
     Rows are filtered two ways, kept apart so changing one never clears the other:
     the user's filters (`set_filters`) and the plot's visible region (`set_view_ranges`).
     Each is evaluated over the whole dataframe at once, into a mask of rows to keep.
+
+    Sorting is handed to the model (see `CompoundTableModel.sort`), and rows are
+    passed in and out as dataset rows (`index_of`, `dataset_row`).
     """
 
     def __init__(self, model: CompoundTableModel):
         super().__init__()
-        # By row index: which rows pass the user's filters / sit in the plot's view.
+        self.model = model
+        # By dataset row: which rows pass the user's filters / sit in the plot's view.
         self.passing = np.ones(model.rowCount(), dtype=bool)
         self.in_view = self.passing.copy()
         self.setSourceModel(model)
-        self.setSortRole(SORT_ROLE)
         # The last substructure query and its matches, by row index. Only the
         # sketcher changes the query, so other filter edits reuse the search.
         self._query = None
         self._query_matches = None
 
     @property
-    def mdf(self) -> MoleculeDataFrame:
-        return self.sourceModel().mdf
+    def dataset(self) -> ToolkitDataset:
+        return self.sourceModel().dataset
 
     def set_filters(
-        self, text="", series=None, status=None, query=None, value_ranges=()
+        self,
+        text: str = "",
+        query: Molecule | None = None,
+        value_ranges=(),
+        categories: dict[str, list[str]] | None = None,
     ):
-        checks = [_range_check(key, low, high) for key, low, high in value_ranges]
+        """Keep the rows that pass every filter given:
+
+        - `text`: in any searched column (see `DataColumns.searched`), ignoring case.
+        - `query`: a substructure the molecule must contain.
+        - `value_ranges`: (column, low, high) of number or date columns, as from
+          `DataColumns.numbers`.
+        - `categories`: by column, the values (as `DataColumns.strings`) to keep.
+        """
+        columns = self.dataset.columns
+        checks = []
         if text:
             checks.append(
                 polars.any_horizontal(
                     polars.col(key)
+                    .cast(polars.String)
                     .str.to_lowercase()
                     .str.contains(text.lower(), literal=True)
-                    for key in ("id", "series", "smiles")
+                    .fill_null(False)
+                    for key in columns.searched
                 )
             )
-        if series:
-            checks.append(polars.col("series") == series)
-        if status:
-            checks.append(polars.col("status") == status)
+        for key, values in (categories or {}).items():
+            checks.append(
+                polars.col(key).cast(polars.String).fill_null("None").is_in(values)
+            )
         passing = self._mask(checks)
+        for key, low, high in value_ranges:
+            passing &= columns.range_mask(key, low, high)
         if query is not None:
             passing &= self._substructure_matches(query)
 
@@ -309,7 +405,12 @@ class CompoundFilterProxy(QSortFilterProxyModel):
         self.endFilterChange()
 
     def set_view_ranges(self, view_ranges):
-        in_view = self._mask([_range_check(*r) for r in view_ranges])
+        in_view = np.ones(self.dataset.height, dtype=bool)
+        for key, low, high in view_ranges:
+            # rows missing the value aren't on the plot, so its view can't rule them out
+            in_view &= self.dataset.columns.range_mask(
+                key, low, high, keep_missing=True
+            )
         self.beginFilterChange()
         self.in_view = in_view
         self.endFilterChange()
@@ -317,24 +418,32 @@ class CompoundFilterProxy(QSortFilterProxyModel):
     def _substructure_matches(self, query: Molecule) -> np.ndarray:
         if query is not self._query:
             self._query = query
-            self._query_matches = np.zeros(self.mdf.df.height, dtype=bool)
-            self._query_matches[self.mdf.get_substructure_matches(query)] = True
+            self._query_matches = self.dataset.substructure_matches(query)
         return self._query_matches
 
     def _mask(self, checks: list[polars.Expr]) -> np.ndarray:
         """Evaluate `checks` over every row: True where a row passes all of them."""
-        df = self.mdf.df
+        df = self.dataset.df
         if not checks:
             return np.ones(df.height, dtype=bool)
-        return df.select(polars.all_horizontal(checks)).to_series().to_numpy().copy()
+        mask = df.select(polars.all_horizontal(checks).fill_null(False)).to_series()
+        return mask.to_numpy().copy()
 
     def filterAcceptsRow(self, source_row, _parent):
-        return bool(self.passing[source_row] and self.in_view[source_row])
+        row = self.model.order[source_row]
+        return bool(self.passing[row] and self.in_view[row])
 
+    def sort(self, column: int, order=Qt.SortOrder.AscendingOrder):
+        # The model sorts itself; this proxy keeps its order.
+        self.model.sort(column, order)
 
-def _range_check(key: str, low, high) -> polars.Expr:
-    # lit: bounds can be strings (e.g. ISO dates), which would otherwise name columns
-    return polars.col(key).is_between(polars.lit(low), polars.lit(high))
+    def index_of(self, row: int) -> QModelIndex:
+        """The index of dataset row `row`, invalid while it's filtered out."""
+        return self.mapFromSource(self.model.index_of(row))
+
+    def dataset_row(self, index: QModelIndex) -> int:
+        """The dataset row of a (valid) index of this proxy."""
+        return self.model.order[self.mapToSource(index).row()]
 
 
 class SortHeader(QHeaderView):
@@ -430,8 +539,10 @@ class CompoundTable(QTableView):
         self.setFrameShape(QFrame.Shape.NoFrame)  # the stylesheet draws the border
         self.setShowGrid(False)
         self.setAlternatingRowColors(True)
+        # Start in the file's own order. Set before enabling sorting, which would
+        # otherwise sort by the first column straight away (slow for large datasets).
+        self.horizontalHeader().setSortIndicator(-1, Qt.SortOrder.AscendingOrder)
         self.setSortingEnabled(True)
-        self.sortByColumn(model.column("pIC50"), Qt.SortOrder.DescendingOrder)
         self.setIconSize(THUMBNAIL_SIZE)
         self.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -440,26 +551,38 @@ class CompoundTable(QTableView):
         self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
         self.setHorizontalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
         self.verticalHeader().hide()
-        self.verticalHeader().setDefaultSectionSize(THUMBNAIL_SIZE.height() + 6)
+        has_images = model.dataset.has_molecules
+        self.verticalHeader().setDefaultSectionSize(
+            THUMBNAIL_SIZE.height() + 6 if has_images else TEXT_ROW_HEIGHT
+        )
         header = self.horizontalHeader()
         header.setStretchLastSection(True)
         header.setHighlightSections(False)  # no bold header over a selected row
         header.setCursor(Qt.CursorShape.PointingHandCursor)  # click to sort
-        for key in ("smiles", "tested"):
+        # Sizing to fit measures only the rows near the top, so large datasets
+        # open quickly.
+        header.setResizeContentsPrecision(RESIZE_PRECISION)
+        for key in model.dataset.columns.hidden_by_default:
             self.setColumnHidden(model.column(key), True)
         # Size text columns to fit. Skip the image column (measuring it would render
         # every image) and hidden ones (measuring them is wasted work).
-        for column in range(1, model.columnCount()):
-            if not self.isColumnHidden(column):
+        for column in range(model.columnCount()):
+            if column != model.structure_column and not self.isColumnHidden(column):
                 self.resizeColumnToContents(column)
-        self.setColumnWidth(0, THUMBNAIL_SIZE.width() + THUMBNAIL_PADDING)
+                # still room for others when the values are long (e.g. names)
+                if self.columnWidth(column) > MAX_COLUMN_WIDTH:
+                    self.setColumnWidth(column, MAX_COLUMN_WIDTH)
+        if has_images:
+            self.setColumnWidth(
+                model.structure_column, THUMBNAIL_SIZE.width() + THUMBNAIL_PADDING
+            )
         # the images (and so the rows) grow and shrink with the column's width
         header.sectionResized.connect(self._on_section_resized)
         self.setMouseTracking(True)  # needed for the `entered` (hover) signal
 
     def _on_section_resized(self, column: int, _old_width: int, new_width: int):
         model = self.model().sourceModel()
-        if column != model.column("structure"):
+        if column != model.structure_column:
             return
         width = max(new_width - THUMBNAIL_PADDING, MIN_THUMBNAIL_WIDTH)
         # keep THUMBNAIL_SIZE's aspect ratio
@@ -497,7 +620,9 @@ class ColumnChooser(QWidget):
         model = table.model().sourceModel()
         # Columns hidden at startup were never sized; size them when first shown.
         self.unsized = {
-            i for i in range(1, model.columnCount()) if table.isColumnHidden(i)
+            i
+            for i in range(model.columnCount())
+            if i != model.structure_column and table.isColumnHidden(i)
         }
         layout = QVBoxLayout(self)
         layout.setContentsMargins(12, 12, 12, 12)
@@ -514,8 +639,10 @@ class ColumnChooser(QWidget):
         layout.addLayout(buttons)
 
         self.checkboxes: list[StyledCheckBox] = []
-        for column, (label, _) in enumerate(model.COLUMNS):
-            checkbox = StyledCheckBox(label)
+        for column in range(model.columnCount()):
+            checkbox = StyledCheckBox(
+                model.headerData(column, Qt.Orientation.Horizontal)
+            )
             checkbox.setChecked(not table.isColumnHidden(column))
             checkbox.toggled.connect(
                 lambda on, column=column: self._set_shown(column, on)

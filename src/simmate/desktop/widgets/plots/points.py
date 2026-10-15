@@ -172,7 +172,7 @@ class PointsLayer:
         if len(rows) == 1 and self.show_card() and self.panel.svg_of is not None:
             self.tooltip.show_at(
                 self.panel.svg_of(rows[0]),
-                self.panel.df["id"][rows[0]],
+                self.panel.columns.label(rows[0]),
                 self.plot.mapFromScene(event.scenePos()),
             )
         else:

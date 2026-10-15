@@ -5,7 +5,7 @@ import polars
 import pyqtgraph as pg
 
 from simmate.desktop.widgets.plots.base import PlotPanel
-from simmate.desktop.widgets.plots.columns import CATEGORY, DATE, NUMBER
+from simmate.desktop.widgets.plots.columns import CATEGORY, DATE, NUMBER, DataColumns
 from simmate.desktop.widgets.plots.points import PointsLayer
 from simmate.desktop.widgets.plots.style import (
     ColorMapping,
@@ -31,7 +31,9 @@ class ScatterPanel(PlotPanel):
     description = "Two columns against each other, a point per compound"
 
     def __init__(
-        self, df: polars.DataFrame, svg_of: Callable[[int], bytes] | None = None
+        self,
+        df: polars.DataFrame | DataColumns,
+        svg_of: Callable[[int], bytes] | None = None,
     ):
         super().__init__(df, svg_of)
         self.column_setting("x", "X axis", (NUMBER, DATE), default="cLogP")

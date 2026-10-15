@@ -35,6 +35,7 @@ from simmate.desktop import theme
 from simmate.desktop.widgets.button import PrimaryButton
 from simmate.desktop.widgets.inputs import input_style
 from simmate.desktop.widgets.plots.base import PlotPanel
+from simmate.desktop.widgets.plots.columns import DataColumns
 
 
 class AiPlotPanel(PlotPanel):
@@ -46,7 +47,9 @@ class AiPlotPanel(PlotPanel):
     preview = True
 
     def __init__(
-        self, df: polars.DataFrame, svg_of: Callable[[int], bytes] | None = None
+        self,
+        df: polars.DataFrame | DataColumns,
+        svg_of: Callable[[int], bytes] | None = None,
     ):
         super().__init__(df, svg_of)
         self._build(None)

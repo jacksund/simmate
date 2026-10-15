@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from pathlib import Path
 
 from PySide6.QtCore import (
     QEvent,
@@ -13,23 +14,30 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QFrame,
     QHBoxLayout,
+    QLabel,
     QScrollArea,
     QSplitter,
+    QStackedWidget,
     QVBoxLayout,
     QWidget,
 )
 
+from simmate.desktop import theme
+from simmate.desktop.data import ToolkitDataset
 from simmate.desktop.example_data.compounds import build_dataset
 from simmate.desktop.tabs.placeholder import PlaceholderTab
 from simmate.desktop.widgets import (
     PLOT_TYPES,
+    BackgroundTask,
     ColumnChooser,
     CompoundDetails,
     CompoundFilterProxy,
     CompoundTable,
     CompoundTableModel,
+    DatasetStart,
     FilterPanel,
     HistogramPanel,
+    IncrementalTask,
     MouseModeToggle,
     Pane,
     PaneLayout,
@@ -40,15 +48,126 @@ from simmate.desktop.widgets import (
     SettingsButton,
     SidePanel,
     StyledCheckBox,
+    close_icon,
     columns_icon,
+    confirm,
+    get_datasets_dir,
+    import_dataset,
     input_style,
     lock_icon,
     plus_icon,
 )
 
+# Datasets with more rows than this ask before opening, as they can use a lot of
+# memory (until large datasets are handled more frugally).
+LARGE_DATASET_ROWS = 250_000
 
-class DashboardTab(QWidget):
-    """Plots and a table, flanked by tabbed side panels, all kept in sync.
+
+class DashboardTab(QStackedWidget):
+    """
+    The Toolkit tab: a start page for choosing a dataset (the sample, one from the
+    Datasets tab, or an upload), then a `ToolkitWorkspace` exploring it.
+
+    Opening another dataset builds a new workspace in place of the old one.
+
+    `go_to_datasets` asks the window to show the Datasets tab. Subclasses can use
+    their own workspace by setting `workspace_class`.
+    """
+
+    status = Signal(str)
+    go_to_datasets = Signal()
+
+    workspace_class: type["ToolkitWorkspace"]  # set below the class
+
+    def __init__(self):
+        super().__init__()
+        self.start = DatasetStart()
+        self.start.sample_requested.connect(self.open_sample)
+        self.start.datasets_requested.connect(self.go_to_datasets)
+        self.start.upload_requested.connect(self.upload)
+        self.addWidget(self.start)
+        self.workspace: ToolkitWorkspace | None = None
+        self.load_task: BackgroundTask | None = None
+
+    # --- opening datasets -----------------------------------------------------------------
+
+    def open_sample(self):
+        """Open the practice dataset (see `example_data.compounds`)."""
+        self._load(
+            "the sample dataset",
+            lambda _: ToolkitDataset(build_dataset(), name="Sample compounds"),
+        )
+
+    def open_path(self, path: Path):
+        """Open a dataset file (e.g. one from the Datasets tab)."""
+        rows = ToolkitDataset.count_rows(path)
+        if rows is not None and rows > LARGE_DATASET_ROWS:
+            if not confirm(
+                self,
+                "Open a large dataset?",
+                f"{path.stem} has {rows:,} rows, so it may use a lot of memory "
+                "and be slow to explore.",
+            ):
+                return
+        self._load(path.stem, lambda _: ToolkitDataset.from_file(path))
+
+    def upload(self, source: Path):
+        """Save a copy of `source` to the datasets folder (as parquet), then open it."""
+
+        def work(_):
+            path = import_dataset(source, get_datasets_dir())
+            return ToolkitDataset.from_file(path)
+
+        self._load(source.name, work)
+
+    def close_dataset(self):
+        """Back to the start page, dropping the open dataset."""
+        self._drop_workspace()
+        self.start.reset()
+        self.setCurrentWidget(self.start)
+        self.status.emit("Ready")
+
+    def _load(self, name: str, work):
+        self._drop_workspace()
+        self.setCurrentWidget(self.start)
+        self.start.set_loading(f"Opening {name}…")
+        self.status.emit(f"Opening {name}…")
+        task = BackgroundTask(work, self)
+        self.load_task = task
+        task.finished.connect(lambda dataset: self._loaded(task, dataset))
+        task.failed.connect(lambda error: self._load_failed(task, name, error))
+        task.start()
+
+    def _loaded(self, task: BackgroundTask, dataset: ToolkitDataset):
+        if task is not self.load_task:
+            return  # replaced by a newer request
+        self.load_task = None
+        self.start.reset()
+        self.workspace = self.workspace_class(dataset)
+        self.workspace.status.connect(self.status)
+        self.workspace.close_requested.connect(self.close_dataset)
+        self.addWidget(self.workspace)
+        self.setCurrentWidget(self.workspace)
+
+    def _load_failed(self, task: BackgroundTask, name: str, error: str):
+        if task is not self.load_task:
+            return
+        self.load_task = None
+        self.start.set_error(f"Couldn't open {name}: {error}")
+        self.status.emit(f"Couldn't open {name}")
+
+    def _drop_workspace(self):
+        if self.load_task is not None:
+            self.load_task.cancel()
+            self.load_task = None
+        if self.workspace is not None:
+            self.removeWidget(self.workspace)
+            self.workspace.deleteLater()
+            self.workspace = None
+
+
+class ToolkitWorkspace(QWidget):
+    """Plots and a table of one dataset, flanked by tabbed side panels, all kept in sync.
 
     - The plots and table sit in an editable layout. "Add plot" adds one (pick a type
       in the new pane: scatter, histogram, bar or line; see `PLOT_TYPES`), and "Add table" (shown once the table's removed) puts it back.
@@ -72,16 +191,19 @@ class DashboardTab(QWidget):
 
     Subclasses can add or swap side panel pages by overriding `get_left_pages` and
     `get_right_pages`, the plots on offer with `get_plot_types`, and the starting
-    layout with `build_default_layout`.
+    layout with `build_default_layout` (then set `DashboardTab.workspace_class`).
+
+    `close_requested` fires from its "Close" button, once the user confirms.
     """
 
     status = Signal(str)
+    close_requested = Signal()
 
-    def __init__(self):
+    def __init__(self, dataset: ToolkitDataset):
         super().__init__()
-        self.mdf = build_dataset()
-        self.df = self.mdf.df
-        self.model = CompoundTableModel(self.mdf)
+        self.dataset = dataset
+        self.df = dataset.df
+        self.model = CompoundTableModel(dataset)
         self.proxy = CompoundFilterProxy(self.model)
 
         # Our own record of the selection. The table's selection model forgets rows that
@@ -96,7 +218,7 @@ class DashboardTab(QWidget):
         self.range_timer.timeout.connect(self._filter_to_view)
 
         # --- detail card --------------------------------------------------------------
-        self.details = CompoundDetails(self.mdf)
+        self.details = CompoundDetails(dataset)
         self.details_scroll = QScrollArea()
         self.details_scroll.setWidget(self.details)
         self.details_scroll.setWidgetResizable(True)
@@ -113,7 +235,7 @@ class DashboardTab(QWidget):
 
         # --- side panels --------------------------------------------------------------
         # One page per tab; only the open tab's page shows.
-        self.filter_panel = FilterPanel(self.mdf)
+        self.filter_panel = FilterPanel(dataset)
         self.filter_panel.filters_changed.connect(self._apply_filters)
         # re-draw thumbnails and the card with the new substructure highlighted & aligned
         self.filter_panel.query_changed.connect(self.model.set_highlight)
@@ -209,11 +331,25 @@ class DashboardTab(QWidget):
         self.add_table_button.setIcon(plus_icon())
         self.add_table_button.setToolTip("Put the table back in the layout")
         self.add_table_button.clicked.connect(self._add_table_pane)
+        self.close_button = PrimaryButton("Close", muted=True)
+        self.close_button.setIcon(close_icon())
+        self.close_button.setToolTip("Close this dataset and go back to choose another")
+        self.close_button.clicked.connect(self._confirm_close)
+        name_label = QLabel(dataset.name)
+        name_label.setStyleSheet(f"color: {theme.MUTED_COLOR}; font-weight: 600;")
+        name_label.setToolTip(f"{dataset.height:,} rows")
         layout_controls = QHBoxLayout()
         layout_controls.setSpacing(8)
         layout_controls.addWidget(self.mouse_mode)
+        layout_controls.addSpacing(8)
+        layout_controls.addWidget(name_label)
         layout_controls.addStretch()
-        for button in [self.add_plot_button, self.add_table_button, self.edit_button]:
+        for button in [
+            self.add_plot_button,
+            self.add_table_button,
+            self.edit_button,
+            self.close_button,
+        ]:
             layout_controls.addWidget(button)
         self._update_add_table()
 
@@ -260,6 +396,21 @@ class DashboardTab(QWidget):
         # Again once the window is listening, so the count replaces its "Ready".
         QTimer.singleShot(0, self._update_count)
 
+        # The sketcher's substructure search needs an index of every molecule. It's
+        # slow to build for large datasets, so it's built a little at a time (and
+        # stops if the workspace is closed first).
+        if dataset.has_molecules:
+            self.index_task = IncrementalTask(
+                dataset.build_substructure_index(), dataset.height, self
+            )
+            self.index_task.progress.connect(self.filter_panel.set_index_progress)
+            self.index_task.finished.connect(self.filter_panel.set_index_ready)
+            self.index_task.failed.connect(
+                lambda error: self.filter_panel.set_index_ready(False, error)
+            )
+            self.filter_panel.set_index_progress(0, dataset.height)
+            self.index_task.start()
+
     # --- side panel pages -----------------------------------------------------------------
 
     def get_left_pages(self) -> list[tuple[str, QWidget]]:
@@ -300,6 +451,16 @@ class DashboardTab(QWidget):
         self.pane_layout.add_pane(histogram, scatter, "right")
         self.pane_layout.add_pane(self.table_pane, side="bottom")
 
+    def _confirm_close(self):
+        if confirm(
+            self,
+            "Close this dataset?",
+            f"Your plots, filters and selection for {self.dataset.name} will be "
+            "cleared. The dataset itself stays in My datasets, so you can open it "
+            "again anytime.",
+        ):
+            self.close_requested.emit()
+
     def _set_editing(self, editing: bool):
         self.pane_layout.set_editing(editing)
         self.edit_button.setText("Done" if editing else "Edit layout")
@@ -312,7 +473,10 @@ class DashboardTab(QWidget):
 
     def _add_plot(self, plot_type: type[PlotPanel]) -> PlotPanel:
         """Make a plot of `plot_type` that's kept in sync with everything else."""
-        plot = plot_type(self.df, self.details.svg)
+        plot = plot_type(
+            self.dataset.columns,
+            self.details.svg if self.dataset.has_molecules else None,
+        )
         plot.rows_hovered.connect(
             lambda rows, plot=plot: self._on_rows_hovered(rows, plot)
         )
@@ -360,7 +524,7 @@ class DashboardTab(QWidget):
     # --- helpers --------------------------------------------------------------------------
 
     def _proxy_index(self, row: int):
-        return self.proxy.mapFromSource(self.model.index(row, 0))
+        return self.proxy.index_of(row)
 
     def _show_selection_card(self):
         if len(self.selected_rows) > 1:
@@ -370,7 +534,7 @@ class DashboardTab(QWidget):
 
     def _update_count(self):
         shown = self.proxy.rowCount()
-        self.status.emit(f"{shown} of {self.df.height} compounds shown")
+        self.status.emit(f"{shown:,} of {self.df.height:,} rows shown")
 
     # --- side panels -----------------------------------------------------------------------
 
@@ -504,12 +668,10 @@ class DashboardTab(QWidget):
         if self._syncing:
             return  # selection churn caused by filtering, not by the user
         indexes = self.table.selectionModel().selectedRows()
-        self.selected_rows = {self.proxy.mapToSource(i).row() for i in indexes}
+        self.selected_rows = {self.proxy.dataset_row(i) for i in indexes}
 
         current = self.table.selectionModel().currentIndex()
-        current_row = (
-            self.proxy.mapToSource(current).row() if current.isValid() else None
-        )
+        current_row = self.proxy.dataset_row(current) if current.isValid() else None
         if current_row in self.selected_rows:
             self.focus_row = current_row
         elif self.selected_rows:
@@ -520,16 +682,19 @@ class DashboardTab(QWidget):
 
         self._refresh_selection_marks()
         if self.selected_rows:
-            self.status.emit(f"{len(self.selected_rows)} compound(s) selected")
+            self.status.emit(f"{len(self.selected_rows):,} row(s) selected")
 
     def _refresh_selection_marks(self):
         for plot in self.plots:
             plot.set_selected(self.selected_rows)
 
     def _on_table_hover(self, index):
-        self._on_rows_hovered({self.proxy.mapToSource(index).row()}, None)
+        self._on_rows_hovered({self.proxy.dataset_row(index)}, None)
 
     def eventFilter(self, watched, event):
         if watched is self.table.viewport() and event.type() == QEvent.Type.Leave:
             self._on_rows_hovered(set(), None)
         return super().eventFilter(watched, event)
+
+
+DashboardTab.workspace_class = ToolkitWorkspace

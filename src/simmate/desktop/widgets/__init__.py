@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from .background import BackgroundTask, IncrementalTask
 from .button import PrimaryButton
 from .compound_details import CompoundDetails
 from .compound_table import (
-    NUMERIC_COLUMNS,
     ColumnChooser,
     CompoundFilterProxy,
     CompoundTable,
@@ -12,9 +12,11 @@ from .compound_table import (
     scroll_bar_style,
     table_style,
 )
-from .dataset_browser import DatasetBrowser, get_datasets_dir
+from .confirm_dialog import ConfirmDialog, confirm
+from .dataset_browser import DatasetBrowser, get_datasets_dir, import_dataset
 from .dataset_chat import DatasetChat
 from .dataset_downloads import DatasetDownloads
+from .dataset_start import DatasetStart
 from .filter_panel import FilterPanel
 from .inputs import StyledCheckBox, StyledComboBox, input_style
 from .pane_layout import Pane, PaneLayout
@@ -23,6 +25,7 @@ from .plot_toolbar import (
     MouseModeToggle,
     ResetViewButton,
     SettingsButton,
+    close_icon,
     columns_icon,
     download_icon,
     folder_icon,

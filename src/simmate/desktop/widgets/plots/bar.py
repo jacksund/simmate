@@ -5,7 +5,7 @@ import polars
 
 from simmate.desktop.widgets.plots.bars import AGGREGATES, STACKING, GroupedBars
 from simmate.desktop.widgets.plots.base import PlotPanel
-from simmate.desktop.widgets.plots.columns import CATEGORY, NUMBER
+from simmate.desktop.widgets.plots.columns import CATEGORY, NUMBER, DataColumns
 
 BAR_WIDTH = 0.8  # of each category's slot
 
@@ -22,7 +22,9 @@ class BarPanel(PlotPanel):
     description = "A bar per category, counting its compounds or averaging a column"
 
     def __init__(
-        self, df: polars.DataFrame, svg_of: Callable[[int], bytes] | None = None
+        self,
+        df: polars.DataFrame | DataColumns,
+        svg_of: Callable[[int], bytes] | None = None,
     ):
         super().__init__(df, svg_of)
         self.column_setting("category", "Category", (CATEGORY,), default="series")
