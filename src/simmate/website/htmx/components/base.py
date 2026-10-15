@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import re
+import threading
 from typing import get_args, get_origin
 
 import numpy
 import pandas
 from cachetools import LRUCache
+from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.utils.functional import classproperty
@@ -17,6 +19,13 @@ from simmate.website.utils import parse_request_get
 from .utils import get_uuid_starting_with_letter, htmx_redirect
 
 LOCAL_COMPONENT_CACHE = LRUCache(maxsize=10_000)
+
+LOCAL_COMPONENT_CACHE_LOCK = threading.Lock()
+"""
+cachetools caches are not thread-safe (even `get` reorders an LRUCache), so
+all access goes through this lock. Needed when the server handles requests in
+threads (e.g. `gunicorn --threads 4`).
+"""
 
 
 class HtmxComponent:
@@ -67,6 +76,9 @@ class HtmxComponent:
         # from cache using the component_id
         self.component_id = get_uuid_starting_with_letter()
         self.form_data = {}
+        # Requests for one component are handled one at a time, as they all
+        # modify this same object (see `handle_request`)
+        self._request_lock = threading.Lock()
         self.initial_context = context
         self.request = (
             getattr(context, "request", None) if context else None
@@ -92,50 +104,67 @@ class HtmxComponent:
         request: HttpRequest,
         method_name: str = None,
     ) -> HttpResponse:
-
-        self.request = request  # for easy access elsewhere
-
-        self.js_actions = []  # reset as to not repeat last request's actions
-        self.action_error = ""
-        self.action_message = ""
-
-        self.pre_parse()
-        self.post_data = self.parse_post_data()
-        self.post_parse()
-
-        # we could just do...
-        #   self.form_data.update(self.post_data)
-        # but we want to call any `on_change_hook__example_col` methods if they
-        # are present and the value changed
-        for key, new_value in self.post_data.items():
-            self.update_form(key, new_value)
-
-        if method_name:
-            method = getattr(self, method_name)
-            method_kwargs = parse_request_get(self.request)
-            response = method(**method_kwargs)
-        else:
-            response = self.process()
-
-        # response is typically None, meaning we defer to rendering the component
-        # template again. But in some cases, it can return a JsonResponse, a URL,
-        # or some html that takes priority
-        if isinstance(response, JsonResponse):
-            return response
-        elif isinstance(response, HttpResponseRedirect):
-            # convert to special redirect htmx response
-            return htmx_redirect(response.url)
-        # elif isinstance(response, str):  # DISABLED -- need better check
-        #     return htmx_redirect(response)  # redirect to url
-        elif response is not None:
-            return response  # could be Http, html or something else
-        else:
-            # None returned, meaning we re-render the whole component template
-            return render(
-                request,
-                self.template_name,
-                self.get_context(),
+        # `method_name` comes straight from the URL, so only action methods are
+        # allowed. Private methods and the base class's own machinery are not
+        # (e.g. calling `handle_request` would deadlock on `_request_lock`)
+        if method_name and (
+            method_name.startswith("_")
+            or (
+                hasattr(HtmxComponent, method_name)
+                and method_name not in ["refresh", "stream_plotly_data"]
             )
+        ):
+            raise PermissionDenied(f"Not an action method: {method_name}")
+
+        # When the server is threaded, two requests for the same component
+        # (e.g. a double-click, or a poll landing during a click) could
+        # otherwise run at once and clash over `self.request`, `form_data`,
+        # etc. Requests for *different* components still run in parallel.
+        with self._request_lock:
+
+            self.request = request  # for easy access elsewhere
+
+            self.js_actions = []  # reset as to not repeat last request's actions
+            self.action_error = ""
+            self.action_message = ""
+
+            self.pre_parse()
+            self.post_data = self.parse_post_data()
+            self.post_parse()
+
+            # we could just do...
+            #   self.form_data.update(self.post_data)
+            # but we want to call any `on_change_hook__example_col` methods if
+            # they are present and the value changed
+            for key, new_value in self.post_data.items():
+                self.update_form(key, new_value)
+
+            if method_name:
+                method = getattr(self, method_name)
+                method_kwargs = parse_request_get(self.request)
+                response = method(**method_kwargs)
+            else:
+                response = self.process()
+
+            # response is typically None, meaning we defer to rendering the
+            # component template again. But in some cases, it can return a
+            # JsonResponse, a URL, or some html that takes priority
+            if isinstance(response, JsonResponse):
+                return response
+            elif isinstance(response, HttpResponseRedirect):
+                # convert to special redirect htmx response
+                return htmx_redirect(response.url)
+            # elif isinstance(response, str):  # DISABLED -- need better check
+            #     return htmx_redirect(response)  # redirect to url
+            elif response is not None:
+                return response  # could be Http, html or something else
+            else:
+                # None returned, meaning we re-render the whole component template
+                return render(
+                    request,
+                    self.template_name,
+                    self.get_context(),
+                )
 
     def refresh(self):
         """
@@ -237,7 +266,8 @@ class HtmxComponent:
 
     @staticmethod
     def from_local_cache(component_cache_key: str) -> "HtmxComponent":
-        return LOCAL_COMPONENT_CACHE.get(component_cache_key)
+        with LOCAL_COMPONENT_CACHE_LOCK:
+            return LOCAL_COMPONENT_CACHE.get(component_cache_key)
 
     # @staticmethod
     # def from_django_cache(self):
@@ -256,7 +286,8 @@ class HtmxComponent:
         # self.to_django_cache()  # DISABLE FOR NOW
 
     def to_local_cache(self):
-        LOCAL_COMPONENT_CACHE[self.component_cache_key] = self
+        with LOCAL_COMPONENT_CACHE_LOCK:
+            LOCAL_COMPONENT_CACHE[self.component_cache_key] = self
 
     # def to_django_cache(self):
     #     cache_full_tree(self)
