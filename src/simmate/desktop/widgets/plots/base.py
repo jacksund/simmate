@@ -55,15 +55,18 @@ class PlotPanel(QWidget):
     status = Signal(str)
 
     def __init__(
-        self, df: polars.DataFrame, svg_of: Callable[[int], bytes] | None = None
+        self,
+        df: polars.DataFrame | DataColumns,
+        svg_of: Callable[[int], bytes] | None = None,
     ):
         super().__init__()
-        self.df = df
-        self.columns = DataColumns(df)
+        # Pass the dataset's `DataColumns` to share its profile and cached values.
+        self.columns = df if isinstance(df, DataColumns) else DataColumns(df)
+        self.df = self.columns.df
         # how a row's compound is drawn, e.g. for a card on hover
         self.svg_of = svg_of
         # By row index: which rows pass the filters.
-        self.passing = np.ones(df.height, dtype=bool)
+        self.passing = np.ones(self.df.height, dtype=bool)
         self.selected_rows: set[int] = set()
         self.settings: dict[str, QWidget] = {}
         self._setting_rows: list = []  # (label, input) pairs, or an input alone
@@ -278,7 +281,7 @@ class PlotPanel(QWidget):
             plot_item.setLogMode(y=log)
 
     def describe_row(self, row: int, keys: list[str]) -> str:
-        """`row` for the status bar: its ID and its values of `keys`."""
+        """`row` for the status bar: its label (e.g. ID) and its values of `keys`."""
         values = []
         for key in dict.fromkeys(k for k in keys if k):
             if self.columns.kinds.get(key) in (NUMBER, DATE):
@@ -287,7 +290,7 @@ class PlotPanel(QWidget):
                 )
             else:
                 values.append(f"{key} {self.df[key][row]}")
-        return f"{self.df['id'][row]}: " + ", ".join(values)
+        return f"{self.columns.label(row)}: " + ", ".join(values)
 
     # --- what the dashboard calls ----------------------------------------------------------
 

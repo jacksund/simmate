@@ -1,7 +1,6 @@
 import shutil
 from pathlib import Path
 
-import polars
 from PySide6.QtCore import QDir, QFileInfo, QModelIndex, Qt, QUrl, Signal
 from PySide6.QtGui import QAbstractFileIconProvider, QIcon
 from PySide6.QtWidgets import (
@@ -20,6 +19,7 @@ from PySide6.QtWidgets import (
 
 from simmate.config import settings
 from simmate.desktop import theme
+from simmate.desktop.data import read_table
 from simmate.desktop.widgets.background import BackgroundTask
 from simmate.desktop.widgets.button import PrimaryButton
 from simmate.desktop.widgets.compound_table import SortHeader, table_style
@@ -37,7 +37,7 @@ from simmate.desktop.widgets.status import (
 )
 
 DATASET_SUFFIX = ".parquet"
-UPLOAD_FILTER = "Datasets (*.sdf *.csv *.parquet)"
+UPLOAD_FILTER = "Datasets (*.sdf *.smi *.csv *.parquet)"
 
 
 def get_datasets_dir() -> Path:
@@ -61,56 +61,17 @@ def unique_path(path: Path) -> Path:
 
 def import_dataset(source: Path, folder: Path) -> Path:
     """
-    Saves a copy of `source` (a .parquet, .csv or .sdf file) in `folder` as parquet,
-    and returns the new file. SDF records become rows of SMILES plus their properties.
+    Saves a copy of `source` (a .parquet, .csv, .sdf or .smi file) in `folder` as
+    parquet, and returns the new file. SDF and SMILES records become rows of SMILES
+    plus their properties (see `read_table`).
     """
     source = Path(source)
     target = unique_path(folder / f"{source.stem}{DATASET_SUFFIX}")
-    suffix = source.suffix.lower()
-    if suffix == ".parquet":
+    if source.suffix.lower() == DATASET_SUFFIX:
         shutil.copyfile(source, target)
-    elif suffix == ".csv":
-        polars.read_csv(source, infer_schema_length=10_000).write_parquet(target)
-    elif suffix == ".sdf":
-        _read_sdf(source).write_parquet(target)
     else:
-        raise ValueError(f"Can't import {source.name}: use .sdf, .csv or .parquet")
+        read_table(source).write_parquet(target)
     return target
-
-
-def _read_sdf(source: Path) -> polars.DataFrame:
-    """An SDF file as a table: one row per molecule, of its SMILES and properties."""
-    from simmate.toolkit import Molecule
-
-    molecules = Molecule.from_sdf_file(source, skip_failed=True)
-    if not isinstance(molecules, list):
-        molecules = [molecules]
-    rows = [
-        {
-            "smiles": molecule.to_smiles(),
-            # as text, then typed per column below (rdkit guesses per molecule)
-            **{
-                key: str(value)
-                for key, value in molecule.metadata.items()
-                if not key.startswith("_")  # rdkit's private props, e.g. _Name
-            },
-        }
-        for molecule in molecules
-    ]
-    df = polars.from_dicts(rows, infer_schema_length=None)
-    return df.with_columns(
-        _parse_numbers(df[column]) for column in df.columns if column != "smiles"
-    )
-
-
-def _parse_numbers(column: polars.Series) -> polars.Series:
-    """`column` as integers or floats if every value is one, else unchanged."""
-    for dtype in (polars.Int64, polars.Float64):
-        try:
-            return column.cast(dtype)
-        except polars.exceptions.InvalidOperationError:
-            continue
-    return column
 
 
 class FolderIcons(QAbstractFileIconProvider):
@@ -184,9 +145,12 @@ class DatasetBrowser(QWidget):
     The datasets saved on this computer (see `get_datasets_dir`), where datasets can
     be uploaded, renamed, deleted and organized into folders (drag to move).
 
-    `status` reports what it did, for the window's status bar.
+    `open_requested` fires with a dataset to open in the Toolkit tab (from "Open in
+    Toolkit" or a double-click), and `status` reports what it did, for the window's
+    status bar.
     """
 
+    open_requested = Signal(Path)
     status = Signal(str)
 
     def __init__(self):
@@ -198,7 +162,7 @@ class DatasetBrowser(QWidget):
             "Upload", icon=plus_icon(color=theme.PRIMARY_COLOR)
         )
         upload_button.setToolTip(
-            "Add your own .sdf, .csv or .parquet files, saved here as parquet"
+            "Add your own .sdf, .smi, .csv or .parquet files, saved here as parquet"
         )
         upload_button.clicked.connect(self.upload)
         folder_button = PrimaryButton("New folder", muted=True, icon=folder_icon())
@@ -207,9 +171,9 @@ class DatasetBrowser(QWidget):
         self.rename_button.clicked.connect(self.rename)
         self.delete_button = PrimaryButton("Delete", muted=True, icon=trash_icon())
         self.delete_button.clicked.connect(self.delete)
-        # TODO: load the selected dataset into the Toolkit tab
         self.open_button = PrimaryButton("Open in Toolkit", filled=True)
-        self.open_button.setToolTip("Coming soon")
+        self.open_button.setToolTip("Explore the selected dataset in the Toolkit tab")
+        self.open_button.clicked.connect(self.open_selected)
         buttons = QHBoxLayout()
         buttons.addWidget(upload_button)
         buttons.addWidget(folder_button)
@@ -248,6 +212,7 @@ class DatasetBrowser(QWidget):
         self.tree.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
         self.tree.setDefaultDropAction(Qt.DropAction.MoveAction)
         self.tree.selectionModel().selectionChanged.connect(self._update_buttons)
+        self.tree.doubleClicked.connect(lambda _: self.open_selected())
 
         folder_url = QUrl.fromLocalFile(str(self.root)).toString()
         location = note_label(
@@ -282,7 +247,20 @@ class DatasetBrowser(QWidget):
         selected = self._selected() is not None
         self.rename_button.setEnabled(selected)
         self.delete_button.setEnabled(selected)
-        self.open_button.setEnabled(False)  # TODO: selected and not a folder
+        self.open_button.setEnabled(self._selected_dataset() is not None)
+
+    def _selected_dataset(self) -> Path | None:
+        """The selected dataset file, or None (e.g. while a folder is selected)."""
+        index = self._selected()
+        if index is None or self.model.isDir(index):
+            return None
+        return Path(self.model.filePath(index))
+
+    def open_selected(self):
+        """Opens the selected dataset in the Toolkit tab."""
+        path = self._selected_dataset()
+        if path is not None:
+            self.open_requested.emit(path)
 
     def select(self, path: Path):
         """Selects (and scrolls to) a file or folder in the datasets folder."""

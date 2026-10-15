@@ -4,6 +4,7 @@ from collections.abc import Callable
 
 from PySide6.QtCore import QEvent, QRectF, Qt
 from PySide6.QtGui import QAction, QIcon, QKeySequence, QPainter, QPainterPath
+from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from PySide6.QtWidgets import QMainWindow, QTabWidget, QWidget
 
 from simmate.desktop import theme
@@ -69,16 +70,26 @@ class MainWindow(QMainWindow):
 
         self.setStyleSheet(tab_style())
 
+        # Opening a dataset in the Toolkit tab adds OpenGL-backed widgets (the 3D
+        # viewer and the sketcher's web view). A window already on screen has to
+        # recreate its native surface for its first such widget, which looks like
+        # the whole window closing and reopening. A hidden one, there from the start,
+        # makes the window OpenGL-ready before it's shown.
+        self._opengl_placeholder = QOpenGLWidget(self)
+        self._opengl_placeholder.hide()
+
         self.title_bar = TitleBar()
         self.setMenuWidget(self.title_bar)
 
         tabs = QTabWidget()
+        self.tabs = tabs
         for title, make_tab in self.get_tabs():
             tab = make_tab()
             # Each tab reports what it's doing via a signal; the window owns the status bar.
             tab.status.connect(self.statusBar().showMessage)
             tabs.addTab(tab, title)
         self.setCentralWidget(tabs)
+        self._connect_tabs()
 
         # The window shows a resize cursor over its margin. Give its children a
         # normal arrow so they don't inherit that cursor once the mouse moves in.
@@ -111,6 +122,29 @@ class MainWindow(QMainWindow):
             ("Toolkit", DashboardTab),
             ("Workers", WorkersTab),
         ]
+
+    def _connect_tabs(self):
+        """Let tabs hand work to each other: datasets opened from the Datasets tab
+        (`open_requested`) go to the Toolkit tab, and the Toolkit tab's
+        `go_to_datasets` shows the Datasets tab. Tabs are found by type, so
+        subclassed or reordered tabs still connect."""
+        toolkit = self._find_tab(DashboardTab)
+        datasets = self._find_tab(DatasetsTab)
+        if toolkit is None or datasets is None:
+            return
+
+        def open_dataset(path):
+            self.tabs.setCurrentWidget(toolkit)
+            toolkit.open_path(path)
+
+        datasets.open_requested.connect(open_dataset)
+        toolkit.go_to_datasets.connect(lambda: self.tabs.setCurrentWidget(datasets))
+
+    def _find_tab(self, tab_type: type) -> QWidget | None:
+        for index in range(self.tabs.count()):
+            if isinstance(self.tabs.widget(index), tab_type):
+                return self.tabs.widget(index)
+        return None
 
     def _add_shortcuts(self):
         quit_action = QAction("&Quit", self)

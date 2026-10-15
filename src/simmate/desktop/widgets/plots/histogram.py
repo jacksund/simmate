@@ -4,7 +4,7 @@ import polars
 
 from simmate.desktop.widgets.plots.bars import AGGREGATES, STACKING, HistogramPlot
 from simmate.desktop.widgets.plots.base import PlotPanel
-from simmate.desktop.widgets.plots.columns import DATE, NUMBER
+from simmate.desktop.widgets.plots.columns import DATE, NUMBER, DataColumns
 
 
 class HistogramPanel(PlotPanel):
@@ -19,7 +19,9 @@ class HistogramPanel(PlotPanel):
     description = "How one column's values are spread out, in bins"
 
     def __init__(
-        self, df: polars.DataFrame, svg_of: Callable[[int], bytes] | None = None
+        self,
+        df: polars.DataFrame | DataColumns,
+        svg_of: Callable[[int], bytes] | None = None,
     ):
         super().__init__(df, svg_of)
         self.column_setting("column", "Column", (NUMBER, DATE), default="MolWt")

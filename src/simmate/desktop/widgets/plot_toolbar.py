@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QFrame,
     QGraphicsDropShadowEffect,
     QHBoxLayout,
+    QScrollArea,
     QToolButton,
     QVBoxLayout,
     QWidget,
@@ -26,6 +27,7 @@ from PySide6.QtWidgets import (
 from simmate.desktop import theme
 from simmate.desktop.theme import rgba
 from simmate.desktop.widgets.button import PrimaryButton, button_style
+from simmate.desktop.widgets.compound_table import scroll_bar_style
 
 PANEL_STYLE = """
 #settingsPanel {
@@ -33,6 +35,8 @@ PANEL_STYLE = """
 }
 """
 GEAR_SIZE = 18  # px
+PANEL_GAP = 4  # px between a settings button and its panel
+PANEL_MARGIN = 8  # px kept between a settings panel and the window's edge
 
 
 class MouseModeToggle(QWidget):
@@ -123,7 +127,8 @@ class SettingsButton(QToolButton):
 
     The panel floats inside the window, under the button's right edge (or its left
     edge, if there's no room on the left), rather than being a popup window: on Wayland, popup menus are positioned unreliably and can
-    stop opening. While it's open, an invisible layer behind it covers the rest of
+    stop opening. A panel too tall for the room below the button scrolls (and opens
+    upward instead, if there's more room above). While it's open, an invisible layer behind it covers the rest of
     the window, so clicking anywhere else (or the gear again) or pressing Escape
     closes it.
     """
@@ -167,9 +172,21 @@ class SettingsButton(QToolButton):
         shadow = QGraphicsDropShadowEffect(blurRadius=16, offset=QPointF(0, 2))
         shadow.setColor(QColor(0, 0, 0, 60))
         self.panel.setGraphicsEffect(shadow)
+        # scrolls when it's taller than the room in the window (e.g. a long list)
+        self.scroll = QScrollArea()
+        self.scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.scroll.setStyleSheet(
+            "QScrollArea { background: transparent; }" + scroll_bar_style()
+        )
+        self.scroll.viewport().setAutoFillBackground(False)
+        self.scroll.setWidget(content)
+        # setWidget turns on the content's own (window-colored) background
+        content.setAutoFillBackground(False)
         layout = QVBoxLayout(self.panel)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(content)
+        layout.setContentsMargins(0, 0, 0, 0)  # the stylesheet's border insets it
+        layout.addWidget(self.scroll)
         close_shortcut = QShortcut(QKeySequence(Qt.Key.Key_Escape), self.panel)
         close_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         close_shortcut.activated.connect(lambda: self.setChecked(False))
@@ -206,14 +223,35 @@ class SettingsButton(QToolButton):
             self.panel.hide()
 
     def _place_panel(self):
-        self.click_catcher.setGeometry(self.window().rect())
-        self.panel.adjustSize()
-        bottom_right = self.mapTo(self.window(), self.rect().bottomRight())
-        x = bottom_right.x() - self.panel.width() + 1
+        window = self.window()
+        self.click_catcher.setGeometry(window.rect())
+
+        # As tall as its content, but no taller than the room below the button (or
+        # above it, when there's more room there), scrolling the rest.
+        hint = self.scroll.widget().sizeHint()
+        border = 2  # the panel's border, 1px each side
+        wanted = hint.height() + border
+        top_left = self.mapTo(window, self.rect().topLeft())
+        bottom_right = self.mapTo(window, self.rect().bottomRight())
+        below = window.height() - bottom_right.y() - PANEL_GAP - PANEL_MARGIN
+        above = top_left.y() - PANEL_GAP - PANEL_MARGIN
+        opens_up = wanted > below and above > below
+        height = min(wanted, above if opens_up else below)
+        width = hint.width() + border
+        if height < wanted:  # room for the scroll bar beside the content
+            width += self.scroll.verticalScrollBar().sizeHint().width()
+        self.panel.setFixedSize(width, height)
+
+        x = bottom_right.x() - width + 1
         if x < 0:  # no room on the left, so line up with the button's left edge
-            x = self.mapTo(self.window(), self.rect().topLeft()).x()
-        x = min(x, self.window().width() - self.panel.width())  # nor the right
-        self.panel.move(max(x, 0), bottom_right.y() + 4)
+            x = top_left.x()
+        x = min(x, window.width() - width)  # nor the right
+        y = (
+            top_left.y() - PANEL_GAP - height
+            if opens_up
+            else bottom_right.y() + PANEL_GAP
+        )
+        self.panel.move(max(x, 0), y)
 
     def eventFilter(self, watched, event):
         if event.type() == QEvent.Type.Resize:
@@ -259,6 +297,11 @@ def folder_icon(size: int = GEAR_SIZE, color: str | None = None) -> QIcon:
 def download_icon(size: int = GEAR_SIZE, color: str | None = None) -> QIcon:
     """An arrow pointing down onto a tray."""
     return _icon(_download_path(size), size, color)
+
+
+def close_icon(size: int = GEAR_SIZE, color: str | None = None) -> QIcon:
+    """An "×" (e.g. for closing something)."""
+    return _icon(_close_path(size), size, color)
 
 
 def lock_icon(size: int = GEAR_SIZE, color: str | None = None) -> QIcon:
@@ -366,6 +409,18 @@ def _plus_path(size: int) -> QPainterPath:
         width / 2,
     )
     return plus.united(vertical)
+
+
+def _close_path(size: int) -> QPainterPath:
+    """The plus sign of `_plus_path`, turned 45° into an "×"."""
+    center = size / 2
+    return (
+        QTransform()
+        .translate(center, center)
+        .rotate(45)
+        .translate(-center, -center)
+        .map(_plus_path(size))
+    )
 
 
 def _stop_path(size: int) -> QPainterPath:

@@ -7,7 +7,7 @@ from PySide6.QtCore import Qt
 
 from simmate.desktop import theme
 from simmate.desktop.widgets.plots.base import PlotPanel
-from simmate.desktop.widgets.plots.columns import CATEGORY, DATE, NUMBER
+from simmate.desktop.widgets.plots.columns import CATEGORY, DATE, NUMBER, DataColumns
 from simmate.desktop.widgets.plots.points import PointsLayer
 from simmate.desktop.widgets.plots.style import PlotKey, category_color, style_plot
 
@@ -36,7 +36,9 @@ class LinePanel(PlotPanel):
     description = "One column against another, joined up in order (e.g. over time)"
 
     def __init__(
-        self, df: polars.DataFrame, svg_of: Callable[[int], bytes] | None = None
+        self,
+        df: polars.DataFrame | DataColumns,
+        svg_of: Callable[[int], bytes] | None = None,
     ):
         super().__init__(df, svg_of)
         self.column_setting("x", "X axis", (NUMBER, DATE), default="tested")

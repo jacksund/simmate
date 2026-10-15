@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QSplitter, QVBoxLayout, QWidget
 
@@ -12,6 +14,7 @@ class DatasetsTab(QWidget):
     `get_datasets_dir`), for exploring in the Toolkit tab.
     """
 
+    open_requested = Signal(Path)  # a dataset to open in the Toolkit tab
     status = Signal(str)
 
     def __init__(self):
@@ -22,6 +25,7 @@ class DatasetsTab(QWidget):
 
         for section in [self.browser, self.downloads]:
             section.status.connect(self.status)
+        self.browser.open_requested.connect(self.open_requested)
         # reveal finished downloads, and keep the "Downloaded" labels up to date
         # as datasets are moved, renamed or deleted
         self.downloads.downloaded.connect(self.browser.select)
