@@ -1,16 +1,16 @@
 <td class="text-center">{{ entry.band_gap|floatformat:4|default:"--" }}</td>
 <td class="text-center">
     {% if entry.is_gap_direct %}
-        <i class="mdi mdi-check text-success"></i>
+        <i class="bi bi-check-lg text-success"></i>
     {% else %}
-        <i class="mdi mdi-close text-danger"></i>
+        <i class="bi bi-x-lg text-danger"></i>
     {% endif %}
 </td>
 <td class="text-center">
     {% if entry.is_metal %}
-        <i class="mdi mdi-check text-success"></i>
+        <i class="bi bi-check-lg text-success"></i>
     {% else %}
-        <i class="mdi mdi-close text-danger"></i>
+        <i class="bi bi-x-lg text-danger"></i>
     {% endif %}
 </td>
 <td class="text-center">{{ entry.nbands|default:"--" }}</td>

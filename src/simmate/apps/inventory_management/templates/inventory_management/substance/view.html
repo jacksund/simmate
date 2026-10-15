@@ -6,7 +6,7 @@
                 <div class="page-title-right m-0">
                     <a role="button"
                        class="btn btn-outline-primary btn-sm"
-                       href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Update <i class="mdi mdi-pencil-outline"></i></a>
+                       href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Update <i class="bi bi-pencil"></i></a>
                 </div>
                 <h3 class="m-0">Overview</h3>
             </div>
@@ -16,7 +16,7 @@
         <div class="row py-2">
             <div class="col-12">
                 <div class="alert alert-warning mb-0">
-                    <i class="mdi mdi-swap-horizontal"></i>
+                    <i class="bi bi-arrow-left-right"></i>
                     This ID has been retired and replaced by
                     <a href="{% url 'data_explorer:table-entry' 'inventory_management__substances' table_entry.replaced_by_id %}">{{ table_entry.replaced_by_id }}</a>.
                     See the ID history below for details.
@@ -26,8 +26,8 @@
     {% endif %}
     <div class="row py-2">
         <div class="col-12">
-            <table class="table table-centered table-striped mb-0 border">
-                <thead class="table-primary">
+            <table class="table table-simmate mb-0">
+                <thead>
                     <tr>
                         <th style="width: 45%">Base Info</th>
                         <th class="text-center"></th>
@@ -89,8 +89,8 @@
     </div>
     <div class="row py-2 mt-3">
         <div class="col-12">
-            <table class="table table-centered table-striped mb-0 border">
-                <thead class="table-primary">
+            <table class="table table-simmate mb-0">
+                <thead>
                     <tr>
                         <th style="width: 45%">External IDs</th>
                         <th class="text-center"></th>
@@ -235,8 +235,8 @@
         {% if id_changes %}
             <div class="row py-2 mt-3">
                 <div class="col-12">
-                    <table class="table table-centered table-striped mb-0 border">
-                        <thead class="table-primary">
+                    <table class="table table-simmate mb-0">
+                        <thead>
                             <tr>
                                 <th>ID History</th>
                                 <th>Old ID</th>

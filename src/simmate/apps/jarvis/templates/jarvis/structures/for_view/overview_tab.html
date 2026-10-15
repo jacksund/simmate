@@ -1,47 +1,48 @@
 <div class="tab-pane show active" id="overview-section">
     <div class="row">
-        <div class="col-5">{% include "core/base_data_types/structure.html" %}</div>
-        <div class="col-7">
-            <table class="table table-centered table-striped mb-0 border">
-                <thead class="table-primary">
-                    <tr>
-                        <th style="width: 45%">Base Info</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>JARVIS ID</td>
-                        <td>
-                            <a href="{{ table_entry.external_link }}" target="_blank">
-                                {{ table_entry.id }} <i class="mdi mdi-open-in-new"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Energy Above Hull</td>
-                        <td>
-                            {% if table_entry.energy_above_hull is not None %}
-                                {{ table_entry.energy_above_hull|floatformat:4 }} eV/atom
-                            {% else %}
-                                --
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Formula (Reduced)</td>
-                        <td>{{ table_entry.formula_reduced }}</td>
-                    </tr>
-                    <tr>
-                        <td>Spacegroup</td>
-                        <td>{{ table_entry.spacegroup.symbol }} ({{ table_entry.spacegroup.number }})</td>
-                    </tr>
-                    <tr>
-                        <td>Number of Sites</td>
-                        <td>{{ table_entry.nsites }}</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="col-12 col-lg-5">{% include "core/base_data_types/structure.html" %}</div>
+        <div class="col-12 col-lg-7 pt-3">
+            {% if table_entry.is_invalid_structure %}
+                <div class="alert alert-danger d-flex align-items-start" role="alert">
+                    <i class="bi bi-exclamation-circle fs-4 me-2 lh-1"></i>
+                    <div>
+                        <strong>Invalid structure.</strong> This entry could not be loaded from JARVIS, so its
+                        structure and computed properties may be missing or inaccurate.
+                    </div>
+                </div>
+            {% endif %}
+            <h3 class="fw-semibold text-break mb-2">{{ table_entry.formula_reduced|chemical_formula|default:"--" }}</h3>
+            <div class="mb-4">
+                {% if table_entry.spacegroup %}
+                    <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ table_entry.spacegroup.crystal_system|title }}</span>
+                {% endif %}
+                {% if table_entry.energy_above_hull == 0 %}
+                    <span class="badge bg-success-subtle text-success-emphasis"
+                          data-bs-toggle="tooltip"
+                          data-bs-title="On the convex hull as calculated by JARVIS, not Simmate">On hull (JARVIS)</span>
+                {% endif %}
+                <div>
+                    {% button_link label="View on JARVIS-DFT" link=table_entry.external_link theme="outline-primary" small=True open_in_new=True %}
+                </div>
+            </div>
+            <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Stability</div>
+            <dl class="row mb-4">
+                <dt class="col-6 col-sm-5 fw-normal text-muted">
+                    <span data-bs-toggle="tooltip"
+                          data-bs-title="Distance from the convex hull. Zero means the structure is predicted to be stable.">Energy above hull</span>
+                </dt>
+                <dd class="col-6 col-sm-7 mb-0">
+                    {% if table_entry.energy_above_hull is not None %}
+                        {{ table_entry.energy_above_hull|floatformat:3 }} eV/atom
+                        <div class="small text-muted">
+                            <i class="bi bi-info-circle"></i> Calculated by JARVIS. Simmate's value may differ.
+                        </div>
+                    {% else %}
+                        --
+                    {% endif %}
+                </dd>
+            </dl>
+            {% include "core/base_data_types/structure_summary.html" %}
         </div>
     </div>
 </div>

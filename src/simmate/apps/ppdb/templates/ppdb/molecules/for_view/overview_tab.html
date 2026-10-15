@@ -1,0 +1,57 @@
+<div class="tab-pane show active" id="overview-section">
+    <div class="row">
+        <div class="col-12 col-lg-5">{% include "core/base_data_types/molecule.html" %}</div>
+        <div class="col-12 col-lg-7 mt-3 mt-lg-0">
+            <table class="table table-simmate mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 45%">Base Info</th>
+                        <th class="text-center"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>CAS Number</td>
+                        <td>{{ table_entry.cas_number }}</td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>{{ table_entry.name }}</td>
+                    </tr>
+                    <tr>
+                        <td>Disciplines</td>
+                        <td>
+                            {% for tag in table_entry.disciplines %}<div class="badge bg-primary rounded-pill">{{ tag }}</div>{% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Classes</td>
+                        <td>
+                            {% for tag in table_entry.pesticide_classes %}<div class="badge bg-primary rounded-pill">{{ tag }}</div>{% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Approval Source</td>
+                        <td>{{ table_entry.approval_source }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row py-2">
+        <div class="col-12">
+            <table class="table table-simmate table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ table_entry.notes|linebreaks }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

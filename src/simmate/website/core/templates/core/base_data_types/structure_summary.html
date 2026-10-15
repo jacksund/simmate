@@ -1,0 +1,36 @@
+{# Compact summary of a crystal structure, for the right side of an Overview tab #}
+<div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Structure</div>
+<dl class="row mb-0">
+    <dt class="col-6 col-sm-5 fw-normal text-muted">Space group</dt>
+    <dd class="col-6 col-sm-7">
+        {% if table_entry.spacegroup %}
+            {{ table_entry.spacegroup.symbol }} (#{{ table_entry.spacegroup.number }})
+        {% else %}
+            --
+        {% endif %}
+    </dd>
+    <dt class="col-6 col-sm-5 fw-normal text-muted">Chemical system</dt>
+    <dd class="col-6 col-sm-7">
+        {{ table_entry.chemical_system|default:"--" }}
+    </dd>
+    <dt class="col-6 col-sm-5 fw-normal text-muted">Sites</dt>
+    <dd class="col-6 col-sm-7">
+        {{ table_entry.nsites|default_if_none:"--" }}
+    </dd>
+    <dt class="col-6 col-sm-5 fw-normal text-muted">Density</dt>
+    <dd class="col-6 col-sm-7">
+        {% if table_entry.density is not None %}
+            {{ table_entry.density|floatformat:3 }} g/cm<sup>3</sup>
+        {% else %}
+            --
+        {% endif %}
+    </dd>
+    <dt class="col-6 col-sm-5 fw-normal text-muted">Volume</dt>
+    <dd class="col-6 col-sm-7 mb-0">
+        {% if table_entry.volume is not None %}
+            {{ table_entry.volume|floatformat:2 }} Å<sup>3</sup>
+        {% else %}
+            --
+        {% endif %}
+    </dd>
+</dl>

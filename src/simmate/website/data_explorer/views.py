@@ -3,6 +3,7 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 
+from simmate.apps.rdkit.models import Molecule
 from simmate.config import settings
 from simmate.database.core import DatabaseTable
 from simmate.website.htmx.utils import get_component
@@ -141,7 +142,7 @@ def table_entries(request, table_name):
             # "paginator": page.paginator,
             # "entries": page.object_list,  # page.paginator.object_list gives ALL results
             "page_title": table_name,
-            "page_title_icon": "mdi-database",
+            "page_title_icon": "bi-database",
             "breadcrumbs": ["Data", component.display_name],
             "title_json_link": True,
             **component.get_extra_table_context(request),
@@ -213,8 +214,24 @@ def table_entry(request, table_name, table_entry_id):
         )
         return response
 
+    elif view_format == "sdf":
+        content = table_entry.to_toolkit().to_sdf()
+        response = HttpResponse(content, content_type="text/plain")
+        response["Content-Disposition"] = f'attachment; filename="{table_entry_id}.sdf"'
+        return response
+
+    elif view_format == "smiles":
+        content = table_entry.smiles
+        response = HttpResponse(content, content_type="text/plain")
+        response["Content-Disposition"] = f'attachment; filename="{table_entry_id}.smi"'
+        return response
+
     elif view_format == "input":
-        content = table_entry.structure
+        content = (
+            table_entry.molecule_original
+            if isinstance(table_entry, Molecule)
+            else table_entry.structure
+        )
         response = HttpResponse(content, content_type="text/plain")
         response["Content-Disposition"] = (
             f'attachment; filename="{table_entry_id}_input.txt"'
@@ -235,7 +252,7 @@ def table_entry_new(request, table_name):
     context = {
         "component_name": component_class.component_name,
         "page_title": table_name,
-        "page_title_icon": "mdi-database",
+        "page_title_icon": "bi-database",
         "breadcrumbs": ["Data", table_name, "Form"],
     }
     template = getattr(

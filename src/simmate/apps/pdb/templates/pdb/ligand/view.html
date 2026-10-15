@@ -2,6 +2,9 @@
 {% block entrycontent %}
     <div>
         {% include "pdb/ligand/for_view/tabs_header.html" %}
-        <div class="tab-content">{% include "pdb/ligand/for_view/overview_tab.html" %}</div>
+        <div class="tab-content">
+            {% include "pdb/ligand/for_view/overview_tab.html" %}
+            {% include "pdb/ligand/for_view/molecule_details_tab.html" %}
+        </div>
     </div>
 {% endblock %}

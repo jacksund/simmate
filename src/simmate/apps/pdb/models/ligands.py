@@ -111,7 +111,7 @@ class PdbLigand(ThirdPartyData, Molecule):
 
     @property
     def external_link(self) -> str:
-        return f"https://www.ebi.ac.uk/pdbe-srv/pdbechem/chemicalCompound/complete/{self.id}"
+        return f"https://www.rcsb.org/ligand/{self.id}"
 
     # -------------------------------------------------------------------------
 

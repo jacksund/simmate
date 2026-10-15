@@ -3,8 +3,9 @@
     <button class="btn btn-{{ theme }} {% if small %}btn-sm{% endif %}"
             {% htmx_post indicator=indicator trigger="click" method_name=method_name method_kwargs=method_kwargs javascript_only=javascript_only include=include target=target %}
             hx-disabled-elt>  {# disabled button after submit and until response comes #}
-        {% if icon %}<i class="bi bi-{{ icon }} mx-1"></i>{% endif %}
+        {% if icon and not icon_right %}<i class="bi bi-{{ icon }} mx-1"></i>{% endif %}
         {% if show_label %}{{ label }}{% endif %}
+        {% if icon and icon_right %}<i class="bi bi-{{ icon }} mx-1"></i>{% endif %}
     </button>
 {% if not grouped %}</div>{% endif %}
 {# djlint:on #}

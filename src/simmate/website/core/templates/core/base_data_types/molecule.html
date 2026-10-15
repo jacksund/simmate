@@ -1,1 +1,26 @@
-{% include "rdkit/molecule_entry_display.html" %}
+{% load simmate_input_forms %}
+<div class="col-12">
+    <div class="row m-2">
+        <div class="col-12 molecule-panel d-flex justify-content-center align-items-center border rounded-3 border-5 bg-white">
+            {% if table_entry.molecule %}
+                {% draw_molecule table_entry width=450 height=450 %}
+            {% else %}
+                <div class="text-center text-muted">
+                    <i class="bi bi-hexagon fs-1"></i>
+                    <div>No structure available</div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-12 mt-2 text-center">
+            {% if table_entry.molecule %}
+                {% button_link label="SDF" link="?format=sdf" theme="outline-secondary" icon="download" small=True %}
+            {% endif %}
+            {% if table_entry.smiles %}
+                {% button_link label="SMILES" link="?format=smiles" theme="outline-secondary" icon="download" small=True %}
+            {% endif %}
+            {% if table_entry.molecule_original %}
+                {% button_link label="Original Input" link="?format=input" theme="outline-secondary" icon="download" small=True %}
+            {% endif %}
+        </div>
+    </div>
+</div>

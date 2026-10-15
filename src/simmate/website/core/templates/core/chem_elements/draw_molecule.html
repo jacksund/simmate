@@ -1,2 +1,11 @@
-<div id="{{ div_id }}"></div>
-<script>add_mol_viewer("{{ div_id }}", "{{ molecule }}", {{ width }}, {{ height }});</script>
+{% if molecule %}
+    <div id="{{ div_id }}"></div>
+    <script>add_mol_viewer("{{ div_id }}", "{{ molecule }}", {{ width }}, {{ height }});</script>
+{% else %}
+    <div class="d-flex flex-column justify-content-center align-items-center text-muted mx-auto"
+         style="width: {{ width }}px;
+                height: {{ height }}px">
+        <i class="bi bi-hexagon fs-3"></i>
+        <small>No structure</small>
+    </div>
+{% endif %}

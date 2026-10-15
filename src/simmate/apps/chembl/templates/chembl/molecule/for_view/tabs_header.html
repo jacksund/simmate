@@ -4,8 +4,17 @@
            data-bs-toggle="tab"
            aria-expanded="true"
            class="nav-link active">
-            <i class="mdi mdi-home-variant d-md-none d-block"></i>
+            <i class="bi bi-house-door d-md-none d-block"></i>
             <span class="d-none d-md-block">Overview</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#molecule-details-section"
+           data-bs-toggle="tab"
+           aria-expanded="false"
+           class="nav-link">
+            <i class="bi bi-hexagon d-md-none d-block"></i>
+            <span class="d-none d-md-block">Molecule</span>
         </a>
     </li>
     <li class="nav-item">
@@ -13,8 +22,8 @@
            data-bs-toggle="tab"
            aria-expanded="false"
            class="nav-link">
-            <i class="mdi mdi-file-document-outline d-md-none d-block"></i>
-            <span class="d-none d-md-block">Documents</span>
+            <i class="bi bi-file-earmark-text d-md-none d-block"></i>
+            <span class="d-none d-md-block">Documents <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis">{{ documents__count }}</span></span>
         </a>
     </li>
     <li class="nav-item">
@@ -22,8 +31,8 @@
            data-bs-toggle="tab"
            aria-expanded="false"
            class="nav-link">
-            <i class="mdi mdi-flask d-md-none d-block"></i>
-            <span class="d-none d-md-block">Assays</span>
+            <i class="bi bi-clipboard-data d-md-none d-block"></i>
+            <span class="d-none d-md-block">Assays <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis">{{ assays__count }}</span></span>
         </a>
     </li>
 </ul>

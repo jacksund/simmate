@@ -1,11 +1,24 @@
 {% load simmate_input_forms %}
 <div class="col-12">
     <div class="row m-2">
-        <div class="col-12 text-center" style="height: 500px;">{% draw_structure table_entry %}</div>
+        <div class="col-12 structure-panel">
+            {% if table_entry.structure %}
+                {% draw_structure table_entry %}
+            {% else %}
+                <div class="h-100 d-flex justify-content-center align-items-center border rounded-3 border-5 bg-white">
+                    <div class="text-center text-muted">
+                        <i class="bi bi-box fs-1"></i>
+                        <div>No structure available</div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
         <div class="col-12 mt-2 text-center">
-            {% button_link label="CIF" link="?format=cif" theme="outline-secondary" icon="download" small=True %}
-            {% button_link label="POSCAR" link="?format=poscar" theme="outline-secondary" icon="download" small=True %}
-            {% button_link label="Original Input" link="?format=input" theme="outline-secondary" icon="download" small=True %}
+            {% if table_entry.structure %}
+                {% button_link label="CIF" link="?format=cif" theme="outline-secondary" icon="download" small=True %}
+                {% button_link label="POSCAR" link="?format=poscar" theme="outline-secondary" icon="download" small=True %}
+                {% button_link label="Original Input" link="?format=input" theme="outline-secondary" icon="download" small=True %}
+            {% endif %}
         </div>
     </div>
 </div>
