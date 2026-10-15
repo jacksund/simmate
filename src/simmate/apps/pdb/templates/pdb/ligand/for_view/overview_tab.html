@@ -1,88 +1,76 @@
 <div class="tab-pane show active" id="overview-section">
     <div class="row">
-        <div class="col-xl-12">{% include "rdkit/molecule_entry_display.html" %}</div>
-    </div>
-    <div class="row py-2">
-        <div class="col-12">
-            {# base info #}
-            <div class="row pt-2">
-                <div class="col-xl-7">
-                    <table class="table table-centered table-striped mb-0 border">
-                        <thead class="table-primary">
-                            <tr>
-                                <th style="width: 45%">Base Info</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>PDB ID</td>
-                                <td>
-                                    <a href="{{ table_entry.external_link }}" target="_blank">
-                                        {{ table_entry.id }} <i class="mdi mdi-open-in-new"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Name</td>
-                                <td>{{ table_entry.name|default:"--" }}</td>
-                            </tr>
-                            <tr>
-                                <td>Type</td>
-                                <td>{{ table_entry.type_code|default:"--" }}</td>
-                            </tr>
-                            <tr>
-                                <td>Monomer Type</td>
-                                <td>{{ table_entry.monomer_type|default:"--" }}</td>
-                            </tr>
-                            <tr>
-                                <td>Delisted (obsolete)</td>
-                                <td>{{ table_entry.is_delisted|yesno:"Yes,No,--" }}</td>
-                            </tr>
-                            {% if table_entry.replaced_by %}
-                                <tr>
-                                    <td>Replaced By</td>
-                                    <td>
-                                        <a href="{% url 'data_explorer:table-entry' table_entry.table_name table_entry.replaced_by %}">
-                                            {{ table_entry.replaced_by }} <small><i class="bi bi-box-arrow-up-right"></i></small>
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% endif %}
-                            <tr>
-                                <td>Valid Molecule</td>
-                                <td>
-                                    {% if table_entry.is_invalid_molecule is None %}
-                                        --
-                                    {% else %}
-                                        {{ table_entry.is_invalid_molecule|yesno:"No,Yes" }}
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Created At (original)</td>
-                                <td>{{ table_entry.created_at_original|date:"Y-m-d"|default:"--" }}</td>
-                            </tr>
-                            <tr>
-                                <td>Updated At (original)</td>
-                                <td>{{ table_entry.updated_at_original|date:"Y-m-d"|default:"--" }}</td>
-                            </tr>
-                            {% if table_entry.protein_ids_original %}
-                                <tr>
-                                    <td>Found in Proteins</td>
-                                    <td>
-                                        {% for pdb_id in table_entry.protein_ids_original %}
-                                            <a href="https://www.rcsb.org/structure/{{ pdb_id }}"
-                                               target="_blank"
-                                               class="badge bg-secondary text-white">{{ pdb_id }}</a>
-                                        {% endfor %}
-                                    </td>
-                                </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
+        <div class="col-12 col-lg-5">{% include "core/base_data_types/molecule.html" %}</div>
+        <div class="col-12 col-lg-7 pt-3">
+            {% if table_entry.is_delisted %}
+                <div class="alert alert-warning d-flex align-items-start" role="alert">
+                    <i class="bi bi-archive fs-4 me-2 lh-1"></i>
+                    <div>
+                        <strong>Obsolete ligand.</strong> PDB has retired this ID and it will not be reused.
+                        {% if table_entry.replaced_by %}
+                            Replaced by
+                            <a href="{% url 'data_explorer:table-entry' table_entry.table_name table_entry.replaced_by %}"
+                               class="alert-link text-nowrap">{{ table_entry.replaced_by }} <i class="bi bi-box-arrow-up-right small"></i></a>
+                        {% else %}
+                            There is no known replacement in PDB.
+                        {% endif %}
+                    </div>
                 </div>
+            {% endif %}
+            {% if table_entry.is_invalid_molecule %}
+                <div class="alert alert-danger d-flex align-items-start" role="alert">
+                    <i class="bi bi-exclamation-circle fs-4 me-2 lh-1"></i>
+                    <div>
+                        <strong>Invalid molecule.</strong> This entry could not be fully processed by the Simmate toolkit, so its
+                        structure and computed properties may be missing or inaccurate.
+                    </div>
+                </div>
+            {% endif %}
+            <h3 class="fw-semibold text-break mb-2">{{ table_entry.name|default:"--" }}</h3>
+            <div class="mb-4">
+                {% if table_entry.monomer_type %}
+                    <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ table_entry.monomer_type|title }}</span>
+                {% endif %}
+                {% if table_entry.type_code %}
+                    <span class="badge border border-secondary text-secondary"
+                          data-bs-toggle="tooltip"
+                          data-bs-title="PDB type code">{{ table_entry.type_code }}</span>
+                {% endif %}
+                {% if not table_entry.is_delisted %}
+                    <div>
+                        {% button_link label="View on RCSB PDB" link=table_entry.external_link theme="outline-primary" small=True open_in_new=True %}
+                    </div>
+                {% endif %}
             </div>
+            <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Source Record · PDB</div>
+            <dl class="row mb-4">
+                <dt class="col-5 fw-normal text-muted">Added to PDB</dt>
+                <dd class="col-7">
+                    {{ table_entry.created_at_original|date:"M j, Y"|default:"--" }}
+                </dd>
+                <dt class="col-5 fw-normal text-muted">Last modified by PDB</dt>
+                <dd class="col-7">
+                    {{ table_entry.updated_at_original|date:"M j, Y"|default:"--" }}
+                </dd>
+                <dt class="col-5 fw-normal text-muted">Status</dt>
+                <dd class="col-7 mb-0">
+                    {% if table_entry.is_delisted %}
+                        Obsolete
+                    {% else %}
+                        Released
+                    {% endif %}
+                </dd>
+            </dl>
+            {% if table_entry.protein_ids_original %}
+                <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Found in Proteins</div>
+                <div>
+                    {% for pdb_id in table_entry.protein_ids_original %}
+                        <a href="https://www.rcsb.org/structure/{{ pdb_id }}"
+                           target="_blank"
+                           class="badge bg-secondary text-white">{{ pdb_id }}</a>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>

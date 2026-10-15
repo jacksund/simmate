@@ -8,7 +8,7 @@
                     <div class="page-title-right m-0">
                         <a role="button"
                            class="btn btn-outline-primary btn-sm"
-                           href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Edit <i class="mdi mdi-pencil"></i></a>
+                           href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Edit <i class="bi bi-pencil"></i></a>
                     </div>
                     <h3 class="m-0">Tag Info</h3>
                 </div>
@@ -17,7 +17,7 @@
         <div class="col-xl-12">
             <div class="row py-2">
                 <div>
-                    <table class="table table-centered table-striped mb-0 border">
+                    <table class="table table-simmate mb-0">
                         <tbody>
                             <tr>
                                 <td>Tag Name</td>
@@ -31,7 +31,7 @@
                                 <td>Project</td>
                                 <td>
                                     {% if table_entry.tag_type == "project-specific" %}
-                                        <a href="{% url 'data_explorer:table-entry' 'Project' table_entry.project.id %}">{{ table_entry.project.name }} <i class="mdi mdi-open-in-new"></i></a>
+                                        <a href="{% url 'data_explorer:table-entry' 'Project' table_entry.project.id %}">{{ table_entry.project.name }} <i class="bi bi-box-arrow-up-right"></i></a>
                                     {% else %}
                                         ---
                                     {% endif %}

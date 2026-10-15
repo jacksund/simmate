@@ -1,72 +1,87 @@
 <div class="tab-pane show active" id="overview-section">
     <div class="row">
-        <div class="col-xl-12">{% include "rdkit/molecule_entry_display.html" %}</div>
-    </div>
-    <div class="row py-2">
-        <div class="col-12">
-            {# base info #}
-            <div class="row pt-2">
-                <div class="col-xl-7">
-                    <table class="table table-centered table-striped mb-0 border">
-                        <thead class="table-primary">
-                            <tr>
-                                <th style="width: 45%">Base Info</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>ChEMBL ID</td>
-                                <td>
-                                    <a href="{{ table_entry.external_link }}" target="_blank">
-                                        {{ table_entry.chembl_id }} <i class="mdi mdi-open-in-new"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Molecule Type</td>
-                                <td>{{ table_entry.molecule_type|default:"--" }}</td>
-                            </tr>
-                            <tr>
-                                <td>Drug Likeness</td>
-                                <td>{{ table_entry.drug_likeness|default:"--" }}</td>
-                            </tr>
-                            <tr>
-                                <td>ALogP</td>
-                                <td>{{ table_entry.alog_p_chembl|default:"--" }}</td>
-                            </tr>
-                            <tr>
-                                <td>Rule of 3 Pass</td>
-                                <td>
-                                    {% if table_entry.rule_of_3_pass == True %}
-                                        <i class="mdi mdi-check text-success"></i> Yes
-                                    {% elif table_entry.rule_of_3_pass == False %}
-                                        <i class="mdi mdi-close text-danger"></i> No
-                                    {% else %}
-                                        --
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Rule of 5 Violations</td>
-                                <td>{{ table_entry.rule_of_5_violations|default:"--" }}</td>
-                            </tr>
-                            <tr>
-                                <td>H-Bond Acceptors</td>
-                                <td>{{ table_entry.num_h_acceptors_lipinski|default:"--" }}</td>
-                            </tr>
-                            <tr>
-                                <td>H-Bond Donors</td>
-                                <td>{{ table_entry.num_h_donors_lipinski|default:"--" }}</td>
-                            </tr>
-                            <tr>
-                                <td>Natural Product Likeness</td>
-                                <td>{{ table_entry.natural_product_likeness|default:"--" }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+        <div class="col-12 col-lg-5">{% include "core/base_data_types/molecule.html" %}</div>
+        <div class="col-12 col-lg-7 pt-3">
+            {% if table_entry.is_invalid_molecule %}
+                <div class="alert alert-danger d-flex align-items-start" role="alert">
+                    <i class="bi bi-exclamation-circle fs-4 me-2 lh-1"></i>
+                    <div>
+                        <strong>Invalid molecule.</strong> This entry could not be fully processed by the Simmate toolkit, so its
+                        structure and computed properties may be missing or inaccurate.
+                    </div>
                 </div>
+            {% endif %}
+            <h3 class="fw-semibold text-break mb-2">{{ table_entry.chembl_id|default:"--" }}</h3>
+            <div class="mb-4">
+                {% if table_entry.molecule_type %}
+                    <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ table_entry.molecule_type }}</span>
+                {% endif %}
+                {% if table_entry.chembl_id %}
+                    <div>
+                        {% button_link label="View on ChEMBL" link=table_entry.external_link theme="outline-primary" small=True open_in_new=True %}
+                    </div>
+                {% endif %}
             </div>
+            <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Drug-Likeness · ChEMBL</div>
+            <dl class="row mb-4">
+                <dt class="col-7 col-sm-5 fw-normal text-muted">
+                    <span data-bs-toggle="tooltip"
+                          data-bs-title="Quantitative estimate of drug-likeness (0-1, higher is more drug-like)">QED</span>
+                </dt>
+                <dd class="col-5 col-sm-7">
+                    {% if table_entry.drug_likeness is not None %}
+                        {{ table_entry.drug_likeness|floatformat:2 }}
+                    {% else %}
+                        --
+                    {% endif %}
+                </dd>
+                <dt class="col-7 col-sm-5 fw-normal text-muted">ALogP</dt>
+                <dd class="col-5 col-sm-7">
+                    {% if table_entry.alog_p_chembl is not None %}
+                        {{ table_entry.alog_p_chembl|floatformat:2 }}
+                    {% else %}
+                        --
+                    {% endif %}
+                </dd>
+                <dt class="col-7 col-sm-5 fw-normal text-muted">Rule of 5 violations</dt>
+                <dd class="col-5 col-sm-7">
+                    {{ table_entry.rule_of_5_violations|default_if_none:"--" }}
+                </dd>
+                <dt class="col-7 col-sm-5 fw-normal text-muted">Rule of 3</dt>
+                <dd class="col-5 col-sm-7">
+                    {{ table_entry.rule_of_3_pass|yesno:"Pass,Fail,--" }}
+                </dd>
+                <dt class="col-7 col-sm-5 fw-normal text-muted">H-bond acceptors (Lipinski)</dt>
+                <dd class="col-5 col-sm-7">
+                    {{ table_entry.num_h_acceptors_lipinski|default_if_none:"--" }}
+                </dd>
+                <dt class="col-7 col-sm-5 fw-normal text-muted">H-bond donors (Lipinski)</dt>
+                <dd class="col-5 col-sm-7">
+                    {{ table_entry.num_h_donors_lipinski|default_if_none:"--" }}
+                </dd>
+                <dt class="col-7 col-sm-5 fw-normal text-muted">
+                    <span data-bs-toggle="tooltip"
+                          data-bs-title="Natural product-likeness score (Ertl et al.), higher is more natural-product-like">Natural product-likeness</span>
+                </dt>
+                <dd class="col-5 col-sm-7 mb-0">
+                    {% if table_entry.natural_product_likeness is not None %}
+                        {{ table_entry.natural_product_likeness|floatformat:2 }}
+                    {% else %}
+                        --
+                    {% endif %}
+                </dd>
+            </dl>
+            <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Bioactivity · ChEMBL</div>
+            <dl class="row mb-0">
+                <dt class="col-7 col-sm-5 fw-normal text-muted">Assay results</dt>
+                <dd class="col-5 col-sm-7">
+                    {{ assays__count }}
+                </dd>
+                <dt class="col-7 col-sm-5 fw-normal text-muted">Source documents</dt>
+                <dd class="col-5 col-sm-7 mb-0">
+                    {{ documents__count }}
+                </dd>
+            </dl>
         </div>
     </div>
 </div>

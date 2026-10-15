@@ -438,6 +438,7 @@ def htmx_button(
     show_label: bool = True,
     theme: str = "primary",
     icon: str = None,
+    icon_right: bool = False,
     small: bool = False,
     javascript_only: bool = False,
     include: str = None,
@@ -689,7 +690,7 @@ def htmx_periodic_table_input(
 #     # for button
 #     button_name: str = None,
 #     button_theme: str = "primary",
-#     button_icon: str = "magnify",
+#     button_icon: str = "search",
 #     # for selectbox
 #     show_selectbox: bool = False,
 #     selectbox_name: str = None,

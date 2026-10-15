@@ -65,8 +65,12 @@ a:focus {
   --bs-btn-active-border-color: var(--bs-success-lighter);
 }   
 
+:root {
+    --simmate-table-header-bg: #0094854f;
+}
+
 .table-primary {
-    --bs-table-bg: #0094854f !important;
+    --bs-table-bg: var(--simmate-table-header-bg) !important;
 }
 
 .page-link {
@@ -302,4 +306,68 @@ a:focus {
 /* Hairline border so shadowed cards stand out against the white page */
 .card.shadow-sm {
     --bs-card-border-color: rgba(var(--bs-emphasis-color-rgb), 0.08);
+}
+
+/* Simmate's standard table: rounded + outlined, striped rows, vertically
+   centered cells, and a teal header. Use as `<table class="table table-simmate">`
+   with a plain `<thead>`, and add only layout utilities in templates (mb-*,
+   table-sm, text-nowrap, ...). Striping mirrors Bootstrap's `.table-striped`.
+   Corner cells are rounded individually (rather than `overflow: hidden`) so
+   nothing inside the table (dropdowns, popovers) gets clipped. */
+.table-simmate {
+    --simmate-table-radius: var(--bs-border-radius-lg);
+    border-collapse: separate;
+    border-spacing: 0;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    border-radius: var(--simmate-table-radius);
+    vertical-align: middle;
+}
+.table-simmate > thead {
+    --bs-table-bg: var(--simmate-table-header-bg);
+    --bs-table-color: var(--bs-emphasis-color);
+}
+.table-simmate > tbody > tr:nth-of-type(odd) > * {
+    --bs-table-color-type: var(--bs-table-striped-color);
+    --bs-table-bg-type: var(--bs-table-striped-bg);
+}
+.table-simmate > :first-child > tr:first-child > :first-child {
+    border-top-left-radius: var(--simmate-table-radius);
+}
+.table-simmate > :first-child > tr:first-child > :last-child {
+    border-top-right-radius: var(--simmate-table-radius);
+}
+.table-simmate > :last-child > tr:last-child > :first-child {
+    border-bottom-left-radius: var(--simmate-table-radius);
+}
+.table-simmate > :last-child > tr:last-child > :last-child {
+    border-bottom-right-radius: var(--simmate-table-radius);
+}
+.table-simmate > :last-child > tr:last-child > * {
+    border-bottom-width: 0;
+}
+
+/* Square box for the 3D crystal viewer (core/base_data_types/structure.html),
+   which fills its container. */
+.structure-panel {
+    aspect-ratio: 1;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Square box for a large 2D molecule drawing (core/base_data_types/molecule.html).
+   The RDKit SVG is drawn at a fixed size, so we scale it to fit the box on
+   smaller screens (e.g. phones). */
+.molecule-panel {
+    aspect-ratio: 1;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+.molecule-panel > div {
+    width: 100%;
+}
+.molecule-panel svg {
+    display: block;
+    width: 100%;
+    height: auto;
 }

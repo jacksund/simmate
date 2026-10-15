@@ -25,74 +25,74 @@
         <b>Showing {{ component.nworkflows_show }} of {{ component.nworkflows }}</b>
     </div>
     <div class="table-responsive mb-5">
-        <table class="table table-striped align-middle">
-            <thead class="table-primary">
+        <table class="table table-simmate">
+            <thead>
                 <tr>
                     {% with ob=component.form_data.order_by.0 %}
                         <th></th>
                         <th style="min-width:200px">
                             {% if ob == "name_type" %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>Type</b>" grouped=True order_by_value="-name_type" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="sort-down" label="<b>Type</b>" grouped=True order_by_value="-name_type" %}
                             {% elif ob == "-name_type" %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="sort-up" label="<b>Type</b>" grouped=True order_by_value="name_type" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="sort-up" label="<b>Type</b>" grouped=True order_by_value="name_type" %}
                             {% else %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>Type</b>" grouped=True order_by_value="name_type" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="filter" label="<b>Type</b>" grouped=True order_by_value="name_type" %}
                             {% endif %}
                         </th>
                         <th style="min-width:200px">
                             {% if ob == "name_app" %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>App(s)</b>" grouped=True order_by_value="-name_app" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="sort-down" label="<b>App(s)</b>" grouped=True order_by_value="-name_app" %}
                             {% elif ob == "-name_app" %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="sort-up" label="<b>App(s)</b>" grouped=True order_by_value="name_app" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="sort-up" label="<b>App(s)</b>" grouped=True order_by_value="name_app" %}
                             {% else %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>App(s)</b>" grouped=True order_by_value="name_app" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="filter" label="<b>App(s)</b>" grouped=True order_by_value="name_app" %}
                             {% endif %}
                         </th>
                         <th style="min-width:200px">
                             {% if ob == "name_preset" %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>Preset</b>" grouped=True order_by_value="-name_preset" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="sort-down" label="<b>Preset</b>" grouped=True order_by_value="-name_preset" %}
                             {% elif ob == "-name_preset" %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="sort-up" label="<b>Preset</b>" grouped=True order_by_value="name_preset" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="sort-up" label="<b>Preset</b>" grouped=True order_by_value="name_preset" %}
                             {% else %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>Preset</b>" grouped=True order_by_value="name_preset" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="filter" label="<b>Preset</b>" grouped=True order_by_value="name_preset" %}
                             {% endif %}
                         </th>
                         <th style="min-width:140px">
                             {% if ob == "accuracy_rating" %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>Accuracy</b>" grouped=True order_by_value="-accuracy_rating" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="sort-down" label="<b>Accuracy</b>" grouped=True order_by_value="-accuracy_rating" %}
                             {% elif ob == "-accuracy_rating" %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="sort-up" label="<b>Accuracy</b>" grouped=True order_by_value="accuracy_rating" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="sort-up" label="<b>Accuracy</b>" grouped=True order_by_value="accuracy_rating" %}
                             {% else %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>Accuracy</b>" grouped=True order_by_value="accuracy_rating" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="filter" label="<b>Accuracy</b>" grouped=True order_by_value="accuracy_rating" %}
                             {% endif %}
                         </th>
                         <th style="min-width:140px">
                             {% if ob == "median_cpu_time" %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>CPU Time</b>" grouped=True order_by_value="-median_cpu_time" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="sort-down" label="<b>CPU Time</b>" grouped=True order_by_value="-median_cpu_time" %}
                             {% elif ob == "-median_cpu_time" %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="sort-up" label="<b>CPU Time</b>" grouped=True order_by_value="median_cpu_time" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="sort-up" label="<b>CPU Time</b>" grouped=True order_by_value="median_cpu_time" %}
                             {% else %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>CPU Time</b>" grouped=True order_by_value="median_cpu_time" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="filter" label="<b>CPU Time</b>" grouped=True order_by_value="median_cpu_time" %}
                             {% endif %}
                         </th>
                         {% simmate_setting "website.show_finances" as SHOW_FINANCES %}
                         <th style="min-width:140px">
                             {% if ob == "median_real_time" %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>Real Time</b>" grouped=True order_by_value="-median_real_time" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="sort-down" label="<b>Real Time</b>" grouped=True order_by_value="-median_real_time" %}
                             {% elif ob == "-median_real_time" %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="sort-up" label="<b>Real Time</b>" grouped=True order_by_value="median_real_time" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="sort-up" label="<b>Real Time</b>" grouped=True order_by_value="median_real_time" %}
                             {% else %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>Real Time</b>" grouped=True order_by_value="median_real_time" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="filter" label="<b>Real Time</b>" grouped=True order_by_value="median_real_time" %}
                             {% endif %}
                         </th>
                         {% if SHOW_FINANCES %}
                             <th style="min-width:140px">
                                 {% if ob == "median_cost_usdc" %}
-                                    {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>Cost <img src='/static/images/usdc-icon.svg' height='25'></b>" grouped=True order_by_value="-median_cost_usdc" %}
+                                    {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="sort-down" label="<b>Cost <img src='/static/images/usdc-icon.svg' height='25'></b>" grouped=True order_by_value="-median_cost_usdc" %}
                                 {% elif ob == "-median_cost_usdc" %}
-                                    {% htmx_button method_name="set_order_by" theme="" icon="sort-up" label="<b>Cost <img src='/static/images/usdc-icon.svg' height='25'></b>" grouped=True order_by_value="median_cost_usdc" %}
+                                    {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="sort-up" label="<b>Cost <img src='/static/images/usdc-icon.svg' height='25'></b>" grouped=True order_by_value="median_cost_usdc" %}
                                 {% else %}
-                                    {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>Cost <img src='/static/images/usdc-icon.svg' height='25'></b>" grouped=True order_by_value="median_cost_usdc" %}
+                                    {% htmx_button method_name="set_order_by" theme="" icon_right=True icon="filter" label="<b>Cost <img src='/static/images/usdc-icon.svg' height='25'></b>" grouped=True order_by_value="median_cost_usdc" %}
                                 {% endif %}
                             </th>
                         {% endif %}

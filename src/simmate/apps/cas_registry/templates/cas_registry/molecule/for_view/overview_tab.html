@@ -1,0 +1,29 @@
+<div class="tab-pane show active" id="overview-section">
+    <div class="row">
+        <div class="col-12 col-lg-5">{% include "core/base_data_types/molecule.html" %}</div>
+        <div class="col-12 col-lg-7 mt-3 mt-lg-0">
+            <table class="table table-simmate mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 45%">Base Info</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>CAS RN</td>
+                        <td>
+                            <a href="{{ table_entry.external_link }}" target="_blank">
+                                {{ table_entry.id }} <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Common Name</td>
+                        <td>{{ table_entry.common_name|default:"--" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

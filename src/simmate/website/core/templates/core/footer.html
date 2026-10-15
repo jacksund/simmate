@@ -20,7 +20,7 @@
 <script>
     function copyTextById(id2copy) {
         var copyText = document.getElementById(id2copy);
-        navigator.clipboard.writeText(copyText.innerHTML);
+        navigator.clipboard.writeText(copyText.textContent);
     }
 </script>
 <script>refresh_select2()</script>

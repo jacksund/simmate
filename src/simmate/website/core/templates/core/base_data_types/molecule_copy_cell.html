@@ -1,0 +1,18 @@
+<div class="d-flex {% if preformatted %}align-items-start{% else %}align-items-center{% endif %}">
+    {% if preformatted %}
+        <details class="flex-grow-1">
+            <summary>Show</summary>
+            <pre id="{{ text_id }}" class="small mt-2 mb-0">{{ value }}</pre>
+        </details>
+    {% else %}
+        <span id="{{ text_id }}" class="flex-grow-1 text-break">{{ value|default_if_none:"--" }}</span>
+    {% endif %}
+    <button onclick="copyTextById('{{ text_id }}')"
+            class="btn btn-outline-secondary btn-sm border border-light ms-2"
+            data-bs-toggle="popover"
+            data-bs-trigger="hover"
+            data-bs-placement="bottom"
+            data-bs-content="Click to copy">
+        <i class="bi bi-copy"></i>
+    </button>
+</div>

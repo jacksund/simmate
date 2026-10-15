@@ -1,8 +1,8 @@
 <div class="tab-pane" id="thermodynamics-section">
     <div class="row">
         <div class="col-xl-7">
-            <table class="table table-centered table-striped mb-0 border">
-                <thead class="table-primary">
+            <table class="table table-simmate mb-0">
+                <thead>
                     <tr>
                         <th style="width: 45%">Stability and Energy</th>
                         <th></th>
@@ -33,9 +33,9 @@
                         <td>Is Stable?</td>
                         <td>
                             {% if table_entry.is_stable %}
-                                <i class="mdi mdi-check text-success"></i> Yes
+                                <i class="bi bi-check-lg text-success"></i> Yes
                             {% else %}
-                                <i class="mdi mdi-close text-danger"></i> No
+                                <i class="bi bi-x-lg text-danger"></i> No
                             {% endif %}
                         </td>
                     </tr>

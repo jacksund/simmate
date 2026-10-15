@@ -1,0 +1,146 @@
+<table class="table table-simmate mb-4">
+    <thead>
+        <tr>
+            <th style="width: 45%">Representations</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>SMILES</td>
+            <td>
+                {% include "core/base_data_types/molecule_copy_cell.html" with text_id="smiles_text" value=table_entry.smiles %}
+            </td>
+        </tr>
+        <tr>
+            <td>InChI</td>
+            <td>{% include "core/base_data_types/molecule_copy_cell.html" with text_id="inchi_text" value=table_entry.inchi %}</td>
+        </tr>
+        <tr>
+            <td>InChI Key</td>
+            <td>
+                {% include "core/base_data_types/molecule_copy_cell.html" with text_id="inchi_key_text" value=table_entry.inchi_key %}
+            </td>
+        </tr>
+        {% if table_entry.molecule %}
+            <tr>
+                <td>SDF (c-tab)</td>
+                <td>
+                    {% include "core/base_data_types/molecule_copy_cell.html" with text_id="sdf_text" value=table_entry.molecule preformatted=True %}
+                </td>
+            </tr>
+        {% endif %}
+        <tr>
+            <td>SDF Coordinates</td>
+            <td>{{ table_entry.is_3d|yesno:"3D,2D,--" }}</td>
+        </tr>
+    </tbody>
+</table>
+<table class="table table-simmate mb-4">
+    <thead>
+        <tr>
+            <th style="width: 45%">Features</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Atoms (#)</td>
+            <td>{{ table_entry.num_atoms|default_if_none:"--" }}</td>
+        </tr>
+        <tr>
+            <td>Stereocenters (#)</td>
+            <td>{{ table_entry.num_stereocenters|default_if_none:"--" }}</td>
+        </tr>
+        <tr>
+            <td>Rings (#)</td>
+            <td>{{ table_entry.num_rings|default_if_none:"--" }}</td>
+        </tr>
+        <tr>
+            <td>H-Bond Acceptors (#)</td>
+            <td>{{ table_entry.num_h_acceptors|default_if_none:"--" }}</td>
+        </tr>
+        <tr>
+            <td>H-Bond Donors (#)</td>
+            <td>{{ table_entry.num_h_donors|default_if_none:"--" }}</td>
+        </tr>
+        <tr>
+            <td>Molecular Weight</td>
+            <td>
+                {% if table_entry.molecular_weight is not None %}
+                    {{ table_entry.molecular_weight|floatformat:3 }} g/mol
+                {% else %}
+                    --
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>Molecular Weight (exact)</td>
+            <td>
+                {% if table_entry.molecular_weight_exact is not None %}
+                    {{ table_entry.molecular_weight_exact|floatformat:4 }} g/mol
+                {% else %}
+                    --
+                {% endif %}
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table class="table table-simmate mb-4">
+    <thead>
+        <tr>
+            <th style="width: 45%">Predicted Properties</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>LogP (RDKit)</td>
+            <td>
+                {% if table_entry.log_p_rdkit is not None %}
+                    {{ table_entry.log_p_rdkit|floatformat:3 }}
+                {% else %}
+                    --
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>TPSA (RDKit)</td>
+            <td>
+                {% if table_entry.tpsa_rdkit is not None %}
+                    {{ table_entry.tpsa_rdkit|floatformat:2 }} Å<sup>2</sup>
+                {% else %}
+                    --
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>Synthetic Accessibility (1-10)</td>
+            <td>
+                {% if table_entry.synthetic_accessibility is not None %}
+                    {{ table_entry.synthetic_accessibility|floatformat:2 }}
+                {% else %}
+                    --
+                {% endif %}
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% if table_entry.functional_groups %}
+    <table class="table table-simmate mb-4">
+        <thead>
+            <tr>
+                <th>Functional Groups</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    {% for group_name, group_count in table_entry.functional_groups.items %}
+                        <span class="badge bg-secondary">{{ group_name }}: {{ group_count }}</span>
+                    {% endfor %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+{% endif %}

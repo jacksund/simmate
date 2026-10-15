@@ -63,7 +63,8 @@ def draw_molecule(
 
     # see what kind of molecule we were given and get its sdf string
     if isinstance(molecule, DatabaseMolecule):
-        molecule = molecule.sdf_str
+        # entries that failed to load (e.g. invalid molecules) have no structure
+        molecule = molecule.sdf_str if molecule.molecule else None
     elif isinstance(molecule, ToolkitMolecule):
         molecule = molecule.to_sdf().replace("\n", "\\n")
     else:
