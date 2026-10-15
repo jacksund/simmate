@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import time
+
 import numpy
 import pandas
 import requests
@@ -50,6 +52,16 @@ class TrinoDB:
 
     scope: str = None
 
+    token_refresh_margin: int = 300
+    """
+    Seconds before the access token expires that a new one is requested. This
+    is also the least time a query has before its token expires.
+    """
+
+    _access_token: str = None
+
+    _token_expires_at: float = 0
+
     def __init__(
         self,
         auth_type: str = "JWT",  # or 'OAuth2' to have it open your browser to auth
@@ -61,33 +73,44 @@ class TrinoDB:
         also applying patch fixes for encoding errors commonly found in old
         databases.
         """
-        if not client_id:
-            client_id = self.client_id
-        if not client_secret:
-            client_secret = self.client_secret
+        if client_id:
+            self.client_id = client_id
+        if client_secret:
+            self.client_secret = client_secret
 
         # configure auth variable
         if auth_type == "JWT":
-
-            # grab an access token
-            res = requests.post(
-                f"https://login.microsoftonline.com/{self.tenant_id}/oauth2/v2.0/token",
-                data={
-                    "grant_type": "client_credentials",
-                    "client_id": client_id,
-                    "client_secret": client_secret,
-                    "scope": self.scope,
-                },
-                headers={"Content-Type": "application/x-www-form-urlencoded"},
-            )
-            access_token = res.json()["access_token"]
-            auth = JWTAuthentication(access_token)
+            # the access token is fetched (and refreshed) as queries are made
+            self.auth = None
         elif auth_type == "OAuth2":
-            auth = OAuth2Authentication()
+            self.auth = OAuth2Authentication()
         else:
             raise Exception(f"Unknown auth_type: {auth_type}")
 
-        self.auth = auth
+    def get_access_token(self) -> str:
+        """
+        Gives an access token for non-interactive (JWT) auth, reusing the
+        previous one until shortly before it expires.
+        """
+        if time.time() < self._token_expires_at - self.token_refresh_margin:
+            return self._access_token
+
+        res = requests.post(
+            f"https://login.microsoftonline.com/{self.tenant_id}/oauth2/v2.0/token",
+            data={
+                "grant_type": "client_credentials",
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "scope": self.scope,
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            timeout=60,
+        )
+        token_data = res.json()
+        self._access_token = token_data["access_token"]
+        # `expires_in` is in seconds (typically ~1 hour)
+        self._token_expires_at = time.time() + float(token_data.get("expires_in", 0))
+        return self._access_token
 
     def get_query_data(self, query: str) -> pandas.DataFrame:
         """
@@ -103,7 +126,7 @@ class TrinoDB:
         with connect(
             host=self.host,
             port=self.port,
-            auth=self.auth,
+            auth=self.auth or JWTAuthentication(self.get_access_token()),
             http_scheme="https",
             **connect_kwargs,
         ) as connection:

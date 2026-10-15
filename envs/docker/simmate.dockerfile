@@ -59,8 +59,16 @@ EXPOSE 8000
 # Starts the Django app via Gunicorn on port 8000.
 # '--worker-tmp-dir /dev/shm' is required due to a DigitalOcean App Platform bug:
 # https://docs.digitalocean.com/products/app-platform/reference/dockerfile/
+# '--threads 4' lets a request that is slow because it is *waiting* (i.e. I/O
+# bound, such as a database query) run without freezing the site for everyone
+# else. This does NOT help with CPU-bound requests: there is still only one
+# worker process, and python runs one thread at a time while computing. We use
+# threads rather than more '--workers' because htmx components are kept in the
+# memory of a single process (see `simmate.website.htmx.components.base`),
+# which all threads share.
 CMD ["gunicorn", \
      "--worker-tmp-dir", "/dev/shm", \
+     "--threads", "4", \
      "--bind", "0.0.0.0:8000", \
      "--access-logfile", "gunicorn_logging.out", \
      "simmate.website.server.wsgi"]
