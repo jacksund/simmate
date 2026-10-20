@@ -15,7 +15,7 @@ def run_update_stale_workers():
     SimmateWorker.update_stale_workers()
 
 
-if settings.database_backups.enable:
+if settings.database_backups:
 
     @schedule(interval="daily", at="03:00")
     def run_database_backup():
@@ -23,6 +23,6 @@ if settings.database_backups.enable:
         Nightly backup of the database to the private s3 bucket. Requires
         postgres and `settings.s3.bucket`.
 
-        Enable with `database_backups.enable: true` in your settings.
+        Enable with `database_backups: true` in your settings.
         """
         Maintenance__Postgres__BackupToS3.run()

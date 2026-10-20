@@ -23,7 +23,7 @@ class Maintenance__Postgres__BackupToS3(Workflow):
 
     - `days_to_keep`:
         Backups in the bucket that are older than this number of days are
-        deleted. Set to None to keep all backups. Default is 7.
+        deleted. Set to None to keep all backups. Default is 3.
     - `s3_prefix`:
         The folder within the bucket to store backups in.
     """
@@ -34,7 +34,7 @@ class Maintenance__Postgres__BackupToS3(Workflow):
     def run_config(
         command: str = None,
         directory: Path = None,
-        days_to_keep: int = 7,
+        days_to_keep: int = 3,
         s3_prefix: str = "database_backups",
         **kwargs,
     ):
