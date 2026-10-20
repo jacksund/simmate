@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .customized import Customized__Toolkit__UserConfig
+from .pg_backup import Maintenance__Postgres__BackupToS3
 from .pg_dump import Maintenance__Postgres__PgDump
 from .restart import Restart__Toolkit__Automatic
 from .s3 import S3Workflow

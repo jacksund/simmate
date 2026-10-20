@@ -57,6 +57,7 @@ def test_list_of_all_workflows():
         "electronic-structure.vasp.matproj-density-of-states-hse",
         "electronic-structure.vasp.matproj-full",
         "electronic-structure.vasp.matproj-hse-full",
+        "maintenance.postgres.backup-to-s3",
         "maintenance.postgres.pg-dump",
         # "nested.vasp.warren-lab-relaxation-static-hse-hse",
         # "nested.vasp.warren-lab-relaxation-static-pbe-hse",

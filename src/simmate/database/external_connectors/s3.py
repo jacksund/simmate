@@ -181,6 +181,31 @@ class S3Bucket:
         cls.client.upload_file(str(local_path), cls.bucket, s3_key)
 
     @classmethod
+    def delete_keys(
+        cls,
+        keys: list[str],
+    ) -> None:
+        """
+        Deletes a list of object keys from the S3 bucket.
+
+        Deletions are sent in batches of 1000, which is the max allowed by
+        the S3 API per request.
+
+        #### Parameters
+
+        - `keys`:
+            The S3 object keys to delete (e.g. ["my/folder/file1.txt", ...]).
+        """
+        client = cls.client
+        batch_size = 1000
+        for i in range(0, len(keys), batch_size):
+            batch = keys[i : i + batch_size]
+            client.delete_objects(
+                Bucket=cls.bucket,
+                Delete={"Objects": [{"Key": key} for key in batch]},
+            )
+
+    @classmethod
     def upload_directory(
         cls,
         local_dir: Path | str,
@@ -283,3 +308,13 @@ class SimmateS3Bucket(S3Bucket):
     region = settings.s3.region
     verify = settings.s3.verify
     signature_version = settings.s3.signature_version
+
+
+class SimmatePrivateS3Bucket(SimmateS3Bucket):
+    """
+    Same as `SimmateS3Bucket`, but uses the bucket ``{settings.s3.bucket}-private``
+    (e.g. "simmate" -> "simmate-private"). For non-public data like database
+    backups.
+    """
+
+    bucket = f"{settings.s3.bucket}-private" if settings.s3.bucket else None

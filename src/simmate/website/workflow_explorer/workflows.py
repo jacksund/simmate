@@ -4,6 +4,7 @@
 
 from simmate.workflows.common import (
     Customized__Toolkit__UserConfig,
+    Maintenance__Postgres__BackupToS3,
     Maintenance__Postgres__PgDump,
     Restart__Toolkit__Automatic,
 )

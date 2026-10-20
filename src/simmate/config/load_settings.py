@@ -429,6 +429,10 @@ class SimmateSettings:
                 "verify": True,
                 "signature_version": None,
             },
+            # nightly pg_dump uploaded to the private s3 bucket
+            "database_backups": {
+                "enable": False,
+            },
         }
 
     @cached_property
@@ -689,6 +693,7 @@ class SimmateSettings:
         "SIMMATE__S3__REGION": str,
         "SIMMATE__S3__VERIFY": bool,
         "SIMMATE__S3__SIGNATURE_VERSION": str,
+        "SIMMATE__DATABASE_BACKUPS__ENABLE": bool,
     }
 
 
