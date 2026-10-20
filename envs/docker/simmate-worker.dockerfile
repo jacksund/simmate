@@ -38,7 +38,21 @@ RUN apt-get update && \
         libsm6 \
         libexpat1 \
         libfontconfig1 \
-        libglib2.0-0 && \
+        libglib2.0-0 \
+        gnupg \
+        lsb-release && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# =============================================================================
+# PostgreSQL Client (for database backups via pg_dump)
+# =============================================================================
+
+# Client version must be >= the server's (see postgres image in the helm chart)
+RUN curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql-keyring.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/postgresql-keyring.gpg] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends postgresql-client-17 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

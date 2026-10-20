@@ -263,4 +263,8 @@
 - name: SIMMATE__S3__SIGNATURE_VERSION
   value: {{ .Values.simmate.s3.signature_version | quote }}
 {{- end }}
+{{- if .Values.simmate.database_backups }}
+- name: SIMMATE__DATABASE_BACKUPS
+  value: {{ .Values.simmate.database_backups | quote }}
+{{- end }}
 {{- end }}
