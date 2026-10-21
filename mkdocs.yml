@@ -318,7 +318,6 @@ nav:
             - First time setup: full_guides/contributing/first_time_setup.md
             - Creating & submitting changes: full_guides/contributing/creating_and_submitting_changes.md
             - Maintainer notes: full_guides/contributing/maintainer_notes.md
-            - README for AI Assistants: full_guides/contributing/ai_assistants.md
     
     - Apps: 
         - Overview: apps/overview.md

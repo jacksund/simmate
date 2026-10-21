@@ -149,7 +149,6 @@ uv.lock
 
 # AI Tools
 .aider*
-AGENTS.md
 .agents/
 .gemini/
 .antigravitycli
