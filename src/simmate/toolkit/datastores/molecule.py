@@ -208,7 +208,7 @@ class MoleculeDatastore(Datastore):
 
         method_df = MethodCaller.featurize_many(
             molecules=df["smiles"].to_list(),
-            method_map={_get_smiles_with_h: {}},
+            method_map={"add_hydrogens.to_smiles": {}},
             parallel=True,
             dataframe_format="polars",
         )
@@ -359,6 +359,86 @@ class MoleculeDatastore(Datastore):
         )
 
     @classmethod
+    def upsert_rows(cls, df: polars.DataFrame):
+        """
+        Adds rows to the live chunk files, replacing any existing rows with
+        the same ID (which keep their `datastore_id`). Property and fingerprint
+        columns that exist in the live datastore are computed for the rows.
+
+        The input should only contain columns that are in the live datastore
+        (others are dropped). The datastore must already be built. Vector
+        indexes are NOT updated, so rerun `build_fingerprint_index` afterwards.
+        """
+        if len(df) == 0:
+            return
+
+        if not cls.chunk_files:
+            raise FileNotFoundError(
+                "The datastore must be built before rows can be added. "
+                f"See the {cls.__name__} docstring for the setup steps."
+            )
+        schema = cls.schema()
+        live_columns = set(schema.names())
+
+        df = cls.add_chunk_key_column(df=df)
+        df = cls._featurize_new_rows(df, live_columns)
+
+        # only keep columns that are in the live schema so that all chunk
+        # files stay consistent. chunk_key is kept for grouping below
+        extra_columns = set(df.columns) - live_columns - {"chunk_key"}
+        if extra_columns:
+            logging.warning(
+                f"Dropping columns not in the live datastore: {extra_columns}"
+            )
+            df = df.drop(extra_columns)
+
+        # merge into each chunk file. chunk_key is dropped from each group
+        # if the files don't store it (e.g. hive-partitioned)
+        groups = df.partition_by(
+            "chunk_key",
+            as_dict=True,
+            include_key="chunk_key" in live_columns,
+        )
+        for (chunk_key,), df_new in groups.items():
+            try:
+                file = cls.get_chunk_file(chunk_key)
+                df_existing = polars.read_parquet(file)
+            except FileNotFoundError:
+                file = (
+                    cls.live_directory / f"chunk_key={chunk_key}" / "combined.parquet"
+                )
+                file.parent.mkdir(parents=True, exist_ok=True)
+                df_existing = polars.DataFrame(schema=schema)
+
+            # replaced rows keep their datastore_id, and added rows continue
+            # from the largest one in the chunk
+            existing_ids = df_existing.select("id", "datastore_id")
+            df_replaced = df_new.join(existing_ids, on="id")
+            existing_max = df_existing["datastore_id"].max()
+            start_id = (
+                chunk_key * cls.datastore_id_multiplier
+                if existing_max is None
+                else existing_max + 1
+            )
+            df_added = df_new.join(existing_ids, on="id", how="anti").with_columns(
+                (polars.int_range(polars.len(), dtype=polars.UInt64) + start_id).alias(
+                    "datastore_id"
+                )
+            )
+
+            df_combined = polars.concat(
+                [
+                    df_existing.join(df_new.select("id"), on="id", how="anti"),
+                    df_replaced,
+                    df_added,
+                ],
+                how="diagonal_relaxed",
+            )
+            df_combined.write_parquet(file, compression=cls.compression_mode)
+
+        logging.info(f"Wrote {len(df):,} rows")
+
+    @classmethod
     def _featurize_new_rows(
         cls,
         df: polars.DataFrame,
@@ -434,10 +514,3 @@ class MoleculeDatastore(Datastore):
     def load_fingerprint_index(cls, fp_type: str = "ecfp4") -> None:
         """Loads index files for the specified fingerprint type."""
         cls.get_vector_index(fp_type).load()
-
-
-# top-level (not a method) so it is picklable for multiprocessing
-def _get_smiles_with_h(molecule):
-    """Return SMILES with explicit hydrogens added."""
-    molecule.add_hydrogens()
-    return molecule.to_smiles()

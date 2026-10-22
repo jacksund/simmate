@@ -4,14 +4,15 @@ from simmate.toolkit.similarity.base import SimilarityEngine
 
 
 class Euclidean(SimilarityEngine):
+    is_distance_based: bool = True
+
     @classmethod
-    def get_similarity(
+    def get_distance(
         cls,
         fingerprint1: numpy.array,
         fingerprint2: numpy.array,
-        # backend: str = "numpy",
     ) -> float:
-        raise NotImplementedError("This method is still being written")
+        return numpy.linalg.norm(fingerprint1 - fingerprint2)
 
     # -------------------------------------------------------------------------
 
@@ -25,10 +26,3 @@ class Euclidean(SimilarityEngine):
         from scipy.spatial import distance
 
         return distance.euclidean(fingerprint1, fingerprint2)
-
-    @staticmethod
-    def _numpy_method(
-        fingerprint1: numpy.array,
-        fingerprint2: numpy.array,
-    ):
-        return numpy.linalg.norm(fingerprint1 - fingerprint2)

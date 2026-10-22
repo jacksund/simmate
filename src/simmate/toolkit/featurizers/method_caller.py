@@ -7,7 +7,12 @@ from .base import Featurizer
 
 class MethodCaller(Featurizer):
     """
-    Calls methods from the molecule object using fixed kwargs
+    Calls methods from the molecule object using fixed kwargs.
+
+    Methods can be chained with dots (e.g. "get_flattened.to_smiles"), where
+    all but the last method are called without kwargs. If a chained method
+    works in-place and returns None (e.g. "add_hydrogens.to_smiles"), the chain
+    continues with the same (now modified) molecule.
     """
 
     @classmethod
@@ -17,9 +22,10 @@ class MethodCaller(Featurizer):
             "to_inchi_key": "inchi_key",
             "to_inchi": "inchi",
             "to_smiles": "smiles",
+            "get_flattened.to_smiles": "flat_smiles",
             # !!! maybe just remove "to_" when the str starts with it?
             # for MolecularDataFrame special type:
-            "_get_smiles_with_h": "smiles",
+            "add_hydrogens.to_smiles": "smiles",
         }
         return [
             (
@@ -36,12 +42,15 @@ class MethodCaller(Featurizer):
         method_map: dict,  # e.g. {"to_inchi_key": {}, "get_fingerprint": {"fingerprint_type": "topological"}}
         **kwargs,
     ) -> numpy.array:
-        values = [
-            (
-                getattr(molecule, method_name)(**method_kwargs)
-                if isinstance(method_name, str)
-                else method_name(molecule=molecule, **method_kwargs)
-            )  # assume callable
-            for method_name, method_kwargs in method_map.items()
-        ]
+        values = []
+        for method_name, method_kwargs in method_map.items():
+            if not isinstance(method_name, str):  # assume callable
+                values.append(method_name(molecule=molecule, **method_kwargs))
+                continue
+            *chained_names, final_name = method_name.split(".")
+            obj = molecule
+            for name in chained_names:
+                result = getattr(obj, name)()
+                obj = obj if result is None else result
+            values.append(getattr(obj, final_name)(**method_kwargs))
         return numpy.array(values)

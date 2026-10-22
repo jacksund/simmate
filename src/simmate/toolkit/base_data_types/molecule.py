@@ -1036,6 +1036,15 @@ class Molecule:
         largest_idx = all_counts.index(max(all_counts))
         return all_components[largest_idx]
 
+    def get_flattened(self):  # -> Molecule
+        """
+        Gives a copy of the molecule with all stereochemistry removed (i.e. the
+        "flat" version of a stereoisomer).
+        """
+        flat = self.copy()
+        AllChem.RemoveStereochemistry(flat.rdkit_molecule)
+        return flat
+
     # -------------------------------------------------------------------------
 
     # METADATA

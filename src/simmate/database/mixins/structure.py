@@ -3,7 +3,6 @@ from scipy.constants import Avogadro
 
 from simmate.config import settings
 from simmate.toolkit import Structure as ToolkitStructure
-from simmate.toolkit.validators.fingerprint import PartialCrystalNNFingerprint
 from simmate.utils import get_chemical_subsystems
 
 from ..core import DatabaseTable, SearchResults, table_column
@@ -97,13 +96,7 @@ class StructureSearchResults(SearchResults):
             structure = ToolkitStructure.from_dynamic(structure)
 
         # get new structure feature
-        featurizer = PartialCrystalNNFingerprint.get_featurizer(
-            composition=structure.composition
-        )
-        new_fingerprint = featurizer.featurize(structure)
-        fingerprint_str = str(new_fingerprint)
-        # TODO: this is used in several places and should probably be a property
-        # of our toolkit structure class
+        fingerprint_str = str(list(structure.get_fingerprint()))
 
         queryset = self.annotate(
             similarity=Func(
@@ -376,10 +369,7 @@ class Structure(DatabaseTable):
 
         # TODO:
         # Generate fingerprint
-        # featurizer = PartialCrystalNNFingerprint.get_featurizer(
-        #     composition=structure.composition
-        # )
-        # fingerprint = featurizer.featurize(structure)
+        # fingerprint = structure.get_fingerprint()
 
         # Given a pymatgen structure object, this will return a database structure
         # object, but will NOT save it to the database yet. The kwargs input

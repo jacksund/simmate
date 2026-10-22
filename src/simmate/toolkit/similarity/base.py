@@ -106,8 +106,9 @@ class SimilarityEngine:
     # !!! maybe have a get_distance method that is (1-sim) or (1/sim)?
     # I may need a "is normalized" or "normalize" methods + properties
 
-    @staticmethod
+    @classmethod
     def get_distance(
+        cls,
         fingerprint1: numpy.array,
         fingerprint2: numpy.array,
     ) -> float:
@@ -126,5 +127,23 @@ class SimilarityEngine:
             **kwargs,
         )
         return [cls.convert_to_distance(sim) for sim in similarities]
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def is_match(
+        cls,
+        fingerprint1: numpy.array,
+        fingerprint2: numpy.array,
+        cutoff: float,
+    ) -> bool:
+        """
+        Whether two fingerprints are close enough to be considered the same.
+        For distance-based engines, this is `distance < cutoff`. Otherwise,
+        it is `similarity > cutoff`.
+        """
+        if cls.is_distance_based:
+            return cls.get_distance(fingerprint1, fingerprint2) < cutoff
+        return cls.get_similarity(fingerprint1, fingerprint2) > cutoff
 
     # -------------------------------------------------------------------------
