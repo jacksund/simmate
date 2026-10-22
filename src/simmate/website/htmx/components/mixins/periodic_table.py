@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 class PeriodicTableInput:
     def toggle_element(self, **kwargs):
         """Toggles an element on/off in the composition string via HTMX."""

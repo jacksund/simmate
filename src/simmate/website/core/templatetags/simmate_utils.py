@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import uuid
 from textwrap import dedent
 
@@ -28,7 +26,7 @@ def getattribute(obj, attr):
     """
     try:
         return getattr(obj, attr)
-    except:  # RelatedObjectDoesNotExist
+    except Exception:  # RelatedObjectDoesNotExist
         return None
 
 

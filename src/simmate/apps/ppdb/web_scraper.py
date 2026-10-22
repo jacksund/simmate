@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 from datetime import datetime
 
@@ -11,7 +9,6 @@ from simmate.toolkit import Molecule
 
 
 class PpdbWebScraper(WebScraper):
-
     @classmethod
     def get_all_data(cls, skip_ids: list[str] = [], **kwargs) -> list[dict]:
         all_data = []
@@ -25,7 +22,7 @@ class PpdbWebScraper(WebScraper):
             try:
                 entry_data = cls.get_id_data(entry_id)
                 all_data.append(entry_data)
-            except:
+            except Exception:
                 logging.warning(f"Failed to load {entry_id}")
 
         return all_data
@@ -55,7 +52,7 @@ class PpdbWebScraper(WebScraper):
 
     @classmethod
     def get_id_data(cls, entry_id: int) -> dict:
-        iso_url = f"https://sitem.herts.ac.uk/aeru/ppdb/en/Reports/{str(entry_id)}.htm"
+        iso_url = f"https://sitem.herts.ac.uk/aeru/ppdb/en/Reports/{entry_id!s}.htm"
         html_data = cls.get_html(iso_url)
 
         data_final = {"id": entry_id}
@@ -173,7 +170,7 @@ class PpdbWebScraper(WebScraper):
         for k, v in data_final.items():
             if isinstance(v, str):
                 data_final[k] = cls.replace_accents(v)
-            elif isinstance(v, list) and all([isinstance(s, str) for s in v]):
+            elif isinstance(v, list) and all(isinstance(s, str) for s in v):
                 data_final[k] = [cls.replace_accents(s) for s in v]
 
         return data_final

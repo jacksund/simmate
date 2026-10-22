@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from simmate.apps.vasp.inputs.potcar_mappings import PBE_POTCAR_MAPPINGS
 
 HSE_POTCAR_MAPPINGS = PBE_POTCAR_MAPPINGS.copy()

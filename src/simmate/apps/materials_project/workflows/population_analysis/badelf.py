@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from pymatgen.analysis.structure_matcher import StructureMatcher
@@ -56,8 +54,9 @@ class PopulationAnalysis__VaspBader__BadelfMatproj(Workflow):
 
         elif empty_sites:
             # Select an empty element that is NOT already in the structure
-            for empty_ion in ["H", "He", "Lv"]:
-                if empty_ion not in [e.symbol for e in structure.composition.elements]:
+            for ion in ["H", "He", "Lv"]:
+                empty_ion = ion
+                if ion not in [e.symbol for e in structure.composition.elements]:
                     break
             structure_w_empties = structure.copy()
             for empty_coords in empty_sites:

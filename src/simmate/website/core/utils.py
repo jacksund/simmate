@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import os
 import shutil
@@ -40,8 +38,7 @@ def download_ketcher() -> Path:
     response = requests.get(ketcher_url, stream=True)
     if response.status_code == 200:
         with open(zip_path, "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
+            f.writelines(response.iter_content(chunk_size=8192))
     else:
         logging.error(f"Failed to download Ketcher (status {response.status_code})")
         return static_dir

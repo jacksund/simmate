@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from rich.progress import track
 
 from simmate.database.core import table_column
@@ -86,7 +84,7 @@ class JarvisStructure(ThirdPartyData, Structure):
         # before using this method
         try:
             from jarvis.db.figshare import data as jarvis_helper
-        except:
+        except Exception:
             raise ModuleNotFoundError(
                 "You must install jarvis with `conda install -c conda-forge jarvis-tools`"
             )

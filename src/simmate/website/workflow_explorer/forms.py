@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django import forms
 from django.core.exceptions import ValidationError
 
@@ -59,7 +57,7 @@ class SubmitWorkflow(forms.Form):
 
         try:
             structure = Structure.from_dynamic(structure_json)
-        except:
+        except Exception:
             raise ValidationError("Failed to load the JSON input provided.")
 
         return structure
@@ -87,7 +85,7 @@ class SubmitWorkflow(forms.Form):
         for fmt in formats:
             try:
                 structure = Structure.from_str(structure_str, fmt=fmt)
-            except:
+            except Exception:
                 structure = None
 
             # break the for-loop once structure is succesfully loaded
@@ -174,7 +172,7 @@ class SubmitWorkflow(forms.Form):
                 raise Exception(f"Unknown input type for parameter {parameter_name}")
 
         # once we have all the fields, we can dynamically create the new class.
-        NewClass = type("SubmitWorkflowForm", tuple([cls]), form_fields)
+        NewClass = type("SubmitWorkflowForm", (cls,), form_fields)
 
         return NewClass
 

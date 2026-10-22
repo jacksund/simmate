@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from rdkit.Chem.rdmolfiles import MaeMolSupplier, MaeWriter
@@ -30,7 +28,6 @@ class MaeAdapter:
 
         filename = Path(filename)
         with filename.open("r", **file_open_kwargs) as file:
-
             supplier = MaeMolSupplier(file)  # file() function...?
             # TODO: support compressed
             # import gzip

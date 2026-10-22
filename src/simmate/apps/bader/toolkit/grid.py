@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import itertools
 import logging
 from functools import cached_property
@@ -451,7 +449,7 @@ class Grid(VolumetricData):
         # make sure the pybader package is present
         try:
             from pybader.interface import Bader
-        except:
+        except Exception:
             raise Exception(
                 "This method requires the pybader module."
                 "Install this with `conda install -c conda-forge pybader`"
@@ -560,7 +558,7 @@ class Grid(VolumetricData):
         elif data_type == "charge":
             spin_data = self.spin_data
             # pymatgen uses some custom class as keys here
-            for key in spin_data.keys():
+            for key in spin_data:
                 if key.value == 1:
                     spin_up_data = spin_data[key].copy()
                 elif key.value == -1:
@@ -620,7 +618,7 @@ class Grid(VolumetricData):
         return new_grid
 
     @staticmethod
-    def label(input: NDArray, structure: NDArray = np.ones([3, 3, 3])):
+    def label(input: NDArray, structure: NDArray = np.ones([3, 3, 3])):  # noqa: B008
         """
         Uses scipy's ndimage package to label an array, and corrects for
         periodic boundaries
@@ -635,11 +633,11 @@ class Grid(VolumetricData):
             # pad our featured grid, re-label it, and check if the new labels
             # contain multiple of our previous labels.
             padded_featured_grid = np.pad(labeled_array, 1, "wrap")
-            relabeled_array, label_num = label(padded_featured_grid, structure)
+            relabeled_array, _label_num = label(padded_featured_grid, structure)
         else:
             labeled_array, _ = label(input)
             padded_featured_grid = np.pad(labeled_array, 1, "wrap")
-            relabeled_array, label_num = label(padded_featured_grid)
+            relabeled_array, _label_num = label(padded_featured_grid)
 
         # We want to keep track of which features are connected to each other
         unique_connections = [[] for i in range(len(np.unique(labeled_array)))]
@@ -653,7 +651,6 @@ class Grid(VolumetricData):
             # already have, we want to extend the connection to include any other
             # features in this super feature
             for j in connected_features:
-
                 unique_connections[j].extend([k for k in connected_features if k != j])
 
                 unique_connections[j] = list(np.unique(unique_connections[j]))
@@ -750,7 +747,7 @@ class Grid(VolumetricData):
         # !!! Check if padding and threshold effect final result
         # get gradient using a padded grid to handle periodicity
         padding = 2
-        a, b, c = self.get_padded_grid_axes(padding)
+        _a, _b, _c = self.get_padded_grid_axes(padding)
         padded_array = np.pad(array, padding, mode="wrap")
         dx, dy, dz = np.gradient(padded_array)
 

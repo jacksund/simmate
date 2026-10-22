@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import warnings
 
@@ -128,7 +126,7 @@ class Thermodynamics(DatabaseTable):
 
             entry.energy_above_hull = hull_energy
 
-            entry.is_stable = True if hull_energy == 0 else False
+            entry.is_stable = bool(hull_energy == 0)
 
             # OPTIMIZE: I would like this to point to another entry specifically
             # but this will take more work.

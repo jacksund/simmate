@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Colors and other look-and-feel constants shared by every part of the desktop app.
 

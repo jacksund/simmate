@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from numpy.random import random as numpy_random
 
 

@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("chembl", "0004_chemblmolecule_is_invalid_molecule"),
     ]

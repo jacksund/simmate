@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-
 import numpy
 import pandas
-from rich.progress import track
 
 from simmate.toolkit import Molecule
 from simmate.utils import dispatch

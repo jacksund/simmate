@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from .matproj import StaticEnergy__Vasp__Matproj
 from .matproj_hse import StaticEnergy__Vasp__MatprojHse
 from .matproj_hsesol import StaticEnergy__Vasp__MatprojHsesol

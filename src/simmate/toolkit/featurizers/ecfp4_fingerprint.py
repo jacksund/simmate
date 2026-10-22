@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from rdkit.Chem import AllChem
 
 from simmate.toolkit import Molecule

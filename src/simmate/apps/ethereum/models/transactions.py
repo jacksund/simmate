@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from datetime import datetime
 
 from django.utils.timezone import make_aware
@@ -12,7 +11,6 @@ from .wallets import EthereumWallet
 
 
 class EthereumTransaction(ThirdPartyData, DatabaseTable):
-
     class Meta:
         db_table = "ethereum__transactions"
 
@@ -105,7 +103,6 @@ class EthereumTransaction(ThirdPartyData, DatabaseTable):
         wallet_transactions = AlchemyClient.get_all_transaction_data()
 
         for transaction in wallet_transactions.to_dict(orient="records"):
-
             from_address = transaction["from"]
             to_address = transaction["to"]
             if not from_address or not to_address or not transaction["token_verified"]:
@@ -119,7 +116,7 @@ class EthereumTransaction(ThirdPartyData, DatabaseTable):
 
             if transaction["metadata"]["blockTimestamp"]:
                 date_str = transaction["metadata"]["blockTimestamp"]
-                created_at_original = datetime.fromisoformat(date_str[:-1] + "+00:00")
+                created_at_original = datetime.fromisoformat(date_str)
             else:
                 created_at_original = None
 
@@ -146,7 +143,6 @@ class EthereumTransaction(ThirdPartyData, DatabaseTable):
         wallet_transactions = EtherscanClient.get_all_transaction_data()
 
         for transaction in wallet_transactions.to_dict(orient="records"):
-
             from_address = transaction["from"]
             to_address = transaction["to"]
             if not from_address or not to_address or not transaction["token_verified"]:

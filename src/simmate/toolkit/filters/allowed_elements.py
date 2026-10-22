@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-
 from simmate.toolkit import Molecule
 
 from .base import Filter
 
 
 class AllowedElements(Filter):
-
     is_atomic = True
 
     @classmethod

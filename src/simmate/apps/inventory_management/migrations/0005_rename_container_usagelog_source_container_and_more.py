@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("inventory_management", "0004_substance_check_digit"),
         ("project_management", "0002_remove_transaction_source"),

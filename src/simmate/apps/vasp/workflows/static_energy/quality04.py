@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.vasp.workflows.relaxation.quality04 import Relaxation__Vasp__Quality04
 
 

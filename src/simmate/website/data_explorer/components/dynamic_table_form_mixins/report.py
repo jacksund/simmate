@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-
-
 class ReportMixin:
-
     # Methods for reports and plotting.
     report_df_columns: list[str] = None
 

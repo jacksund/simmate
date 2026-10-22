@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import polars
 from rich.progress import track
 

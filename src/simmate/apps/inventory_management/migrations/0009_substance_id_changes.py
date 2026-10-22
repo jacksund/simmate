@@ -7,7 +7,6 @@ import simmate.database.core.archive
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("inventory_management", "0008_drop_external_dataset_columns"),
     ]

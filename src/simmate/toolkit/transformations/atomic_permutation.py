@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from numpy.random import choice, randint
@@ -18,7 +16,7 @@ class AtomicPermutation(Transformation):
     ninput = 1
     allow_parallel = False
 
-    #!!! should I add an option for distribution of exchange number? Potentially
+    # !!! should I add an option for distribution of exchange number? Potentially
     # use creation.vector objects?
     # USPEX states that they do this - and select from a normal distribution
 
@@ -39,10 +37,10 @@ class AtomicPermutation(Transformation):
                 "only has one element type!!"
             )
             return False
-        #!!! add another elif for when all sites are equivalent and atomic
+        # !!! add another elif for when all sites are equivalent and atomic
         # permutation cannot create a new structure
 
-        #!!! when doing multiple exchanges, I do not check to see if an exchange
+        # !!! when doing multiple exchanges, I do not check to see if an exchange
         # has been done before - I can change this though
         # Therefore one exchange could undo another and we could be back where
         # we started. There are also scenarios where all sites are equivalent

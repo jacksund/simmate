@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import itertools
 import logging
 import time
@@ -69,7 +67,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
             endpoint_compositions = [
                 Composition(sys) for sys in chemical_system.split("-")
             ]
-        except:
+        except Exception:
             raise Exception(
                 "Failed to split {} into elements. Your format for the input "
                 "chemical system should be two elements and follow the format "
@@ -284,7 +282,9 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
                 # BUG: I do skip these for now because compositions like "N1"
                 # are failing in vasp for me.
                 if len(composition.elements) == 1:
-                    logging.warn(f"Skipping single-element composition {composition}")
+                    logging.warning(
+                        f"Skipping single-element composition {composition}"
+                    )
                     continue
 
                 # For this first cycle, we only look at non-reduced compositions
@@ -295,7 +295,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
                     composition.reduced_composition.num_atoms / composition.num_atoms
                 )
                 if current_factor > max_stoich_factor:
-                    logging.warn(
+                    logging.warning(
                         f"Skipping composition {composition} bc it exceeds the max "
                         f"factor of {max_stoich_factor}"
                     )

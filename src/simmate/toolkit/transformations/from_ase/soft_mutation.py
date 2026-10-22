@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from ase_ga.soft_mutation import SoftMutation as ASESoftMutation
 from ase_ga.utilities import closest_distances_generator
 from pymatgen.io.ase import AseAtomsAdaptor
@@ -87,12 +85,12 @@ class SoftMutation(Transformation):
         # the ase dev team
 
         # reset the used_modes to none
-        #!!! I could also fill this if I want to try different modes until
+        # !!! I could also fill this if I want to try different modes until
         # I have a unique structure. The dictionary would be {0:[3,4,5...]}
         # if I want to skip modes
         softmut.used_modes = {}
 
-        #!!! Their code suggests the use of .get_new_individual() but I think
+        # !!! Their code suggests the use of .get_new_individual() but I think
         # .mutate() is what we'd like new_structure_ase,
         # label = self.softmut.get_new_individual([structure_ase])
         new_structure_ase = softmut.mutate(structure_ase)

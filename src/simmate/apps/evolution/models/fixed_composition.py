@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import math
 import traceback
@@ -10,7 +8,6 @@ import pandas
 import plotly.express as plotly_express
 import plotly.graph_objects as plotly_go
 from django.utils.timezone import now
-from rich.progress import track
 
 from simmate.apps.evolution import selectors as selector_module
 from simmate.apps.evolution import stop_conditions as stop_conditions_module
@@ -93,7 +90,7 @@ class FixedCompositionSearch(Calculation):
         if stop_conditions is not None:
             # We require that the BasicStopConditions are part of our
             # stop_conditions. We add them here if they aren't
-            if "BasicStopConditions" not in stop_conditions.keys():
+            if "BasicStopConditions" not in stop_conditions:
                 stop_conditions["BasicStopConditions"] = dict(
                     max_structures=None,
                     min_structures_exact=None,
@@ -271,7 +268,7 @@ class FixedCompositionSearch(Calculation):
                 "RandomSymStructure",
                 "PyXtalStructure",
             ]
-            is_creator = True if source_name in known_creators else False
+            is_creator = source_name in known_creators
             known_transformations = [
                 "ExtremeSymmetry",
                 "from_ase.Heredity",
@@ -282,7 +279,7 @@ class FixedCompositionSearch(Calculation):
                 "from_ase.AtomicPermutation",
                 "from_ase.CoordinatePerturbation",
             ]
-            is_transformation = True if source_name in known_transformations else False
+            is_transformation = source_name in known_transformations
             if not is_creator and not is_transformation:
                 raise Exception("Unknown source being used.")
                 # BUG: I should really allow any subclass of Creator/Transformation
@@ -617,7 +614,7 @@ class FixedCompositionSearch(Calculation):
             rank_cleaned = str(rank).zfill(2)  # converts 1 to 01
             structure_filename = (
                 directory
-                / f"rank-{str(rank_cleaned)}__id-{structure.database_object.id}.cif"
+                / f"rank-{rank_cleaned!s}__id-{structure.database_object.id}.cif"
             )
             structure.to(filename=str(structure_filename), fmt="cif")
 

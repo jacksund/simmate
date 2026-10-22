@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("workflow_explorer", "0013_remove_workitem_command_not_found_failures"),
     ]

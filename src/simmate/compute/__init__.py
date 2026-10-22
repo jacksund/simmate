@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .api.worker import ApiWorker
 from .executor import SimmateExecutor
 from .scheduler import SimmateScheduler, schedule

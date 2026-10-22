@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.workflows.common import S3Workflow
 
 

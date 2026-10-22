@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 RADIUS_METHODS = [
@@ -23,7 +21,7 @@ def test_radii_estimate_metallic(sample_compositions):
     composition_fe.radii_estimate("metallic")
 
     # make sure a non-metallic composition fails
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="radius_method is not allowed"):
         composition_si = sample_compositions["Si2"]
         composition_si.radii_estimate("metallic")
 

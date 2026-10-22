@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .ai_chatbot import AiChatbotFigure
 from .bar import Bar
 from .histogram import Histogram

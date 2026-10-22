@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 from simmate.apps.materials_project.workflows.electronic_structure.matproj_band_structure import (

@@ -67,7 +67,7 @@ def _launcher():
     sets up Django, which must not happen before Qt WebEngine starts (web views
     then hang), so this waits until a worker action needs it.
     """
-    from simmate.database import connect  # isort:skip
+    from simmate.database import connect  # ruff: isort: skip
     from simmate.compute import launcher
 
     return launcher
@@ -145,8 +145,9 @@ class WorkersTab(QWidget):
         )
         # each time it opens, start from the default in the settings
         self.start_popout.toggled.connect(
-            lambda open: open
-            and self.contribute.setChecked(settings.desktop.contribute)
+            lambda open: (
+                open and self.contribute.setChecked(settings.desktop.contribute)
+            )
         )
 
         # --- toolbar ---
@@ -383,8 +384,9 @@ class WorkersTab(QWidget):
             return
         self._run(
             [self.engine, "logs", "--tail", "500", selected],
-            lambda _, output: self._selected() == selected
-            and self.logs.setPlainText(output),
+            lambda _, output: (
+                self._selected() == selected and self.logs.setPlainText(output)
+            ),
         )
 
     def stop_all(self):

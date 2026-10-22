@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import simmate.apps.rdkit.models.custom_fields.bfp
 import simmate.apps.rdkit.models.custom_fields.mol
 from simmate.config import settings

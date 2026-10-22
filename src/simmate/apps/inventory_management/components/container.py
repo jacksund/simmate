@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from functools import cached_property
 
 from simmate.website.data_explorer.components import TableComponent
@@ -8,7 +6,6 @@ from ..models import Container, StorageLocation
 
 
 class ContainerComponent(TableComponent):
-
     table = Container
 
     template_names = {

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import time
 from datetime import datetime
@@ -284,7 +282,6 @@ class EtherscanClient:
         token_verified_list = []
         amount_normalized_list = []
         for row in data.itertuples():
-
             # find verified token using contract address
             if row.contractAddress == None:
                 # special case of Ethereum not having a contract address
@@ -292,7 +289,7 @@ class EtherscanClient:
             else:
                 # now rest of tokens
                 verified_token_found = False
-                for chain, tokens in EthereumMappings.token_addresses.items():
+                for tokens in EthereumMappings.token_addresses.values():
                     for token_symbol, token_address in tokens.items():
                         if token_address == row.contractAddress:
                             verified_token_found = True

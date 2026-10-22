@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 from simmate.website.test_app.models import TestThermodynamics

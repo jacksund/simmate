@@ -41,7 +41,6 @@ def drop_removed_columns(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         (
             "inventory_management",

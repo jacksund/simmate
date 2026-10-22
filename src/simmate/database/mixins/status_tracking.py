@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import plotly.express as plotly_express
 from django.utils import timezone
 from pandas import DataFrame

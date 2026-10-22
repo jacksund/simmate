@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
-
 from simmate.database.core import table_column
 from simmate.database.mixins import Calculation
 
 
 class VariableNsitesCompositionSearch(Calculation):
-
     class Meta:
         app_label = "workflow_explorer"
         db_table = "workflows_variablensitescompositionsearch"

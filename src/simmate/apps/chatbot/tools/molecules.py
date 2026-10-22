@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from langchain.tools import tool
 
 from simmate.toolkit import Molecule

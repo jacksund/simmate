@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from simmate.config import settings
@@ -55,7 +53,7 @@ def keyword_modifier_ecutwfc(structure: Structure, mode: str) -> float:
         mode, scale = mode.split("_")
         scale = float(scale)
     else:
-        mode, scale = mode, 1
+        scale = 1
 
     if mode == "efficiency":
         mappings = SSSP_PBE_EFFICIENCY_MAPPINGS
@@ -89,7 +87,7 @@ def keyword_modifier_ecutrho(structure: Structure, mode: str) -> float:
         mode, scale = mode.split("_")
         scale = float(scale)
     else:
-        mode, scale = mode, 1
+        scale = 1
 
     if mode == "efficiency":
         mappings = SSSP_PBE_EFFICIENCY_MAPPINGS
@@ -116,7 +114,7 @@ def keyword_modifier_smart_smear(structure: Structure, smear_config: dict):
     material is and uses the proper smearing type.
 
     """
-    #!!! It would be useful to have a handler similar to the IncorrectSmearing
+    # !!! It would be useful to have a handler similar to the IncorrectSmearing
     # error handler used in vasp workflows.
 
     # for now we just go through the structure and if all elements are

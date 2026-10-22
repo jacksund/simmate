@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-
-# isort: skip_file
+# ruff: isort: skip_file
 from simmate.database import connect  # must be first
 
 from pymatgen.analysis.structure_matcher import StructureMatcher

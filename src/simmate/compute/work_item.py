@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import time
 import uuid
 
@@ -189,10 +187,7 @@ class WorkItem(DatabaseTable):
         workitem = WorkItem.objects.only("status").get(pk=self.pk)
 
         # check the status and indicate whether it is CANCELED or not
-        if workitem.status == "Pending":
-            return True
-        else:
-            return False
+        return workitem.status == "Pending"
 
     def is_cancelled(self) -> bool:
         """
@@ -202,10 +197,7 @@ class WorkItem(DatabaseTable):
         workitem = WorkItem.objects.only("status").get(pk=self.pk)
 
         # check the status and indicate whether it is CANCELED or not
-        if workitem.status == "Cancelled":
-            return True
-        else:
-            return False
+        return workitem.status == "Cancelled"
 
     def is_running(self) -> bool:
         """
@@ -215,10 +207,7 @@ class WorkItem(DatabaseTable):
         workitem = WorkItem.objects.only("status").get(pk=self.pk)
 
         # check the status and indicate whether it is RUNNING or not
-        if workitem.status == "Running":
-            return True
-        else:
-            return False
+        return workitem.status == "Running"
 
     def is_done(self) -> bool:
         """
@@ -228,10 +217,7 @@ class WorkItem(DatabaseTable):
         workitem = WorkItem.objects.only("status").get(pk=self.pk)
 
         # check the status and indicate whether it is COMPLETED or CANCELLED
-        if workitem.status in ["Completed", "Cancelled"]:
-            return True
-        else:
-            return False
+        return workitem.status in ["Completed", "Cancelled"]
 
     def result(
         self,

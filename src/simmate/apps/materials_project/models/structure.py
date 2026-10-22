@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+from contextlib import suppress
 
 from rich.progress import track
 
@@ -160,7 +160,7 @@ class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
 
         try:
             from mp_api.client import MPRester
-        except:
+        except Exception:
             raise Exception(
                 "To use this method, MP-API is required. Please install it "
                 "with `uv pip install mp-api"
@@ -262,7 +262,7 @@ class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
         # Let's iterate through each structure and save it to the database
         # This also takes a while, so we use a progress bar
         for entry in track(data):
-            try:
+            with suppress(Exception):
                 # convert the data to a Simmate database object
                 yield cls.from_toolkit(
                     id=str(entry.material_id),
@@ -277,5 +277,3 @@ class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
                     total_magnetization=entry.total_magnetization,
                     is_theoretical=entry.theoretical,
                 )
-            except:
-                pass

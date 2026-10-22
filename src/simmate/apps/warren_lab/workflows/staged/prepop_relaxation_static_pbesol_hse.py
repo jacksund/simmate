@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.warren_lab.workflows.relaxation.pbesol import (
     Relaxation__Vasp__PbesolWarren,
 )

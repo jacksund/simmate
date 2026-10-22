@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import re
 from pathlib import Path
@@ -11,7 +9,6 @@ from simmate.toolkit import Molecule
 
 
 class SdfAdapter:
-
     # Property tags are written as `>  <My Key>` but the number of spaces
     # varies between programs (e.g. ChemDraw uses two, others use one)
     property_key_pattern = re.compile(r"^>\s*<(.+?)>")
@@ -120,7 +117,7 @@ class SdfAdapter:
                     )
                     continue
                 else:
-                    raise error
+                    raise
             molecules.append(molecule)
 
         return molecules if len(molecules) > 1 else molecules[0]

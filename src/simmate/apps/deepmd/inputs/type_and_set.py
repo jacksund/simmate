@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from pathlib import Path
-
 import numpy
 from django_pandas.io import read_frame
 from sklearn.model_selection import train_test_split

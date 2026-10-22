@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import subprocess
 
@@ -22,6 +20,7 @@ class SlurmCluster(Cluster):
             shell=True,
             capture_output=True,
             text=True,
+            check=False,
         )
         job_id = int(process.stdout.strip().split()[-1])
         return job_id
@@ -42,6 +41,7 @@ class SlurmCluster(Cluster):
                 shell=True,
                 capture_output=True,
                 text=True,
+                check=False,
             )
             # An error is return if the job is no longer in the queue.
             # If the job is still running, then two lines will be printed to

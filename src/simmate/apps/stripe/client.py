@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import stripe
 
 from simmate.config import settings

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from simmate.database.core import DatabaseTable
@@ -7,7 +5,6 @@ from simmate.toolkit import Structure
 
 
 class StructureInput:
-
     def load_structure(self, input_name: str = "structure"):
         """
         Handles loading a structure from various input types: file, database, or URL.

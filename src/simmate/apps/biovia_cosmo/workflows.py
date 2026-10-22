@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # USER NOTE: Make sure you have "biovia_cosmo.zip" unpacked into ~/simmate dir.
 # In the future, maybe I can grab this in a better way.
 
@@ -16,10 +14,10 @@ __all__ = [
     "ConformerGeneration__CosmoConf__BpSvpAm1",
     "ConformerGeneration__CosmoConf__Tzvp",
     "ConformerGeneration__CosmoConf__TzvpFine",
-    "Solubility__CosmoTherm__LogPowFromCtdPreset",
     "Solubility__BioviaCosmo__LogPowBpSvpAm1",
     "Solubility__BioviaCosmo__LogPowTzvp",
     "Solubility__BioviaCosmo__LogPowTzvpFine",
+    "Solubility__CosmoTherm__LogPowFromCtdPreset",
 ]
 
 

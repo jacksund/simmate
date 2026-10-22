@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pymatgen.analysis.elasticity.strain import Strain, convert_strain_to_deformation
 
 from simmate.toolkit import Structure
@@ -14,7 +12,7 @@ class LatticeStrain(Transformation):
     break symmetries and allow a structure to relax.
     """
 
-    #!!! should I mutate atomic sites too? USPEX is unclear if they do this
+    # !!! should I mutate atomic sites too? USPEX is unclear if they do this
     # in addition to lattice strain. If so, I should look at the
     # CoordinateMutation transfomation class
 
@@ -40,9 +38,6 @@ class LatticeStrain(Transformation):
         fixed_volume: float,
         max_attempts=100,
     ):
-        # after straining the lattice, we need to scale it to a fixed volume
-        fixed_volume = fixed_volume
-
         # following along with USPEX paper, we need to first establish boundries
         # for the symmetric strain matrix
         # when generating components for this matrix, they randomly select
@@ -53,7 +48,7 @@ class LatticeStrain(Transformation):
         components = component_generator.new_vector(size=6)
 
         # next we need to assemble the strain matrix using these components
-        #!!! is there a better way to do this? I'm just using equation (3) in
+        # !!! is there a better way to do this? I'm just using equation (3) in
         # the USPEX paper
         strain_matrix = [
             [1 + components[0], components[5] / 2, components[4] / 2],
@@ -67,7 +62,7 @@ class LatticeStrain(Transformation):
         strain = Strain(strain_matrix)
 
         # now convert it to a deformation object
-        #!!! do I want the shape to be 'upper' or 'symmetric'??
+        # !!! do I want the shape to be 'upper' or 'symmetric'??
         deformation = convert_strain_to_deformation(strain, shape="symmetric")
 
         # deform the structure

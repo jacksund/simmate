@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.rdkit.models import Molecule
 from simmate.database.core import table_column
 from simmate.database.mixins import ThirdPartyData
@@ -81,10 +79,9 @@ class CasRegistryMolecule(ThirdPartyData, Molecule):
         Returns:
             CasRegistryMolecule: The database entry for the CAS number.
         """
-        if not force_update:
-            # check the database to see if this has been searched for
-            if cls.objects.filter(id=cas_number).exists():
-                return cls.objects.get(id=cas_number)
+        # check the database to see if this has been searched for
+        if not force_update and cls.objects.filter(id=cas_number).exists():
+            return cls.objects.get(id=cas_number)
 
         is_valid = validate_cas_number(cas_number)
         if not is_valid:
@@ -99,7 +96,7 @@ class CasRegistryMolecule(ThirdPartyData, Molecule):
         }
 
         # we use update_or_create to avoid race conditions when creating
-        cas_entry, is_new = cls.objects.update_or_create(
+        cas_entry, _is_new = cls.objects.update_or_create(
             id=cas_number,
             defaults=cls.from_toolkit(
                 **official_data,
@@ -133,10 +130,9 @@ class CasRegistryMolecule(ThirdPartyData, Molecule):
         """
         inchi_key = molecule.to_inchi_key()
 
-        if not force_update:
-            # check the database to see if this has been searched for
-            if cls.objects.filter(inchi_key=inchi_key).exists():
-                return cls.objects.get(inchi_key=inchi_key)
+        # check the database to see if this has been searched for
+        if not force_update and cls.objects.filter(inchi_key=inchi_key).exists():
+            return cls.objects.get(inchi_key=inchi_key)
 
         # Otherwise we need to search official api
         # The client's search method is robust and handles SMILES, InChI, etc.

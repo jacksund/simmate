@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import uuid
 from datetime import datetime, timedelta
@@ -273,7 +271,7 @@ class SimmateExecutor:
         ).to_dataframe()
 
         all_items["tags"] = all_items.tags.apply(tuple)
-        unique_tags = set([t for g in all_items.tags.unique() for t in g])
+        unique_tags = {t for g in all_items.tags.unique() for t in g}
         logging.info(f"Found {len(unique_tags)} unique tags")
 
         # sort by type of tag then aphlabetical

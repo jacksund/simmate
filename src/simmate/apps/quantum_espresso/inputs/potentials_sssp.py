@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 We need to map which potential to grab for each element based off of the type
 of calculation we are doing. To see how these were selected, you should look
@@ -111,7 +109,6 @@ def check_pseudo_setup() -> bool:
     for file in files:
         full_filename = settings.quantum_espresso.pseudo_dir / file
         if not full_filename.exists():
-            breakpoint()
             return False  # one missing is enough to exit
     # TODO: consider checking md5 hashes as well
 

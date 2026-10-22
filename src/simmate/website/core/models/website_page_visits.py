@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-
 from django.contrib.auth.models import User
 
 from simmate.database.core import DatabaseTable, table_column
 
 
 class WebsitePageVisit(DatabaseTable):
-
     class Meta:
         db_table = "django_website_page_visits"
 

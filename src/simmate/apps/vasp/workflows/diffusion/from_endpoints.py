@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from simmate.toolkit import Structure
@@ -93,7 +91,7 @@ class NebFromEndpointWorkflow(Workflow):
         )
 
         # interpolate / empirically relax the endpoint structures
-        images = get_migration_images_from_endpoints(
+        images = get_migration_images_from_endpoints(  # noqa: F821
             supercell_start=endpoint_start_result,
             supercell_end=endpoint_end_result,
             nimages=nimages,

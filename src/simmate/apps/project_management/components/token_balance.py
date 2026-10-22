@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-
 from django.http import HttpResponseRedirect
 
 from simmate.website.htmx.components import HtmxComponent
 
 
 class TokenBalanceComponent(HtmxComponent):
-
     template_name = "project_management/wallet/token_balance_form.html"
 
     def submit(self):

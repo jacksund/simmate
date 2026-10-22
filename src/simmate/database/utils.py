@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import base64
 import csv
 import io
@@ -183,7 +181,7 @@ def postgres_connect_maintenance_db():
             if f'"{maintenance_db_name}" does not exist' in str(error):
                 continue  # just jump to trying the next db name
             # otherwise we might a password auth issue or something else
-            raise error
+            raise
 
         # exit loop as soon as we have a working connection
         if connection:
@@ -337,7 +335,7 @@ def get_all_table_docs(extra_docs: dict = {}, include_empties: bool = True) -> d
     for model in apps.get_models():
         table_name = model._meta.db_table
 
-        if table_name in extra_docs.keys():
+        if table_name in extra_docs:
             all_docs[table_name] = extra_docs[table_name]
 
         elif not hasattr(model, "get_table_docs"):
@@ -512,7 +510,7 @@ def start_postgres_docker(
 
     # Check if the container already exists
     check_command = ["docker", "container", "inspect", "simmate_db"]
-    result = subprocess.run(check_command, capture_output=True)
+    result = subprocess.run(check_command, capture_output=True, check=False)
 
     if result.returncode == 0:
         # Container exists, just start it

@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-
 import shutil
-import time
 from pathlib import Path
 from tempfile import mkdtemp
 
@@ -347,10 +344,11 @@ def download_file(
         total_chunks = total_size // chunk_size if total_size else None
 
         with open(dest_path, "wb") as f:
-            for chunk in track(
-                response.iter_content(chunk_size=chunk_size),
-                total=total_chunks,
-            ):
-                f.write(chunk)
+            f.writelines(
+                track(
+                    response.iter_content(chunk_size=chunk_size),
+                    total=total_chunks,
+                )
+            )
 
     return dest_path

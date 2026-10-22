@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import time
 from pathlib import Path
@@ -112,7 +110,7 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         # the pool up front. This is acheive just by accessing the validator.
         # This also makes sure the Fingerprints are all up to date before
         # submitting workers below
-        search_datatable.validator
+        search_datatable.validator  # noqa: B018
 
         logging.info("Finished setup")
         logging.info(

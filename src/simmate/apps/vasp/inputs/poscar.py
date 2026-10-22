@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import numpy
 from pymatgen.core.lattice import Lattice  # BUG -- this is only for a bug-fix
 
@@ -145,9 +143,7 @@ class Poscar:
                 # the next three values are for the selective dynamics and they
                 # include series of "T" or "F" values for True/False on whether
                 # the site can move along a, b, or c respectively.
-                dynamic_tags = [
-                    True if "T" in value else False for value in values[3:6]
-                ]
+                dynamic_tags = ["T" in value for value in values[3:6]]
                 selective_dynamics.append(dynamic_tags)
 
             # check if there's an element symbol at the end of the line. This

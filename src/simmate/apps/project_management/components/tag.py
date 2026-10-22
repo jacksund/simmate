@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.website.data_explorer.components import TableComponent
 
 from ..models import Tag
@@ -7,7 +5,6 @@ from .mixins import ProjectInput
 
 
 class TagComponent(TableComponent, ProjectInput):
-
     table = Tag
 
     template_names = {

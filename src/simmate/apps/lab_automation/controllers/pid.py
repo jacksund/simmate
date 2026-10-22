@@ -98,7 +98,7 @@ class PID(Controller):
         if dt is None:
             dt = now - self._last_time if (now - self._last_time) else 1e-16
         elif dt <= 0:
-            raise ValueError("dt has negative value {}, must be positive".format(dt))
+            raise ValueError(f"dt has negative value {dt}, must be positive")
 
         if (
             self.sample_time is not None
@@ -154,15 +154,15 @@ class PID(Controller):
 
     def __repr__(self):
         return (
-            "{self.__class__.__name__}("
-            "Kp={self.Kp!r}, Ki={self.Ki!r}, Kd={self.Kd!r}, "
-            "setpoint={self.setpoint!r}, sample_time={self.sample_time!r}, "
-            "output_limits={self.output_limits!r}, auto_mode={self.auto_mode!r}, "
-            "proportional_on_measurement={self.proportional_on_measurement!r}, "
-            "differential_on_measurement={self.differential_on_measurement!r}, "
-            "error_map={self.error_map!r}"
+            f"{self.__class__.__name__}("
+            f"Kp={self.Kp!r}, Ki={self.Ki!r}, Kd={self.Kd!r}, "
+            f"setpoint={self.setpoint!r}, sample_time={self.sample_time!r}, "
+            f"output_limits={self.output_limits!r}, auto_mode={self.auto_mode!r}, "
+            f"proportional_on_measurement={self.proportional_on_measurement!r}, "
+            f"differential_on_measurement={self.differential_on_measurement!r}, "
+            f"error_map={self.error_map!r}"
             ")"
-        ).format(self=self)
+        )
 
     @property
     def components(self):

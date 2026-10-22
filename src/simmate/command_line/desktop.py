@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This defines commands for the Simmate desktop app. All commands are accessible
 through the `simmate desktop` command.
@@ -19,7 +17,6 @@ def desktop():
     """
     Commands for launching and building the Simmate desktop app.
     """
-    pass
 
 
 @desktop_app.command()

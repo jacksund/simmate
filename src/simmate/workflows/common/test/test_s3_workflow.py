@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Example job(s) [with and without subprocess.Popen]
 # Example handler(s)
 
@@ -244,8 +242,5 @@ def test_s3workflow_8(tmp_path):
         command = "echo dummy"
         required_files = ["FILE_THAT_DOESNT_EXIST"]
 
-    pytest.raises(
-        Exception,
-        Customized__Testing__DummyWorkflow.run_config,
-        directory=tmp_path,
-    )
+    with pytest.raises(Exception, match="some are missing"):
+        Customized__Testing__DummyWorkflow.run_config(directory=tmp_path)

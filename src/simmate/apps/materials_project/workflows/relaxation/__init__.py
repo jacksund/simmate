@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .matproj import Relaxation__Vasp__Matproj
 from .matproj_hse import Relaxation__Vasp__MatprojHse
 from .matproj_hsesol import Relaxation__Vasp__MatprojHsesol

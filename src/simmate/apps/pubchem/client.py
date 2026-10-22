@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-
 import logging
+from contextlib import suppress
 
 import requests
 from bs4 import BeautifulSoup
@@ -11,7 +10,6 @@ from simmate.utils import download_file, get_directory
 
 
 class PubChemClient:
-
     # DEV-NOTE:
     # You can do a lot of this with PubChemPy, but that package hasn't been updated
     # since 2016, and it's pretty outdated. We just implement our version
@@ -79,12 +77,10 @@ class PubChemClient:
 
         # revert to searching via cas which is more robust
         for cas_number in cas_numbers:
-            try:
+            with suppress(Exception):
                 # !!! we just use the first cas number that works
                 assert cls.get_data_from_cas_number(cas_number)
                 return cas_number
-            except:
-                continue
 
     # -------------------------------------------------------------------------
 
@@ -201,7 +197,6 @@ class PubChemClient:
 
         # 2. Iterate and download
         for filename in all_files:
-
             full_url = f"{cls.PUBCHEM_FTP_URL}{filename}"
             local_path = target_dir / filename
 

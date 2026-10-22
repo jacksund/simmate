@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.db.models import Func
 from scipy.constants import Avogadro
 
@@ -14,7 +12,6 @@ from .symmetry import Spacegroup
 
 # UNDER DEV -- Not used elsewhere yet
 class StructureSearchResults(SearchResults):
-
     def filter_similarity(
         self,
         structure: ToolkitStructure,
@@ -31,11 +28,11 @@ class StructureSearchResults(SearchResults):
         to be transferred to the local cpu).
         """
         #############################################
-        NotImplementedError("Method still in testing")
+        raise NotImplementedError("Method still in testing")
         #############################################
 
         if settings.database_backend != "postgresql":
-            NotImplementedError(
+            raise NotImplementedError(
                 "Similarity searches in-database are not supported outside of "
                 "postgres. You can still use the toolkit's SimilarityFilter "
                 "to handle this outside the database though."
@@ -313,7 +310,7 @@ class Structure(DatabaseTable):
         # Grab the "include_subsystems" field from the filter form. Note, this
         # value will be given as a string which we convert to a python boolean
         include_subsystems = self.data.dict().get("include_subsystems", "false")
-        include_subsystems = True if include_subsystems == "true" else False
+        include_subsystems = include_subsystems == "true"
 
         # TODO:
         # Make sure that the chemical system is made of valid elements and

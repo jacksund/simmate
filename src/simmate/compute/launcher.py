@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Builds the commands that start containerized API workers (via Podman or Docker),
 as used by the desktop app.
@@ -23,7 +21,9 @@ def find_container_engine() -> str | None:
         if not path:
             continue
         try:
-            result = subprocess.run([path, "info"], capture_output=True, timeout=15)
+            result = subprocess.run(
+                [path, "info"], capture_output=True, timeout=15, check=False
+            )
         except (subprocess.TimeoutExpired, OSError):
             continue
         if result.returncode == 0:

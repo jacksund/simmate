@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from langchain.agents import create_agent
 
 from .llm import get_llm

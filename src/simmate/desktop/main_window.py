@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from collections.abc import Callable
 
 from PySide6.QtCore import QEvent, QRectF, Qt

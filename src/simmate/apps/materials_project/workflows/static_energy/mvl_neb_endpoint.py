@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.materials_project.workflows.relaxation.mvl_neb_endpoint import (
     Relaxation__Vasp__MvlNebEndpoint,
 )

@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-
 import uuid
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from ortools.sat.python import cp_model
 
@@ -11,7 +8,7 @@ class BaseTask(ABC):
     """Abstract base class for all schedulable tasks."""
 
     def __init__(
-        self, name: str, resources: str | list[str], task_id: Optional[str] = None
+        self, name: str, resources: str | list[str], task_id: str | None = None
     ):
         self.task_id = task_id or uuid.uuid4().hex[:8]
         self.name = name
@@ -46,7 +43,7 @@ class BaseTask(ABC):
         pass
 
     @abstractmethod
-    def get_penalty(self, model: cp_model.CpModel, horizon: int) -> Optional[object]:
+    def get_penalty(self, model: cp_model.CpModel, horizon: int) -> object | None:
         pass
 
     @abstractmethod
@@ -62,7 +59,7 @@ class Task(BaseTask):
         name: str,
         duration: int,
         resources: str | list[str],
-        task_id: Optional[str] = None,
+        task_id: str | None = None,
     ):
         super().__init__(name, resources, task_id=task_id)
         self.duration = duration
@@ -89,7 +86,7 @@ class Task(BaseTask):
         for res in self.resources:
             resources_usage[res].append(self.interval_var)
 
-    def get_penalty(self, model: cp_model.CpModel, horizon: int) -> Optional[object]:
+    def get_penalty(self, model: cp_model.CpModel, horizon: int) -> object | None:
         return None
 
     def process_solution(self, solver: cp_model.CpSolver) -> list[dict]:
@@ -123,7 +120,7 @@ class FixedTask(Task):
         duration: int,
         start_time: int,
         resources: str | list[str],
-        task_id: Optional[str] = None,
+        task_id: str | None = None,
     ):
         super().__init__(name, duration, resources, task_id=task_id)
         self.start_time = start_time
@@ -162,7 +159,7 @@ class PreemptableTask(BaseTask):
         min_chunk_size: int,
         max_chunks: int,
         resources: str | list[str],
-        task_id: Optional[str] = None,
+        task_id: str | None = None,
     ):
         super().__init__(name, resources, task_id=task_id)
         self.total_duration = total_duration
@@ -222,7 +219,7 @@ class PreemptableTask(BaseTask):
         model.Add(self.start_var == self.chunk_starts[0])
         model.AddMaxEquality(self.end_var, self.chunk_ends)
 
-    def get_penalty(self, model: cp_model.CpModel, horizon: int) -> Optional[object]:
+    def get_penalty(self, model: cp_model.CpModel, horizon: int) -> object | None:
         span = model.NewIntVar(0, horizon, f"span_{self.task_id}")
         model.Add(span == self.end_var - self.start_var)
         return span
@@ -257,7 +254,9 @@ class PreemptableTask(BaseTask):
             start_time = chunk["start"]
             end_time = chunk["end"]
             chunk_size = end_time - start_time
-            name = f"{self.name} (Part {j+1})" if len(merged_chunks) > 1 else self.name
+            name = (
+                f"{self.name} (Part {j + 1})" if len(merged_chunks) > 1 else self.name
+            )
 
             print(
                 f"Minute {start_time:02d} to {end_time:02d} | "

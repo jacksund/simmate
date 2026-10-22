@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.database.core import DatabaseTable, table_column
 from simmate.database.utils import batch_bulk_create
 

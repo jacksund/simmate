@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .create import CreateMixin
 from .create_many import CreateManyMixin
 from .dashboard import DashboardMixin

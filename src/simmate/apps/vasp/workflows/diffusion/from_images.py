@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 from pathlib import Path
 
@@ -54,18 +52,17 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         # INCAR file.
         # first, we check if the user set this.
         nimages = cls.incar.get("IMAGES")
-        if nimages:
-            # if so, we check that it was set correctly. It should be equal to
-            # the number of structures minus 2 (because we don't count the
-            # start and end images here.)
-            if nimages != (len(migration_images) - 2):
-                raise Exception(
-                    "IMAGES looks to be improperly set! This value should not"
-                    " include the start/end images -- so make sure you counted"
-                    " properly. Alternatively, you also can remove this keyword"
-                    " from your INCAR and Simmate will provide it automatically"
-                    " for you."
-                )
+        # if so, we check that it was set correctly. It should be equal to
+        # the number of structures minus 2 (because we don't count the
+        # start and end images here.)
+        if nimages and nimages != (len(migration_images) - 2):
+            raise Exception(
+                "IMAGES looks to be improperly set! This value should not"
+                " include the start/end images -- so make sure you counted"
+                " properly. Alternatively, you also can remove this keyword"
+                " from your INCAR and Simmate will provide it automatically"
+                " for you."
+            )
 
         # TODO: add a precheck that ensures the number of cores VASP is ran on
         # is also divisible by the number of images. For example...

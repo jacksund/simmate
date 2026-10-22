@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.project_management.models import Project, Transaction, Wallet
 
 

@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-
 from django.shortcuts import render
 
 
 class UpdateManyMixin:
-
     # for form_mode "update_many"
 
     ignore_on_update_many: list[str] = []

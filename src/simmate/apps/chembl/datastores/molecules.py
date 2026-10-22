@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.toolkit.datastores import MoleculeDatastore
 
 
@@ -27,7 +25,7 @@ class ChemblMoleculeStore(MoleculeDatastore):
         single parquet file in the staging directory.
         """
 
-        from simmate.database import connect  # isort: skip
+        from simmate.database import connect  # ruff: isort: skip
 
         from ..models import ChemblMolecule
 

@@ -7,7 +7,6 @@ import simmate.database.core.archive
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0007_feedback"),
         ("workflow_explorer", "0009_alter_bandstructurecalc_table_and_more"),

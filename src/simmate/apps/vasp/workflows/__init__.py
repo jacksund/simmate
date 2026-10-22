@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .relaxation import (
     Relaxation__Vasp__Quality00,
     Relaxation__Vasp__Quality01,

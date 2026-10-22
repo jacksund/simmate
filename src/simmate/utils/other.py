@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import ast
 import hashlib
 import importlib
@@ -214,8 +212,7 @@ def str_to_datatype(
     # If it is not in the common keys listed, just leave it as a string.
     else:
         logging.warning(
-            "Unknown parameter mapping of {parameter}: {target_type}. "
-            "Leaving as str."
+            f"Unknown parameter mapping of {parameter}: {target_type}. Leaving as str."
         )
         return value
 
@@ -390,7 +387,7 @@ def get_attributes_doc(cls: type, dedent_and_strip: bool = True) -> dict[str, st
                 continue
             doc_expr_value = stmt2.value
             if isinstance(doc_expr_value, ast.JoinedStr):
-                raise Exception("F-strings are not allowed for attribute docstrings")
+                raise TypeError("F-strings are not allowed for attribute docstrings")
             if isinstance(doc_expr_value, ast.Constant):
                 if isinstance(stmt1, ast.AnnAssign):
                     attr_names = [stmt1.target.id]  # type: ignore
@@ -454,8 +451,8 @@ def dispatch(
     parallel mode.
     """
     if parallel == "job":
-        from simmate.database import connect  # isort:skip
-        from simmate.compute import SimmateExecutor  # isort:skip
+        from simmate.database import connect  # ruff: isort: skip
+        from simmate.compute import SimmateExecutor  # ruff: isort: skip
 
         results = []
         for item in track(items):

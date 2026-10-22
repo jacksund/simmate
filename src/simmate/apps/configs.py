@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.apps import AppConfig
 
 
@@ -149,7 +147,7 @@ class ProjectManagementConfig(AppConfig):
 
     def ready(self):
         # signals a wallet creation for new users
-        import simmate.apps.project_management.signals
+        import simmate.apps.project_management.signals  # noqa: F401
 
 
 class QuantumEspressoConfig(AppConfig):

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # This line just disables anything var from being set as an attribute to the
 # simmate module (e.g., it disables `from simmate import RichHandler`)
 __all__ = []
@@ -11,7 +9,7 @@ try:
     import django
     import pymatgen
     import rdkit
-except:
+except Exception:
     raise Exception(
         "Simmate's core dependencies were not found. "
         "You most likely are seeing this message if you improperly installed simmate "

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import numpy
 from sklearn.cluster import KMeans as sk_KMeans
 from sklearn.cluster import kmeans_plusplus
@@ -33,7 +31,7 @@ class Kmeans(ClusteringEngine):
         result = cluster_ids if flat_output else unflatten_cluster_ids(cluster_ids)
 
         if return_centers:
-            centers_init, centers_indicies = kmeans_plusplus(
+            _centers_init, centers_indicies = kmeans_plusplus(
                 fingerprints,
                 n_clusters=n_clusters,
                 random_state=random_state,

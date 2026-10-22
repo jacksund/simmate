@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .background import BackgroundTask, IncrementalTask
 from .button import PrimaryButton
 from .compound_details import CompoundDetails

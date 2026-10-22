@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-
+from contextlib import suppress
 import warnings
 
 # BUG: Importing matminer featurizers print a tqdm error so we silence them
@@ -15,8 +14,8 @@ with warnings.catch_warnings(record=True):
         OPSiteFingerprint,
     )
     from matminer.featurizers.structure import (
-        PartialRadialDistributionFunction,
-        RadialDistributionFunction,
+        PartialRadialDistributionFunction,  # noqa: F401
+        RadialDistributionFunction,  # noqa: F401
         # SiteStatsFingerprint,  # see below
         # PartialsSiteStatsFingerprint  # see below
     )
@@ -28,7 +27,7 @@ with warnings.catch_warnings(record=True):
 # install and it doesn't look like matminer is making release any time soon.
 #   https://github.com/jacksund/matminer/blob/main/matminer/featurizers/structure/sites.py
 
-# isort: skip_file
+# ruff: isort: skip_file
 
 import numpy as np
 from pymatgen.analysis.local_env import VoronoiNN
@@ -75,7 +74,7 @@ class SiteStatsFingerprint(BaseFeaturizer):
         """
 
         self.site_featurizer = site_featurizer
-        self.stats = tuple([stats]) if type(stats) == str else stats
+        self.stats = (stats,) if type(stats) == str else stats
         if self.stats and "_mode" in "".join(self.stats):
             nmodes = 0
             for stat in self.stats:
@@ -236,7 +235,7 @@ class SiteStatsFingerprint(BaseFeaturizer):
                     ],
                     signed=False,
                 ),
-                stats=["holder_mean::%d" % d for d in range(0, 4 + 1)] + ["std_dev"],
+                stats=[f"holder_mean::{d}" for d in range(4 + 1)] + ["std_dev"],
             )
 
         elif preset == "Composition-dejong2016_SD":
@@ -252,20 +251,20 @@ class SiteStatsFingerprint(BaseFeaturizer):
                     ],
                     signed=True,
                 ),
-                stats=["holder_mean::%d" % d for d in [1, 2, 4]] + ["std_dev"],
+                stats=[f"holder_mean::{d}" for d in [1, 2, 4]] + ["std_dev"],
             )
 
         elif preset == "BondLength-dejong2016":
             return cls(
                 AverageBondLength(VoronoiNN()),
-                stats=["holder_mean::%d" % d for d in range(-4, 4 + 1)]
+                stats=[f"holder_mean::{d}" for d in range(-4, 4 + 1)]
                 + ["std_dev", "geom_std_dev"],
             )
 
         elif preset == "BondAngle-dejong2016":
             return cls(
                 AverageBondAngle(VoronoiNN()),
-                stats=["holder_mean::%d" % d for d in range(-4, 4 + 1)]
+                stats=[f"holder_mean::{d}" for d in range(-4, 4 + 1)]
                 + ["std_dev", "geom_std_dev"],
             )
 
@@ -273,10 +272,8 @@ class SiteStatsFingerprint(BaseFeaturizer):
             # TODO: Why assume coordination number? Should this just raise an error? - lw
             # One of the various Coordination Number presets:
             # MinimumVIRENN, MinimumDistanceNN, JmolNN, VoronoiNN, etc.
-            try:
+            with suppress(Exception):
                 return cls(CoordinationNumber.from_preset(preset), **kwargs)
-            except Exception:
-                pass
 
         raise ValueError("Unrecognized preset!")
 
@@ -410,8 +407,7 @@ class PartialsSiteStatsFingerprint(SiteStatsFingerprint):
         labels = []
         for e in self.elements_:
             e_labels = [f"{e} {l}" for l in super().feature_labels()]
-            for l in e_labels:
-                labels.append(l)
+            labels.extend(e_labels)
 
         return labels
 

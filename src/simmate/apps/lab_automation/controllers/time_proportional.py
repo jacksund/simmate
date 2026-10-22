@@ -88,9 +88,9 @@ class TimeProportional(Controller):
 
     def __repr__(self):
         return (
-            "{self.__class__.__name__}("
-            "setpoint={self.setpoint!r}, proportional_band={self.proportional_band!r}, "
-            "cycle_time={self.cycle_time!r}, on_output={self.on_output!r}, "
-            "off_output={self.off_output!r}, auto_mode={self.auto_mode!r}"
+            f"{self.__class__.__name__}("
+            f"setpoint={self.setpoint!r}, proportional_band={self.proportional_band!r}, "
+            f"cycle_time={self.cycle_time!r}, on_output={self.on_output!r}, "
+            f"off_output={self.off_output!r}, auto_mode={self.auto_mode!r}"
             ")"
-        ).format(self=self)
+        )

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 import polars
@@ -110,7 +108,7 @@ class SubstanceDatastore(MoleculeDatastore):
         into a single parquet file in the staging directory.
         """
 
-        from simmate.database import connect  # isort: skip
+        from simmate.database import connect  # ruff: isort: skip
 
         from ..models import Substance
 
@@ -143,7 +141,7 @@ class SubstanceDatastore(MoleculeDatastore):
         updated, so rerun `build_fingerprint_index` afterwards.
         """
 
-        from simmate.database import connect  # isort: skip
+        from simmate.database import connect  # ruff: isort: skip
 
         from ..models import Substance
 
@@ -242,7 +240,7 @@ class SubstanceDatastore(MoleculeDatastore):
         datastore. Use this when building catalogs for `append_rows`.
         """
 
-        from simmate.database import connect  # isort: skip
+        from simmate.database import connect  # ruff: isort: skip
 
         from ..models import Substance
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 from simmate.apps.materials_project.workflows.diffusion import (
@@ -65,7 +63,7 @@ def test_neb_from_images_setup(sample_structures, tmp_path, mocker):
     )
     assert incar_filename.exists()
 
-    assert all([f.exists() for f in poscar_filenames])
+    assert all(f.exists() for f in poscar_filenames)
 
     assert potcar_filename.exists()
     Potcar.to_file_from_type.assert_called_with(

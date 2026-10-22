@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-
 from simmate.database.core import DatabaseTable, table_column
 
 from .project import Project
 
 
 class Tag(DatabaseTable):
-
     class Meta:
         db_table = "project_management__tags"
 

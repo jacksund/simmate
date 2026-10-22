@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pandas as pd
 import streamlit as st
 
@@ -9,7 +7,6 @@ from .base import PlotConstructor
 
 
 class AiChatbotFigure(PlotConstructor):
-
     display_name = "Describe to AI"
     required_inputs = ["user_request"]
 

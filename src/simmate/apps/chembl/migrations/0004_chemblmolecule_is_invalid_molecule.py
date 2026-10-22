@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("chembl", "0003_remove_chemblmolecule_acid_base_type_and_more"),
     ]

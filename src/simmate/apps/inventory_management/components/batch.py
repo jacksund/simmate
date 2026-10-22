@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-
 from simmate.website.data_explorer.components import TableComponent
 
 from ..models import Batch
 
 
 class BatchComponent(TableComponent):
-
     table = Batch
 
     template_names = {

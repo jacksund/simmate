@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-
 import shutil
+from contextlib import suppress
 from pathlib import Path
 
 from pymatgen.io.vasp.outputs import Vasprun
@@ -25,7 +24,7 @@ class Unconverged(ErrorHandler):
     def check(self, directory: Path) -> bool:
         # Now check if the calculation converged. If not, we have the error!
         xml_filename = directory / "vasprun.xml"
-        try:
+        with suppress(Exception):
             # load the xml file and only parse the bare minimum
             xmlReader = Vasprun(
                 filename=xml_filename,
@@ -37,8 +36,6 @@ class Unconverged(ErrorHandler):
             )
             if not xmlReader.converged:
                 return True
-        except Exception:
-            pass
 
         # if the xml fails to load or if it converged successfully, then we
         # don't have this error.

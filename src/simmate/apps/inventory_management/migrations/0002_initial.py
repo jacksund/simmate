@@ -9,7 +9,6 @@ from simmate.apps.rdkit.utils import get_rdkit_ext_fields
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [

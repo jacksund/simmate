@@ -65,21 +65,27 @@ class DatasetStart(QWidget):
             [
                 (
                     "New here? Try the sample dataset",
-                    "400 made-up compounds in six chemical series, with assay results. "
-                    "Small and quick to load, so it's a good place to explore what "
-                    "the Toolkit can do.",
+                    (
+                        "400 made-up compounds in six chemical series, with assay results. "
+                        "Small and quick to load, so it's a good place to explore what "
+                        "the Toolkit can do."
+                    ),
                     self.sample_button,
                 ),
                 (
                     "Official datasets",
-                    "Download catalogs like ChEMBL and the PDB's ligands from the "
-                    "Datasets tab, then open them with “Open in Toolkit”.",
+                    (
+                        "Download catalogs like ChEMBL and the PDB's ligands from the "
+                        "Datasets tab, then open them with “Open in Toolkit”."
+                    ),
                     self.datasets_button,
                 ),
                 (
                     "Your own data",
-                    "Upload an .sdf, .smi, .csv or .parquet file. A copy is saved to "
-                    "My datasets (in the Datasets tab) so you can open it again.",
+                    (
+                        "Upload an .sdf, .smi, .csv or .parquet file. A copy is saved to "
+                        "My datasets (in the Datasets tab) so you can open it again."
+                    ),
                     self.upload_button,
                 ),
             ]

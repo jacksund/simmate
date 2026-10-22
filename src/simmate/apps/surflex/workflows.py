@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Official surflex docs: https://www.biopharmics.com/Public/Surflex-Manual.pdf
 
@@ -25,10 +23,10 @@ __all__ = [
     "ConformerGeneration__Surflex__Fgen3d",
     "ConformerGeneration__Surflex__ForceGen",
     "ConformerGeneration__Surflex__FullGen",
-    "Similarity__Surflex__ESimList",
-    "PrototypeGen__Surflex__DockProto",
     "Docking__Surflex__DockList",
     "Docking__Surflex__FullFlow",
+    "PrototypeGen__Surflex__DockProto",
+    "Similarity__Surflex__ESimList",
 ]
 
 # -----------------------------------------------------------------------------

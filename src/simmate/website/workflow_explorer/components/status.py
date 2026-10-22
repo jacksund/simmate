@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-
 from simmate.website.htmx.components.base import HtmxComponent
 
 
 class WorkflowStatusComponent(HtmxComponent):
-
     template_name: str = "workflow_explorer/status.html"
 
     table_entry = None

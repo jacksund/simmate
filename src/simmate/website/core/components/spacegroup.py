@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.database.mixins.symmetry import Spacegroup
 from simmate.website.data_explorer.components import TableComponent
 

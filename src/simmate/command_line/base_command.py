@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This defines the base "simmate" command that all other commands stem from.
 """
@@ -33,7 +31,6 @@ def base_command():
     help with a specific command group, use `simmate <group> --help`
     (e.g., `simmate database --help`).
     """
-    pass
 
 
 @simmate_app.command()

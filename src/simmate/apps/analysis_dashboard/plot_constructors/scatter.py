@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -8,7 +6,6 @@ from .base import PlotConstructor
 
 
 class Scatter(PlotConstructor):
-
     display_name = "Scatter"
     required_inputs = ["x", "y"]
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import shutil
 import subprocess
 import time
@@ -128,6 +126,7 @@ class UspexStructure(StructureCreator):
             "chmod a+x run_uspex.sh",
             shell=True,
             cwd=temp_dir,
+            check=False,
         )
 
         # We now have everything except the INPUT.txt file! We will write

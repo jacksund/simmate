@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("materials_project", "0002_matprojstructure_updated_at_original_and_more"),
     ]

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import numpy
 from numba import njit, prange
 
@@ -7,7 +5,6 @@ from simmate.toolkit.similarity.base import SimilarityEngine
 
 
 class Tanimoto(SimilarityEngine):
-
     matrix_mode = "series"
 
     @classmethod

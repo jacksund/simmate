@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from pymatgen.analysis.transition_state import NEBAnalysis
@@ -18,7 +16,6 @@ from .structure import Structure
 
 
 class DiffusionAnalysis(Structure, Calculation):
-
     class Meta:
         app_label = "workflow_explorer"
         db_table = "workflows_diffusionanalysis"

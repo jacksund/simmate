@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.contrib.auth.backends import ModelBackend
 from django.core.exceptions import PermissionDenied
 
@@ -24,7 +22,7 @@ class TokenAuthenticationMiddleware:
             token_auth = TokenAuthentication()
             user_auth_tuple = token_auth.authenticate(request)
             if user_auth_tuple:
-                user, token = user_auth_tuple
+                user, _token = user_auth_tuple
                 request.user = user
 
         # Continue processing as usual

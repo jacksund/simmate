@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pymatgen.symmetry.groups import SpaceGroup as PymatgenSpacegroup
 from rich.progress import track
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 A Qt-based (PySide6) desktop app for exploring chemical data.
 

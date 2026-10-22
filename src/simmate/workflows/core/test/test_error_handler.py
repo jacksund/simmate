@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 import pytest
@@ -39,7 +37,7 @@ def test_error_handler():
 
     # confirm Exception when settings are improperly set
     handler = IncorrectHandler()
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="requires filename_to_check"):
         handler.check(directory=directory)
 
     # This line tests nothing, but simply covers the abstract method's pass statement

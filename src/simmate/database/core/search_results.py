@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import shutil
 from pathlib import Path
 
@@ -89,10 +87,8 @@ class SearchResults(models.QuerySet):
         # results to get our values_list. (unless the query gave back an
         # incomplete values_list)
         if use_cache and self._result_cache is not None:
-
             # check if we have a list of models or values
             if self._iterable_class == models.query.ValuesListIterable:
-
                 # if the user has a `values_list` call to the queryset, and didn't
                 # set columns for `to_dataframe`, we'll use those cols for the df
                 if not has_user_cols:
@@ -103,7 +99,7 @@ class SearchResults(models.QuerySet):
                 # needed for the dataframe If not, another query is needed
                 else:
                     cache_columns = list(self._fields)
-                    has_all_cols = all([c in cache_columns for c in columns])
+                    has_all_cols = all(c in cache_columns for c in columns)
                     if has_all_cols:
                         i_map = [cache_columns.index(c) for c in columns]
                         values_list = [

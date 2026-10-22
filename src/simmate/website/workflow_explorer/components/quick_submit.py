@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from django.http import HttpResponseRedirect
-
 from simmate.website.htmx.components import HtmxComponent, MoleculeInput, StructureInput
 from simmate.workflows.utils import get_workflow
 
@@ -49,7 +45,7 @@ class QuickSubmitComponent(HtmxComponent, StructureInput, MoleculeInput):
     def calculation_type_options(self):
         input_type = self.form_data.get("primary_input_type")
         mappings = self.WORKFLOW_MAPPINGS.get(input_type, {})
-        return [(k, k) for k in mappings.keys()]
+        return [(k, k) for k in mappings]
 
     @property
     def primary_input_label(self) -> str:

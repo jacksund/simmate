@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from pymatgen.analysis.structure_matcher import StructureMatcher
@@ -144,7 +142,6 @@ class ExpectedStructure(StopCondition):
         # slow the following for loop is, that may be necessary
 
         expected_structure = self.expected_structure
-        breakpoint()
         # get completed individuals since the last check. If this is our first
         # check we instead use the start time.
         if self.search.last_check_timestamp is None:
@@ -166,7 +163,6 @@ class ExpectedStructure(StopCondition):
 
         # for each structure, check if it matches the expected structure
         for n, structure in track(list(enumerate(structures))):
-
             is_match = matcher.fit(expected_structure, structure)
             if is_match:
                 # structure.to("cif", d / "match.cif")

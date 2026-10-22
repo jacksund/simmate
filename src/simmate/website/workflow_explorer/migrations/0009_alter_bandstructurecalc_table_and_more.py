@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("workflow_explorer", "0008_bandstructurecalc_is_invalid_structure_and_more"),
     ]

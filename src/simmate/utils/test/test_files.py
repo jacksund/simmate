@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import shutil
 
 from simmate.conftest import copy_test_files

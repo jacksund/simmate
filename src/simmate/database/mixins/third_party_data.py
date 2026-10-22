@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 class ThirdPartyData:
     """
     A mixin for database tables that ingest data from third-party sources.

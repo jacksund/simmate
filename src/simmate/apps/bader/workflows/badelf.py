@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from pymatgen.io.vasp.outputs import Chgcar, Elfcar

@@ -173,7 +173,7 @@ class Camera:
         Compiles JPEG images in a folder into a video file.
         """
         folder = Path(image_folder)
-        images = sorted(list(folder.glob("*.jpg")))
+        images = sorted(folder.glob("*.jpg"))
 
         if not images:
             logging.warning(f"No images found in {image_folder}")

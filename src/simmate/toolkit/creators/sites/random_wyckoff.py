@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from numpy.random import choice, randint
@@ -79,7 +77,7 @@ class RandomWySites:
             logging.info("Done.")
 
         # below, I'll need to repeatedly reference wy_data
-        #!!! I want to find a better way of loading wy_data - maybe load
+        # !!! I want to find a better way of loading wy_data - maybe load
         # only data for spacegroup_options?
         self.wy_data = loadWyckoffData().values
 
@@ -254,7 +252,7 @@ class RandomWySites:
 
         # if any extra_conditions were provided by the user, we want to
         # combine them with the asym conditions
-        if "extra_conditions" in self.coords_gen_options.keys():
+        if "extra_conditions" in self.coords_gen_options:
             all_bounds = self.coords_gen_options["extra_conditions"] + asym_bounds
             final_options.update({"extra_conditions": all_bounds})
         # otherwise, the asym_bounds are the only boundry conditions for
@@ -273,7 +271,7 @@ class RandomWySites:
 
 
 # Grab the boundry conditions for the asymmetric unit of a spacegroup's unitcell
-def asymmetric_unit_boundries(spacegroup, asym_data=loadAsymmetricUnitData()):
+def asymmetric_unit_boundries(spacegroup, asym_data=loadAsymmetricUnitData()):  # noqa: B008
     # spacegroup = spacegroup that we are interested in
     # asym_data = result of loadAsmmetricUnitData() - this is in the header for speed reasons
 

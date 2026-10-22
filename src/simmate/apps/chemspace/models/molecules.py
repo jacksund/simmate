@@ -1,14 +1,6 @@
-# -*- coding: utf-8 -*-
-
-import logging
-import warnings
-from pathlib import Path
-
 from simmate.apps.rdkit.models import Molecule
-from simmate.config import settings
 from simmate.database.core import table_column
 from simmate.database.mixins import ThirdPartyData
-from simmate.utils import get_directory
 
 
 class ChemSpaceFreedomSpaceMolecule(ThirdPartyData, Molecule):

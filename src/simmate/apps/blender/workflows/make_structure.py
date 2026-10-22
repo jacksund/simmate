@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import json
 from pathlib import Path
 
@@ -29,7 +27,7 @@ class Visualization__Blender__Structure(S3Workflow):
         # Now build all of the our serialized structure data and settings together
         # into the blender command that we will call via the command line
         command = (
-            f"{blender_command} --background --factory-startup --python {str(path_to_script)} "
+            f"{blender_command} --background --factory-startup --python {path_to_script!s} "
             f'-- --filename="simmate_structure.json" --save="{filename}"'
         )
         return command

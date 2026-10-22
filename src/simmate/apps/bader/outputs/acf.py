@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import warnings
 from pathlib import Path
 
@@ -89,7 +87,7 @@ def ACF(directory: Path = None, filename="ACF.dat"):
             # and whatever element is missing from our nelectron_data is said
             # to be an empty and we set to 0.
             for element in structure.composition:
-                if element.symbol not in nelectron_data.keys():
+                if element.symbol not in nelectron_data:
                     nelectron_data.update({element.symbol: 0})
 
         # otherwise, grab the structure from the CHGCAR

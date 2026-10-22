@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 from functools import cached_property
 
@@ -45,7 +43,7 @@ class MoleculeDataFrame:
         parallel: bool = False,
     ):
 
-        if all([c not in df.columns for c in ["smiles", "molecule", "molecule_obj"]]):
+        if all(c not in df.columns for c in ["smiles", "molecule", "molecule_obj"]):
             raise Exception(
                 "The dataframe must have a `smiles`, `molecule`, or `molecule_obj` column "
                 "in order to generate a full dataframe."

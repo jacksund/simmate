@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import platform
 from contextlib import closing
 
@@ -109,16 +107,18 @@ class MsSqlDB:
         # statement) only handles transactions (commit/rollback) and does NOT
         # automatically close the connection. We must use contextlib.closing
         # to ensure the connection is closed.
-        with closing(pyodbc.connect(self.config_str)) as connection:
-            with closing(connection.cursor()) as cursor:
-                cursor.execute(query)
+        with (
+            closing(pyodbc.connect(self.config_str)) as connection,
+            closing(connection.cursor()) as cursor,
+        ):
+            cursor.execute(query)
 
-                data = pandas.DataFrame(
-                    # BUG: for some reason I need to convert the list of Tuples to
-                    # a list of lists for pandas to read this successfully...
-                    data=[list(e) for e in cursor.fetchall()],
-                    columns=[c[0] for c in cursor.description],
-                )
+            data = pandas.DataFrame(
+                # BUG: for some reason I need to convert the list of Tuples to
+                # a list of lists for pandas to read this successfully...
+                data=[list(e) for e in cursor.fetchall()],
+                columns=[c[0] for c in cursor.description],
+            )
 
         # ---- BUG FIXES -----------------------
         # BUG-FIX (nan-->None)

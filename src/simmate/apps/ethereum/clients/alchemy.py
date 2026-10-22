@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 import numpy
@@ -12,7 +10,6 @@ from ..mappings import EthereumMappings
 
 
 class AlchemyClient:
-
     api_key = settings.ethereum.alchemy.api_key
 
     # used in building the base api endpoint like https://eth-mainnet.g.alchemy.com/v2/
@@ -127,19 +124,18 @@ class AlchemyClient:
         token_verified_list = []
         amount_normalized_list = []
         for t_data in df.rawContract:
-
             # Get token name
             token_address = t_data.get("address", None)
             if token_address == None:
                 token_name = "ETH"
             else:
-                token_name = [
+                token_name = next(
                     name
                     for name, t_address in EthereumMappings.token_addresses[
                         chain
                     ].items()
                     if t_address.lower() == token_address.lower()
-                ][0]
+                )
             token_verified_list.append(token_name)
 
             # convert to proper units
@@ -179,7 +175,7 @@ class AlchemyClient:
     @classmethod
     def get_balances(cls, address: str) -> dict:
         balances = {}
-        for chain in cls.chain_map.keys():
+        for chain in cls.chain_map:
             logging.info(f"Loading from '{chain}' chain")
             chain_balances = cls.get_balances_for_chain(address, chain)[
                 ["token_name", "token_amount"]
@@ -223,11 +219,11 @@ class AlchemyClient:
         token_amounts = []
         for row in df.itertuples():
             if row.contractAddress != "null":
-                token_name = [
+                token_name = next(
                     name
                     for name, address in EthereumMappings.token_addresses[chain].items()
                     if address == row.contractAddress.lower()
-                ][0]
+                )
             else:
                 token_name = "ETH"
             precision = EthereumMappings.token_precisions[token_name]
@@ -261,12 +257,12 @@ class AlchemyClient:
         response = requests.post(api_url, json=payload)
         response.raise_for_status()
         data = response.json()
-        assert "result" in data.keys()
+        assert "result" in data
 
         # TODO: catch errors that give 200 return code but error message response
 
         # perform a recursive call if the results are over multiple pages
-        if recursive and "pageKey" in data["result"].keys():
+        if recursive and "pageKey" in data["result"]:
             logging.info("API Results are paginated. Enumerating next.")
 
             full_results = cls.get_response(

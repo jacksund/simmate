@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import argparse
 import json
 import sys
@@ -69,7 +67,7 @@ def make_structure_blend(input_filename, output_filename):
         # first check if we have made this material already (i.e. an element of
         # this type has been made before). If so, we use that one.
         materials = bpy.data.materials
-        if element_symbol in materials.keys():
+        if element_symbol in materials:
             mat = materials[element_symbol]
         # otherwise we make a new material and name it after the element for
         # future reference.

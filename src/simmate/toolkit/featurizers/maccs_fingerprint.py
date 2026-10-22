@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from rdkit.Chem import MACCSkeys
 
 from simmate.toolkit import Molecule

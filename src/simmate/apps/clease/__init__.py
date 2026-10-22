@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 # CLEASE is an optional dependency, so make sure it's installed before loading
 # this module
 try:
     import clease
-except:
+except Exception:
     raise ModuleNotFoundError(
         "The Simmate-Clease app requires CLEASE to run. Please install CLEASE to "
         "your python environment with... \n"

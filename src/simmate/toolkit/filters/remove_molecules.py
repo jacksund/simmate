@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from rich.progress import track
 
 from simmate.toolkit import Molecule
@@ -49,13 +47,13 @@ class RemoveMolecules(Filter):
                 keys_to_remove = list(
                     molecules_to_remove.values_list("inchi_key", flat=True).all()
                 )
-            except:
+            except Exception:
                 raise Exception(f"Unknown Input: {type(molecules_to_remove)}")
 
         keep_list = []
         for molecule in track(molecules, disable=not progress_bar):
             inchi_key = molecule.to_inchi_key()
-            keep = True if inchi_key not in keys_to_remove else False
+            keep = inchi_key not in keys_to_remove
             keep_list.append(keep)
 
         return keep_list

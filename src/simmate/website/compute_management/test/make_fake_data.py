@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Generates `fake_data.zip`, which holds fake workers and work items for tests
 and for exploring the compute dashboard (see `simmate dev load-test-data`).
@@ -15,13 +13,13 @@ worker ever picks up one of the pending items.
 import random
 import time
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import cloudpickle
 
-from simmate.database import connect  # isort: skip
+from simmate.database import connect  # ruff: isort: skip
 
-from simmate.database.utils import (  # isort: skip
+from simmate.database.utils import (  # ruff: isort: skip
     get_fake_data_path,
     get_fake_users,
     write_fake_data,
@@ -29,7 +27,7 @@ from simmate.database.utils import (  # isort: skip
 
 random.seed(1234)
 
-REFERENCE_DATE = datetime(2026, 10, 1, 12, tzinfo=timezone.utc)
+REFERENCE_DATE = datetime(2026, 10, 1, 12, tzinfo=UTC)
 NOW = REFERENCE_DATE  # the loader shifts all dates so that this becomes "now"
 
 LABEL = "compute_management"

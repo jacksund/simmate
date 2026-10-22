@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pandas
 from rich.progress import track
 

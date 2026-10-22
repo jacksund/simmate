@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.vasp.error_handlers import (
     Brions,
     Brmix,

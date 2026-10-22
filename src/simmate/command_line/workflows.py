@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 from pathlib import Path
 
@@ -17,7 +15,6 @@ def workflows():
     """
     Commands for exploring, configuring, and executing Simmate workflows.
     """
-    pass
 
 
 def list_options(options: list) -> int:
@@ -105,7 +102,7 @@ def parse_parameters(context: Context) -> dict:
             for i in range(0, len(context.args), 2)
         }
 
-    except:
+    except Exception:
         raise typer.BadParameter(
             "This workflow command appears to be improperly formatted. \n"
             "When giving workflow parameters, make sure you provide both the \n"
@@ -120,7 +117,7 @@ def explore(
     include_subflows: bool = typer.Option(
         False,
         help="Whether to include sub-workflows (internal steps) in the exploration list.",
-    )
+    ),
 ):
     """
     Interactively explore available workflows, their descriptions, and parameters.
@@ -201,7 +198,7 @@ def list_all(
     include_subflows: bool = typer.Option(
         False,
         help="Whether to include sub-workflows (internal steps) in the list.",
-    )
+    ),
 ):
     """
     Lists all registered Simmate workflows.
@@ -221,7 +218,7 @@ def show_config(
     workflow_name: str = typer.Argument(
         ...,
         help="The full name of the workflow (e.g., 'relaxation.vasp.staged').",
-    )
+    ),
 ):
     """
     Displays the configuration settings for a specific workflow.
@@ -326,7 +323,7 @@ def run(
     filename: Path = typer.Argument(
         ...,
         help="The YAML or TOML file containing workflow parameters.",
-    )
+    ),
 ):
     """
     Executes a workflow locally using parameters loaded from a configuration file.
@@ -342,7 +339,7 @@ def run_cloud(
     filename: Path = typer.Argument(
         ...,
         help="The YAML or TOML file containing workflow parameters.",
-    )
+    ),
 ):
     """
     Submits a workflow for remote execution on a cluster or cloud resource.

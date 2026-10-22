@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from baderkit.core import ElfLabeler
-
 from simmate.database.core import DatabaseTable, table_column
 
 

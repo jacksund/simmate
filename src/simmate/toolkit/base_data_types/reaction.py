@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-import logging
 from pathlib import Path
 
 from rdkit.Chem import AllChem, Draw
@@ -9,7 +6,6 @@ from .molecule import Molecule
 
 
 class Reaction:
-
     def __init__(
         self,
         reactants: list[Molecule],
@@ -127,7 +123,7 @@ class Reaction:
 
     @property
     def is_reaction_template(self):
-        return True if self.template_reactants or self.template_products else False
+        return bool(self.template_reactants or self.template_products)
 
     @property
     def template_rdkit_reaction(self):

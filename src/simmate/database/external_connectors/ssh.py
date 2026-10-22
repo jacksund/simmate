@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
 import shlex
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from pathlib import Path, PurePosixPath
 from stat import S_ISDIR
 
@@ -65,9 +63,8 @@ class SshServer:
             yield sftp
             return
 
-        with cls.client as client:
-            with client.open_sftp() as new_sftp:
-                yield new_sftp
+        with cls.client as client, client.open_sftp() as new_sftp:
+            yield new_sftp
 
     @staticmethod
     def _to_remote_str(remote: str | Path) -> str:
@@ -108,7 +105,7 @@ class SshServer:
     @classmethod
     def call_command_remote(cls, command: str) -> str:
         with cls.client as client:
-            ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(command)
+            _ssh_stdin, ssh_stdout, _ssh_stderr = client.exec_command(command)
             # TODO: do I want to just return stdout? Raise an error if there is one?
             return ssh_stdout.read().decode("utf-8")
 
@@ -124,9 +121,9 @@ class SshServer:
         """
         Checks whether a remote file or directory exists.
         """
-        with cls._sftp_session(sftp) as sftp:
+        with cls._sftp_session(sftp) as sftp_client:
             try:
-                sftp.stat(cls._to_remote_str(remote))
+                sftp_client.stat(cls._to_remote_str(remote))
                 return True
             except FileNotFoundError:
                 return False
@@ -156,16 +153,16 @@ class SshServer:
         # always exists
         parents = [p for p in reversed(remote_path.parents) if str(p) not in ["/", "."]]
 
-        with cls._sftp_session(sftp) as sftp:
+        with cls._sftp_session(sftp) as sftp_client:
             for directory in parents + [remote_path]:
-                if cls.exists_remote(directory, sftp=sftp):
+                if cls.exists_remote(directory, sftp=sftp_client):
                     continue
                 try:
-                    sftp.mkdir(str(directory))
+                    sftp_client.mkdir(str(directory))
                 except OSError:
                     # another process may have made it since the check above.
                     # This is only a true failure if it still isn't there.
-                    if not cls.exists_remote(directory, sftp=sftp):
+                    if not cls.exists_remote(directory, sftp=sftp_client):
                         raise
 
         return remote
@@ -187,8 +184,8 @@ class SshServer:
         - `"folders"`: subdirectories at this level
         - `"files"`: files at this level
         """
-        with cls._sftp_session(sftp) as sftp:
-            contents = sftp.listdir_attr(cls._to_remote_str(remote))
+        with cls._sftp_session(sftp) as sftp_client:
+            contents = sftp_client.listdir_attr(cls._to_remote_str(remote))
         return {
             "folders": [c.filename for c in contents if S_ISDIR(c.st_mode)],
             "files": [c.filename for c in contents if not S_ISDIR(c.st_mode)],
@@ -211,26 +208,25 @@ class SshServer:
         """
         remote = cls._to_remote_str(remote)
 
-        with cls._sftp_session(sftp) as sftp:
+        with cls._sftp_session(sftp) as sftp_client:
             # Fast path: use `find` command over SSH
-            try:
-                session = sftp.get_channel().get_transport().open_session()
+            with suppress(Exception):
+                session = sftp_client.get_channel().get_transport().open_session()
                 session.exec_command(f"cd {shlex.quote(remote)} && find . -type f")
                 if session.recv_exit_status() == 0:
                     lines = session.makefile("rb").read().decode("utf-8").splitlines()
                     return [
-                        line[2:] if line.startswith("./") else line
+                        line.removeprefix("./")
                         for line in (l.strip() for l in lines)
                         if line and line != "."
                     ]
-            except Exception:
-                pass  # Fall back to recursive SFTP
 
-            contents = cls.listdir_remote(remote, sftp=sftp)
+            # Fall back to recursive SFTP
+            contents = cls.listdir_remote(remote, sftp=sftp_client)
             files = contents["files"]
             for folder in contents["folders"]:
                 # recurse, then prefix the results with this subfolder's name
-                subfiles = cls.walk_remote(f"{remote}/{folder}", sftp=sftp)
+                subfiles = cls.walk_remote(f"{remote}/{folder}", sftp=sftp_client)
                 files += [f"{folder}/{f}" for f in subfiles]
 
         return files
@@ -281,7 +277,6 @@ class SshServer:
         folders = [f.relative_to(local_dir).as_posix() for f in contents if f.is_dir()]
 
         with cls._sftp_session() as sftp:
-
             # skip files that made it over on a previous (interrupted) run
             if not overwrite and cls.exists_remote(remote_dir, sftp=sftp):
                 already_copied = set(cls.walk_remote(remote_dir, sftp=sftp))
@@ -353,7 +348,6 @@ class SshServer:
         remote_dir = cls._to_remote_str(remote)
 
         with cls._sftp_session() as sftp:
-
             # skip files that made it over on a previous (interrupted) run
             files = [
                 f

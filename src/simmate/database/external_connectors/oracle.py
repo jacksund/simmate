@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-
 import platform
+from contextlib import suppress
 
 import numpy
 import oracledb
@@ -107,31 +106,32 @@ class OracleDB:
         # fetch_type: str = "fetchall",
         # chunk_size: str = None,
 
-        with oracledb.connect(
-            user=self.user,
-            password=self.password,
-            dsn=self.dsn,
-        ) as connection:
-            with connection.cursor() as cursor:
+        with (
+            oracledb.connect(
+                user=self.user,
+                password=self.password,
+                dsn=self.dsn,
+            ) as connection,
+            connection.cursor() as cursor,
+        ):
+            # setup cursor for old db bug-fix
+            self._patch_cursor(cursor)
 
-                # setup cursor for old db bug-fix
-                self._patch_cursor(cursor)
+            cursor.execute(query)
 
-                cursor.execute(query)
+            # below is the same as...
+            #   self._patch_fetch(cursor.fetchall())
+            # But fetching 1,000 at a time is more stable and often faster
+            fetch_data = []
+            new_data = True
+            while new_data:
+                new_data = self._patch_fetch(cursor.fetchmany(fetch_size))
+                fetch_data += new_data
 
-                # below is the same as...
-                #   self._patch_fetch(cursor.fetchall())
-                # But fetching 1,000 at a time is more stable and often faster
-                fetch_data = []
-                new_data = True
-                while new_data:
-                    new_data = self._patch_fetch(cursor.fetchmany(fetch_size))
-                    fetch_data += new_data
-
-                data = pandas.DataFrame(
-                    data=fetch_data,
-                    columns=[c[0] for c in cursor.description],
-                )
+            data = pandas.DataFrame(
+                data=fetch_data,
+                columns=[c[0] for c in cursor.description],
+            )
 
         # ---- BUG FIXES -----------------------
         # BUG-FIX (nan-->None)
@@ -286,13 +286,11 @@ class OracleDB:
                     # "WINDOWS-1257",
                     # "WINDOWS-1258",
                 ]:
-                    try:
+                    with suppress(Exception):
                         value_cleaned = value.decode(encoding)
                         entry[value_index] = value_cleaned
                         is_decoded = True
                         break
-                    except:
-                        pass
                 if not is_decoded:
                     raise Exception(f"Failed to decode bytes: {value}")
             data_cleaned.append(entry)

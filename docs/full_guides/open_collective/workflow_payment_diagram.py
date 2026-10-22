@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import plotly.graph_objects as go
 
 # ---------------------------------------------

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .allowed_elements import AllowedElements
 from .base import Filter
 from .invalid_smiles import RemoveInvalidSmiles

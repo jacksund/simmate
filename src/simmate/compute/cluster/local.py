@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 import subprocess
 from pathlib import Path
 from tempfile import mkstemp

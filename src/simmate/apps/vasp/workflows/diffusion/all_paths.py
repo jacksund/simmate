@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from simmate.toolkit import Structure
@@ -114,7 +112,7 @@ class NebAllPathsWorkflow(Workflow):
 
         # Run NEB single_path workflow for all these.
         for i, hop in enumerate(migration_hops):
-            result = cls.single_path_workflow.run(
+            cls.single_path_workflow.run(
                 # !!! The hop object gives an ugly output. Should I use the
                 # database dictionary instead?
                 migration_hop=hop,

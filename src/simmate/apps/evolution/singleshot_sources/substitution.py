@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import itertools
 import logging
 import warnings
@@ -33,8 +31,6 @@ def get_structures_from_substitution_of_known(
         # make a copy just in case we perform manipulations below
         oxi_composition = composition.copy()
 
-    # and grab the list of species, which we will need later
-    elements_final = [str(element) for element in oxi_composition]
     oxi_states = {
         element.symbol: element.oxi_state for element in oxi_composition.elements
     }
@@ -63,7 +59,7 @@ def get_structures_from_substitution_of_known(
             try:
                 expected_substituitions = substitutor.pred_from_list(elements_to_sub)
                 break  # exit immediately once successful
-            except:
+            except Exception:
                 expected_substituitions = []
         if expected_substituitions:
             has_subs = True
@@ -81,7 +77,7 @@ def get_structures_from_substitution_of_known(
         charge = 0
         for i_el in oxi_composition.elements:
             # BUG: not caught in pymatgen -- ex: Composition("C4")
-            if i_el not in subs.keys():
+            if i_el not in subs:
                 continue
             f_el = subs[i_el]
             charge += f_el.oxi_state * oxi_composition[i_el]

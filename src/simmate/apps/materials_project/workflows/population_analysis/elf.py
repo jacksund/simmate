@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.materials_project.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )

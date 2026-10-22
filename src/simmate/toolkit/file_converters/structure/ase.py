@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This converter simply imports a pymatgen class. With this you can quickly
 convert between Simmate.toolkit and ASE.atoms objects.

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import shutil
 from pathlib import Path
 
@@ -96,7 +94,7 @@ class VaspWorkflow(S3Workflow, StructureWorkflow):
                 # Check if there is a modifier version of the key that
                 # needs removed.
                 # For example, a new "EDIFF" would replace "EDIFF__per_atom"
-                for original_key in parent_incar.keys():
+                for original_key in parent_incar:
                     if original_key.split("__")[0] == key.split("__")[0]:
                         final_incar.pop(original_key)
                 # OPIMIZE: maybe move this logic to the Incar class

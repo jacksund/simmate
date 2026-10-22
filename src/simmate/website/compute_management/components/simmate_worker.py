@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.compute import SimmateWorker
 from simmate.website.data_explorer.components import TableComponent
 

@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 from simmate.toolkit.creators.vector import UniformlyDistributedVectors
 
 
-#!! NOTE: I should make a copy of this that is RandomSymSites, where I limit the
+# !! NOTE: I should make a copy of this that is RandomSymSites, where I limit the
 # random sites generated to the asym unit of the specified spacegroup
 class RandomSites:
     def __init__(

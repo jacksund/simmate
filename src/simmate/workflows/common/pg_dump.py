@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 from pathlib import Path
 
@@ -9,7 +7,6 @@ from .s3 import S3Workflow
 
 
 class Maintenance__Postgres__PgDump(S3Workflow):
-
     use_database = False
     monitor = False
 

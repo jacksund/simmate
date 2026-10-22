@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-
 import inspect
 import textwrap
 import urllib
+from contextlib import suppress
 from functools import cache
 from pathlib import Path
 
@@ -170,7 +169,6 @@ class DatabaseTable(models.Model, ArchiveMixin):
         """
         column_names = []
         for column in cls._meta.get_fields(include_parents):
-
             name = column.name
 
             # there is some redundant code here, but organizing in this way
@@ -299,7 +297,7 @@ class DatabaseTable(models.Model, ArchiveMixin):
             f"\t- Website UI Location: {docs['table_info']['website_url']}\n\n"
         )
 
-        final_str += "## Table Description\n\n" f"{docs['table_description']}\n\n"
+        final_str += f"## Table Description\n\n{docs['table_description']}\n\n"
 
         final_str += "## Column Descriptions\n\n"
         for col_name, col_descr in docs["column_descriptions"].items():
@@ -397,7 +395,7 @@ class DatabaseTable(models.Model, ArchiveMixin):
         all_data["_TABLE_ID_"] = self.id
 
         # EXPERIMNETAL: adding workflow URL
-        try:
+        with suppress(Exception):
             from simmate.workflows.utils import get_workflow
 
             from .calculation import Calculation
@@ -412,8 +410,6 @@ class DatabaseTable(models.Model, ArchiveMixin):
                 # OPTIMIZE: what if I switch database results to be queried
                 # in the Data tab rather than for each workflow:
                 # all_data["_WEBSITE_URL_"] = self.url
-        except:
-            pass
 
         summary_filename = directory / "simmate_summary.yaml"
         with summary_filename.open("w") as file:
@@ -473,7 +469,7 @@ class DatabaseTable(models.Model, ArchiveMixin):
             table_name = source["database_table"]
             table_id = source["database_id"]
 
-            if table_name not in query_info.keys():
+            if table_name not in query_info:
                 query_info[table_name] = []
 
             query_info[table_name].append(table_id)
@@ -490,7 +486,7 @@ class DatabaseTable(models.Model, ArchiveMixin):
         all_data_ordered = [
             all_data_dict[id]
             for id in table_ids
-            if id in all_data_dict.keys()  # BUG: should I warn if the id isn't found?
+            if id in all_data_dict  # BUG: should I warn if the id isn't found?
         ]
 
         return all_data_ordered
@@ -706,9 +702,7 @@ class DatabaseTable(models.Model, ArchiveMixin):
             # Now inputs is current of list of keys that we need. Next, we go
             # through our kwargs and see if we have any of these keys, and if so,
             # grab them.
-            matching_inputs = {
-                key: kwargs[key] for key in inputs if key in kwargs.keys()
-            }
+            matching_inputs = {key: kwargs[key] for key in inputs if key in kwargs}
 
             # We now pass these inputs to the _from_toolkit. If we're missing
             # a required input, this will raise an error here. We only
@@ -783,7 +777,7 @@ class DatabaseTable(models.Model, ArchiveMixin):
     # We still allow users to set "None" disable this feature.
 
     @classproperty
-    @cache
+    @cache  # noqa: B019
     def filter_methods(cls) -> list[str]:
         """
         All filtering methods that can be used to narrow a queryset
@@ -801,7 +795,7 @@ class DatabaseTable(models.Model, ArchiveMixin):
         ]  # dir() looks to be faster than inspect.getmembers
 
     @classproperty
-    @cache
+    @cache  # noqa: B019
     def filter_methods_extra_args(cls) -> list[str]:
         """
         Any unique parameters that are used as kwargs in `filter_methods`
@@ -917,7 +911,6 @@ class DatabaseTable(models.Model, ArchiveMixin):
 
         queryset = cls.objects if not use_web_queryset else cls.get_web_queryset()
         for filter_name, filter_value in filters.items():
-
             # to prevent crazy joins, we can limit the number of double-underscores
             # (which indicate a join or field lookup) in a filter.
             # Example: `user__first_name__isnull` has 2 double-underscores.

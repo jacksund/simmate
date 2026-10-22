@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 # For a list of parameter and their defaults look at...
 #   https://docs.deepmodeling.org/projects/deepmd/en/master/train/train-input.html
 
-{
+EXAMPLE_PARAMETERS = {
     "model": {
         "descriptor": {
             "type": "se_e2_a",

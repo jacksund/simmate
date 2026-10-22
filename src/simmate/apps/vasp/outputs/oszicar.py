@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # !!! In the future, I think this should be a "converter" class that loads data
 # into a more generic DftResults class -- so one that is more generically for
 # storing electronic and ionic steps across different apps. I think it
@@ -203,5 +201,5 @@ def try_float(value: str) -> float:
     """
     try:
         return float(value)
-    except:
+    except Exception:
         return numpy.nan

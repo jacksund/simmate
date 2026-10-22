@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.http import HttpResponseRedirect
 
 from simmate.config import settings
@@ -8,7 +6,6 @@ from simmate.workflows.utils import get_workflow
 
 
 class FixedCompositionSubmissionComponent(HtmxComponent):
-
     template_name = "evolution/fixed_composition_submission.html"
 
     # both set in mount()

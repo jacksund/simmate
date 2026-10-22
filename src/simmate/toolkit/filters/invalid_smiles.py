@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from rich.progress import track
 
 from simmate.toolkit import Molecule

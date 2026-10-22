@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("cod", "0003_alter_codstructure_id"),
         ("inventory_management", "0008_drop_external_dataset_columns"),

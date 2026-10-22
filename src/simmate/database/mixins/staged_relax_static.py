@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from ..core import table_column
 from .forces import Forces
 from .staged import StagedWorkflow
 from .structure import Structure

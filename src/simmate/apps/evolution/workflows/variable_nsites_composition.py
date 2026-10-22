@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 from pathlib import Path
 
@@ -62,8 +60,7 @@ class StructurePrediction__Toolkit__VariableNsitesComposition(Workflow):
             # just remove the started_at kwarg here, but this could also be fixed
             # by changing to fixed_composition_kwargs = {} or by adding a check
             # for this to the Workflow class itself.
-            if "started_at" in kwargs.keys():
-                del kwargs["started_at"]
+            kwargs.pop("started_at", None)
 
             # logging.info(f"Beginning composition {composition_current}")
             cls.fixed_comp_workflow.run(

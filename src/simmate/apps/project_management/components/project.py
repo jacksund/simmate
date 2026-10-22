@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.website.data_explorer.components import TableComponent
 from simmate.website.htmx.components import UserInput
 
@@ -7,7 +5,6 @@ from ..models import Project
 
 
 class ProjectComponent(TableComponent, UserInput):
-
     table = Project
 
     display_name = "Projects"

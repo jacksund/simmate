@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import bz2
 import logging
 from pathlib import Path
@@ -63,7 +61,7 @@ class ChemspaceClient(S3Bucket):
         )
 
         for i, file in enumerate(all_files):
-            logging.info(f"Reading file {i+1} of {len(all_files)}: {file.name}")
+            logging.info(f"Reading file {i + 1} of {len(all_files)}: {file.name}")
             with bz2.open(file, "rb") as f_in:
                 file_content = f_in.read()
                 yield polars.read_csv(file_content, separator="\t")

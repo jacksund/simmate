@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from ase_ga.standardmutations import StrainMutation
 from ase_ga.utilities import CellBounds, closest_distances_generator
 from pymatgen.io.ase import AseAtomsAdaptor
@@ -61,7 +59,7 @@ class LatticeStrain(Transformation):
         # first I need to convert the structures to an ASE atoms object
         structure_ase = AseAtomsAdaptor.get_atoms(structure)
 
-        #!!! Their code suggests the use of .get_new_individual() but
+        # !!! Their code suggests the use of .get_new_individual() but
         # I think .mutate() is what we'd like
         new_structure_ase = strain.mutate(structure_ase)
 

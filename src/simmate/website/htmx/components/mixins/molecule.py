@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from simmate.database.core import DatabaseTable
@@ -7,7 +5,6 @@ from simmate.toolkit import Molecule
 
 
 class MoleculeInput:
-
     ignore_on_search = ["molecule_query_type"]
 
     # -------------------------------------------------------------------------
@@ -58,9 +55,7 @@ class MoleculeInput:
         # form mode. We want to notify users when the load fails too, which
         # is why we put this whole section in a try/except
         try:
-
             if input_type in ["sketcher", "text"]:
-
                 if getattr(self, "component_type", None) == "search":
                     query_type = self.form_data.pop(f"{input_name}_query_type")
                     # TODO: better loading for SMARTS
@@ -99,7 +94,7 @@ class MoleculeInput:
             elif input_type == "custom":
                 self.load_molecule_custom(input_name)
 
-        except:
+        except Exception:
             logging.warning(
                 f"Failed to load molecule for input '{input_name}' of type '{input_type}': '{molecule_input}'"
             )
@@ -112,7 +107,7 @@ class MoleculeInput:
         ):
             matches = self.check_datasets(molecule_obj)
             # TODO: f"{input_name}__molecule_matches"
-            setattr(self, "molecule_matches", matches)
+            self.molecule_matches = matches
 
         # draw mol image
         self.js_actions = [
@@ -141,7 +136,6 @@ class MoleculeInput:
 
         matches = []
         for table_name in self.molecule_match_tables:
-
             if table_name == "__self__":
                 table = self.table
             else:
@@ -179,7 +173,7 @@ class MoleculeInput:
         try:
             molecules = Molecule.from_dynamic(mol_str).components
             self.molecule = True  # indicates successful load in templates
-        except:
+        except Exception:
             self.molecule = False
             return
 
@@ -192,7 +186,6 @@ class MoleculeInput:
     ):
         self.child_components = []
         for molecule_obj in molecules:
-
             child = self.create_child_component()
             child.form_data[input_name] = molecule_obj
 

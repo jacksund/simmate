@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.contrib.postgres.operations import CreateExtension
 
 
@@ -14,7 +12,7 @@ class RDKitExtension(CreateExtension):
         from_state,
         to_state,
     ):
-        super(RDKitExtension, self).database_forwards(
+        super().database_forwards(
             app_label,
             schema_editor,
             from_state,

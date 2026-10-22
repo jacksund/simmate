@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This module defines the Structure class.
 
@@ -109,12 +107,12 @@ class Structure(PymatgenStructure):
 
         # if the "@module" key is in the dictionary, then we have a pymatgen
         # structure dict which we convert to a pymatgen object and return
-        elif isinstance(structure, dict) and "@module" in structure.keys():
+        elif isinstance(structure, dict) and "@module" in structure:
             structure_cleaned = cls.from_dict(structure)
 
         # if there is a database_table key, then we are pointing to the simmate
         # database for the input structure
-        elif isinstance(structure, dict) and "database_table" in structure.keys():
+        elif isinstance(structure, dict) and "database_table" in structure:
             structure_cleaned = cls.from_database_dict(structure)
 
         # if the value is a str and it relates to a filepath, then we load the
@@ -138,7 +136,7 @@ class Structure(PymatgenStructure):
                     f"We were unable to find '{structure}' in '{Path.cwd()}'"
                 )
             else:
-                raise Exception(
+                raise TypeError(
                     "Unknown format provided for structure input. "
                     f"{type(structure)} was provided."
                 )
@@ -224,7 +222,6 @@ class Structure(PymatgenStructure):
         # For example, if there a site at (0,0,0) then we also want to display the
         # site at (1,1,1).
         for site_index, site in enumerate(render_structure):
-
             # Grab the base info that is the same for all site images here.
 
             try:
@@ -360,7 +357,6 @@ class Structure(PymatgenStructure):
             # for jimage_vector in itertools.product([-1, 0, 1], repeat=3)
             jimage_vector = (0, 0, 0)
             for site_index in range(len(structure_graph.structure)):
-
                 # we only care about bonds/atoms if they are in our sites_to_draw
                 ref_key = f"{site_index}-{jimage_vector}"
                 if ref_key not in jimage_ref:
@@ -368,7 +364,6 @@ class Structure(PymatgenStructure):
 
                 connected_sites = structure_graph.get_connected_sites(site_index)
                 for connected_site in connected_sites:
-
                     ref_key2 = f"{connected_site.index}-{connected_site.jimage}"
                     # same as above, we only want bonds when connected site is
                     # also in our sites_to_draw

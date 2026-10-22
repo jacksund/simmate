@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Packages a desktop app into a single-file executable with PyInstaller.
 """

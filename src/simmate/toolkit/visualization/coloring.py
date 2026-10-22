@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ELEMENT_COLORS_JMOL_HEX = {
     "H": 0xFFFFFF,
     "He": 0xD9FFFF,

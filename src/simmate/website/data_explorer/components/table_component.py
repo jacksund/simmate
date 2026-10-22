@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.shortcuts import redirect
 from django.utils.functional import classproperty
 
@@ -116,7 +114,7 @@ class TableComponent(
 
         try:
             return TableCount.objects.get(table_name=self.table.table_name).row_count
-        except:
+        except Exception:
             return None
 
     # -------------------------------------------------------------------------
@@ -245,7 +243,7 @@ class TableComponent(
 
         self.check_form_hook()
 
-        return True if not self.form_errors else False
+        return not self.form_errors
 
     def check_form_hook(self) -> bool:
         return True  # default is there's nothing extra to check

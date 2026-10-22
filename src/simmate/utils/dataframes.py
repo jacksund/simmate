@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import operator
 from functools import reduce
 
@@ -13,7 +11,6 @@ def filter_pandas_df(data: pandas.DataFrame, **kwargs) -> pandas.DataFrame:
 
     checks = []
     for filter_key, filter_value in kwargs.items():
-
         column_name, metric = (
             filter_key.rsplit("__", 1) if "__" in filter_key else (filter_key, "exact")
         )

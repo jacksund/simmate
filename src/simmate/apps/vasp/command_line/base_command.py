@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This defines the base "simmate-vasp" command that all other commands stem from.
 """
@@ -21,7 +19,6 @@ def base_command():
     Commands and utilities for managing VASP calculations, input files,
     and output visualizations.
     """
-    pass
 
 
 # All commands are organized into other files, so we need to manually register

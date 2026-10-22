@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .brions import Brions
 from .brmix import Brmix
 from .edddav import Edddav
@@ -35,6 +33,6 @@ from .zheev import Zheev
 from .zpotrf import Zpotrf
 
 # These handlers depend on other handlers above. So we make sure they are
-# imported last and disable isort for them.
-# isort: split
+# imported last and disable import sorting for them.
+# ruff: isort: split
 from .tetirr import Tetirr

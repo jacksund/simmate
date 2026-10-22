@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This defines commands for S3 bucket operations. All commands are
 accessible through the `simmate dev s3` command.
@@ -19,7 +17,6 @@ def s3():
     """
     Commands for uploading, downloading, and browsing the configured S3 bucket.
     """
-    pass
 
 
 @s3_app.command()

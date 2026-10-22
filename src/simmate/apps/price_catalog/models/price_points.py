@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-
 from simmate.database.core import DatabaseTable, table_column
 
 from .priced_items import PricedItem
 
 
 class PricePoint(DatabaseTable):
-
     class Meta:
         db_table = "price_catalog__price_points"
         unique_together = (("priced_item", "ticker", "date"),)

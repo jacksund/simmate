@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.utils.functional import classproperty
 
 from simmate.utils import dispatch

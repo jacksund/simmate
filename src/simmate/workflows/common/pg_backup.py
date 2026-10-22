@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from ..core import Workflow
@@ -47,7 +45,7 @@ class Maintenance__Postgres__BackupToS3(Workflow):
             )
 
         # create the full backup, named by date since we do daily backups
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         filename = now.strftime("%Y_%m_%d.sql")
         dump_dir = directory / "pg_dump"
         Maintenance__Postgres__PgDump.run(

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 from pathlib import Path
 
@@ -105,7 +103,7 @@ class EnamineRealMolecule(ThirdPartyData, Molecule):
         logging.info("Saving to simmate database...")
 
         for i, chunk_filename in enumerate(chunk_filenames):
-            logging.info(f"Chunk {i+1} of {nchunks}")
+            logging.info(f"Chunk {i + 1} of {nchunks}")
 
             # read the file text (without loading as Molecule objects)
             data = pandas.read_csv(chunk_filename, delimiter="\t")
@@ -127,7 +125,7 @@ class EnamineRealMolecule(ThirdPartyData, Molecule):
                         is_diverse_subset=True,  # I haven't looked at the full set yet
                     )
                     db_objs.append(molecule_db)
-                except:
+                except Exception:
                     failed_rows.append(entry)
             # save each entry to simmate database
             logging.info("Saving to Simmate database...")

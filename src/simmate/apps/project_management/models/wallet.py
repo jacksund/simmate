@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from decimal import Decimal
 
 from django.contrib.auth.models import User
@@ -12,7 +10,6 @@ from .project import Project
 
 
 class Wallet(DatabaseTable):
-
     class Meta:
         db_table = "project_management__wallets"
 
@@ -124,7 +121,6 @@ class Wallet(DatabaseTable):
         from .transaction import Transaction
 
         with django_db_transaction.atomic():
-
             if usdc_amount:
                 usdc_amount = Decimal(usdc_amount)
             if token_amount:
@@ -207,7 +203,6 @@ class Wallet(DatabaseTable):
             raise Exception("Staking amount must be non-zero")
 
         with django_db_transaction.atomic():
-
             self.usdc_balance -= amount
             self.collateral_balance += amount
             self.save()

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.utils import timezone
 
 from simmate.compute import SimmateExecutor, SimmateWorker, WorkItem

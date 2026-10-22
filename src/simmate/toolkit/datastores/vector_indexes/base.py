@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 import copy
 import logging
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 import numpy
 import polars
@@ -80,8 +78,7 @@ class VectorIndex:
         """
         if load_mode not in self.valid_load_modes:
             raise ValueError(
-                f"Unknown load_mode: {load_mode!r}. "
-                f"Use one of {self.valid_load_modes}."
+                f"Unknown load_mode: {load_mode!r}. Use one of {self.valid_load_modes}."
             )
         if self.requires_metric_fn and metric_fn is None:
             raise ValueError(
@@ -248,7 +245,7 @@ class VectorIndex:
         Hook for one-time setup needed before any shard is built (such as
         training). Only called when there are shards left to build.
         """
-        pass  # nothing needed by default
+        # nothing needed by default
 
     def _build_batch(self, batch: list[int]) -> None:
         """Builds and saves the single shard covering `batch` of chunk_keys."""

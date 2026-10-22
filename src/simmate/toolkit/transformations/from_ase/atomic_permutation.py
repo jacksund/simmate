@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from ase_ga.standardmutations import PermutationMutation
 from ase_ga.utilities import closest_distances_generator
 from pymatgen.io.ase import AseAtomsAdaptor
@@ -59,7 +57,7 @@ class AtomicPermutation(Transformation):
             # verbose=False
         )
 
-        #!!! Their code suggests the use of .get_new_individual() but I think
+        # !!! Their code suggests the use of .get_new_individual() but I think
         # .mutate() is what we'd like
         new_structure_ase = perm.mutate(structure_ase)
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This defines commands for managing your Simmate configuration settings. All commands are
 accessible through the "simmate config" command.
@@ -21,7 +19,6 @@ def config():
     Commands for managing Simmate settings, including viewing, updating, and testing
     app configurations.
     """
-    pass
 
 
 @config_app.command()
@@ -29,7 +26,7 @@ def write(
     filename: Path = typer.Option(
         None,
         help="The filename (including path) to write settings to. Defaults to `simmate_settings.yaml` in the current directory.",
-    )
+    ),
 ):
     """
     Writes the final Simmate configuration (including defaults) to a YAML file.
@@ -45,7 +42,7 @@ def show(
     user_only: bool = typer.Option(
         False,
         help="Only display settings that have been explicitly modified by the user. If false, all settings including defaults are shown.",
-    )
+    ),
 ):
     """
     Displays the final Simmate settings in an easy-to-read YAML format.
@@ -197,7 +194,7 @@ def update(
         ...,
         metavar="CONFIG_UPDATE",
         help="The setting to update using dot-notation (e.g., 'database.backend=postgresql').",
-    )
+    ),
 ):
     """
     Updates one or more Simmate settings using dot-notation and writes them to
@@ -215,7 +212,7 @@ def test(
     app_name: str = typer.Argument(
         ...,
         help="The name of the app to test configuration for.",
-    )
+    ),
 ):
     """
     Validates the configuration of a specified app (e.g., checking for installed

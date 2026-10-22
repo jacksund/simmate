@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.config.utils import (
     check_app_reg,
     check_command_exists,

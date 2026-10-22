@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import re
 import threading
 from typing import get_args, get_origin
@@ -12,7 +10,7 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonRes
 from django.shortcuts import render
 from django.utils.functional import classproperty
 
-from simmate.toolkit import Molecule, Structure
+from simmate.toolkit import Structure
 from simmate.utils import dotdict, str_to_datatype
 from simmate.website.utils import parse_request_get
 
@@ -29,7 +27,6 @@ threads (e.g. `gunicorn --threads 4`).
 
 
 class HtmxComponent:
-
     # Prevents Django from instantiating this class when accessing class attributes in templates
     # (e.g., when accessing `dataset.table` where `dataset` is an uninstantiated HtmxComponent)
     do_not_call_in_templates = True
@@ -121,7 +118,6 @@ class HtmxComponent:
         # otherwise run at once and clash over `self.request`, `form_data`,
         # etc. Requests for *different* components still run in parallel.
         with self._request_lock:
-
             self.request = request  # for easy access elsewhere
 
             self.js_actions = []  # reset as to not repeat last request's actions
@@ -170,7 +166,6 @@ class HtmxComponent:
         """
         No-op action method. Calling it simply re-renders the component.
         """
-        pass
 
     # -------------------------------------------------------------------------
 

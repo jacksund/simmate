@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.database.mixins import Structure as StructureMixin
 
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import json
 import re
 import urllib
@@ -8,7 +6,6 @@ from django.shortcuts import redirect
 
 
 class SearchMixin:
-
     # for form_mode "search"
 
     ignore_on_search: list[str] = []

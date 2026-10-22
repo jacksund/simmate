@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 from simmate.website.data_explorer.components import TableComponent
 from simmate.website.htmx.components import MoleculeInput
 
-from ..models import EmoleculesMolecule, EmoleculesSupplierOffer
+from ..models import EmoleculesMolecule
 
 
 class EmoleculesMoleculeComponent(TableComponent, MoleculeInput):

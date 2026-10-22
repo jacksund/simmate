@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-
+from contextlib import suppress
 from pathlib import Path
 
 from pymatgen.io.vasp.outputs import Vasprun
@@ -27,7 +26,9 @@ class IncorrectSmearing(ErrorHandler):
         # we need this inside of a try/except clause because if the xml is
         # poorly formatted, then there is another issue at play. We only
         # want to check for the incorrect smearing here.
-        try:
+        # any error below means there is some other problem, so we say
+        # there is not an IncorrectSmearing error
+        with suppress(Exception):
             # load the xml file and only parse the bare minimum
             xmlReader = Vasprun(
                 filename=filename,
@@ -48,11 +49,6 @@ class IncorrectSmearing(ErrorHandler):
                 and xmlReader.incar.get("NSW", 0) > 1
             ):
                 return True
-
-        except Exception:
-            # any error above means there is some other problem, so we say
-            # there is not an IncorrectSmearing error
-            pass
 
         # if we reach this point, there is no error
         return False

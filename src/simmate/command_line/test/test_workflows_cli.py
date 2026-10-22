@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import yaml
 
 from simmate.apps.vasp.inputs import Potcar

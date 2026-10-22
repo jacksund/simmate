@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-
 import logging
+from contextlib import suppress
 from io import StringIO
 
 import numpy
@@ -12,11 +11,8 @@ from simmate.toolkit import Molecule
 
 from .data import BCPC_NEWS_ARCHIVE
 
-# from simmate.apps.chatbot import get_llm # TODO
-
 
 class BcpcWebScraper(WebScraper):
-
     @classmethod
     def get_all_data(
         cls,
@@ -30,7 +26,7 @@ class BcpcWebScraper(WebScraper):
             news_data = cls.get_all_news_data()
 
             for entry in name_data:
-                try:
+                with suppress(Exception):
                     matches = [
                         e for e in news_data if entry["name"] == e["chemical_name"]
                     ]
@@ -49,8 +45,6 @@ class BcpcWebScraper(WebScraper):
                             else None
                         )
                         entry["created_at_original"] = df.loc[0]["date_added"]
-                except:
-                    continue
 
         # for-loop above merged news_data into the name_data
         return name_data
@@ -71,10 +65,10 @@ class BcpcWebScraper(WebScraper):
                 entry_data = cls.get_name_data(iso_name)
 
                 # we only want to include entries that have a compound associated with it
-                if "molecule" in entry_data.keys():
+                if "molecule" in entry_data:
                     all_data.append(entry_data)
 
-            except:
+            except Exception:
                 logging.warning(f"Failed to load {iso_name}")
 
         return all_data
@@ -208,7 +202,6 @@ class BcpcWebScraper(WebScraper):
 
                 inchis = []
                 for inchi_section in section.find_all("span"):
-
                     # Ideally this is what we want , but there are a lot of
                     # broken cases that we try to cover below
                     inchi = inchi_section.text
@@ -281,14 +274,13 @@ class BcpcWebScraper(WebScraper):
 
         all_data = []
         for xml_name in track(cls.get_all_news_links()):
-
             # Their website is unstable and inconsistent, so I just skip those
             # that fail. Most cases, this is a website disconnect so things
             # should work the next time this function is ran.
             try:
                 entry_data = cls.get_news_data(xml_name)
                 all_data += entry_data
-            except:
+            except Exception:
                 logging.warning(f"Failed to load {xml_name}")
 
         return all_data
@@ -320,6 +312,9 @@ class BcpcWebScraper(WebScraper):
     def get_news_data(cls, xml_name: str) -> dict:
         iso_url = f"http://www.bcpcpesticidecompendium.org/news/{xml_name}"
         html_data = cls.get_html(iso_url)
+
+        # chatbot is an optional dependency, so we import it here
+        from simmate.apps.chatbot.llm import get_llm
 
         llm = get_llm()
         prompt = f"""

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.compute import schedule
 from simmate.compute.worker import SimmateWorker
 from simmate.config import settings

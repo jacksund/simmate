@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-
+from contextlib import suppress
 from pathlib import Path
 
 from pymatgen.io.vasp.inputs import Kpoints
@@ -51,7 +50,7 @@ class MeshSymmetry(ErrorHandler):
 
         # Now check if the calculation converged. If it did, we ignore the error.
         xml_filename = directory / "vasprun.xml"
-        try:
+        with suppress(Exception):
             # load the xml file and only parse the bare minimum
             xmlReader = Vasprun(
                 filename=xml_filename,
@@ -63,8 +62,6 @@ class MeshSymmetry(ErrorHandler):
             )
             if xmlReader.converged:
                 return False
-        except Exception:
-            pass
 
         # Finally, we can now search for the error message. We can use the parent
         # class's default function to do this.
@@ -79,7 +76,7 @@ class MeshSymmetry(ErrorHandler):
 
         # load the INCAR file to view the current settings
         kpoints_filename = directory / "KPOINTS"
-        kpoints = Kpoints.from_file(kpoints_filename)
+        Kpoints.from_file(kpoints_filename)
 
         # !!! I'm not sure what Custodian is doing here exactly, so I need to
         # revisit this when I have my KPOINTS class implemented

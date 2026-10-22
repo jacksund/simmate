@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("inventory_management", "0003_mixture_id_prefix_alter_mixture_id"),
     ]

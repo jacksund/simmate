@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 from pathlib import Path
 
@@ -182,7 +180,7 @@ class Bader(Structure, Calculation):
             data["oxidation_states"] = bader.get_oxidation_from_potcar(
                 directory / "POTCAR"
             ).tolist()
-        except:
+        except Exception:
             logging.warning(
                 "No POTCAR found in file. Oxidation states will not be calculated"
             )

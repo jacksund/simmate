@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This defines commands for managing your Simmate computational resources. All commands are
 accessible through the "simmate compute" command.
@@ -18,7 +16,6 @@ def compute():
     Commands for managing computational resources, including workers, clusters,
     and task scheduling.
     """
-    pass
 
 
 worker_app = typer.Typer(rich_markup_mode="markdown", cls=AlphabeticalGroup)
@@ -37,7 +34,6 @@ def worker():
     """
     Commands for starting individual Simmate Workers.
     """
-    pass
 
 
 @cluster_app.callback(no_args_is_help=True)
@@ -45,7 +41,6 @@ def cluster():
     """
     Commands for starting and managing clusters of Simmate Workers.
     """
-    pass
 
 
 @scheduler_app.callback(no_args_is_help=True)
@@ -53,7 +48,6 @@ def scheduler():
     """
     Commands for running the scheduler of periodic tasks.
     """
-    pass
 
 
 @workitems_app.callback(no_args_is_help=True)
@@ -61,7 +55,6 @@ def workitems():
     """
     Commands for viewing and managing jobs (WorkItems) in the queue.
     """
-    pass
 
 
 @scheduler_app.command("start")
@@ -72,7 +65,7 @@ def start_scheduler():
     This command monitors the "schedules" module of each registered app and
     triggers tasks at their defined intervals.
     """
-    from simmate.database import connect  # isort:skip
+    from simmate.database import connect  # ruff: isort: skip
     from simmate.compute import SimmateScheduler
 
     SimmateScheduler.start()
@@ -117,7 +110,7 @@ def start_worker(
     and execute them.
     """
 
-    from simmate.database import connect  # isort:skip
+    from simmate.database import connect  # ruff: isort: skip
 
     if is_api_worker:
         from simmate.compute import ApiWorker
@@ -164,7 +157,7 @@ def start_cluster(
     Starts and manages a cluster of Simmate Workers.
     """
 
-    from simmate.database import connect  # isort:skip
+    from simmate.database import connect  # ruff: isort: skip
     from simmate.compute.cluster.utils import start_cluster
 
     start_cluster(
@@ -193,7 +186,7 @@ def list_workitems(
     Displays a tabular list of jobs and their current status.
     """
 
-    from simmate.database import connect  # isort:skip
+    from simmate.database import connect  # ruff: isort: skip
     from simmate.compute import SimmateExecutor
 
     SimmateExecutor.show_workitems(
@@ -223,7 +216,7 @@ def stats(
     Displays statistics for all jobs (Pending, Running, Finished, etc.).
     """
 
-    from simmate.database import connect  # isort:skip
+    from simmate.database import connect  # ruff: isort: skip
     from simmate.compute import SimmateExecutor
 
     if detail or tag or recent is not None:
@@ -241,7 +234,7 @@ def errors():
     Displays a summary of error messages for all failed jobs in the database.
     """
 
-    from simmate.database import connect  # isort:skip
+    from simmate.database import connect  # ruff: isort: skip
     from simmate.compute import SimmateExecutor
 
     SimmateExecutor.show_error_summary()
@@ -281,7 +274,7 @@ def delete(
             "Only one of `--tag`, `--completed`, or `--all` can be given."
         )
 
-    from simmate.database import connect  # isort:skip
+    from simmate.database import connect  # ruff: isort: skip
     from simmate.compute import SimmateExecutor
 
     if completed:

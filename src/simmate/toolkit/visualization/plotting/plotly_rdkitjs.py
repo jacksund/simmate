@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import uuid
 import webbrowser
 from pathlib import Path
@@ -10,7 +8,6 @@ from simmate.toolkit.visualization.plotting.plotly import PlotlyFigure
 
 
 class PlotlyRdkitjsFigure(PlotlyFigure):
-
     @classmethod
     def view_plot(cls, parent_class, **kwargs):
 

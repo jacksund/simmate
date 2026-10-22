@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Generates `fake_data.zip`, which holds fake projects, tags, wallets, and
 transactions for tests and for exploring the UI (see `simmate dev load-test-data`).
@@ -11,12 +9,12 @@ does.
 
 import random
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
-from simmate.database import connect  # isort: skip
+from simmate.database import connect  # ruff: isort: skip
 
-from simmate.database.utils import (  # isort: skip
+from simmate.database.utils import (  # ruff: isort: skip
     get_fake_data_path,
     get_fake_users,
     write_fake_data,
@@ -24,7 +22,7 @@ from simmate.database.utils import (  # isort: skip
 
 random.seed(1234)
 
-REFERENCE_DATE = datetime(2026, 10, 1, 12, tzinfo=timezone.utc)
+REFERENCE_DATE = datetime(2026, 10, 1, 12, tzinfo=UTC)
 # the loader shifts all dates so that this becomes "now"
 
 LABEL = "project_management"

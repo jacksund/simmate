@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import shutil
 import subprocess
 
@@ -115,6 +113,7 @@ class CalypsoStructure(StructureCreator):
             shell=True,
             capture_output=True,
             cwd=temp_dir,
+            check=False,
         )
 
         # All the structures are as POSCAR files. The files are

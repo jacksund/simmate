@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.openeye_omega.workflows.base import OmegaWorkflow
 
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import numpy
 from ase import Atoms
 from ase_ga.cutandsplicepairing import CutAndSplicePairing
@@ -30,10 +28,10 @@ class Heredity(Transformation):
         structures: list[Structure],
         ratio_of_covalent_radii: float = 0.1,
     ) -> Structure:
-        #!!! takes two structures!
+        # !!! takes two structures!
 
         # ----------- SETUP (consider caching as class attribute) -------------
-        #!!! I assume 3D structure for now. I could do things like
+        # !!! I assume 3D structure for now. I could do things like
         # pbc=[1,1,0] for 2D in the future though
         slab = Atoms(pbc=True)
 
@@ -94,7 +92,7 @@ class Heredity(Transformation):
             n_top=int(structure1.composition.num_atoms),
             # distance cutoff matrix
             blmin=element_distance_matrix,
-            #!!! I understand this as number of unique vectors. Is that right?
+            # !!! I understand this as number of unique vectors. Is that right?
             number_of_variable_cell_vectors=3,
             # p1=1, # probablitiy of shifting
             # p2=0.05, # probablitiy of shifting
@@ -111,7 +109,7 @@ class Heredity(Transformation):
         structure1_ase = AseAtomsAdaptor.get_atoms(structure1)
         structure2_ase = AseAtomsAdaptor.get_atoms(structure2)
 
-        #!!! Their code suggests the use of .get_new_individual() but I think
+        # !!! Their code suggests the use of .get_new_individual() but I think
         # .cross() is what we'd like
         new_structure_ase = casp.cross(structure1_ase, structure2_ase)
 

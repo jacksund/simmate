@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from pymatgen.analysis.diffusion.neb.pathfinder import DistinctPathFinder as PymatgenDPF

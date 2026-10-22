@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 from abc import ABC, abstractmethod
 
@@ -20,7 +18,6 @@ class StructureCreator(ABC):
         a new structure, so you would find all valid combinations here in the
         __init__ so you don't have to repeatedly find combos below in create()
         """
-        pass
 
     @classproperty
     def name(cls):
@@ -91,7 +88,6 @@ class StructureCreator(ABC):
         to update the self.lattice_creator method to a more accurate volume.
         I can run machine learning code here before updating too.
         """
-        pass
 
     def create_structure_with_validation(self, validators=[], max_attempts=100):
         # While some structure creators go through validation while they are being

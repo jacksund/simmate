@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.materials_project.workflows.diffusion.mit import (
     Diffusion__Vasp__NebSinglePathMit,
 )

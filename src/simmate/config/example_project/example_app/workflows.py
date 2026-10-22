@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Building a workflow in Simmate can sometimes involve using custom database
 tables, so before you start editting this file, make sure you have gone through
@@ -29,8 +27,8 @@ from .models import MyCustomTable2
 # -----------------------------------------------------------------------------
 
 __all__ = [
-    "add",
     "Example__Python__MyExample",
+    "add",
 ]
 
 # -----------------------------------------------------------------------------

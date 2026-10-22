@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This module provides conversion between Simmate toolkit and database structures.
 

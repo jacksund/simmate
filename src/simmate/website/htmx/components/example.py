@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-
 from django.http import JsonResponse
 
 from .base import HtmxComponent
 
 
 class ExampleComponent(HtmxComponent):
-
     template_name: str = "htmx/example_form.html"
 
     status_options = [

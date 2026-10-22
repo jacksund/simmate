@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Mock data for the personal dashboard prototype (`/dashboard/`).
 
