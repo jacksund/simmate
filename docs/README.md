@@ -1,9 +1,11 @@
 # Documentation
 
-This directory hosts the source files for Simmate's online documentation. You can access the live docs [here](https://jacksund.github.io/simmate/home/). If you would like to host our documentation locally for offline access, then you can run the following commands after doing a dev install of Simmate:
+This directory hosts the source files for Simmate's online documentation. You can access the live docs [here](https://jacksund.github.io/simmate/home/). The site is built with [Zensical](https://zensical.org/) and configured in `zensical.toml` at the root of the repo.
+
+To preview the docs locally (with live reload), run the following after doing a dev install of Simmate:
 
 ``` bash
-mkdocs build
+simmate dev docs
 ```
 
-You can then open up the generated files to view the offline documentation.
+Then open [http://localhost:8000](http://localhost:8000). If you would rather have offline files, run `zensical build` and open the generated `site/` folder.

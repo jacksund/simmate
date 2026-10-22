@@ -14,7 +14,7 @@ This project is designed for both direct use in research and as a platform for b
 ```text
 simmate/
 ├── .github/                # CI/CD and contribution templates
-├── docs/                   # MkDocs documentation
+├── docs/                   # Zensical documentation (config in zensical.toml)
 │   ├── full_guides/        # Deep-dive guides (CRITICAL for building new apps)
 │   │   ├── apps/           # Creating and using custom apps
 │   │   ├── compute/        # Workers, HPC (SLURM), Kubernetes, and schedules
@@ -43,6 +43,7 @@ simmate/
 │       ├── conftest.py     # Shared Pytest fixtures
 │       └── __init__.py     # Package entry point
 ├── pyproject.toml          # Project metadata and dependencies
+├── zensical.toml           # Docs site config (nav, theme, markdown extensions)
 └── README.md
 ```
 
@@ -61,7 +62,7 @@ simmate/
 - **Scientific:** PyMatGen, RDKit, Pandas, Polars (datastores and archives), NumPy
 - **Desktop:** PySide6 (optional `desktop` extra)
 - **Testing:** Pytest, Pytest-Django
-- **Docs:** MkDocs (Material theme)
+- **Docs:** Zensical (successor to MkDocs Material; `simmate dev docs` serves locally)
 
 ## App Structure (`src/simmate/apps/`)
 

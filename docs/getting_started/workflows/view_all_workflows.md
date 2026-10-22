@@ -1,7 +1,7 @@
 # Exploring Available Workflows
 
 !!! warning
-    Keep in mind that only the *default* Simmate workflows will show in this section! To explore others, you'll need to go through the [Apps](/apps/overview.md) tab of our documentation.
+    Keep in mind that only the *default* Simmate workflows will show in this section! To explore others, you'll need to go through the [Apps](../../apps/overview.md) tab of our documentation.
 
 ----------------------------------------------------------------------
 
@@ -91,7 +91,7 @@ To understand each parameter, you can read through our parameter docs, which giv
 ## Understanding Parameters
 
 In the above message, there's a reference to our **Parameter docs**. You can access this
-page by clicking the **Parameters** section at the top of this webpage (or click [here](/parameters.md)).
+page by clicking the **Parameters** section at the top of this webpage (or click [here](../../full_guides/workflows/parameters/overview.md)).
 
 This page provides a comprehensive list of ALL parameters for ALL workflows. If you want to learn more about a specific input, this is your go-to resource.
 

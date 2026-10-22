@@ -78,7 +78,7 @@ simmate database download materials_project
 | Structures | ---        | ---      | `materials_project__structures` | `MatprojStructure` |
 
 !!! tip
-    Read through [our database guide](/full_guides/database/basic_use.md) to learn how to work with these datasets
+    Read through [our database guide](../full_guides/database/basic_use.md) to learn how to work with these datasets
 
 !!! example
 
@@ -129,7 +129,7 @@ static-energy.vasp.prebader-matproj
 ```
 
 !!! tip
-    Read through [our workflow guide](/full_guides/workflows/basic_use.md) to learn how to run workflows
+    Read through [our workflow guide](../full_guides/workflows/basic_use.md) to learn how to run workflows
 
 !!! example
 

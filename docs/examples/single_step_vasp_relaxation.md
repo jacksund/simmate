@@ -13,8 +13,8 @@ This script demonstrates how to run a single VASP relaxation using Simmate. We l
 
 ## Prerequisites :rotating_light:
 
-- [x] Configure a database ([guide](/getting_started/workflows/configure_database.md))
-- [x] VASP installed and configured ([guide](/apps/vasp/installation.md))
+- [x] Configure a database ([guide](../getting_started/initial_setup/configure_database.md))
+- [x] VASP installed and configured ([guide](../apps/vasp/installation.md))
 
 ## The script :rocket:
 

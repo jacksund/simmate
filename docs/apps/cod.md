@@ -56,7 +56,7 @@ simmate database download cod
 | Structures | ---        | ---      | `cod__structures` | `CodStructure` |
 
 !!! tip
-    Read through [our database guide](/full_guides/database/basic_use.md) to learn how to work with these datasets
+    Read through [our database guide](../full_guides/database/basic_use.md) to learn how to work with these datasets
 
 !!! example
 

@@ -53,7 +53,7 @@ simmate database download chemspace
 | Freedom Molecules | ---        | ---      | `chemspace__freedom_space__molecules` | `ChemSpaceFreedomSpaceMolecule` |
 
 !!! tip
-    Read through [our database guide](/full_guides/database/basic_use.md) to learn how to work with these datasets
+    Read through [our database guide](../full_guides/database/basic_use.md) to learn how to work with these datasets
 
 !!! example
 

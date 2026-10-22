@@ -16,7 +16,7 @@ With this in mind, it is helpful to know that all of our Simmate apps are really
 ## Step-by-Step Tutorials
 
 1. [Django's official tutorial](https://docs.djangoproject.com/en/5.2/intro/)
-2. [Simmate's getting-start guide](/getting_started/custom_apps/create_an_app.md)
+2. [Simmate's getting-start guide](../../getting_started/custom_apps/create_an_app.md)
 
 !!! tip
     `django` is installed for you when you install `simmate`, so you can start their tutorials without any additional setup.
@@ -107,7 +107,7 @@ from .results import MyTestResults
     Simmate uses the [Django ORM](https://docs.djangoproject.com/en/5.2/topics/db/models/) to manage database tables, so all standard Django model rules apply.
     
 !!! tip
-    Learn more about defining tables in our [Database guides](/full_guides/database/custom_tables.md).
+    Learn more about defining tables in our [Database guides](../database/creating_tables.md).
 
 ## Adding Workflows
 
@@ -125,7 +125,7 @@ from .static_energy import StaticEnergy__Vasp__MyCustom
 ```
 
 !!! tip
-    Read more about building custom workflows in our [Workflow guides](/full_guides/workflows/creating_basic_workflows.md).
+    Read more about building custom workflows in our [Workflow guides](../workflows/creating_basic_workflows.md).
 
 
 ## Adding Web UI (urls/views)
@@ -161,7 +161,7 @@ You could view them in the Simmate website at:
 - `http://127.0.0.1:8000/apps/example_app/my-custom-view/`
 
 !!! tip
-    Read more about custom views in our [Website guides](/full_guides/website/creating_views.md)
+    Read more about custom views in our [Website guides](../website/creating_views.md)
 
 ### Customizing your card on the Apps page
 

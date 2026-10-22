@@ -55,7 +55,7 @@ simmate database download bcpc
 | ISO Names | ---        | ---      | `bcpc__iso_pesticides__molecules` | `BcpcIsoPesticide` |
 
 !!! tip
-    Read through [our database guide](/full_guides/database/basic_use.md) to learn how to work with these datasets
+    Read through [our database guide](../full_guides/database/basic_use.md) to learn how to work with these datasets
 
 !!! example
 

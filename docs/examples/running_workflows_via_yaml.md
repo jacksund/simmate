@@ -13,7 +13,7 @@ This example demonstrates how to configure and run a Simmate workflow using a YA
 
 ## Prerequisites :rotating_light:
 
-- [x] Configure a database ([guide](/getting_started/workflows/configure_database.md))
+- [x] Configure a database ([guide](../getting_started/initial_setup/configure_database.md))
 - [x] Simulation software installed (e.g. VASP)
 
 ## The configuration :rocket:

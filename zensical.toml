@@ -1,0 +1,367 @@
+[project]
+site_name = "Simmate Documentation"
+site_url = "https://simmate.org"
+repo_url = "https://github.com/jacksund/simmate"
+edit_uri = "edit/main/docs/"
+
+# Main organization of website
+nav = [
+    { "Home" = "home.md" },
+    { "Getting Started" = [
+        { "Introduction" = "getting_started/introduction.md" },
+        # 1. Public Website:
+        # { "Quickstart" = "getting_started/public_website/quickstart.md" },
+        # { "a) Exploring & managing data" = "getting_started/installation/data.md" },
+        # { "b) Your first workflow run" = "getting_started/installation/workflow.md" },
+        # { "c) Connect your own compute" = "getting_started/installation/add_compute.md" },
+        # { "(extra) Intro to USDC" = "getting_started/installation/crypto.md" },
+        { "1. Installation" = [
+            { "Quickstart" = "getting_started/installation/quickstart.md" },
+            { "a) Installing Python" = "getting_started/installation/install_python.md" },
+            { "b) Intro to the command line" = "getting_started/installation/command_line.md" },
+            { "c) Create your environment" = "getting_started/installation/create_your_env.md" },
+            { "d) Explore Simmate commands" = "getting_started/installation/explore_simmate_cli.md" },
+        ]},
+        { "2. Initial Setup & Tour" = [
+            { "Quickstart" = "getting_started/initial_setup/quickstart.md" },
+            { "a) Configure the database" = "getting_started/initial_setup/configure_database.md" },
+            { "b) Exploring Apps & Data" = "getting_started/initial_setup/explore_apps.md" },
+            { "c) Submitting a Workflow" = "getting_started/initial_setup/run_a_workflow.md" },
+        ]},
+        { "3. Workflows" = [
+            { "Quickstart" = "getting_started/workflows/quickstart.md" },
+            { "a) Make an input structure" = "getting_started/workflows/make_a_structure.md" },
+            { "b) View all workflows" = "getting_started/workflows/view_all_workflows.md" },
+            { "c) Configure QE" = "getting_started/workflows/configure_qe.md" },
+            { "d) Run a workflow" = "getting_started/workflows/running_the_workflow.md" },
+            { "(extra) Submit to a cluster" = "getting_started/workflows/submit_to_a_cluster.md" },
+        ]},
+        { "4. Toolkit" = [
+            { "Quickstart" = "getting_started/toolkit/quickstart.md" },
+            { "a) Intro to Python (& Spyder)" = "getting_started/toolkit/intro_to_spyder.md" },
+            { "b) The Structure class" = "getting_started/toolkit/the_structure_class.md" },
+            { "c) The Molecule class" = "getting_started/toolkit/the_molecule_class.md" },
+            { "d) The Composition class" = "getting_started/toolkit/the_composition_class.md" },
+            { "e) Advanced classes" = "getting_started/toolkit/advanced_classes.md" },
+        ]},
+        { "5. Database" = [
+            { "Quickstart" = "getting_started/database/quickstart.md" },
+            { "a) View data w. DBeaver" = "getting_started/database/dbeaver.md" },
+            { "b) How tables are built" = "getting_started/database/intro_to_python_inheritance.md" },
+            { "c) Workflow data" = "getting_started/database/access_workflow_data.md" },
+            { "d) Third-party data" = "getting_started/database/access_thirdparty_data.md" },
+        ]},
+        { "6. Use a cloud database" = [
+            { "Quickstart" = "getting_started/use_a_cloud_database/quickstart.md" },
+            { "a) Private vs shared" = "getting_started/use_a_cloud_database/private_vs_collab.md" },
+            { "b) Building a database" = "getting_started/use_a_cloud_database/build_a_postgres_database.md" },
+            { "c) Connect to Postgres" = "getting_started/use_a_cloud_database/connect_to_postgres.md" },
+        ]},
+        { "7. Computational resources" = [
+            { "Quickstart" = "getting_started/add_computational_resources/quickstart.md" },
+            { "a) Why use workers?" = "getting_started/add_computational_resources/1_what_are_workers.md" },
+            { "b) Running locally" = "getting_started/add_computational_resources/2_running_locally.md" },
+            { "c) Monitoring jobs" = "getting_started/add_computational_resources/3_monitoring_and_managing.md" },
+            { "d) Parallel clusters" = "getting_started/add_computational_resources/4_scaling_to_clusters.md" },
+            { "e) HPC & Clouds" = "getting_started/add_computational_resources/5_hpc_and_clouds.md" },
+        ]},
+        { "8. Custom Apps" = [
+            { "Quickstart" = "getting_started/custom_apps/quickstart.md" },
+            { "a) Create an app" = "getting_started/custom_apps/create_an_app.md" },
+            { "b) Custom workflows" = "getting_started/custom_apps/custom_workflows.md" },
+            { "c) Custom tables" = "getting_started/custom_apps/custom_tables.md" },
+        ]},
+        { "Wrap up" = "getting_started/wrap_up.md" },
+    ]},
+    # Examples:
+    # { "Overview" = "examples/overview.md" },
+    # { "Data Mining & CIF Export" = "examples/data_mining_and_cif_export.md" },
+    # { "Symmetry-Breaking Strains" = "examples/symmetry_breaking_strains.md" },
+    # { "Structure Loading & I/O" = "examples/structure_loading_and_io.md" },
+    # { "Molecule Filtering" = "examples/molecule_filtering.md" },
+    # { "Running Workflows via YAML" = "examples/running_workflows_via_yaml.md" },
+    # { "Chemical Composition Analysis" = "examples/chemical_composition_analysis.md" },
+    # { "Single-Step VASP Relaxation" = "examples/single_step_vasp_relaxation.md" },
+    # { "High-Throughput VASP Runs" = "examples/high_throughput_vasp_runs.md" },
+    # { "VASP + Bader Charge Analysis" = "examples/vasp_plus_bader_charge_analysis.md" },
+    # { "Machine Learning Featurization" = "examples/machine_learning_featurization.md" },
+    # { "Advanced NEB Path Finding" = "examples/advanced_neb_path_finding.md" },
+    # { "Custom Evolutionary Search" = "examples/custom_evolutionary_search.md" },
+    { "Full Guides" = [
+        { "Overview" = "full_guides/overview.md" },
+        { "Config" = "full_guides/configuration.md" },
+        { "Apps" = [
+            { "Basic Use" = "full_guides/apps/basic_use.md" },
+            { "Creating custom apps" = "full_guides/apps/creating_custom_apps.md" },
+        ]},
+        { "Website" = [
+            { "Setup & Config" = "full_guides/website/setup_and_config.md" },
+            { "Creating views" = "full_guides/website/creating_views.md" },
+            { "Creating components" = [
+                { "Overview" = "full_guides/website/creating_components/overview.md" },
+                { "Frontend Elements" = [
+                    { "text_input" = "full_guides/website/creating_components/frontend_elements/text_input.md" },
+                    { "text_area" = "full_guides/website/creating_components/frontend_elements/text_area.md" },
+                    { "number_input" = "full_guides/website/creating_components/frontend_elements/number_input.md" },
+                    { "button" = "full_guides/website/creating_components/frontend_elements/button.md" },
+                    { "radio" = "full_guides/website/creating_components/frontend_elements/radio.md" },
+                    { "molecule_input" = "full_guides/website/creating_components/frontend_elements/molecule_input.md" },
+                    { "selectbox" = "full_guides/website/creating_components/frontend_elements/selectbox.md" },
+                    { "checkbox" = "full_guides/website/creating_components/frontend_elements/checkbox.md" },
+                    { "search_box" = "full_guides/website/creating_components/frontend_elements/search_box.md" },
+                    { "plotly_figure" = "full_guides/website/creating_components/frontend_elements/plotly_figure.md" },
+                    # { "alert" = "full_guides/website/creating_components/frontend_elements/alert.md" },
+                    # { "draw_molecule" = "full_guides/website/creating_components/frontend_elements/draw_molecule.md" },
+                ]},
+                { "Backend Mix-ins" = "full_guides/website/creating_components/backend_mixins.md" },
+            ]},
+            { "REST API" = "full_guides/website/rest_api.md" },
+        ]},
+        { "Workflows" = [
+            { "Naming Conventions" = "full_guides/workflows/naming_conventions.md" },
+            { "Accuracy Ratings" = "full_guides/workflows/accuracy_ratings.md" },
+            { "Basic Use" = "full_guides/workflows/basic_use.md" },
+            { "Parameters" = [
+                { "Overview" = "full_guides/workflows/parameters/overview.md" },
+                { "angle_tolerance" = "full_guides/workflows/parameters/angle_tolerance.md" },
+                { "chemical_system" = "full_guides/workflows/parameters/chemical_system.md" },
+                { "command" = "full_guides/workflows/parameters/command.md" },
+                { "composition" = "full_guides/workflows/parameters/composition.md" },
+                { "compress_output" = "full_guides/workflows/parameters/compress_output.md" },
+                { "copy_previous_directory" = "full_guides/workflows/parameters/copy_previous_directory.md" },
+                { "diffusion_analysis_id" = "full_guides/workflows/parameters/diffusion_analysis_id.md" },
+                { "directory" = "full_guides/workflows/parameters/directory.md" },
+                { "directory_new" = "full_guides/workflows/parameters/directory_new.md" },
+                { "directory_old" = "full_guides/workflows/parameters/directory_old.md" },
+                { "fitness_field" = "full_guides/workflows/parameters/fitness_field.md" },
+                { "input_parameters" = "full_guides/workflows/parameters/input_parameters.md" },
+                { "is_restart" = "full_guides/workflows/parameters/is_restart.md" },
+                { "max_atoms" = "full_guides/workflows/parameters/max_atoms.md" },
+                { "max_path_length" = "full_guides/workflows/parameters/max_path_length.md" },
+                { "max_stoich_factor" = "full_guides/workflows/parameters/max_stoich_factor.md" },
+                { "max_supercell_atoms" = "full_guides/workflows/parameters/max_supercell_atoms.md" },
+                { "max_structures" = "full_guides/workflows/parameters/max_structures.md" },
+                { "migrating_specie" = "full_guides/workflows/parameters/migrating_specie.md" },
+                { "migration_hop" = "full_guides/workflows/parameters/migration_hop.md" },
+                { "migration_images" = "full_guides/workflows/parameters/migration_images.md" },
+                { "min_atoms" = "full_guides/workflows/parameters/min_atoms.md" },
+                { "min_supercell_atoms" = "full_guides/workflows/parameters/min_supercell_atoms.md" },
+                { "min_supercell_vector_lengths" = "full_guides/workflows/parameters/min_supercell_vector_lengths.md" },
+                { "nfirst_generation" = "full_guides/workflows/parameters/nfirst_generation.md" },
+                { "nimages" = "full_guides/workflows/parameters/nimages.md" },
+                { "nsteadystate" = "full_guides/workflows/parameters/nsteadystate.md" },
+                { "nsteps" = "full_guides/workflows/parameters/nsteps.md" },
+                { "percolation_mode" = "full_guides/workflows/parameters/percolation_mode.md" },
+                { "relax_bulk" = "full_guides/workflows/parameters/relax_bulk.md" },
+                { "relax_endpoints" = "full_guides/workflows/parameters/relax_endpoints.md" },
+                { "run_id" = "full_guides/workflows/parameters/run_id.md" },
+                { "search_id" = "full_guides/workflows/parameters/search_id.md" },
+                { "selector_kwargs" = "full_guides/workflows/parameters/selector_kwargs.md" },
+                { "selector_name" = "full_guides/workflows/parameters/selector_name.md" },
+                { "singleshot_sources" = "full_guides/workflows/parameters/singleshot_sources.md" },
+                { "sleep_step" = "full_guides/workflows/parameters/sleep_step.md" },
+                { "source" = "full_guides/workflows/parameters/source.md" },
+                { "standardize_structure" = "full_guides/workflows/parameters/standardize_structure.md" },
+                { "steadystate_source_id" = "full_guides/workflows/parameters/steadystate_source_id.md" },
+                { "steadystate_sources" = "full_guides/workflows/parameters/steadystate_sources.md" },
+                { "stop_conditions" = "full_guides/workflows/parameters/stop_conditions.md" },
+                { "structure" = "full_guides/workflows/parameters/structure.md" },
+                { "subworkflow_kwargs" = "full_guides/workflows/parameters/subworkflow_kwargs.md" },
+                { "subworkflow_name" = "full_guides/workflows/parameters/subworkflow_name.md" },
+                { "supercell_end" = "full_guides/workflows/parameters/supercell_end.md" },
+                { "supercell_start" = "full_guides/workflows/parameters/supercell_start.md" },
+                { "symmetry_precision" = "full_guides/workflows/parameters/symmetry_precision.md" },
+                { "tags" = "full_guides/workflows/parameters/tags.md" },
+                { "temperature_end" = "full_guides/workflows/parameters/temperature_end.md" },
+                { "temperature_start" = "full_guides/workflows/parameters/temperature_start.md" },
+                { "time_step" = "full_guides/workflows/parameters/time_step.md" },
+                { "updated_settings" = "full_guides/workflows/parameters/updated_settings.md" },
+                { "vacancy_mode" = "full_guides/workflows/parameters/vacancy_mode.md" },
+                { "validator_kwargs" = "full_guides/workflows/parameters/validator_kwargs.md" },
+                { "validator_name" = "full_guides/workflows/parameters/validator_name.md" },
+                { "workflow_base" = "full_guides/workflows/parameters/workflow_base.md" },
+                { "write_summary_files" = "full_guides/workflows/parameters/write_summary_files.md" },
+            ]},
+            { "Creating basic workflows" = "full_guides/workflows/creating_basic_workflows.md" },
+            { "Creating nested workflows" = "full_guides/workflows/creating_nested_workflows.md" },
+            { "Creating \"S3\" workflows" = "full_guides/workflows/creating_s3_workflows.md" },
+        ]},
+        { "Compute" = [
+            { "Basic Use" = "full_guides/compute/basic_use.md" },
+            { "HPC" = "full_guides/compute/hpc_slurm.md" },
+            { "Cloud" = "full_guides/compute/cloud_kubernetes.md" },
+            { "Monitoring" = "full_guides/compute/monitoring_and_cleanup.md" },
+            { "Advanced" = "full_guides/compute/advanced_config.md" },
+            { "Schedules" = "full_guides/compute/schedules.md" },
+        ]},
+        { "Database" = [
+            { "Basic use" = "full_guides/database/basic_use.md" },
+            { "Workflow data" = "full_guides/database/workflow_data.md" },
+            { "Third-party data" = "full_guides/database/third_party_data.md" },
+            { "Creating Data Apps" = "full_guides/database/creating_data_apps.md" },
+            { "Creating New Tables" = "full_guides/database/creating_tables.md" },
+        ]},
+        { "Toolkit" = [
+            { "Molecules" = [
+                { "Overview" = "full_guides/toolkit/molecules/overview.md" },
+                { "Single Molecule" = [
+                    { "Quickstart" = "full_guides/toolkit/molecules/single_molecule/quickstart.md" },
+                    { "Loading" = "full_guides/toolkit/molecules/single_molecule/loading.md" },
+                    { "Exporting" = "full_guides/toolkit/molecules/single_molecule/exporting.md" },
+                    { "Reactions" = "full_guides/toolkit/molecules/single_molecule/reaction.md" },
+                    { "Cleaning" = "full_guides/toolkit/molecules/single_molecule/cleaning.md" },
+                    { "Common Properties" = "full_guides/toolkit/molecules/single_molecule/properties.md" },
+                    { "Common Analyses" = "full_guides/toolkit/molecules/single_molecule/analyses.md" },
+                    { "SMARTS sets" = "full_guides/toolkit/molecules/single_molecule/smarts_sets.md" },
+                ]},
+                { "Many Molecules" = [
+                    { "Featurizers" = "full_guides/toolkit/molecules/many_molecules/featurizers.md" },
+                    { "Clustering" = "full_guides/toolkit/molecules/many_molecules/clustering.md" },
+                    { "ChemSpace Mapping" = "full_guides/toolkit/molecules/many_molecules/mapping.md" },
+                    { "Similarity & Diversity" = "full_guides/toolkit/molecules/many_molecules/similarity.md" },
+                ]},
+            ]},
+            { "Crystal Structures" = [
+                { "Overview" = "full_guides/toolkit/crystal_structures/overview.md" },
+                # Single Structure:
+                # { "Loading" = "full_guides/toolkit/crystal_structures/single_structure/loading.md" },
+                # { "Exporting" = "full_guides/toolkit/crystal_structures/single_structure/exporting.md" },
+                # { "Composition" = "full_guides/toolkit/crystal_structures/single_structure/composition.md" },
+                # { "Common Properties" = "full_guides/toolkit/crystal_structures/single_structure/properties.md" },
+                # { "Common Analyses" = "full_guides/toolkit/crystal_structures/single_structure/analyses.md" },
+                # Many Structures:
+                # { "Featurizers" = "full_guides/toolkit/crystal_structures/many_structures/featurizers.md" },
+                { "PyMatGen Help" = [
+                    { "Structure" = "full_guides/toolkit/crystal_structures/pymatgen/structure.md" },
+                    { "Lattice" = "full_guides/toolkit/crystal_structures/pymatgen/lattice.md" },
+                    { "Sites" = "full_guides/toolkit/crystal_structures/pymatgen/sites.md" },
+                    { "Composition" = "full_guides/toolkit/crystal_structures/pymatgen/composition.md" },
+                ]},
+            ]},
+        ]},
+        { "Contributing" = [
+            { "First time setup" = "full_guides/contributing/first_time_setup.md" },
+            { "Creating & submitting changes" = "full_guides/contributing/creating_and_submitting_changes.md" },
+            { "Maintainer notes" = "full_guides/contributing/maintainer_notes.md" },
+        ]},
+    ]},
+    { "Apps" = [
+        { "Overview" = "apps/overview.md" },
+        { "AFLOW" = "apps/aflow.md" },
+        { "Bader (henkelman)" = "apps/bader_henkelman.md" },
+        { "baderkit" = "apps/baderkit.md" },
+        { "BCPC" = "apps/bcpc.md" },
+        { "CAS Registry" = "apps/cas_registry.md" },
+        { "Chembl" = "apps/chembl.md" },
+        { "ChemSpace" = "apps/chemspace.md" },
+        { "COD" = "apps/cod.md" },
+        { "eMolecules" = "apps/emolecules.md" },
+        { "Enamine" = "apps/enamine.md" },
+        { "EPPO Global Database" = "apps/eppo_gd.md" },
+        { "Evolutionary Searches" = "apps/evolution.md" },
+        { "JARVIS" = "apps/jarvis.md" },
+        { "Lab Automation" = [
+            { "Overview" = "apps/lab_automation/overview.md" },
+            { "Sensors" = "apps/lab_automation/sensors.md" },
+            { "Controllers" = "apps/lab_automation/controllers.md" },
+            { "Devices" = "apps/lab_automation/devices.md" },
+        ]},
+        { "Materials Project" = "apps/materials_project.md" },
+        { "OQMD" = "apps/oqmd.md" },
+        { "PDB" = "apps/pdb.md" },
+        { "PPDB" = "apps/ppdb.md" },
+        { "Quantum Espresso" = "apps/quantum_espresso.md" },
+        { "RDKit" = "apps/rdkit.md" },
+        { "VASP" = [
+            { "Overview" = "apps/vasp/overview.md" },
+            { "Installation" = "apps/vasp/installation.md" },
+            { "Workflows" = "apps/vasp/workflows.md" },
+            # { "Inputs" = "apps/vasp/inputs.md" },
+            # { "Outputs" = "apps/vasp/outputs.md" },
+            # { "Error Handlers" = "apps/vasp/error_handlers.md" },
+        ]},
+        { "Warren Lab" = "apps/warren_lab.md" },
+        { "++ Experimental Apps" = [
+            { "BIOVIA COMSO" = "apps/biovia_cosmo.md" },
+            { "CLEASE" = "apps/clease.md" },
+            { "DeepMD" = "apps/deepmd.md" },
+            { "OpenEye OMEGA" = "apps/openeye_omega.md" },
+            { "Schrodinger" = "apps/schrodinger.md" },
+            { "Surflex" = "apps/surflex.md" },
+        ]},
+    ]},
+    { "Updates" = [
+        { "Overview" = "change_log/overview.md" },
+        { "Upcoming Release" = "change_log/upcoming.md" },
+        { "v0.19.0 (2026.03.22)" = "change_log/v0.19.0.md" },
+        { "v0.18.0 (2025.04.20)" = "change_log/v0.18.0.md" },
+        { "v0.17.0 (2024.05.20)" = "change_log/v0.17.0.md" },
+        { "v0.16.0 (2024.01.27)" = "change_log/v0.16.0.md" },
+        { "v0.15.0 (2024.01.04)" = "change_log/v0.15.0.md" },
+        { "v0.14.0 (2023.07.06)" = "change_log/v0.14.0.md" },
+        { "v0.13.0 (2023.03.06)" = "change_log/v0.13.0.md" },
+        { "v0.12.0 (2022.10.23)" = "change_log/v0.12.0.md" },
+        { "v0.11.0 (2022.09.10)" = "change_log/v0.11.0.md" },
+        { "v0.10.0 (2022.08.29)" = "change_log/v0.10.0.md" },
+        { "v0.9.0 (2022.08.17)" = "change_log/v0.9.0.md" },
+        { "v0.8.0 (2022.08.11)" = "change_log/v0.8.0.md" },
+        { "v0.7.0 (2022.07.19)" = "change_log/v0.7.0.md" },
+        { "v0.6.0 (2022.06.25)" = "change_log/v0.6.0.md" },
+        { "v0.5.0 (2022.05.30)" = "change_log/v0.5.0.md" },
+        { "v0.4.0 (2022.04.24)" = "change_log/v0.4.0.md" },
+        { "v0.3.0 (2022.04.19)" = "change_log/v0.3.0.md" },
+        { "v0.2.0 (2022.04.15)" = "change_log/v0.2.0.md" },
+        { "v0.1.4 (2022.04.12)" = "change_log/v0.1.4.md" },
+        { "v0.0.0 (2022.03.28)" = "change_log/v0.0.0.md" },
+    ]},
+]
+
+[project.theme]
+variant = "classic"
+language = "en"
+logo = "images/simmate-icon.svg"
+favicon = "images/simmate-icon.svg"
+features = [
+    "navigation.tabs",
+    "navigation.tabs.sticky",
+    "content.code.annotate",
+]
+
+[project.theme.icon]
+repo = "fontawesome/brands/github"
+
+# Coloring for light/dark themes
+[[project.theme.palette]]
+scheme = "default"
+toggle.icon = "material/toggle-switch"
+toggle.name = "Switch to dark mode"
+primary = "teal"
+accent = "teal"
+
+[[project.theme.palette]]
+scheme = "slate"
+toggle.icon = "material/toggle-switch-off-outline"
+toggle.name = "Switch to light mode"
+primary = "teal"
+accent = "teal"
+
+# For emojis, annotations, etc.
+[project.markdown_extensions.admonition]
+[project.markdown_extensions.attr_list]
+[project.markdown_extensions.def_list]
+[project.markdown_extensions.md_in_html]
+[project.markdown_extensions.toc]
+permalink = true
+
+[project.markdown_extensions.pymdownx.details]
+[project.markdown_extensions.pymdownx.superfences]
+custom_fences = [
+    { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]
+[project.markdown_extensions.pymdownx.emoji]
+emoji_index = "zensical.extensions.emoji.twemoji"
+emoji_generator = "zensical.extensions.emoji.to_svg"
+[project.markdown_extensions.pymdownx.tabbed]
+alternate_style = true
+[project.markdown_extensions.pymdownx.tasklist]
+custom_checkbox = true

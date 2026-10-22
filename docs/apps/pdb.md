@@ -53,7 +53,7 @@ simmate database download pdb
 | Ligand Molecules | ---        | ~50,000  | `pdb__ligands` | `PdbLigand`  |
 
 !!! tip
-    Read through [our database guide](/full_guides/database/basic_use.md) to learn how to work with these datasets
+    Read through [our database guide](../full_guides/database/basic_use.md) to learn how to work with these datasets
 
 !!! example
 

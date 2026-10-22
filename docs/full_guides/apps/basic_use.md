@@ -8,7 +8,7 @@ Most official Simmate apps (Vasp, Materials Project, etc.) are pre-installed and
 
 **Custom or Specialized Apps**
 
-1. Browse the full list of apps in the [`Apps`](/apps/overview.md) tab above.
+1. Browse the full list of apps in the [`Apps`](../../apps/overview.md) tab above.
 2. If an app is not in your defaults (see below), follow its specific installation directions.
 
 **Restoring Default Apps**
@@ -51,7 +51,7 @@ To uninstall an app, go to your `~/simmate/settings.yaml` file and remove the ta
 
 ## Accessing tables
 
-:material-arrow-left::material-arrow-left::material-arrow-left: Refer to [our database guide](/full_guides/database/basic_use.md) in the sidebar for in-depth usage.
+:material-arrow-left::material-arrow-left::material-arrow-left: Refer to [our database guide](../database/basic_use.md) in the sidebar for in-depth usage.
 
 All of an app's tables and datasets are packaged within its `models` module (e.g., `simmate.apps.example.models`). Simmate uses the [Django ORM](https://docs.djangoproject.com/en/5.1/topics/db/queries/), where a `model` represents a single database table.
 
@@ -64,12 +64,12 @@ All of an app's tables and datasets are packaged within its `models` module (e.g
 
 ## Accessing workflows
 
-:material-arrow-left::material-arrow-left::material-arrow-left: Refer to [our workflows guide](/full_guides/workflows/basic_use.md) in the sidebar for in-depth usage.
+:material-arrow-left::material-arrow-left::material-arrow-left: Refer to [our workflows guide](../workflows/basic_use.md) in the sidebar for in-depth usage.
 
 Advanced users can import a workflow class directly rather than using the `get_workflow` utility. All of an app's workflows are packaged within its `workflows` module.
 
 !!! example
-    `static-energy.vasp.mat-proj` is converted to `StaticEnergy__Vasp__MatProj` following [our workflow naming conventions](/full_guides/workflows/naming_conventions.md). You can import it from:
+    `static-energy.vasp.mat-proj` is converted to `StaticEnergy__Vasp__MatProj` following [our workflow naming conventions](../workflows/naming_conventions.md). You can import it from:
 
     ``` python
     from simmate.apps.materials_project.workflows import StaticEnergy__Vasp__MatProj
