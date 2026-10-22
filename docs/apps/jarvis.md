@@ -53,7 +53,7 @@ simmate database download jarvis
 | Freedom Molecules | ---        | ---      | `jarvis__structures` | `JarvisStructure` |
 
 !!! tip
-    Read through [our database guide](/full_guides/database/basic_use.md) to learn how to work with these datasets
+    Read through [our database guide](../full_guides/database/basic_use.md) to learn how to work with these datasets
 
 !!! example
 

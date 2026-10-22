@@ -18,7 +18,7 @@ This website is your go-to resource for all our tutorials and guides. You might 
 
 The computational side of chemistry research can be intimidating because there are so many programs and databases to choose from, and it is challenging to select and combine them for your specific project. Simmate aims to be a bridge between the many diverse programs, databases, and utilities available, and in turn, simplify the setup and execution of chemistry projects.
 
-Third-party datasets and tools are integrated into Simmate as "apps", where there is a growing list of [supported software and databases](/apps/overview.md). You can mix & match these apps to meet your research needs and to even build out your own custom applications.
+Third-party datasets and tools are integrated into Simmate as "apps", where there is a growing list of [supported software and databases](apps/overview.md). You can mix & match these apps to meet your research needs and to even build out your own custom applications.
 
 Simmate also includes a core chemical toolkit, workflow management system, database ORM, and web component library -- giving you a framework with essential frontend and backend tools. Our goal is for Simmate to be "batteries-included", so all of these apps & tools are available within the base installation. To learn more about Simmate's scope & design, as well as how it compares to other popular chemistry frameworks, visit [our comparisons page](#).
 

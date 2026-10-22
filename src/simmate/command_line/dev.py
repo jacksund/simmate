@@ -78,8 +78,8 @@ def docs():
     """
     Starts a local development server for the documentation.
     """
-    logging.info("Starting mkdocs serve...")
-    subprocess.run("mkdocs serve", shell=True)
+    logging.info("Starting zensical serve...")
+    subprocess.run("zensical serve", shell=True)
 
 
 @dev_app.command()

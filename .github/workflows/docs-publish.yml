@@ -3,11 +3,20 @@ on:
   push:
     branches:
       - main
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy Docs to Github Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
+    - name: Configure Github Pages
+      uses: actions/configure-pages@v6
     - name: Initial setup
       uses: actions/checkout@v7
     # --------
@@ -18,10 +27,13 @@ jobs:
         python-version: 3.13
     - name: Install dependencies
       run: uv sync --extra dev
-    - name: Install Simmate
-      run: uv pip install -e .
     # --------
     - name: Make documentation
-      shell: bash -l {0}
-      run: |
-        uv run mkdocs gh-deploy --force
+      run: uv run zensical build --clean
+    - name: Upload documentation
+      uses: actions/upload-pages-artifact@v5
+      with:
+        path: site
+    - name: Deploy documentation
+      id: deployment
+      uses: actions/deploy-pages@v5

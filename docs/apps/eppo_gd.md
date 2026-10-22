@@ -51,7 +51,7 @@ simmate database download eppo_gd
 | EPPO Codes | ---        | ---      | `eppo_gd__eppo_codes` | `EppoCode`   |
 
 !!! tip
-    Read through [our database guide](/full_guides/database/basic_use.md) to learn how to work with these datasets
+    Read through [our database guide](../full_guides/database/basic_use.md) to learn how to work with these datasets
 
 !!! example
 

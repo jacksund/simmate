@@ -1,7 +1,7 @@
 
 ## What is an App?
 
-Apps are installable Simmate add-ons. Each one adds support for a third-party software/dataset or helps with a specific analysis. Learn more in the [`Apps` section within the `Full Guides`](/full_guides/apps/basic_use.md).
+Apps are installable Simmate add-ons. Each one adds support for a third-party software/dataset or helps with a specific analysis. Learn more in the [`Apps` section within the `Full Guides`](../full_guides/apps/basic_use.md).
 
 !!! example
     VASP is a program capable of running a variety of density functional theory (DFT) calculations. However, since it's not written in Python, we require some "helper" code to execute VASP commands, create input files, and extract data from the outputs. This helper code is what makes up Simmate's `vasp` app.

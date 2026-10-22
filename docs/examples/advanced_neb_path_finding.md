@@ -14,8 +14,8 @@ This script demonstrates how to define and run a custom Nudged Elastic Band (NEB
 
 ## Prerequisites :rotating_light:
 
-- [x] Configure a database ([guide](/getting_started/workflows/configure_database.md))
-- [x] VASP installed and configured ([guide](/apps/vasp/installation.md))
+- [x] Configure a database ([guide](../getting_started/initial_setup/configure_database.md))
+- [x] VASP installed and configured ([guide](../apps/vasp/installation.md))
 - [x] [VTST-tools](https://theory.cm.utexas.edu/vtsttools/neb.html) (for CI-NEB support)
 
 ## The script :rocket:

@@ -13,8 +13,8 @@ This script demonstrates how to load structure data from the database and genera
 
 ## Prerequisites :rotating_light:
 
-- [x] Configure a database ([guide](/getting_started/workflows/configure_database.md))
-- [x] Load Materials Project data ([guide](/database/access_thirdparty_data.md))
+- [x] Configure a database ([guide](../getting_started/initial_setup/configure_database.md))
+- [x] Load Materials Project data ([guide](../getting_started/database/access_thirdparty_data.md))
 
 ## The script :rocket:
 

@@ -95,7 +95,7 @@ Note that `core/site_base.html` already includes the HTMX library and necessary 
 {% endblock %}
 ```
 
-For more details on building the component itself, see the [Creating Components guide](/full_guides/website/creating_components/overview.md).
+For more details on building the component itself, see the [Creating Components guide](creating_components/overview.md).
 
 --------------------------
 

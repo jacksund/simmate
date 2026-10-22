@@ -13,8 +13,8 @@ This script demonstrates how to use Simmate's database models and Django's ORM t
 
 ## Prerequisites :rotating_light:
 
-- [x] Configure a database ([guide](/getting_started/workflows/configure_database.md))
-- [x] Load the Materials Project data ([guide](/getting_started/database/access_thirdparty_data.md))
+- [x] Configure a database ([guide](../getting_started/initial_setup/configure_database.md))
+- [x] Load the Materials Project data ([guide](../getting_started/database/access_thirdparty_data.md))
 
 ## The script :rocket:
 

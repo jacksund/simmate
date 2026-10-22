@@ -129,7 +129,7 @@ You should include `**kwargs` in your function signature to accept these paramet
 
 You often will use input parameters that correspond to `toolkit` objects, such as `Structure` or `Composition`. If you use the matching input parameter name, these will inherit all of their features -- such as loading from filename, a dictionary, or python object.
 
-For example, if you use a `structure` input variable, it behaves as described in the [Parameters](/parameters.md) section.
+For example, if you use a `structure` input variable, it behaves as described in the [Parameters](parameters/overview.md) section.
 
 ``` python
 from simmate.toolkit import Structure
@@ -183,7 +183,7 @@ Example__Python__WriteFile.run()  # (2)
 
 ## Progam-specific Workflows
 
-For many apps, there are workflow classes that you can use as a starting point. Make sure you explore the [Apps section](/apps/overview.md) of our documentation to see what is available.
+For many apps, there are workflow classes that you can use as a starting point. Make sure you explore the [Apps section](../../apps/overview.md) of our documentation to see what is available.
 
 For example, VASP users can inherit from the `VaspWorkflow` class, which includes many built-in features:
 
@@ -228,7 +228,7 @@ class StaticEnergy__Vasp__MyCustomPreset(original_workflow):
 ```
 
 !!! note
-    How you update a workflow depends on the app you are using. Be sure to read the [Apps section](/apps/overview.md) of our documentation for more information.
+    How you update a workflow depends on the app you are using. Be sure to read the [Apps section](../../apps/overview.md) of our documentation for more information.
 
 ------------------------------------------------------------
 

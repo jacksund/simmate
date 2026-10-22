@@ -63,7 +63,7 @@ simmate database download cas_registry
 | CAS Molecules | ---        | ---      | `cas_registry__molecules` | `CasRegistryMolecule` |
 
 !!! tip
-    Read through [our database guide](/full_guides/database/basic_use.md) to learn how to work with these datasets
+    Read through [our database guide](../full_guides/database/basic_use.md) to learn how to work with these datasets
 
 !!! example
 

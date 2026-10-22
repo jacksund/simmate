@@ -6,7 +6,7 @@ Simmate provides a set of **Data Apps** that simplify the process of downloading
 
 ## Supported Data Apps
 
-For a full list of supported third-party datasets, please refer to the [Apps Overview](/apps/overview.md) page. This includes:
+For a full list of supported third-party datasets, please refer to the [Apps Overview](../../apps/overview.md) page. This includes:
 
 - **Crystal Structures**: Materials Project, OQMD, JARVIS, COD, and AFLOW.
 - **Molecular Data**: BCPC, CAS Registry, ChEMBL, and more.
