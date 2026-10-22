@@ -6,7 +6,6 @@ from ..models import Batch
 
 
 class BatchComponent(TableComponent):
-
     table = Batch
 
     template_names = {

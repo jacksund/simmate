@@ -8,7 +8,6 @@ from simmate.workflows.utils import get_workflow
 
 
 class FixedCompositionSubmissionComponent(HtmxComponent):
-
     template_name = "evolution/fixed_composition_submission.html"
 
     # both set in mount()

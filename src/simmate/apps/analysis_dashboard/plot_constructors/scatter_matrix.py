@@ -8,7 +8,6 @@ from .base import PlotConstructor
 
 
 class ScatterMatrix(PlotConstructor):
-
     display_name = "Scatter Matrix"
     required_inputs = ["dimensions"]
 

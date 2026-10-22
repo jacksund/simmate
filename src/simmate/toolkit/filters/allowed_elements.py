@@ -6,7 +6,6 @@ from .base import Filter
 
 
 class AllowedElements(Filter):
-
     is_atomic = True
 
     @classmethod

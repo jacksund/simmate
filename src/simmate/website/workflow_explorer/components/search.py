@@ -7,7 +7,6 @@ from simmate.workflows.utils import get_all_workflows
 
 
 class WorkflowSearchComponent(HtmxComponent):
-
     template_name = "workflow_explorer/search_form.html"
 
     tags_options: list[str] = None  # set in mount()
@@ -52,7 +51,6 @@ class WorkflowSearchComponent(HtmxComponent):
         # Sort workflows by requested column(s)
         if selected_order_by:
             for key in reversed(selected_order_by):
-
                 default_val = (
                     ""
                     if key.strip("-") in ["name_preset", "name_app", "name_type"]

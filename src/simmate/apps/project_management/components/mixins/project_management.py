@@ -5,7 +5,6 @@ from .project import ProjectInput
 
 
 class ProjectManagementInput(ProjectInput):
-
     # -------------------------------------------------------------------------
 
     project__display = None

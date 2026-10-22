@@ -6,7 +6,6 @@ from ..models import StorageLocation
 
 
 class StorageLocationComponent(TableComponent):
-
     table = StorageLocation
 
     template_names = {

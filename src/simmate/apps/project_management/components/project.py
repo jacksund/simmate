@@ -7,7 +7,6 @@ from ..models import Project
 
 
 class ProjectComponent(TableComponent, UserInput):
-
     table = Project
 
     display_name = "Projects"

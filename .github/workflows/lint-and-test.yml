@@ -17,12 +17,15 @@ jobs:
     steps:
       - name: Initial setup
         uses: actions/checkout@v7
-      - name: Black
-        uses: psf/black@stable
-      - name: iSort
-        uses: isort/isort-action@master
+      - name: Ruff (import sorting)
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: "check"
+      - name: Ruff (formatting)
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: "format --check"
       # TODO: djlint
-      # TODO: maybe ruff for other file types
 
   python-test:
     name: Python ${{ matrix.python-version }} (${{ matrix.os }})

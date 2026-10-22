@@ -113,7 +113,6 @@ class OracleDB:
             dsn=self.dsn,
         ) as connection:
             with connection.cursor() as cursor:
-
                 # setup cursor for old db bug-fix
                 self._patch_cursor(cursor)
 

@@ -284,7 +284,6 @@ class EtherscanClient:
         token_verified_list = []
         amount_normalized_list = []
         for row in data.itertuples():
-
             # find verified token using contract address
             if row.contractAddress == None:
                 # special case of Ethereum not having a contract address

@@ -11,7 +11,6 @@ from simmate.toolkit import Molecule
 
 
 class PpdbWebScraper(WebScraper):
-
     @classmethod
     def get_all_data(cls, skip_ids: list[str] = [], **kwargs) -> list[dict]:
         all_data = []

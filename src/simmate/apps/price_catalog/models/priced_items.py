@@ -266,9 +266,7 @@ class PricedItem(DatabaseTable):
         buying_power_data = cls.get_buying_power_series()
 
         for entry in track(cls.objects.all()):
-
             for years_ago in cls.years_ago_options:
-
                 year_ago_dt = cls.get_years_ago_datetime(years_ago)
 
                 entry_closest = (
@@ -293,7 +291,6 @@ class PricedItem(DatabaseTable):
 
                 price_objs = entry.price_points.order_by("date").all()
                 for i in price_objs:
-
                     # This is the bottleneck + slow bc I call function one
                     # new_x value at time. I can speed up by calling the full
                     # series, but code would be uglier. I cache this data and
@@ -416,7 +413,6 @@ class PricedItem(DatabaseTable):
         }
 
         for name, data in track(all_data.items()):
-
             # sometimes a row is missing the price and/or timestamp
             data.dropna(inplace=True)
 
@@ -497,7 +493,6 @@ class PricedItem(DatabaseTable):
         }
 
         for name, data in track(all_data.items()):
-
             category_found = False
             for category, cat_names in category_lookup.items():
                 if name in cat_names:

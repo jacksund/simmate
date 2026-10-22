@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("inventory_management", "0008_drop_external_dataset_columns"),
         ("pdb", "0003_rename_type_pdbligand_monomer_type_and_more"),

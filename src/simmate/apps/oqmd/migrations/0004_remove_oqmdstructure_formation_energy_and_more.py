@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("oqmd", "0003_alter_oqmdstructure_id"),
     ]

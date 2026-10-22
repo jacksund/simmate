@@ -2,7 +2,6 @@
 
 
 class UpdateMixin:
-
     # for form_mode "update"
 
     ignore_on_update: list[str] = []

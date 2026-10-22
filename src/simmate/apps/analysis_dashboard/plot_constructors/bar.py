@@ -8,7 +8,6 @@ from .base import PlotConstructor
 
 
 class Bar(PlotConstructor):
-
     display_name = "Bar"
     required_inputs = ["x"]
 

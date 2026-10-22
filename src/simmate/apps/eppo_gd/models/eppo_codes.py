@@ -166,7 +166,6 @@ class EppoCode(ThirdPartyData, DatabaseTable):
         )
 
         for entry in all_data:
-
             entry["id"] = entry.pop("eppo_code")
 
             # BUG-FIX: "class" key must be "class_name" to work

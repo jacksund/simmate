@@ -8,7 +8,6 @@ from .base import PlotConstructor
 
 
 class Histogram(PlotConstructor):
-
     display_name = "Histogram"
     required_inputs = ["x"]
 

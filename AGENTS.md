@@ -140,7 +140,7 @@ The web interface is built with Django and HTMX.
 - **Type Hints:** Required for all new code. Keep them simple and use built-in types.
 - **File Paths:** Always use `pathlib.Path`.
 - **Docstrings:** Use Google-style docstrings (`Args:`, `Returns:`). Some older code uses a markdown `#### Parameters` style; don't copy it.
-- **Formatting:** Use `black` and `isort` for Python and `djlint` for HTML templates (`simmate dev lint` runs all three).
+- **Formatting:** Use `ruff` for Python (formatting and import sorting) and `djlint` for HTML templates (`simmate dev lint` runs both).
 - **Toolkit First:** Put rdkit/pymatgen logic on toolkit objects (e.g. add a `Molecule.get_example_property()` method). Do not import `rdkit` or `pymatgen` directly in apps, datastores, or models; extend the toolkit instead. Existing direct pymatgen imports (e.g. in `apps/vasp/` and some database mixins) are legacy; don't copy them.
 - **No One-Off Helpers:** Only pull logic out into a helper when it is reused in several places. Otherwise write it inline (with a short comment if needed) so the method reads top to bottom.
 - **Scripts:** Don't add `if __name__ == "__main__":` guards (scripts are run directly in Spyder). Keep one-off scripts minimal.
@@ -152,7 +152,7 @@ The web interface is built with Django and HTMX.
 - **When Not to Add Tests:** Don't add unit tests for infra/deployment changes (workers, k8s, signal handling) or for features whose design is still in flux; give manual test steps instead. Running existing tests to check nothing broke is fine.
 - **Commands:**
     - Test: `simmate dev test`
-    - Lint: `simmate dev lint` (black, isort, djlint)
+    - Lint: `simmate dev lint` (ruff, djlint)
     - Migrations: `simmate database update` (generates and applies migrations).
 
 ## AI Agent Guidelines
@@ -164,4 +164,5 @@ The web interface is built with Django and HTMX.
 - **Database Changes:** Always ask the user before running anything that modifies the database (migrations, resets, data loads, deletes).
 - **Git Worktrees:** Sessions started in a git worktree share the local dev database with the main repo, so they must NEVER apply migrations or otherwise modify the database. Any work that involves the database is done from the main repo instead. If a worktree needs its own Python environment, set it up with `uv sync --all-extras`.
 - **Discuss Before Planning:** For open-ended design questions (e.g. "look into X"), lay out the options and tradeoffs and give a recommendation. Wait for a direction before writing an implementation plan.
+- **Git:** Leave all changes unstaged. Never stage, commit, or push unless the user explicitly asks. When asked to commit or push, use a one-line commit message only (no description body), and do not add AI co-author signatures or any mention of AI/Claude.
 - **Keep This File Current:** If your changes make anything in AGENTS.md inaccurate (moved or renamed files/classes, new conventions), update it in the same session.

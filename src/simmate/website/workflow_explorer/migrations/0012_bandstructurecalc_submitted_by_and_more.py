@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("workflow_explorer", "0011_remove_relaxation_band_gap_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

@@ -102,7 +102,6 @@ class WorkflowPopulator:
         )
         for ids_chunk in chunk_list(ids_to_update, batch_size):
             try:
-
                 # grab the next set of objects to update
                 objs_to_update = cls.objects.filter(id__in=ids_chunk).all()
 

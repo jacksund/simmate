@@ -170,7 +170,6 @@ class DatabaseTable(models.Model, ArchiveMixin):
         """
         column_names = []
         for column in cls._meta.get_fields(include_parents):
-
             name = column.name
 
             # there is some redundant code here, but organizing in this way
@@ -299,7 +298,7 @@ class DatabaseTable(models.Model, ArchiveMixin):
             f"\t- Website UI Location: {docs['table_info']['website_url']}\n\n"
         )
 
-        final_str += "## Table Description\n\n" f"{docs['table_description']}\n\n"
+        final_str += f"## Table Description\n\n{docs['table_description']}\n\n"
 
         final_str += "## Column Descriptions\n\n"
         for col_name, col_descr in docs["column_descriptions"].items():
@@ -917,7 +916,6 @@ class DatabaseTable(models.Model, ArchiveMixin):
 
         queryset = cls.objects if not use_web_queryset else cls.get_web_queryset()
         for filter_name, filter_value in filters.items():
-
             # to prevent crazy joins, we can limit the number of double-underscores
             # (which indicate a join or field lookup) in a filter.
             # Example: `user__first_name__isnull` has 2 double-underscores.

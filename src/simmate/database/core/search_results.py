@@ -89,10 +89,8 @@ class SearchResults(models.QuerySet):
         # results to get our values_list. (unless the query gave back an
         # incomplete values_list)
         if use_cache and self._result_cache is not None:
-
             # check if we have a list of models or values
             if self._iterable_class == models.query.ValuesListIterable:
-
                 # if the user has a `values_list` call to the queryset, and didn't
                 # set columns for `to_dataframe`, we'll use those cols for the df
                 if not has_user_cols:

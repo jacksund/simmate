@@ -120,7 +120,7 @@ def explore(
     include_subflows: bool = typer.Option(
         False,
         help="Whether to include sub-workflows (internal steps) in the exploration list.",
-    )
+    ),
 ):
     """
     Interactively explore available workflows, their descriptions, and parameters.
@@ -201,7 +201,7 @@ def list_all(
     include_subflows: bool = typer.Option(
         False,
         help="Whether to include sub-workflows (internal steps) in the list.",
-    )
+    ),
 ):
     """
     Lists all registered Simmate workflows.
@@ -221,7 +221,7 @@ def show_config(
     workflow_name: str = typer.Argument(
         ...,
         help="The full name of the workflow (e.g., 'relaxation.vasp.staged').",
-    )
+    ),
 ):
     """
     Displays the configuration settings for a specific workflow.
@@ -326,7 +326,7 @@ def run(
     filename: Path = typer.Argument(
         ...,
         help="The YAML or TOML file containing workflow parameters.",
-    )
+    ),
 ):
     """
     Executes a workflow locally using parameters loaded from a configuration file.
@@ -342,7 +342,7 @@ def run_cloud(
     filename: Path = typer.Argument(
         ...,
         help="The YAML or TOML file containing workflow parameters.",
-    )
+    ),
 ):
     """
     Submits a workflow for remote execution on a cluster or cloud resource.

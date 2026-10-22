@@ -192,14 +192,12 @@ with column2:
 
 with column3:
     with st.popover("Filters"):
-
         # BUG: search as-is removes & resets filters not in search results
         # column_search_query = st.text_input("Search for column")
         # st.divider()
 
         filters = {}
         for column_name, column_dtype in zip(df.columns, df.dtypes):
-
             # if column_search_query and column_search_query not in column_name:
             #     continue
 

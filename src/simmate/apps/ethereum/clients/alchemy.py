@@ -12,7 +12,6 @@ from ..mappings import EthereumMappings
 
 
 class AlchemyClient:
-
     api_key = settings.ethereum.alchemy.api_key
 
     # used in building the base api endpoint like https://eth-mainnet.g.alchemy.com/v2/
@@ -127,7 +126,6 @@ class AlchemyClient:
         token_verified_list = []
         amount_normalized_list = []
         for t_data in df.rawContract:
-
             # Get token name
             token_address = t_data.get("address", None)
             if token_address == None:

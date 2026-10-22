@@ -19,7 +19,6 @@ misleading because we know that Ca2N has the spacegroup 166
 
 ##############################################################################
 
-
 import pandas as pd
 from rich.progress import track
 

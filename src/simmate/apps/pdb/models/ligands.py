@@ -163,7 +163,6 @@ class PdbLigand(ThirdPartyData, Molecule):
         # 3. Parse metadata and molecules
         logging.info("Parsing metadata and molecules...")
         for entry_data in track(cls._iter_cif_blocks(data_filename)):
-
             smiles_str = cls._get_smiles(entry_data)
             try:
                 molecule = ToolkitMolecule.from_smiles(smiles_str)

@@ -6,7 +6,6 @@ from simmate.database.mixins import ThirdPartyData
 
 
 class EthereumWallet(ThirdPartyData, DatabaseTable):
-
     class Meta:
         db_table = "ethereum__wallets"
 

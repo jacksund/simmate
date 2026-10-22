@@ -214,8 +214,7 @@ def str_to_datatype(
     # If it is not in the common keys listed, just leave it as a string.
     else:
         logging.warning(
-            "Unknown parameter mapping of {parameter}: {target_type}. "
-            "Leaving as str."
+            "Unknown parameter mapping of {parameter}: {target_type}. Leaving as str."
         )
         return value
 

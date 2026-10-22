@@ -152,7 +152,6 @@ class EmoleculesSupplierOffer(ThirdPartyData, DatabaseTable):
         nchunks_total = (len(vendor_offers) // chunk_size) + 1
         failed = []
         for emol_chunk in chunk_list(vendor_offers, chunk_size):
-
             logging.info(f"CHUNK # {nchunk} of {nchunks_total}")
             nchunk += 1
 
@@ -242,7 +241,6 @@ class EmoleculesSupplierOffer(ThirdPartyData, DatabaseTable):
         nchunks_total = (len(custom_offers) // chunk_size) + 1
         failed = []
         for emol_chunk in chunk_list(custom_offers, chunk_size):
-
             logging.info(f"CHUNK # {nchunk} of {nchunks_total}")
             nchunk += 1
 

@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("chembl", "0005_remove_chemblassayresult_source_and_more"),
         ("inventory_management", "0008_drop_external_dataset_columns"),

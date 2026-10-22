@@ -9,7 +9,6 @@ from .base import PlotConstructor
 
 
 class AiChatbotFigure(PlotConstructor):
-
     display_name = "Describe to AI"
     required_inputs = ["user_request"]
 

@@ -8,7 +8,6 @@ from simmate.workflows.utils import get_workflow
 
 
 class WorkflowSubmissionComponent(HtmxComponent, StructureInput):
-
     template_name = "workflow_explorer/submission_form.html"
 
     # both set in mount()

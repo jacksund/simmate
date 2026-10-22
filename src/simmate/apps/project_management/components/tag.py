@@ -7,7 +7,6 @@ from .mixins import ProjectInput
 
 
 class TagComponent(TableComponent, ProjectInput):
-
     table = Tag
 
     template_names = {

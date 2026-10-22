@@ -27,7 +27,7 @@ def start(
     port: int = typer.Option(
         8000,
         help="The port on which to run the local server. Default is 8000.",
-    )
+    ),
 ):
     """
     Starts a local development server for the Simmate Web UI.

@@ -189,13 +189,12 @@ class Transformation:
         # a serious problem!
         if not new_structure and attempt > max_attempts:
             logging.warning(
-                f"Failed to create a structure after {max_attempts} attempts."
-                "Giving up."
+                f"Failed to create a structure after {max_attempts} attempts.Giving up."
             )
             return False
         elif not new_structure and current_time >= stop_time:
             logging.warning(
-                f"Failed to create a structure after {num_atoms*max_time_per_atom} seconds."
+                f"Failed to create a structure after {num_atoms * max_time_per_atom} seconds."
                 "Giving up."
             )
             return False

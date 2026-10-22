@@ -8,7 +8,6 @@ from .wallet import Wallet
 
 
 class Transaction(DatabaseTable):
-
     class Meta:
         db_table = "project_management__transactions"
 

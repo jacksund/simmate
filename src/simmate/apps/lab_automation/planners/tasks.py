@@ -257,7 +257,9 @@ class PreemptableTask(BaseTask):
             start_time = chunk["start"]
             end_time = chunk["end"]
             chunk_size = end_time - start_time
-            name = f"{self.name} (Part {j+1})" if len(merged_chunks) > 1 else self.name
+            name = (
+                f"{self.name} (Part {j + 1})" if len(merged_chunks) > 1 else self.name
+            )
 
             print(
                 f"Minute {start_time:02d} to {end_time:02d} | "

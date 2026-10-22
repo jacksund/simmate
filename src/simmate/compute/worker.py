@@ -280,7 +280,6 @@ class SimmateWorker(DatabaseTable):
             # loop. The exception of looping endlessly is if we want the worker
             # to shutdown instead.
             while self.queue_size() == 0:
-
                 # if it is empty, we want to sleep for a little and check again
                 self.status = "Idle"
                 self.save(update_fields=["status", "updated_at"])

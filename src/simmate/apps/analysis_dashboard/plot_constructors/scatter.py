@@ -8,7 +8,6 @@ from .base import PlotConstructor
 
 
 class Scatter(PlotConstructor):
-
     display_name = "Scatter"
     required_inputs = ["x", "y"]
 

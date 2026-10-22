@@ -206,7 +206,6 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
             ],
         ]
         for foldername, endpoint, files_to_download in download_config:
-
             # Grab the full list of dumps (which are named based on date) and
             # then use the lastest one
             url = emol_base_url + endpoint
@@ -229,7 +228,6 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
 
             # Load data from selected ref
             for filename in files_to_download:
-
                 download_filename = download_dir / filename
 
                 # only download if it doesn't exist or a new copy is requested
@@ -322,7 +320,6 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
         nchunks_total = (len(current_listing) // chunk_size) + 1
         failed_rows = []
         for emol_chunk in chunk_list(current_listing, chunk_size):
-
             logging.info(f"CHUNK # {nchunk} of {nchunks_total}")
             nchunk += 1
 
@@ -412,7 +409,6 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
         nchunks_total = (len(current_listing) // chunk_size) + 1
         failed_rows = []
         for emol_chunk in chunk_list(current_listing, chunk_size):
-
             logging.info(f"CHUNK # {nchunk} of {nchunks_total}")
             nchunk += 1
 

@@ -5,7 +5,6 @@ from simmate.database.mixins import Calculation
 
 
 class VariableNsitesCompositionSearch(Calculation):
-
     class Meta:
         app_label = "workflow_explorer"
         db_table = "workflows_variablensitescompositionsearch"

@@ -8,7 +8,6 @@ from .base import PlotConstructor
 
 
 class Line(PlotConstructor):
-
     display_name = "Line"
     required_inputs = ["x", "y"]
 

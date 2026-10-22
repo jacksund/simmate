@@ -4,7 +4,6 @@ from simmate.config import settings
 
 
 class EthereumMappings:
-
     wallet_addresses = settings.ethereum.addresses
 
     token_addresses = {

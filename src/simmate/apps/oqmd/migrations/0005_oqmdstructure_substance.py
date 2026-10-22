@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("inventory_management", "0008_drop_external_dataset_columns"),
         ("oqmd", "0004_remove_oqmdstructure_formation_energy_and_more"),

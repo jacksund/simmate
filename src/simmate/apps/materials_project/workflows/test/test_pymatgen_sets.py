@@ -2,9 +2,9 @@
 
 import pytest
 from pymatgen.analysis.diffusion.neb.io import MVLCINEBEndPointSet, MVLCINEBSet
-from pymatgen.io.vasp.sets import MITNEBSet  # MVLNPTMDSet,
 from pymatgen.io.vasp.sets import (
     MITMDSet,
+    MITNEBSet,  # MVLNPTMDSet,
     MITRelaxSet,
     MPHSEBSSet,
     MPHSERelaxSet,

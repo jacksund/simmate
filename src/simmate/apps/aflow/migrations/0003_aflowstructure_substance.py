@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("aflow", "0002_aflowprototype_is_invalid_structure_and_more"),
         ("inventory_management", "0008_drop_external_dataset_columns"),

@@ -45,8 +45,7 @@ def start(
     #   https://docs.streamlit.io/library/advanced-features/configuration
     #   https://docs.streamlit.io/library/advanced-features/theming
     extra_config = (
-        '--theme.backgroundColor="#fafbfe" '
-        '--theme.primaryColor="#0072ce" '
+        '--theme.backgroundColor="#fafbfe" --theme.primaryColor="#0072ce" '
         # '--server.maxUploadSize=500'
     )
     if port != 8501:

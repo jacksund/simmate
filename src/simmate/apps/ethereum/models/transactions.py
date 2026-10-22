@@ -12,7 +12,6 @@ from .wallets import EthereumWallet
 
 
 class EthereumTransaction(ThirdPartyData, DatabaseTable):
-
     class Meta:
         db_table = "ethereum__transactions"
 
@@ -105,7 +104,6 @@ class EthereumTransaction(ThirdPartyData, DatabaseTable):
         wallet_transactions = AlchemyClient.get_all_transaction_data()
 
         for transaction in wallet_transactions.to_dict(orient="records"):
-
             from_address = transaction["from"]
             to_address = transaction["to"]
             if not from_address or not to_address or not transaction["token_verified"]:
@@ -146,7 +144,6 @@ class EthereumTransaction(ThirdPartyData, DatabaseTable):
         wallet_transactions = EtherscanClient.get_all_transaction_data()
 
         for transaction in wallet_transactions.to_dict(orient="records"):
-
             from_address = transaction["from"]
             to_address = transaction["to"]
             if not from_address or not to_address or not transaction["token_verified"]:

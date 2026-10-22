@@ -56,8 +56,7 @@ class PopulationAnalysis__Bader__BaderDev(S3Workflow):
 
         if atoms_to_print and species_to_print:
             raise Exception(
-                "Set either `atoms_to_print` or `species_to_print`. "
-                "You cannot set both"
+                "Set either `atoms_to_print` or `species_to_print`. You cannot set both"
             )
         elif atoms_to_print:
             indices_str = " ".join([str(i + 1) for i in atoms_to_print])

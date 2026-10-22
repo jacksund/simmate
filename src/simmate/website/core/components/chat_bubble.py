@@ -5,7 +5,6 @@ from simmate.website.htmx.components import HtmxComponent
 
 
 class ChatBubble(HtmxComponent):
-
     template_name = "core/chat_bubble.html"
 
     # State

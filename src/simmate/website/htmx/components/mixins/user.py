@@ -8,7 +8,6 @@ from simmate.config import settings
 
 
 class UserInput:
-
     @cached_property
     def user_options(self):
 

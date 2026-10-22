@@ -653,7 +653,6 @@ class Grid(VolumetricData):
             # already have, we want to extend the connection to include any other
             # features in this super feature
             for j in connected_features:
-
                 unique_connections[j].extend([k for k in connected_features if k != j])
 
                 unique_connections[j] = list(np.unique(unique_connections[j]))

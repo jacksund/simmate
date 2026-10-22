@@ -6,7 +6,6 @@ from .project import Project
 
 
 class Tag(DatabaseTable):
-
     class Meta:
         db_table = "project_management__tags"
 

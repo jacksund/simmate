@@ -23,7 +23,6 @@ def words_to_letters(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("compute_management", "0002_alter_workitem_status"),
     ]

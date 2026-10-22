@@ -2,7 +2,6 @@
 
 
 class EntriesMixin:
-
     page = None
     pagination_urls = None
     report = None

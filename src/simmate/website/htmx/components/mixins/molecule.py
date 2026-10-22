@@ -7,7 +7,6 @@ from simmate.toolkit import Molecule
 
 
 class MoleculeInput:
-
     ignore_on_search = ["molecule_query_type"]
 
     # -------------------------------------------------------------------------
@@ -58,9 +57,7 @@ class MoleculeInput:
         # form mode. We want to notify users when the load fails too, which
         # is why we put this whole section in a try/except
         try:
-
             if input_type in ["sketcher", "text"]:
-
                 if getattr(self, "component_type", None) == "search":
                     query_type = self.form_data.pop(f"{input_name}_query_type")
                     # TODO: better loading for SMARTS
@@ -141,7 +138,6 @@ class MoleculeInput:
 
         matches = []
         for table_name in self.molecule_match_tables:
-
             if table_name == "__self__":
                 table = self.table
             else:
@@ -192,7 +188,6 @@ class MoleculeInput:
     ):
         self.child_components = []
         for molecule_obj in molecules:
-
             child = self.create_child_component()
             child.form_data[input_name] = molecule_obj
 

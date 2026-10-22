@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("workflow_explorer", "0006_simmateworker_workitem_worker"),
     ]

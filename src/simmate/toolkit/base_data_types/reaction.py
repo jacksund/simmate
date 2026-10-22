@@ -9,7 +9,6 @@ from .molecule import Molecule
 
 
 class Reaction:
-
     def __init__(
         self,
         reactants: list[Molecule],

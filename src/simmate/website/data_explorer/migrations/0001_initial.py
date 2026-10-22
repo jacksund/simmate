@@ -6,7 +6,6 @@ import simmate.database.core.archive
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = []

@@ -8,10 +8,10 @@
 
 4. Don't forget to save all file changes.
 
-5. Simmate enforces clean, readable code. We utilize the [`black`](https://github.com/psf/black) formatter, [isort](https://pycqa.github.io/isort/docs/configuration/github_action.html) for managing imports, and [djlint](https://github.com/djlint/djLint) for formatting html templates:
+5. Simmate enforces clean, readable code. We utilize [ruff](https://docs.astral.sh/ruff/) for formatting python code and sorting imports, and [djlint](https://github.com/djlint/djLint) for formatting html templates. You can run all of these with `simmate dev lint`, or individually:
 ``` shell
-isort .
-black .
+ruff check . --fix
+ruff format .
 djlint . --reformat
 ```
 

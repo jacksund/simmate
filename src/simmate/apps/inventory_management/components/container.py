@@ -8,7 +8,6 @@ from ..models import Container, StorageLocation
 
 
 class ContainerComponent(TableComponent):
-
     table = Container
 
     template_names = {

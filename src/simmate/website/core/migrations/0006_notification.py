@@ -8,7 +8,6 @@ import simmate.database.core.archive
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0005_remove_fingerprintpool_source"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

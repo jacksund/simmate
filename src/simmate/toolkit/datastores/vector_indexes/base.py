@@ -80,8 +80,7 @@ class VectorIndex:
         """
         if load_mode not in self.valid_load_modes:
             raise ValueError(
-                f"Unknown load_mode: {load_mode!r}. "
-                f"Use one of {self.valid_load_modes}."
+                f"Unknown load_mode: {load_mode!r}. Use one of {self.valid_load_modes}."
             )
         if self.requires_metric_fn and metric_fn is None:
             raise ValueError(

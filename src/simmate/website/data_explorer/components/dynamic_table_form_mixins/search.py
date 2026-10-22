@@ -8,7 +8,6 @@ from django.shortcuts import redirect
 
 
 class SearchMixin:
-
     # for form_mode "search"
 
     ignore_on_search: list[str] = []

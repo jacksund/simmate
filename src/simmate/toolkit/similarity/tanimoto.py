@@ -7,7 +7,6 @@ from simmate.toolkit.similarity.base import SimilarityEngine
 
 
 class Tanimoto(SimilarityEngine):
-
     matrix_mode = "series"
 
     @classmethod

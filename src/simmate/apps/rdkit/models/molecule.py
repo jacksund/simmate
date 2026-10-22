@@ -11,7 +11,6 @@ from simmate.toolkit import Molecule as ToolkitMolecule
 
 
 class MoleculeSearchResults(SearchResults):
-
     def filter_molecule_exact(self, molecule: ToolkitMolecule):
         if not isinstance(molecule, ToolkitMolecule):
             molecule = ToolkitMolecule.from_dynamic(molecule)
@@ -100,7 +99,6 @@ class MoleculeSearchResults(SearchResults):
 
 
 class Molecule(DatabaseTable):
-
     class Meta:
         abstract = True
         indexes = (
@@ -319,7 +317,6 @@ class Molecule(DatabaseTable):
     # and similarity searches directly within postgres
 
     if settings.postgres_rdkit_extension:
-
         rdkit_mol = custom_fields.MolField(blank=True, null=True)
         """
         This is the column used for substructure (+ SMARTS) searches. However, we 

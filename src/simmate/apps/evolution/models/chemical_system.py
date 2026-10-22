@@ -16,7 +16,6 @@ with warnings.catch_warnings(record=True):
 
 
 class ChemicalSystemSearch(Calculation):
-
     class Meta:
         app_label = "workflow_explorer"
         db_table = "workflows_chemicalsystemsearch"

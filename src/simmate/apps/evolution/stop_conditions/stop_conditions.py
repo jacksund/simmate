@@ -166,7 +166,6 @@ class ExpectedStructure(StopCondition):
 
         # for each structure, check if it matches the expected structure
         for n, structure in track(list(enumerate(structures))):
-
             is_match = matcher.fit(expected_structure, structure)
             if is_match:
                 # structure.to("cif", d / "match.cif")

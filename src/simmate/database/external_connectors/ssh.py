@@ -281,7 +281,6 @@ class SshServer:
         folders = [f.relative_to(local_dir).as_posix() for f in contents if f.is_dir()]
 
         with cls._sftp_session() as sftp:
-
             # skip files that made it over on a previous (interrupted) run
             if not overwrite and cls.exists_remote(remote_dir, sftp=sftp):
                 already_copied = set(cls.walk_remote(remote_dir, sftp=sftp))
@@ -353,7 +352,6 @@ class SshServer:
         remote_dir = cls._to_remote_str(remote)
 
         with cls._sftp_session() as sftp:
-
             # skip files that made it over on a previous (interrupted) run
             files = [
                 f

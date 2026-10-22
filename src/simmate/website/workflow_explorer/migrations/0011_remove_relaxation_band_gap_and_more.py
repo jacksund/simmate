@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("workflow_explorer", "0010_remove_staticenergy_band_gap_and_more"),
     ]

@@ -11,7 +11,6 @@ from simmate.utils import download_file, get_directory
 
 
 class PubChemClient:
-
     # DEV-NOTE:
     # You can do a lot of this with PubChemPy, but that package hasn't been updated
     # since 2016, and it's pretty outdated. We just implement our version
@@ -201,7 +200,6 @@ class PubChemClient:
 
         # 2. Iterate and download
         for filename in all_files:
-
             full_url = f"{cls.PUBCHEM_FTP_URL}{filename}"
             local_path = target_dir / filename
 

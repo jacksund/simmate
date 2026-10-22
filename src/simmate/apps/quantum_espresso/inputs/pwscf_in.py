@@ -558,12 +558,15 @@ class PwscfInput:
             kpoints_offset = None
             kpoints_grid = [k["coords"] for k in kpt_parameters["data"]]
             kpoints_weights = [k["weight"] for k in kpt_parameters["data"]]
-        elif kpoints_mode in [
-            "tpiba_b",  # Monkhorst-Pack grid specified in reciprocal lattice units, with a shift.
-            "tpiba_c",  #  Monkhorst-Pack grid specified in reciprocal lattice units, with a different shift.
-            "crystal_b",  # Specify k-points in crystal coordinates with a shift.
-            "crystal_c",  # Specify k-points in crystal coordinates with a different shift.
-        ]:
+        elif (
+            kpoints_mode
+            in [
+                "tpiba_b",  # Monkhorst-Pack grid specified in reciprocal lattice units, with a shift.
+                "tpiba_c",  #  Monkhorst-Pack grid specified in reciprocal lattice units, with a different shift.
+                "crystal_b",  # Specify k-points in crystal coordinates with a shift.
+                "crystal_c",  # Specify k-points in crystal coordinates with a different shift.
+            ]
+        ):
             raise NotImplementedError(
                 f"{kpoints_mode} is not yet supported for k points"
             )

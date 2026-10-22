@@ -29,7 +29,6 @@ threads (e.g. `gunicorn --threads 4`).
 
 
 class HtmxComponent:
-
     # Prevents Django from instantiating this class when accessing class attributes in templates
     # (e.g., when accessing `dataset.table` where `dataset` is an uninstantiated HtmxComponent)
     do_not_call_in_templates = True
@@ -121,7 +120,6 @@ class HtmxComponent:
         # otherwise run at once and clash over `self.request`, `form_data`,
         # etc. Requests for *different* components still run in parallel.
         with self._request_lock:
-
             self.request = request  # for easy access elsewhere
 
             self.js_actions = []  # reset as to not repeat last request's actions

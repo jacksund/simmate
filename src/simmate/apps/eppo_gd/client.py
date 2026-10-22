@@ -9,7 +9,6 @@ from rich.progress import track
 
 
 class EppoWebScrapper:
-
     @classmethod
     def get_all_eppo_code_data(cls, eppo_codes: list[str], **kwargs) -> list[dict]:
         return [cls.get_eppo_code_data(code, **kwargs) for code in track(eppo_codes)]
@@ -63,7 +62,6 @@ class EppoWebScrapper:
         # all sections. we therefore iterate and figure out what we have on the fly
         data_final = {"eppo_source": "eppo_global_db"}
         for header_div in header_divs:
-
             # The first text of each section shows it's content. This is in a <span>
             # that is the first element in the main <div>
             header_text = header_div.text

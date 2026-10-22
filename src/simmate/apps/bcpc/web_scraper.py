@@ -16,7 +16,6 @@ from .data import BCPC_NEWS_ARCHIVE
 
 
 class BcpcWebScraper(WebScraper):
-
     @classmethod
     def get_all_data(
         cls,
@@ -208,7 +207,6 @@ class BcpcWebScraper(WebScraper):
 
                 inchis = []
                 for inchi_section in section.find_all("span"):
-
                     # Ideally this is what we want , but there are a lot of
                     # broken cases that we try to cover below
                     inchi = inchi_section.text
@@ -281,7 +279,6 @@ class BcpcWebScraper(WebScraper):
 
         all_data = []
         for xml_name in track(cls.get_all_news_links()):
-
             # Their website is unstable and inconsistent, so I just skip those
             # that fail. Most cases, this is a website disconnect so things
             # should work the next time this function is ran.

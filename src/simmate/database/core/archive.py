@@ -376,7 +376,9 @@ class ArchiveMixin:
         columns_label = (
             "full"
             if columns == "full"
-            else "minimal" if columns == "minimal" else "custom"
+            else "minimal"
+            if columns == "minimal"
+            else "custom"
         )
         filename_base = "-".join(
             [

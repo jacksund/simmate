@@ -8,7 +8,6 @@ from .base import PlotConstructor
 
 
 class Pie(PlotConstructor):
-
     display_name = "Pie"
     required_inputs = ["names", "values"]
 

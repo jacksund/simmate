@@ -239,7 +239,7 @@ class StagedSeriesHistogram(PlotlyFigure):
                     x=diffs,
                     name=(
                         f"{workflow.subworkflows[i].name_full} "
-                        f"--> {workflow.subworkflows[i+1].name_full}"
+                        f"--> {workflow.subworkflows[i + 1].name_full}"
                     ),
                 )
             )

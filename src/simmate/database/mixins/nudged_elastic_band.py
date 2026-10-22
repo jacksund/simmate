@@ -18,7 +18,6 @@ from .structure import Structure
 
 
 class DiffusionAnalysis(Structure, Calculation):
-
     class Meta:
         app_label = "workflow_explorer"
         db_table = "workflows_diffusionanalysis"

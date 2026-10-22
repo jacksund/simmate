@@ -72,8 +72,7 @@ dev = [
     "pytest-xdist>=3.6.0,<4.0.0",
     "coverage>=7.13.4,<8.0.0",
     # Formatting & Linting
-    "black>=26.1.0,<27.0.0",
-    "isort>=8.0.0,<9.0.0",
+    "ruff>=0.17.0,<0.18.0",
     "djlint>=1.36.4,<2.0.0",
     # Docs
     "zensical>=0.0.71,<0.1.0",
@@ -171,5 +170,19 @@ filterwarnings = [
 command_line = "-m pytest"
 omit = ["*/test_*", "*/conftest.py", "*/*_test.py"]
 
-[tool.isort]
-profile = "black"
+[tool.ruff]
+src = ["src"]
+# docs code blocks are often partial snippets, so don't format them
+extend-exclude = ["*.md"]
+
+[tool.ruff.lint]
+# import sorting only (replaces isort)
+select = ["I"]
+# TODO: switch to ruff's default lint rules (E4, E7, E9, F) plus import sorting.
+# Remove the `select` above, uncomment the lines below, then run
+# `ruff check . --fix` and resolve the remaining errors by hand.
+# extend-select = ["I"]
+#
+# [tool.ruff.lint.per-file-ignores]
+# # imports in __init__.py files are re-exports, not unused imports
+# "__init__.py" = ["F401"]

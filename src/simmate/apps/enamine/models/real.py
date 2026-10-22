@@ -105,7 +105,7 @@ class EnamineRealMolecule(ThirdPartyData, Molecule):
         logging.info("Saving to simmate database...")
 
         for i, chunk_filename in enumerate(chunk_filenames):
-            logging.info(f"Chunk {i+1} of {nchunks}")
+            logging.info(f"Chunk {i + 1} of {nchunks}")
 
             # read the file text (without loading as Molecule objects)
             data = pandas.read_csv(chunk_filename, delimiter="\t")

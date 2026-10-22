@@ -14,7 +14,6 @@ from .symmetry import Spacegroup
 
 # UNDER DEV -- Not used elsewhere yet
 class StructureSearchResults(SearchResults):
-
     def filter_similarity(
         self,
         structure: ToolkitStructure,

@@ -8,7 +8,6 @@ from bs4 import BeautifulSoup
 
 
 class WebScraper:
-
     @staticmethod
     def get_html(url: str) -> BeautifulSoup:
         """

@@ -2,7 +2,6 @@
 
 
 class CreateManyMixin:
-
     # for form_mode "create_many"
 
     def mount_for_create_many(self):

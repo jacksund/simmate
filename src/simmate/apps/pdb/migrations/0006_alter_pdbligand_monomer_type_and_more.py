@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("pdb", "0005_pdbligand_is_delisted_pdbligand_is_invalid_molecule_and_more"),
     ]

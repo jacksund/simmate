@@ -6,7 +6,6 @@ from ..models import PricedItem
 
 
 class PricedItemsReportComponent(HtmxComponent):
-
     template_name = "price_catalog/priced_items/report.html"
 
     item_names_options: list[str] = None  # set in mount

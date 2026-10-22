@@ -34,13 +34,13 @@ def dev():
 @dev_app.command()
 def lint():
     """
-    Runs black, isort, and djlint to format and lint the codebase.
+    Runs ruff and djlint to format and lint the codebase.
     """
-    logging.info("Running black...")
-    subprocess.run("black .", shell=True)
+    logging.info("Running ruff (import sorting)...")
+    subprocess.run("ruff check . --fix", shell=True)
 
-    logging.info("Running isort...")
-    subprocess.run("isort .", shell=True)
+    logging.info("Running ruff (formatting)...")
+    subprocess.run("ruff format .", shell=True)
 
     logging.info("Running djlint...")
     subprocess.run("djlint . --reformat", shell=True)
@@ -97,6 +97,7 @@ def clean():
         "**/build",
         "**/*.egg-info",
         "**/.djlint_cache",
+        "**/.ruff_cache",
     ]
 
     logging.info("Removing artifacts and cache files...")

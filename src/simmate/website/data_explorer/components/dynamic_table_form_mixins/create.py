@@ -4,7 +4,6 @@ from django.db import transaction
 
 
 class CreateMixin:
-
     # for form_mode "create"
 
     required_inputs: list[str] = []

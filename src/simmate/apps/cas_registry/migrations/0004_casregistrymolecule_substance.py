@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("cas_registry", "0003_remove_casregistrymolecule_physical_state_and_more"),
         ("inventory_management", "0008_drop_external_dataset_columns"),
