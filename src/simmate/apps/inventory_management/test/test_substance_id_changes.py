@@ -2,6 +2,7 @@ import pytest
 from django.urls import reverse
 
 from simmate.apps.chembl.models import ChemblMolecule
+from simmate.apps.inventory_management.datastores import SubstanceDatastore
 from simmate.apps.inventory_management.models import (
     Batch,
     Mixture,
@@ -89,7 +90,7 @@ def test_promote():
 
 @pytest.mark.django_db
 def test_split():
-    flat_id = Substance.register_molecule("CC(O)C(=O)O")  # lactic acid
+    flat_id = SubstanceDatastore.get_or_create_id("CC(O)C(=O)O")  # lactic acid
     batch = Batch.objects.create(is_mixture=False, substance_id=flat_id)
 
     new_ids = Substance.split(

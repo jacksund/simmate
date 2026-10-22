@@ -33,6 +33,8 @@ class Featurizer:
 
     @classmethod
     def _featurize_dynamic(cls, molecule, **kwargs):
+        if molecule is None:
+            return None
         if not isinstance(molecule, Molecule):
             molecule = Molecule.from_dynamic(molecule)
         return cls.featurize(molecule, **kwargs)
@@ -47,6 +49,9 @@ class Featurizer:
     ) -> list:
         """
         Generates fingerprints for a list of molecules in a serial or parallel manner.
+
+        Entries that are None give None (only supported when
+        `dataframe_format="list"`).
         """
         features = dispatch(
             molecules,
