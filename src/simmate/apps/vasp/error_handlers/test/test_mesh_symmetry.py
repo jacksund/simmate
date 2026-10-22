@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 from simmate.apps.vasp.error_handlers import MeshSymmetry

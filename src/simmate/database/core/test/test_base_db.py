@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 from simmate.website.test_app.models import TestDatabaseTable
@@ -27,7 +25,7 @@ def test_to_dataframe():
 
 @pytest.mark.django_db
 def test_to_toolkit():
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="does not have a to_toolkit method"):
         TestDatabaseTable.objects.to_toolkit()
 
 
@@ -53,7 +51,7 @@ def test_archive(tmp_path):
     archive_filename = tmp_path / "test_table.zip"
 
     # Also try to load an archive that doesn't exist yet
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="is not a zip file"):
         TestDatabaseTable.load_archive(filename=archive_filename)
 
     # write to a file
@@ -67,7 +65,7 @@ def test_archive(tmp_path):
     )
 
     # Our test table doesn't have the remote_archive_link label set.
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="does not have a default link"):
         TestDatabaseTable.load_remote_archive()
 
     # now add the attribute and try again

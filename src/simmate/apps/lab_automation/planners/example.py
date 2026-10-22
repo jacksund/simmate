@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.lab_automation.planners import SchedulePlanner
 from simmate.apps.lab_automation.protocols.cooking import (
     add_eggs_benedict_protocol,

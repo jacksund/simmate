@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 import copy
 import logging
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 import numpy
 import polars
@@ -247,7 +245,7 @@ class VectorIndex:
         Hook for one-time setup needed before any shard is built (such as
         training). Only called when there are shards left to build.
         """
-        pass  # nothing needed by default
+        # nothing needed by default
 
     def _build_batch(self, batch: list[int]) -> None:
         """Builds and saves the single shard covering `batch` of chunk_keys."""

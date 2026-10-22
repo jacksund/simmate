@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ##############################################################################
 
 """
@@ -24,7 +22,7 @@ from rich.progress import track
 
 try:
     from selenium import webdriver
-except:
+except Exception:
     raise Exception(
         "To use this method, Selenium is required. Please install it "
         "with `conda install -c conda-forge selenium"

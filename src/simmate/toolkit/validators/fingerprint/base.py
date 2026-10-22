@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 import numpy
@@ -123,7 +121,7 @@ class FingerprintValidator(Validator):
     # -------------------------------------------------------------------------
 
     @staticmethod
-    def get_featurizer(self, **kwargs):
+    def get_featurizer(**kwargs):
         raise NotImplementedError(
             "make sure you add a custom 'get_featurizer' method. This should "
             "return a featurizer object to be used for generating fingerprints."
@@ -276,7 +274,7 @@ class FingerprintValidator(Validator):
             # we need to reorder the query results here
             all_data_dict = {entry.database_id: entry for entry in all_results}
             all_data_ordered = [
-                all_data_dict[id] for id in new_ids if id in all_data_dict.keys()
+                all_data_dict[id] for id in new_ids if id in all_data_dict
             ]
 
             fingerprints = [entry.fingerprint for entry in all_data_ordered]

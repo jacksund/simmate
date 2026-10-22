@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pymatgen.transformations.standard_transformations import (
     PerturbStructureTransformation,
 )

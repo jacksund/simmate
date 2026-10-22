@@ -8,7 +8,7 @@
 
 4. Don't forget to save all file changes.
 
-5. Simmate enforces clean, readable code. We utilize [ruff](https://docs.astral.sh/ruff/) for formatting python code and sorting imports, and [djlint](https://github.com/djlint/djLint) for formatting html templates. You can run all of these with `simmate dev lint`, or individually:
+5. Simmate enforces clean, readable code. We utilize [ruff](https://docs.astral.sh/ruff/) for linting and formatting python code, and [djlint](https://github.com/djlint/djLint) for formatting html templates. You can run all of these with `simmate dev lint`, or individually:
 ``` shell
 ruff check . --fix
 ruff format .

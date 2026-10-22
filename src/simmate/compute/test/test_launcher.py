@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.compute.launcher import get_container_command, get_container_env
 
 

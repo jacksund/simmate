@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 import typer
@@ -12,7 +10,6 @@ def plot():
     """
     Commands for visualizing VASP output data (band structures, DOS, etc.).
     """
-    pass
 
 
 @plot_app.command()

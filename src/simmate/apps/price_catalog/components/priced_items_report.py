@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.website.htmx.components import HtmxComponent
 
 from ..models import PricedItem
@@ -38,9 +36,9 @@ class PricedItemsReportComponent(HtmxComponent):
     def post_parse(self):
         # BUG: checkbox field does not show in POST data when =False. This is
         # normal HTML behavior to save on bandwidth, but causes a bug here.
-        if "use_percent" not in self.post_data.keys():
+        if "use_percent" not in self.post_data:
             self.post_data["use_percent"] = False
-        if "use_inflation_adj" not in self.post_data.keys():
+        if "use_inflation_adj" not in self.post_data:
             self.post_data["use_inflation_adj"] = False
 
     def process(self):

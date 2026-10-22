@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import shutil
 import subprocess
 
@@ -68,7 +66,7 @@ class AirssStructure(StructureCreator):
         with self.cell_filename.open("w") as file:
             # first write the VARVOL line using predicted volume
             volume = composition.volume_estimate()
-            file.write("#VARVOL={}".format(volume) + "\n")
+            file.write(f"#VARVOL={volume}" + "\n")
 
             # write the SPECIES line
             line = "#SPECIES="
@@ -88,6 +86,7 @@ class AirssStructure(StructureCreator):
             shell=True,
             capture_output=True,
             cwd=self.temp_dir,
+            check=False,
         )
 
         # check to see if it was successful

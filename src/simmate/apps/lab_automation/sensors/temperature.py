@@ -77,7 +77,7 @@ class DS18B20:
         if not self.device_file.exists():
             raise RuntimeError(f"Could not find device file at {self.device_file}")
 
-        self._file_handle = open(self.device_file, "r")
+        self._file_handle = open(self.device_file, "r")  # noqa: SIM115
 
     def close(self):
         """Closes the device file connection."""

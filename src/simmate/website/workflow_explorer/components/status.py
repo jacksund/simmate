@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.website.htmx.components.base import HtmxComponent
 
 

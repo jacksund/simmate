@@ -1,6 +1,6 @@
 import math
+from collections.abc import Callable
 from datetime import date
-from typing import Callable
 
 from PySide6.QtCore import QDate, QSize, Qt, QTimer, Signal
 from PySide6.QtWidgets import (

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import os
 import platform
@@ -216,7 +214,7 @@ class S3Workflow(Workflow):
         elif is_restart and is_complete:
             logging.info("Calculation is already completed. Skipping setup.")
         else:  # (not is_restart and is_complete)
-            logging.warn(
+            logging.warning(
                 "It looks like you are running a new workflow inside of a folder "
                 "where another has already completed. This is fine "
                 "for now, but be aware that a future version of Simmate may "
@@ -255,7 +253,7 @@ class S3Workflow(Workflow):
         # Make sure the user is returning a compatible result from the workup
         # method.
         if not isinstance(extra_results, dict):
-            raise Exception(
+            raise TypeError(
                 "When defining a custom `workup` method, you must return a dictionary "
                 "(or None). This is so `corrections` can be added to your dictionary "
                 "and also the dictionary is used to update database columns when "
@@ -302,7 +300,6 @@ class S3Workflow(Workflow):
             not used, but instead, keywords should be explicitly defined when
             writing a setup method.
         """
-        pass
 
     @classmethod
     def setup_restart(directory: Path, **kwargs):
@@ -339,7 +336,6 @@ class S3Workflow(Workflow):
             not used, but instead, keywords should be explicitly defined when
             writing a setup method.
         """
-        pass
 
     @classmethod
     def _check_input_files(
@@ -436,7 +432,7 @@ class S3Workflow(Workflow):
                 command,
                 cwd=directory,
                 shell=True,
-                preexec_fn=(
+                preexec_fn=(  # noqa: PLW1509
                     None
                     if platform.system() == "Windows"
                     # or "mpirun" not in command  # See bug/optimize comment above
@@ -522,7 +518,7 @@ class S3Workflow(Workflow):
             # Now just wait for the process to finish. Note we use communicate
             # instead of the .wait() method. This is the recommended method
             # when we have stderr=subprocess.PIPE, which we use above.
-            output, errors = process.communicate()
+            _output, errors = process.communicate()
 
             # Check for errors again, because a non-monitor may be higher
             # priority than the monitor triggered above (if there was one).
@@ -725,7 +721,6 @@ class S3Workflow(Workflow):
         - `directory`:
             The directory to run everything in.
         """
-        pass
 
 
 # Custom errors that indicate exactly what causes the S3Task to exit.

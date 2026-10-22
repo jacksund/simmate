@@ -101,7 +101,7 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
         # TODO: consider filtering with concentration.todict() from source column
         # BUG: Will adding irrelevent compositions to the database break clease?
         # For now, I just filter any in the chemical system
-        all_elements = list(set([e for es in basis_elements for e in es]))
+        all_elements = list({e for es in basis_elements for e in es})
         all_elements.sort()
         chemical_system = "-".join(all_elements)
 
@@ -188,7 +188,7 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
                 # wait for run to finish and load the results
                 try:
                     result = state.result()  # structure_step
-                except:
+                except Exception:
                     logging.warning("CALC {row.id} FAILED.")
                     continue
                 # if isinstance(result, Exception):
@@ -339,7 +339,7 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
         monte_carlo_engine.run(steps=total_steps)
 
         # write output files
-        thermo = monte_carlo_engine.get_thermodynamic_quantities()
+        monte_carlo_engine.get_thermodynamic_quantities()
         # TODO: this is a dictionary of data that I can hold on to for EACH
         # composition + MC run. Then I'd put all results together in a
         # pandas dataframe and write to a CSV. Maybe write a new CSV each cycle

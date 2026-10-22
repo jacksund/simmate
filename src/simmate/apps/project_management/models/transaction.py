@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.contrib.auth.models import User
 
 from simmate.database.core import DatabaseTable, table_column
@@ -71,7 +69,7 @@ class Transaction(DatabaseTable):
         "Remove Tokens",
         "Other",
     ]
-    transaction_subtype = set(
+    transaction_subtype_options = set(
         funding_options
         + transfer_options
         + payment_options

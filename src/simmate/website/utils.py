@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import base64
 import io
 import json
@@ -88,10 +86,10 @@ def parse_multiselect(select_list: any) -> list:
     if isinstance(select_list, str) and "--and--" in select_list:
         select_list = select_list.split("--and--")
         # Its common to have a list of IDs (integers)
-        if all([i.isnumeric() for i in select_list]):
+        if all(i.isnumeric() for i in select_list):
             select_list = [int(i) for i in select_list]
 
-    elif isinstance(select_list, str) or isinstance(select_list, int):
+    elif isinstance(select_list, (str, int)):
         select_list = [select_list]  # lone id that needs placed in list
 
     return select_list
@@ -228,12 +226,12 @@ def parse_request_get(
     extra_kwargs = {
         key: url_get_args.pop(key)
         for key in ["order_by", "limit", "page", "page_size"]
-        if key in url_get_args.keys()
+        if key in url_get_args
     }
 
     # special case for "format", which is only used to determine how to
     # render the results. This is thrown out if it is not requested
-    if include_format and "format" in url_get_args.keys():
+    if include_format and "format" in url_get_args:
         extra_kwargs["format"] = url_get_args.pop("format", "html")
     else:
         # try removing whether its there or not

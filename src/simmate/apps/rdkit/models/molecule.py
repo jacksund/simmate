@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pandas
 from django.contrib.postgres import indexes
 from django.db.models import Func

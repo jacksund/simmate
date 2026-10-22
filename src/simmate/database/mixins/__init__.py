@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .band_structure import BandStructure, BandStructureCalc
 from .calculation import Calculation
 from .density_of_states import DensityofStates, DensityofStatesCalc

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import random
 
 from django.contrib.auth.models import User

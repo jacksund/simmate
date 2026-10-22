@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.http import HttpResponseRedirect
 
 from simmate.website.htmx.components import HtmxComponent
@@ -30,7 +28,7 @@ class WorkflowSearchComponent(HtmxComponent):
     def post_parse(self):
         # BUG: checkbox field does not show in POST data when =False. This is
         # normal HTML behavior to save on bandwidth, but causes a bug here.
-        if "recommended_only" not in self.post_data.keys():
+        if "recommended_only" not in self.post_data:
             self.post_data["recommended_only"] = False
 
     def process(self):

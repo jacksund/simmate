@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 

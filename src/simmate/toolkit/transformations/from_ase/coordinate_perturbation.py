@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from ase_ga.standardmutations import RattleMutation
 from ase_ga.utilities import closest_distances_generator
 from pymatgen.io.ase import AseAtomsAdaptor
@@ -52,7 +50,7 @@ class CoordinatePerturbation(Transformation):
             # rng=np.random  # TODO: consider changing to normal dist
         )
 
-        #!!! Their code suggests the use of .get_new_individual() but I think
+        # !!! Their code suggests the use of .get_new_individual() but I think
         # .mutate() is what we'd like
         new_structure_ase = rattle.mutate(structure_ase)
 

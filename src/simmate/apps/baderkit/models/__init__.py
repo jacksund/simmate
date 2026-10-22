@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .badelf import Badelf, BadelfCalculation
 from .bader import Bader
 from .elf_analysis import ElfAnalysis, ElfAnalysisCalculation

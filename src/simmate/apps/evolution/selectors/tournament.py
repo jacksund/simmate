@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pandas
 
 from simmate.apps.evolution.selectors import Selector
@@ -24,8 +22,7 @@ class TournamentSelection(Selector):
         # We want the tournament size to be based on the total number of
         # inidividuals available.
         ntournament = int(len(individuals) * tournament_size)
-        if ntournament < tournament_min:
-            ntournament = tournament_min
+        ntournament = max(ntournament, tournament_min)
 
         # Run the series of tournaments and select the winner from each
         tournament_winners = []

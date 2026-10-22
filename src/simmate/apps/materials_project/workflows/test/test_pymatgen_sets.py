@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 from pymatgen.analysis.diffusion.neb.io import MVLCINEBEndPointSet, MVLCINEBSet
 from pymatgen.io.vasp.sets import (

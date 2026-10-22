@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .relaxation import (
     Relaxation__QuantumEspresso__Quality00,
     Relaxation__QuantumEspresso__Quality01,

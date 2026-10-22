@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .prepop_relaxation_static_hse_hse import (
     Relaxation__Vasp__HseWithWavecarWarren,
     StagedRelaxStatic__Vasp__RelaxationStaticHseHseWarren,

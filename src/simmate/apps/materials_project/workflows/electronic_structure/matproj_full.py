@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.materials_project.workflows.electronic_structure.matproj_band_structure import (
     ElectronicStructure__Vasp__MatprojBandStructure,
 )

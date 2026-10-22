@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from simmate.apps.vasp.inputs.potcar_mappings import PBE_GW_POTCAR_MAPPINGS
 
 from .hse import StaticEnergy__Vasp__HseWarren

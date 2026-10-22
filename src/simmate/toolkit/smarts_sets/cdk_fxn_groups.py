@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.toolkit.smarts_sets.base import SmartsSet
 
 

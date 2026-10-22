@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Full documentation and guides for custom error-handlers is on our to-do this.
 If this is of particular interest to you, please let our team know so that

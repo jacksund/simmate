@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 class CreateManyMixin:
     # for form_mode "create_many"
 

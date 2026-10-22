@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
-
 import os
 from pathlib import Path
 
 from baderkit.core import Badelf, SpinBadelf
 
+from simmate.database import connect  # ruff: isort: skip
+
 from simmate.apps.baderkit.models import BadelfCalculation as BadelfModel
 from simmate.apps.baderkit.models import SpinBadelfCalculation as SpinBadelfModel
-from simmate.database import connect
 from simmate.workflows import Workflow
 
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import random
 
 from simmate.database.core import DatabaseTable, table_column

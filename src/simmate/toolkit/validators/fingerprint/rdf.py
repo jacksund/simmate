@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.toolkit.validators.fingerprint import FingerprintValidator
 
 from .featurizers import RadialDistributionFunction as rdf

@@ -101,14 +101,17 @@ class DashboardTab(QStackedWidget):
     def open_path(self, path: Path):
         """Open a dataset file (e.g. one from the Datasets tab)."""
         rows = ToolkitDataset.count_rows(path)
-        if rows is not None and rows > LARGE_DATASET_ROWS:
-            if not confirm(
+        if (
+            rows is not None
+            and rows > LARGE_DATASET_ROWS
+            and not confirm(
                 self,
                 "Open a large dataset?",
                 f"{path.stem} has {rows:,} rows, so it may use a lot of memory "
                 "and be slow to explore.",
-            ):
-                return
+            )
+        ):
+            return
         self._load(path.stem, lambda _: ToolkitDataset.from_file(path))
 
     def upload(self, source: Path):

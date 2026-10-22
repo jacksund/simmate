@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import collections
 
 import pandas as pd
@@ -92,7 +90,7 @@ class SchedulePlanner:
 
         # 3. Dependencies
         for dep in self.dependencies:
-            from_start, from_end = self._get_start_end_vars(dep["from"])
+            _from_start, from_end = self._get_start_end_vars(dep["from"])
             to_start, to_end = self._get_start_end_vars(dep["to"])
 
             ctype = dep["type"]

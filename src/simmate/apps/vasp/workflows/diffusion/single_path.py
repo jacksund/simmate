@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from simmate.toolkit import Structure
@@ -124,7 +122,7 @@ class SinglePathWorkflow(Workflow):
         )
 
         # Run NEB on this set of images
-        neb_images = cls.from_images_workflow.run(
+        cls.from_images_workflow.run(
             migration_images=images,
             command=command,  # subcommands["command_neb"]
             source=source,

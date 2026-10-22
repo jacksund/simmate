@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.database.core import DatabaseTable, table_column
 from simmate.database.mixins import ThirdPartyData
 
@@ -169,21 +167,21 @@ class EppoCode(ThirdPartyData, DatabaseTable):
             entry["id"] = entry.pop("eppo_code")
 
             # BUG-FIX: "class" key must be "class_name" to work
-            if "class" in entry.keys():
+            if "class" in entry:
                 entry["class_name"] = entry.pop("class")
 
             # BUG-FIX: replace encoding issues
-            if "other_scientific_names" in entry.keys():
+            if "other_scientific_names" in entry:
                 entry["other_scientific_names"] = [
                     n.replace("è", "e").replace("é", "e")
                     for n in entry.pop("other_scientific_names")
                 ]
-            if "common_names" in entry.keys():
+            if "common_names" in entry:
                 entry["common_names"] = [
                     n.replace("è", "e").replace("é", "e")
                     for n in entry.pop("common_names")
                 ]
-            if "subfamily" in entry.keys():
+            if "subfamily" in entry:
                 entry["subfamily"] = entry.pop("subfamily").replace("ö", "o")
 
             # remove some unwanted fields

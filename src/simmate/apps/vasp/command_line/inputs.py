@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 import typer
@@ -12,7 +10,6 @@ def inputs():
     """
     Commands for generating and analyzing VASP input files (POTCAR, INCAR, etc.).
     """
-    pass
 
 
 @inputs_app.command()

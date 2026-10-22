@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 from pathlib import Path
 
@@ -17,7 +15,6 @@ def workflows():
     """
     Commands for exploring, configuring, and executing Simmate workflows.
     """
-    pass
 
 
 def list_options(options: list) -> int:
@@ -105,7 +102,7 @@ def parse_parameters(context: Context) -> dict:
             for i in range(0, len(context.args), 2)
         }
 
-    except:
+    except Exception:
         raise typer.BadParameter(
             "This workflow command appears to be improperly formatted. \n"
             "When giving workflow parameters, make sure you provide both the \n"

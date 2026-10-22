@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.command_line.base_command import simmate_app
 
 

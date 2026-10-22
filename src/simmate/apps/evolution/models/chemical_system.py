@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import traceback
 import warnings
@@ -202,7 +200,7 @@ class ChemicalSystemSearch(Calculation):
         for rank, structure in enumerate(structures):
             rank_cleaned = str(rank).zfill(2)  # converts 1 to 01
             structure_filename = directory / (
-                f"rank-{str(rank_cleaned)}__"
+                f"rank-{rank_cleaned!s}__"
                 + f"id-{structure.database_object.id}"
                 + f"id-{structure.composition.reduced_formula}.cif"
             )

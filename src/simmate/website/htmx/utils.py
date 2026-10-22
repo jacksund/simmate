@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import importlib
 from inspect import getmembers, isclass
 

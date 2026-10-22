@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .badelf import (
     PopulationAnalysis__VaspBader__BadelfMatproj,
     StaticEnergy__Vasp__PrebadelfMatproj,

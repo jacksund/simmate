@@ -165,149 +165,145 @@ df = load_data()
 # create columns to put buttons in a row
 column1, column2, column3, column4, column5 = st.columns(5)
 
-with column1:
-    with st.popover("Columns"):
-        columns_display_toggles = [
-            st.checkbox(
-                label=column,
-                value=True,
+with column1, st.popover("Columns"):
+    columns_display_toggles = [
+        st.checkbox(
+            label=column,
+            value=True,
+        )
+        for column in df.columns
+    ]
+    columns_to_display = [
+        column
+        for display, column in zip(columns_display_toggles, df.columns)
+        if display
+    ]
+
+with column2, st.popover("Plot"):
+    plot_type = st.selectbox(
+        label="Plot Type",
+        options=get_plot_constructor_options(),
+        index=0,  # default to the chatbot!
+    )
+    plot_constructor = get_plot_constructor(plot_type) if plot_type else None
+    plot_config = plot_constructor.get_inputs(df) if plot_type else {}
+
+with column3, st.popover("Filters"):
+    # BUG: search as-is removes & resets filters not in search results
+    # column_search_query = st.text_input("Search for column")
+    # st.divider()
+
+    filters = {}
+    for column_name, column_dtype in zip(df.columns, df.dtypes):
+        # if column_search_query and column_search_query not in column_name:
+        #     continue
+
+        # Code I wrote independently but also I later found this source,
+        # which is almost exactly the same, so I used it tweak some checks:
+        # https://blog.streamlit.io/auto-generate-a-dataframe-filtering-ui-in-streamlit-with-filter_dataframe/
+
+        filter_value = None
+
+        if column_dtype == dict:
+            continue  # TODO: I don't build filters for json fields yet
+
+        elif is_numeric_dtype(column_dtype):
+            min_val = df[column_name].min()
+            max_val = df[column_name].max()
+            if min_val == max_val:
+                # this column only has a single value, so there is
+                # no need for a filter
+                continue
+            default = (min_val, max_val)
+            filter_value = st.slider(
+                column_name,
+                min_value=min_val,
+                max_value=max_val,
+                value=default,
             )
-            for column in df.columns
-        ]
-        columns_to_display = [
-            column
-            for display, column in zip(columns_display_toggles, df.columns)
-            if display
-        ]
+            if filter_value != default:
+                filters[column_name] = {
+                    "metric": "range",  # aka between
+                    "value": filter_value,
+                }
+            # df = df[df[column].between(*user_num_input)]
 
-with column2:
-    with st.popover("Plot"):
-        plot_type = st.selectbox(
-            label="Plot Type",
-            options=get_plot_constructor_options(),
-            index=0,  # default to the chatbot!
-        )
-        plot_constructor = get_plot_constructor(plot_type) if plot_type else None
-        plot_config = plot_constructor.get_inputs(df) if plot_type else {}
+        # Treat columns with < 10 unique values as categorical
+        elif (
+            isinstance(column_dtype, pd.CategoricalDtype)
+            or df[column_name].nunique() < 10
+        ):
+            filter_value = st.multiselect(
+                label=column_name,
+                options=df[column_name].unique(),
+                default=None,
+            )
+            if filter_value:
+                filters[column_name] = {
+                    "metric": "in",
+                    "value": filter_value,
+                }
+                # df = df[df[column].isin(user_cat_input)]
 
-with column3:
-    with st.popover("Filters"):
-        # BUG: search as-is removes & resets filters not in search results
-        # column_search_query = st.text_input("Search for column")
-        # st.divider()
+        elif is_datetime64_any_dtype(column_dtype):
+            continue  # TODO: I don't build filters for datetime fields yet
+            # min_val = df[column_name].min()
+            # max_val = df[column_name].max()
+            # default = (min_val, max_val)
+            # filter_value = st.date_input(
+            #     column_name,
+            #     value=default,
+            # )
+            # if filter_value != default:
+            #     filters[column_name] = {
+            #         "metric": "range",  # aka between
+            #         "value": filter_value,
+            #     }
+            # if len(filter_value) == 2:
+            #     user_date_input = tuple(map(pd.to_datetime, user_date_input))
+            #     start_date, end_date = user_date_input
+            #     df = df.loc[df[column].between(start_date, end_date)]
 
-        filters = {}
-        for column_name, column_dtype in zip(df.columns, df.dtypes):
-            # if column_search_query and column_search_query not in column_name:
-            #     continue
+        else:
+            filter_value = st.text_input(label=column_name)
+            if filter_value:
+                filters[column_name] = {
+                    "metric": "exact",  # !!! consider "contains"
+                    "value": filter_value,
+                }
+            # if filter_value:
+            #     df = df[df[column].astype(str).str.contains(user_text_input)]
 
-            # Code I wrote independently but also I later found this source,
-            # which is almost exactly the same, so I used it tweak some checks:
-            # https://blog.streamlit.io/auto-generate-a-dataframe-filtering-ui-in-streamlit-with-filter_dataframe/
+with column4, st.popover("Add columns", disabled=True):
+    smiles_column = st.selectbox(
+        label="SMILES Column",
+        options=df.columns,
+        index=list(df.columns).index("smiles") if "smiles" in df.columns else None,
+    )
 
-            filter_value = None
+    selected_x = st.multiselect(
+        label="Calculated Properties",
+        options=[
+            "Molecular Weight",
+            "2D Chemspace Mapping",
+            "2D Similarity to",
+        ],
+        default=[],
+    )
 
-            if column_dtype == dict:
-                continue  # TODO: I don't build filters for json fields yet
+    st.divider()
 
-            elif is_numeric_dtype(column_dtype):
-                min_val = df[column_name].min()
-                max_val = df[column_name].max()
-                if min_val == max_val:
-                    # this column only has a single value, so there is
-                    # no need for a filter
-                    continue
-                default = (min_val, max_val)
-                filter_value = st.slider(
-                    column_name,
-                    min_value=min_val,
-                    max_value=max_val,
-                    value=default,
-                )
-                if filter_value != default:
-                    filters[column_name] = {
-                        "metric": "range",  # aka between
-                        "value": filter_value,
-                    }
-                # df = df[df[column].between(*user_num_input)]
+    # TODO: add options for each one selected. E.g.m if 2D similarity,
+    # add extra input option for smiles
+    # TODO: actually apply these
+    import time
 
-            # Treat columns with < 10 unique values as categorical
-            elif (
-                isinstance(column_dtype, pd.CategoricalDtype)
-                or df[column_name].nunique() < 10
-            ):
-                filter_value = st.multiselect(
-                    label=column_name,
-                    options=df[column_name].unique(),
-                    default=None,
-                )
-                if filter_value:
-                    filters[column_name] = {
-                        "metric": "in",
-                        "value": filter_value,
-                    }
-                    # df = df[df[column].isin(user_cat_input)]
-
-            elif is_datetime64_any_dtype(column_dtype):
-                continue  # TODO: I don't build filters for datetime fields yet
-                # min_val = df[column_name].min()
-                # max_val = df[column_name].max()
-                # default = (min_val, max_val)
-                # filter_value = st.date_input(
-                #     column_name,
-                #     value=default,
-                # )
-                # if filter_value != default:
-                #     filters[column_name] = {
-                #         "metric": "range",  # aka between
-                #         "value": filter_value,
-                #     }
-                # if len(filter_value) == 2:
-                #     user_date_input = tuple(map(pd.to_datetime, user_date_input))
-                #     start_date, end_date = user_date_input
-                #     df = df.loc[df[column].between(start_date, end_date)]
-
-            else:
-                filter_value = st.text_input(label=column_name)
-                if filter_value:
-                    filters[column_name] = {
-                        "metric": "exact",  # !!! consider "contains"
-                        "value": filter_value,
-                    }
-                # if filter_value:
-                #     df = df[df[column].astype(str).str.contains(user_text_input)]
-
-with column4:
-    with st.popover("Add columns", disabled=True):
-        smiles_column = st.selectbox(
-            label="SMILES Column",
-            options=df.columns,
-            index=list(df.columns).index("smiles") if "smiles" in df.columns else None,
-        )
-
-        selected_x = st.multiselect(
-            label="Calculated Properties",
-            options=[
-                "Molecular Weight",
-                "2D Chemspace Mapping",
-                "2D Similarity to",
-            ],
-            default=[],
-        )
-
-        st.divider()
-
-        # TODO: add options for each one selected. E.g.m if 2D similarity,
-        # add extra input option for smiles
-        # TODO: actually apply these
-        import time
-
-        apply_calcs = st.button(
-            "Apply",
-            on_click=time.sleep,
-            args=(2,),
-            type="primary",
-        )
+    apply_calcs = st.button(
+        "Apply",
+        on_click=time.sleep,
+        args=(2,),
+        type="primary",
+    )
 
 with column5:
     st.download_button(

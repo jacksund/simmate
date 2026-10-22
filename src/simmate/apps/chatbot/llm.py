@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from langchain_core.language_models.chat_models import BaseChatModel
 
 from simmate.config import settings
@@ -29,8 +26,8 @@ def get_llm(**kwargs) -> BaseChatModel:
     if provider == "OpenAI":
         try:
             from langchain_openai import AzureChatOpenAI
-        except:
-            Exception(
+        except Exception:
+            raise Exception(
                 "To use the chatbot with OpenAi, you must first run... "
                 "`conda install -c conda-forge langchain-openai`"
             )
@@ -50,8 +47,8 @@ def get_llm(**kwargs) -> BaseChatModel:
     elif provider == "Google-GenAI":
         try:
             from langchain_google_genai import ChatGoogleGenerativeAI
-        except:
-            Exception(
+        except Exception:
+            raise Exception(
                 "To use the chatbot with Google-GenAI, you must first run... "
                 "`conda install -c conda-forge langchain-google-genai`"
             )

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.vasp.inputs import Incar
 
 
@@ -297,10 +295,10 @@ def test_incar(tmp_path, structure):
 
     # simply check that we can reload. Checking for values and logic should be
     # done with individual keyword modifiers
-    incar4 = Incar.from_file(incar_filename)
+    Incar.from_file(incar_filename)
 
     # TODO: assert equal to ....
-    diff = incar1.compare_incars(incar2)
+    incar1.compare_incars(incar2)
 
 
 def test_custom_keyword_modifier(tmp_path, sample_structures):

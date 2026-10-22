@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-
 import base64
 
-import cloudpickle
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import JsonResponse

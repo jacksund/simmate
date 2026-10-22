@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import numpy
 from pymatgen.analysis.diffusion.neb.pathfinder import (
     DistinctPathFinder,
@@ -378,7 +376,7 @@ class MigrationImages(list):
         else:
             raise Exception(
                 "Unknown format provided for migration_images input."
-                f"The following was provided: {str(migration_images)} of type "
+                f"The following was provided: {migration_images!s} of type "
                 f"{type(migration_images)}"
             )
 

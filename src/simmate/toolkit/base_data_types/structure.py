@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This module defines the Structure class.
 
@@ -109,12 +107,12 @@ class Structure(PymatgenStructure):
 
         # if the "@module" key is in the dictionary, then we have a pymatgen
         # structure dict which we convert to a pymatgen object and return
-        elif isinstance(structure, dict) and "@module" in structure.keys():
+        elif isinstance(structure, dict) and "@module" in structure:
             structure_cleaned = cls.from_dict(structure)
 
         # if there is a database_table key, then we are pointing to the simmate
         # database for the input structure
-        elif isinstance(structure, dict) and "database_table" in structure.keys():
+        elif isinstance(structure, dict) and "database_table" in structure:
             structure_cleaned = cls.from_database_dict(structure)
 
         # if the value is a str and it relates to a filepath, then we load the
@@ -138,7 +136,7 @@ class Structure(PymatgenStructure):
                     f"We were unable to find '{structure}' in '{Path.cwd()}'"
                 )
             else:
-                raise Exception(
+                raise TypeError(
                     "Unknown format provided for structure input. "
                     f"{type(structure)} was provided."
                 )

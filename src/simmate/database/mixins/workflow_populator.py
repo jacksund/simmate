@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from simmate.utils import chunk_list
@@ -133,7 +131,7 @@ class WorkflowPopulator:
                         for entry, entry_result in zip(objs_to_update, results):
                             setattr(entry, column_name, entry_result)
                         cls.objects.bulk_update(objs_to_update, [column_name])
-            except:
+            except Exception:
                 logging.warning("BATCH FAILED")
                 continue
 
@@ -142,5 +140,5 @@ class WorkflowPopulator:
         """
         Uses the `workflow_columns` property to fill columns with data.
         """
-        for column_name in cls.workflow_columns.keys():
+        for column_name in cls.workflow_columns:
             cls.populate_workflow_column(column_name, batch_size=batch_size)

@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-
 import pandas as pd
 from rich.progress import track
 
 try:
     from selenium import webdriver
-except:
+except Exception:
     raise Exception(
         "To use this method, Selenium is required. Please install it "
         "with `conda install -c conda-forge selenium"
@@ -65,7 +63,7 @@ for entry in track(data):
 
         # append to results
         entry.append(poscar)
-    except:
+    except Exception:
         entry.append(None)
 
 

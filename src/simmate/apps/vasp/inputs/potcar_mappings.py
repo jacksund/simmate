@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 # grab the users set directory for all of their VASP POTCAR files

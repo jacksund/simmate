@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This settings file is only for running Simmate's test suite with pytest.
 

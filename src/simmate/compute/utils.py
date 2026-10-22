@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import signal
 import threading
 from contextlib import contextmanager

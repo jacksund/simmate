@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pymatgen.io.vasp.inputs import Kpoints
 from pymatgen.symmetry.bandstructure import HighSymmKpath
 

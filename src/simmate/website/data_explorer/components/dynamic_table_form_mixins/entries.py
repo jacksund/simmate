@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 class EntriesMixin:
     page = None
     pagination_urls = None

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.rdkit.models import Molecule
 from simmate.database.core import table_column
 from simmate.database.mixins import Calculation

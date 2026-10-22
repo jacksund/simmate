@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from .base import Controller
 
 
@@ -61,8 +58,8 @@ class FuzzyLogic(Controller):
 
     def __repr__(self):
         return (
-            "{self.__class__.__name__}("
-            "rules={self.rules!r}, auto_mode={self.auto_mode!r}, "
-            "default_output={self.default_output!r}"
+            f"{self.__class__.__name__}("
+            f"rules={self.rules!r}, auto_mode={self.auto_mode!r}, "
+            f"default_output={self.default_output!r}"
             ")"
-        ).format(self=self)
+        )

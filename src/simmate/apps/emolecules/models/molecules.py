@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import gzip
 import logging
 import shutil
@@ -248,9 +246,11 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
                 if unpack and download_filename.suffix == ".gz":
                     unpacked_filename = download_dir / download_filename.stem
                     if not (use_old and unpacked_filename.exists()):
-                        with gzip.open(download_filename, "rb") as f_in:
-                            with unpacked_filename.open("wb") as f_out:
-                                shutil.copyfileobj(f_in, f_out)
+                        with (
+                            gzip.open(download_filename, "rb") as f_in,
+                            unpacked_filename.open("wb") as f_out,
+                        ):
+                            shutil.copyfileobj(f_in, f_out)
                     # replace filename for final_files use
                     download_filename = unpacked_filename
 
@@ -316,12 +316,10 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
         # split the ids we need to update into chunks to make things easier
         # on the database (rather than making millions of db_objs in one go)
         chunk_size = 25_000
-        nchunk = 0
         nchunks_total = (len(current_listing) // chunk_size) + 1
         failed_rows = []
-        for emol_chunk in chunk_list(current_listing, chunk_size):
+        for nchunk, emol_chunk in enumerate(chunk_list(current_listing, chunk_size)):
             logging.info(f"CHUNK # {nchunk} of {nchunks_total}")
-            nchunk += 1
 
             logging.info("Generating database objects...")
             db_objs = []
@@ -335,7 +333,7 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
                         molecule_original=row.isosmiles,
                     )
                     db_objs.append(molecule_db)
-                except:
+                except Exception:
                     failed_rows.append(row.to_dict())
 
             logging.info("Saving to Simmate database...")
@@ -405,12 +403,10 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
         # split the ids we need to update into chunks to make things easier
         # on the database (rather than making millions of db_objs in one go)
         chunk_size = 25_000
-        nchunk = 0
         nchunks_total = (len(current_listing) // chunk_size) + 1
         failed_rows = []
-        for emol_chunk in chunk_list(current_listing, chunk_size):
+        for nchunk, emol_chunk in enumerate(chunk_list(current_listing, chunk_size)):
             logging.info(f"CHUNK # {nchunk} of {nchunks_total}")
-            nchunk += 1
 
             logging.info("Generating database objects...")
             db_objs = []
@@ -428,7 +424,7 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
                         mfcd=row.mfcd,
                     )
                     db_objs.append(molecule_db)
-                except:
+                except Exception:
                     failed_rows.append(row.to_dict())
 
             logging.info("Saving to Simmate database...")

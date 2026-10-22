@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 
 Currently I grab the first table for each spacegroup, but in many cases there
@@ -18,7 +16,7 @@ from rich.progress import track
 
 try:
     from selenium import webdriver
-except:
+except Exception:
     raise Exception(
         "To use this method, Selenium is required. Please install it "
         "with `conda install -c conda-forge selenium"

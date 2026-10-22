@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import uuid
 import webbrowser
 from pathlib import Path

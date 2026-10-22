@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-
 import logging
+from contextlib import suppress
 
 import requests
 from bs4 import BeautifulSoup
@@ -78,12 +77,10 @@ class PubChemClient:
 
         # revert to searching via cas which is more robust
         for cas_number in cas_numbers:
-            try:
+            with suppress(Exception):
                 # !!! we just use the first cas number that works
                 assert cls.get_data_from_cas_number(cas_number)
                 return cas_number
-            except:
-                continue
 
     # -------------------------------------------------------------------------
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 from simmate.apps.vasp.error_handlers import LargeSigma
@@ -38,7 +36,7 @@ def test_large_sigma(tmp_path):
     incar = Incar.from_file(incar_filename)
     incar["KSPACING"] = 0.2
     incar.to_file(incar_filename)
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="Unable to fix LargeSigma error"):
         fix = error_handler.correct(tmp_path)
 
     # Confirm an error IS NOT found when no outcar exists

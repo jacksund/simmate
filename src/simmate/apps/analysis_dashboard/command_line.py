@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 from pathlib import Path
 
@@ -14,7 +12,6 @@ def base_command():
     Commands for managing the Simmate Analysis Dashboard, a Streamlit-based
     interface for data visualization and analysis.
     """
-    pass
 
 
 @simmate_analysis_dashboard_app.command()
@@ -57,4 +54,5 @@ def start(
     subprocess.run(
         f"streamlit run {server_file} {extra_config}",
         shell=True,
+        check=False,
     )

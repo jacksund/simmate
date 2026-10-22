@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import math
 
 from pymatgen.core import Species
@@ -154,7 +152,7 @@ def keyword_modifier_smart_ldau(structure: Structure, ldau_config: dict):
 
     # To help decide how we set these values, let's check what the most
     # electronegative element is, which will be last in the sorted composition
-    most_electroneg = sorted(structure.composition.elements)[-1].symbol
+    most_electroneg = max(structure.composition.elements).symbol
 
     # As we go through these settings, we want see if we are even using LDAU.
     # For example if we ran a calculation on NaCl, we'd probably see that

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This module hosts common utilities for Simmate's workflow library. This includes
 functions for grabbing all available workflows as well as dynamically loading
@@ -374,7 +372,7 @@ def load_results_from_directories(base_directory: Path | str = "."):
 
             logging.info("Successfully loaded into database.")
 
-        except:
+        except Exception:
             logging.warning("Failed to load into database")
 
 

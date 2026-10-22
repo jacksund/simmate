@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 def validate_cas_number(cas_number: str) -> bool:
     """
     The final number in CAS numbers have are actually a check digit, which
@@ -25,7 +22,7 @@ def validate_cas_number(cas_number: str) -> bool:
     # check 2: each section must be numerical and an integer
     try:
         primary, secondary, check_digit = [int(c) for c in chunks]
-    except:
+    except Exception:
         return False  # FAILS
 
     # check 3: secondary digit must be 2 digits (i.e. under 100)
@@ -44,8 +41,4 @@ def validate_cas_number(cas_number: str) -> bool:
     expected_check_digit = (
         sum([(len(rn_flat) - n) * int(i) for n, i in enumerate(rn_flat)]) % 10
     )
-    if check_digit != expected_check_digit:
-        return False
-
-    # if all checks above passed
-    return True
+    return check_digit == expected_check_digit

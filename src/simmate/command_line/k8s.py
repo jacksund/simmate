@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This defines commands for managing local Kubernetes/Helm deployments. All commands are
 accessible through the `simmate dev k8s` command.
@@ -20,7 +18,6 @@ def k8s():
     """
     Commands for managing local Kubernetes/Helm deployments.
     """
-    pass
 
 
 @k8s_app.command()
@@ -43,12 +40,14 @@ def deploy(
         subprocess.run(
             f"helm template {release_name} envs/helm --debug -f {k8s_values}",
             shell=True,
+            check=False,
         )
     else:
         logging.info(f"Running helm upgrade --install for release {release_name}...")
         subprocess.run(
             f"helm upgrade --install {release_name} envs/helm -f {k8s_values}",
             shell=True,
+            check=False,
         )
 
 
@@ -89,7 +88,7 @@ def exec():
 
     pod = pods[choice]
     logging.info(f"Opening bash in pod: {pod}")
-    subprocess.run(f"kubectl exec -it {pod} -- /bin/bash", shell=True)
+    subprocess.run(f"kubectl exec -it {pod} -- /bin/bash", shell=True, check=False)
 
 
 @k8s_app.command()
@@ -104,6 +103,7 @@ def scale(
     subprocess.run(
         f"kubectl scale deployment simmate-{service}-deployment --replicas={replicas}",
         shell=True,
+        check=False,
     )
 
 
@@ -140,6 +140,7 @@ def update_static():
     subprocess.run(
         f"kubectl exec -it {pod} -- sh -c 'cp -r /root/simmate/src/simmate/website/static/* /staticfiles/'",
         shell=True,
+        check=False,
     )
 
 
@@ -152,4 +153,6 @@ def update_db():
     pod = _get_gunicorn_pod()
 
     logging.info("Running `simmate database update`...")
-    subprocess.run(f"kubectl exec -it {pod} -- simmate database update", shell=True)
+    subprocess.run(
+        f"kubectl exec -it {pod} -- simmate database update", shell=True, check=False
+    )

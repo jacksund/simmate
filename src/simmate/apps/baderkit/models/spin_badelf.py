@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from baderkit.core import SpinBadelf as SpinBadelfClass
@@ -65,7 +63,6 @@ class SpinBadelf(Badelf):
         this model, an error is thrown. To account for this, I just create an empty
         update_from_directory method here.
         """
-        pass
 
     @classmethod
     def from_badelf(cls, badelf: SpinBadelfClass, directory: Path, **kwargs):

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import subprocess
 
 from simmate.website.htmx.components import HtmxComponent
@@ -26,6 +24,7 @@ class CommandComponent(HtmxComponent):
                 stderr=subprocess.STDOUT if merge_stderr else subprocess.PIPE,
                 text=True,
                 timeout=timeout,
+                check=False,
             )
         except (FileNotFoundError, subprocess.TimeoutExpired, OSError) as error:
             return subprocess.CompletedProcess(

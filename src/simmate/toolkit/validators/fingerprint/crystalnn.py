@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.toolkit.validators.fingerprint.base import FingerprintValidator
 
 from .featurizers import CrystalNNFingerprint as cnnf

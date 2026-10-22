@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from numpy.random import normal as numpy_random_normal
 
 

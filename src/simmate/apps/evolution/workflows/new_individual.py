@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import shutil
 from pathlib import Path
@@ -35,7 +33,7 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
         search_db = FixedCompositionSearch.objects.get(id=search_id)
         source_db = search_db.steadystate_sources.get(id=steadystate_source_id)
         validator = search_db.validator
-        #!!!
+        # !!!
         # The search db has a method .individuals_datatable that connects to a
         # relaxation datatable with all of the individuals so far. We just need
         # a method in this relaxation table (defined in structure table) that

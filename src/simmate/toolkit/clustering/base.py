@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.toolkit import Molecule
 from simmate.toolkit.featurizers.base import Featurizer
 from simmate.toolkit.similarity.base import SimilarityEngine
@@ -85,7 +83,7 @@ class ClusteringEngine:
                     "Only the 'cluster_molecules' method is supported for this preset"
                 )
 
-            cluster_method = getattr(ClusterIdentity, "cluster_molecules")
+            cluster_method = ClusterIdentity.cluster_molecules
             clusters = cluster_method(
                 featurizer=PropertyGrabber,
                 similarity_engine=Identity,

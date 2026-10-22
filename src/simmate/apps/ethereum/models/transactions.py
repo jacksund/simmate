@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from datetime import datetime
 
 from django.utils.timezone import make_aware
@@ -117,7 +116,7 @@ class EthereumTransaction(ThirdPartyData, DatabaseTable):
 
             if transaction["metadata"]["blockTimestamp"]:
                 date_str = transaction["metadata"]["blockTimestamp"]
-                created_at_original = datetime.fromisoformat(date_str[:-1] + "+00:00")
+                created_at_original = datetime.fromisoformat(date_str)
             else:
                 created_at_original = None
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This module is for Simmate's test suite. You'll only use this if you are
 contributing to the source code and making new tests.
@@ -191,7 +189,7 @@ def django_db_setup(
         Spacegroup.load_source_data()
 
         # now add test structures
-        for name, structure in sample_structures.items():
+        for structure in sample_structures.values():
             structure_db = TestStructure.from_toolkit(structure=structure)
             structure_db.save()
 

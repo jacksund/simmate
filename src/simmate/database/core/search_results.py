@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import shutil
 from pathlib import Path
 
@@ -101,7 +99,7 @@ class SearchResults(models.QuerySet):
                 # needed for the dataframe If not, another query is needed
                 else:
                     cache_columns = list(self._fields)
-                    has_all_cols = all([c in cache_columns for c in columns])
+                    has_all_cols = all(c in cache_columns for c in columns)
                     if has_all_cols:
                         i_map = [cache_columns.index(c) for c in columns]
                         values_list = [

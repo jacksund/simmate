@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .dashboard import LabDashboardComponent
 from .sensors import (
     AirQualityComponent,

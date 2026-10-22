@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .batch import Batch
 from .container import Container
 from .mixture import Mixture

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from simmate.apps.vasp.inputs import Incar
@@ -45,7 +43,7 @@ class Eddrmm(ErrorHandler):
         if current_icharg < 10:
             # check if IMAGES is in the INCAR. If so, we have a NEB calculation,
             # and the there will be a different organization of folders.
-            if "IMAGES" in incar.keys():
+            if "IMAGES" in incar:
                 # here, folders will be 00, 01, 02, etc. with CHGCARs/WAVECARs
                 # in each. We iterate through and delete all of them.
                 subdirectories = [

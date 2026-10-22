@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.db import models as table_column
 
 from simmate.database.core.table import DatabaseTable

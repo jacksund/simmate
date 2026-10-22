@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 from simmate.apps.vasp.error_handlers import NonConverging
@@ -58,7 +56,7 @@ def test_nonconverging(tmp_path):
     assert incar["ICHARG"] == 2
 
     # Make final attempt at fixing the error, which raises an error
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="Unable to fix NonConverging error"):
         fix = error_handler.correct(tmp_path)
 
     # Make sure an error is not raised when an electronic step converges

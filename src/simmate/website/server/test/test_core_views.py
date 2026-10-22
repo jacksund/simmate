@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 from pytest_django.asserts import assertTemplateNotUsed, assertTemplateUsed
 

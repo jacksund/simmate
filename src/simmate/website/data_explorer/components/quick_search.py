@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.core.exceptions import FieldDoesNotExist
 
 from simmate.database.mixins.structure import Structure

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This middleware is copy/pasted from the following post:
     https://stackoverflow.com/questions/23398393/

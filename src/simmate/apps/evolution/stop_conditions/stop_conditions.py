@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from pymatgen.analysis.structure_matcher import StructureMatcher
@@ -144,7 +142,6 @@ class ExpectedStructure(StopCondition):
         # slow the following for loop is, that may be necessary
 
         expected_structure = self.expected_structure
-        breakpoint()
         # get completed individuals since the last check. If this is our first
         # check we instead use the start time.
         if self.search.last_check_timestamp is None:

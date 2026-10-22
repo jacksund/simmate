@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import datetime
 import inspect
 import json
@@ -214,11 +212,11 @@ class Workflow:
             # any python object if "use_database=False"
             results = cls.run_config(**kwargs_cleaned)
 
-        except Exception as e:
+        except Exception:
             if cls.use_database:
                 database_entry.status = "Failed"
                 database_entry.save()
-            raise e
+            raise
 
         # save the result to the database
         if cls.use_database:
@@ -374,7 +372,7 @@ class Workflow:
         # If a workflow name is given, then we are actually calling this method
         # from the base workflow class -- and need to grab the proper workflow
         # object.
-        if "workflow_name" in parameters.keys():
+        if "workflow_name" in parameters:
             # we are loading an external workflow, which will depend on this base
             # class. We need a local import to prevent circular-import bug.
             from simmate.workflows.utils import get_workflow
@@ -676,7 +674,7 @@ class Workflow:
         defaults = {}
         for method in cls._parameter_methods:
             sig = inspect.signature(getattr(cls, method))
-            for parameter_name in sig.parameters.keys():
+            for parameter_name in sig.parameters:
                 if parameter_name in cls.parameter_names:
                     value = sig.parameters[parameter_name]
                     if value.default == value.empty:
@@ -792,7 +790,7 @@ class Workflow:
             "migration_hop",
             "supercell_start",
         ]:
-            if primary_input_key in parameters_cleaned.keys():
+            if primary_input_key in parameters_cleaned:
                 # note we grab the deserialized input
                 primary_input = parameters_cleaned.get(primary_input_key, None)
                 break
@@ -1038,7 +1036,7 @@ class Workflow:
         )
 
         # as an extra, the start time is always registered for ALL calc if given
-        if "started_at" in kwargs.keys():
+        if "started_at" in kwargs:
             register_kwargs_cleaned["started_at"] = kwargs["started_at"]
 
         # SPECIAL CASE: The exception to the above is with SOURCE, which needs
@@ -1167,7 +1165,7 @@ class Workflow:
         # SPECIAL CASE: customized workflows have their parameters stored under
         # "input_parameters" instead of the base dict
         # THIS INVOLVES A RECURSIVE CALL TO THIS SAME METHOD
-        if "workflow_base" in parameters.keys():
+        if "workflow_base" in parameters:
             # This is a non-modular import that can cause issues and slower
             # run times. We therefore import lazily.
             from simmate.workflows.utils import get_workflow
@@ -1207,7 +1205,7 @@ class Workflow:
         }
 
         for parameter, target_class in parameter_mappings.items():
-            if parameter in parameters.keys():
+            if parameter in parameters:
                 parameter_orig = parameters.get(parameter, None)
                 parameters_cleaned[parameter] = target_class.from_dynamic(
                     parameter_orig
@@ -1221,15 +1219,16 @@ class Workflow:
         if parameters.get("directory", None):
             parameters_cleaned["directory"] = Path(parameters_cleaned["directory"])
 
-        if parameters.get("source", None):
-            # !!! are there other types I should account for? Maybe I should just
-            # make this a recursive call to catch everything?
-            if isinstance(parameters_cleaned["source"], dict) and parameters_cleaned[
-                "source"
-            ].get("directory", None):
-                parameters_cleaned["source"]["directory"] = Path(
-                    parameters_cleaned["directory"]
-                )
+        # !!! are there other types I should account for? Maybe I should just
+        # make this a recursive call to catch everything?
+        if (
+            parameters.get("source", None)
+            and isinstance(parameters_cleaned["source"], dict)
+            and parameters_cleaned["source"].get("directory", None)
+        ):
+            parameters_cleaned["source"]["directory"] = Path(
+                parameters_cleaned["directory"]
+            )
 
         return parameters_cleaned
 
@@ -1383,7 +1382,7 @@ def workflow(
             # dynamically create the new Workflow subclass.
             NewClass = type(
                 f"{app_name}__{type_name}__{preset_name}",
-                tuple([Workflow]),
+                (Workflow,),
                 {
                     "run_config": staticmethod(original_function),
                     "use_database": use_database,

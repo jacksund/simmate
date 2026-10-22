@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 from simmate.apps.vasp.error_handlers import Frozen
@@ -45,7 +43,7 @@ def test_frozen(tmp_path):
     assert Incar.from_file(incar_filename)["SYMPREC"] == 1e-08
 
     # Make final attempt at fixing the error, which raises an error
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="Unable to fix Frozen error"):
         fix = error_handler.correct(tmp_path)
 
     # Confirm an error IS NOT found when no file exists

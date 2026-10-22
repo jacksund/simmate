@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.config import settings
 
 

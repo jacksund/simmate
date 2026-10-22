@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .diffusion import (
     Diffusion__Vasp__NebAllPathsMit,
     Diffusion__Vasp__NebFromEndpointsMit,

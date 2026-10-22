@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.vasp.error_handlers import Eddrmm
 from simmate.apps.vasp.inputs import Incar
 from simmate.conftest import copy_test_files, make_dummy_files
@@ -77,8 +75,8 @@ def test_eddrmm_neb(tmp_path):
         fix == "switched ALGO to Normal and deleted CHGCARs + WAVECARs for all images"
     )
     assert Incar.from_file(incar_filename)["ALGO"] == "Normal"
-    assert not any([f.exists() for f in chgcar_filenames])
-    assert not any([f.exists() for f in wavecar_filenames])
+    assert not any(f.exists() for f in chgcar_filenames)
+    assert not any(f.exists() for f in wavecar_filenames)
 
     # Make second attempt at fixing the error
     make_dummy_files(*chgcar_filenames, *wavecar_filenames)
@@ -88,5 +86,5 @@ def test_eddrmm_neb(tmp_path):
         == "switch POTIM from 0.5 to 0.25 and deleted CHGCARs + WAVECARs for all images"
     )
     assert Incar.from_file(incar_filename)["POTIM"] == 0.25
-    assert not any([f.exists() for f in chgcar_filenames])
-    assert not any([f.exists() for f in wavecar_filenames])
+    assert not any(f.exists() for f in chgcar_filenames)
+    assert not any(f.exists() for f in wavecar_filenames)

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from simmate.apps.bader.toolkit import Grid
@@ -68,7 +66,7 @@ class PopulationAnalysis__Bader__BaderDev(S3Workflow):
                 )
                 # TODO: grab the structure from the CHGCAR
             atom_indices = structure.indices_from_symbol(species_to_print)
-            indices_str = indices_str = " ".join([str(i + 1) for i in atom_indices])
+            indices_str = " ".join([str(i + 1) for i in atom_indices])
             command_final += f" -p sum_atom {indices_str}"
 
         # We now have the final command, and as last check, need to see if we
@@ -79,7 +77,7 @@ class PopulationAnalysis__Bader__BaderDev(S3Workflow):
                 "run",
                 "--rm",
                 "--volume",
-                f"{str(directory)}:/bader_calc",
+                f"{directory!s}:/bader_calc",
                 settings.bader.docker.image,
                 "sh",
                 "-c",

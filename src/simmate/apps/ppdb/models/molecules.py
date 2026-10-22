@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from rich.progress import track
@@ -266,7 +264,7 @@ class PpdbMolecule(ThirdPartyData, Molecule):
                         **entry_data,
                     ),
                 )
-            except:
+            except Exception:
                 logging.info(f"Failed to load entry {entry_id} into database")
                 continue
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from baderkit.core import Badelf as BadelfClass
@@ -120,11 +118,6 @@ class Badelf(Structure):
     The ELF values at which the bare electron volume reduces dimensionality.
     """
 
-    electride_structure = table_column.JSONField(blank=True, null=True)
-    """
-    A PyMatGen Structure JSON with dummy atoms (E) representing electrides.
-    """
-
     elf_analysis = table_column.ForeignKey(
         "baderkit.ElfAnalysis",
         on_delete=table_column.CASCADE,
@@ -175,7 +168,6 @@ class Badelf(Structure):
         this model, an error is thrown. To account for this, I just create an empty
         update_from_directory method here.
         """
-        pass
 
     @classmethod
     def from_badelf(cls, badelf: BadelfClass, directory: Path, **kwargs):
@@ -194,7 +186,7 @@ class Badelf(Structure):
         model_columns = cls.get_column_names()
         for key in model_columns:
             # skip columns in the structure dict
-            if key in structure_dict.keys():
+            if key in structure_dict:
                 continue
             results[key] = badelf_dict.get(key, None)
 

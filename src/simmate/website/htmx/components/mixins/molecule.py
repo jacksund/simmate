@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from simmate.database.core import DatabaseTable
@@ -96,7 +94,7 @@ class MoleculeInput:
             elif input_type == "custom":
                 self.load_molecule_custom(input_name)
 
-        except:
+        except Exception:
             logging.warning(
                 f"Failed to load molecule for input '{input_name}' of type '{input_type}': '{molecule_input}'"
             )
@@ -109,7 +107,7 @@ class MoleculeInput:
         ):
             matches = self.check_datasets(molecule_obj)
             # TODO: f"{input_name}__molecule_matches"
-            setattr(self, "molecule_matches", matches)
+            self.molecule_matches = matches
 
         # draw mol image
         self.js_actions = [
@@ -175,7 +173,7 @@ class MoleculeInput:
         try:
             molecules = Molecule.from_dynamic(mol_str).components
             self.molecule = True  # indicates successful load in templates
-        except:
+        except Exception:
             self.molecule = False
             return
 

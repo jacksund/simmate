@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from .base import Controller
 
 
@@ -64,9 +61,9 @@ class OnOff(Controller):
 
     def __repr__(self):
         return (
-            "{self.__class__.__name__}("
-            "setpoint={self.setpoint!r}, deadband={self.deadband!r}, "
-            "on_output={self.on_output!r}, off_output={self.off_output!r}, "
-            "auto_mode={self.auto_mode!r}"
+            f"{self.__class__.__name__}("
+            f"setpoint={self.setpoint!r}, deadband={self.deadband!r}, "
+            f"on_output={self.on_output!r}, off_output={self.off_output!r}, "
+            f"auto_mode={self.auto_mode!r}"
             ")"
-        ).format(self=self)
+        )

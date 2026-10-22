@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Alternative implementations of this class from ASE and PyMatGen
 # https://gitlab.com/ase/ase/-/blob/master/ase/io/espresso.py
 # https://github.com/materialsproject/pymatgen/blob/master/pymatgen/io/pwscf.py
@@ -273,10 +271,8 @@ class PwscfInput:
             if (
                 # empty lines
                 not line
-                or line.startswith("\n")
-                # comment lines
-                or line.startswith("#")
-                or line.startswith("!")
+                # empty or comment lines
+                or line.startswith(("\n", "#", "!"))
                 # end of section
                 or line == "/"
             ):
@@ -363,9 +359,7 @@ class PwscfInput:
 
             # ----------------------
 
-            elif section.startswith("K_POINTS") or section.startswith(
-                "ADDITIONAL_K_POINTS"
-            ):
+            elif section.startswith(("K_POINTS", "ADDITIONAL_K_POINTS")):
                 section_name, *section_mode = section.lower().split()
                 if not section_mode:
                     section_mode = "tpiba"  # using default value

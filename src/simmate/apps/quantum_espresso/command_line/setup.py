@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import typer
 
 setup_app = typer.Typer(rich_markup_mode="markdown")
@@ -11,7 +9,6 @@ def setup():
     Commands for configuring Quantum Espresso, including potential libraries
     (SSSP).
     """
-    pass
 
 
 @setup_app.command()

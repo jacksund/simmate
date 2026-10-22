@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 from simmate.apps.vasp.inputs import PBE_POTCAR_MAPPINGS
@@ -72,5 +70,7 @@ def test_base_vasp_run(structure, tmp_path, mocker):
         contents = file.readlines()
     with vasprun_filename.open("w") as file:
         file.writelines(contents[50])
-    with pytest.raises(Exception):
+    # TODO: this only raises because `structure` is missing. When given
+    # `structure=structure, directory=tmp_path`, no error is raised.
+    with pytest.raises(Exception):  # noqa: B017
         DummyWorkflow.run(tmp_path)

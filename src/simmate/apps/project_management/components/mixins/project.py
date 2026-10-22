@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from functools import cached_property
 
 from ...models import Project, Tag

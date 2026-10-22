@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from simmate.apps.vasp.inputs.incar_modifiers import (
@@ -300,7 +298,7 @@ class Incar(dict):
         for line in lines:
             # If the line starts with a # then its a comment and we should skip.
             # It also could be an empty line that we should skip,
-            if not line or line.startswith("#") or line.startswith("\n"):
+            if not line or line.startswith(("#", "\n")):
                 continue
             # multiple parameters on a single line are separated by a semicolon
             for sub_line in line.split(";"):

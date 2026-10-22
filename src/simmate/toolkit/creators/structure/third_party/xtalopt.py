@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import shutil
 import subprocess
@@ -115,7 +113,7 @@ class XtaloptStructure(StructureCreator):
         ]
 
         # first establish the min/max values for the lattice vectors and angles
-        #!!! change these to user inputs in the future
+        # !!! change these to user inputs in the future
         # There's no fixed volume setting for XtalOpt so I need to set a
         # minVol, maxVol, and vector limits
         volume = composition.volume_estimate()
@@ -154,10 +152,11 @@ class XtaloptStructure(StructureCreator):
 
         # call randSpg
         subprocess.run(
-            f"{self.command} {str(input_file)}",
+            f"{self.command} {input_file!s}",
             cwd=temp_directory,
             shell=True,
             capture_output=True,
+            check=False,
         )
 
         # BUG: even failed runs return a successful error code
@@ -222,7 +221,7 @@ class XtaloptStructure(StructureCreator):
         ]
 
         # first establish the min/max values for the lattice vectors and angles
-        #!!! change these to user inputs in the future
+        # !!! change these to user inputs in the future
         # There's no fixed volume setting for XtalOpt so I need to set a
         # minVol, maxVol, and vector limits
         volume = composition.volume_estimate()

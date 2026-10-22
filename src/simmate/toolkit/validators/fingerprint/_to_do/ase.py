@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import numpy as np
 from scipy.spatial.distance import cosine
 
@@ -15,11 +13,11 @@ class ASEFingerprint:
         # for example, the max_fails=[20,40,10] needs to be converted to [20,60,70]
         # if infinite attempts are allowed, be sure to use float('inf') as the value
         # This list is more efficient to work with in the point_next_step()
-        #!!! should I make this numpy for speed below?
+        # !!! should I make this numpy for speed below?
         self.max_fails_cum = [sum(max_fails[: x + 1]) for x in range(len(max_fails))]
 
         # we can assume the user has ASE installed because it is a dependency of PyMatgen
-        #!!! it looks like the ase.ga module is actively changing so version may introduce errors
+        # !!! it looks like the ase.ga module is actively changing so version may introduce errors
         from ase_ga.ofp_comparator import OFPComparator
 
         self.featurizer = OFPComparator(  # n_top=None, # atoms to optimize. None is all of them
@@ -35,7 +33,7 @@ class ASEFingerprint:
         )
 
         # we also need to convert pymatgen Structures to ase Atoms below
-        #!!! is it faster and more memory efficient to import below?
+        # !!! is it faster and more memory efficient to import below?
         from pymatgen.io.ase import AseAtomsAdaptor
 
         self.adaptor = AseAtomsAdaptor

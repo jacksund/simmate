@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from numpy.random import choice
 from pymatgen.core.lattice import Lattice
 
@@ -120,14 +118,14 @@ class RSLFixedVolume(RandomSymLattice):
     # identical to RandomSymLattice, except the lattice is scaled to a fixed
     # volume at the end
 
-    #!!! currently, this takes roughly 3x as long as the RandomSymLattice to
+    # !!! currently, this takes roughly 3x as long as the RandomSymLattice to
     # run (180us vs 55.3us averages for new_lattice)
-    #!!! this time increase is primarily in the .scale() function (when I
+    # !!! this time increase is primarily in the .scale() function (when I
     # comment out the check loop - I get a 154us average)
 
-    #!!! this is fixed volume of the conventional cells! So some spacegroups
+    # !!! this is fixed volume of the conventional cells! So some spacegroups
     # may run into issues with this.
-    #!!! I need a 'smart' FixedVolume that scales based on...
+    # !!! I need a 'smart' FixedVolume that scales based on...
     # composition (total atoms and their type)
     # spacegroup (conventional vs primitive size)
 
@@ -160,7 +158,7 @@ class RSLFixedVolume(RandomSymLattice):
         if not check:
             # this is a recursion call that will be hit repeatedly until a
             # valid lattice is found
-            #!!! this will throw a recursion error if the volume and
+            # !!! this will throw a recursion error if the volume and
             # min/max_vectors are unreasonable
             lattice = self.new_lattice(spacegroup)
 
@@ -197,7 +195,7 @@ class RSLSmartVolume:
         # find the respective volume for each spacegroup's conventional unit cell
         # to do this, we need to know the ratio between MultiplicityPrimitive
         # and MultiplicityConventiional for a spacegroup
-        #!!! currently this is stored in wyckoffdata.csv, but I should consider
+        # !!! currently this is stored in wyckoffdata.csv, but I should consider
         # putting it in a separate file for speed
         data = loadWyckoffData()
         self.volumes = {}  # keys are spacegroup
@@ -218,9 +216,9 @@ class RSLSmartVolume:
             self.volumes.update({spacegroup: volume * ratio})
 
             # now we want to make the vector_generator for this spacegroup
-            #!!! I'm not sure users can pass custom parameters this deep and
+            # !!! I'm not sure users can pass custom parameters this deep and
             # if they will work. I need to test for this
-            #!!! I assume NormallyDistributedVectors is used here... will give
+            # !!! I assume NormallyDistributedVectors is used here... will give
             # errors if that's not the case
 
             vgen = vector_generation_method(
@@ -291,8 +289,8 @@ class RSLSmartVolume:
         elif spacegroup <= 230:
             lattice = Lattice.cubic(a)
 
-        #!!! This section makes the code take more than 3x longer to run. Should
-        #!!! I allow a more flexible volume? More flexible volume could also
+        # !!! This section makes the code take more than 3x longer to run. Should
+        # !!! I allow a more flexible volume? More flexible volume could also
         # slow structure creation (bc smaller volumes are allowed)
         # now scale the lattice to the specified volume
         lattice = lattice.scale(volume)
@@ -310,9 +308,9 @@ class RSLSmartVolume:
         if not check:
             # this is a recursion call that will be hit repeatedly until a
             # valid lattice is found
-            #!!! this will throw a recursion error if the volume and
+            # !!! this will throw a recursion error if the volume and
             # min/max_vectors are unreasonable
-            #!!! I need to rewrite this function where it's a while loop
+            # !!! I need to rewrite this function where it's a while loop
             # instead of a recursion call
             lattice = self.new_lattice(spacegroup)
 

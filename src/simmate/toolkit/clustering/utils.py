@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 def flatten_clusters(clusters: list[list]) -> list[int]:
     """
     Takes a list of clusters of the form [[mol1, mol2, ....], [mol3, mol4, ...], ...]

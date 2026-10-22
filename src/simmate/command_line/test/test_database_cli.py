@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from pathlib import Path
-
 import pytest
 
 from simmate.command_line.database import database_app

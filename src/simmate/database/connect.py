@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This file connects to the Simmate database. Behind the scenes, this is really
 setting up Django settings (which includes the database). Therefore, this
@@ -15,4 +13,4 @@ from simmate.config.django import setup
 """
 
 # This import sets up Django so we can connect with the Simmate database
-from simmate.config.django import setup
+from simmate.config.django import setup  # noqa: F401

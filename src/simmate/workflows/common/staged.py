@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import inspect
 import math
 from functools import cache
@@ -84,7 +82,7 @@ class StagedWorkflow(Workflow):
         }
 
     @classproperty
-    @cache
+    @cache  # noqa: B019
     def subworkflows(cls):
         # import locally to avoid circular import
         from simmate.workflows.utils import get_workflow
@@ -95,7 +93,7 @@ class StagedWorkflow(Workflow):
         ]
 
     @classproperty
-    @cache
+    @cache  # noqa: B019
     def subworkflow_tables(cls):
         return list(
             dict.fromkeys(subflow.database_table for subflow in cls.subworkflows)
@@ -178,7 +176,8 @@ class StagedSeriesConvergence(PlotlyFigure):
             )
 
             # add a line for y=x for added visualization
-            valid_vals = [v for v in xs + ys if v is not None and v == v]
+            # (`v == v` is False for NaN)
+            valid_vals = [v for v in xs + ys if v is not None and v == v]  # noqa: PLR0124
             if valid_vals:
                 x_min, x_max = min(valid_vals), max(valid_vals)
                 figure.add_trace(
@@ -231,7 +230,8 @@ class StagedSeriesHistogram(PlotlyFigure):
             diffs = []
             for series in all_energy_series:
                 v1, v2 = series[i], series[i + 1]
-                if v1 is not None and v2 is not None and v1 == v1 and v2 == v2:
+                # (`v == v` is False for NaN)
+                if v1 is not None and v2 is not None and v1 == v1 and v2 == v2:  # noqa: PLR0124
                     diffs.append(v2 - v1)
 
             figure.add_trace(

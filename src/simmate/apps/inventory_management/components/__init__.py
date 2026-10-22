@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .batch import BatchComponent
 from .container import ContainerComponent
 from .dashboard import InventoryDashboardComponent

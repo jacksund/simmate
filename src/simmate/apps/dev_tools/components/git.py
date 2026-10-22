@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import re
 from pathlib import Path
 
@@ -160,7 +158,7 @@ class GitComponent(CommandComponent):
                 new_line += 1
             else:
                 flush()
-                content = line[1:] if line.startswith(" ") else line
+                content = line.removeprefix(" ")
                 rows.append(
                     self._diff_row(
                         {"num": old_line, "text": content, "type": "ctx"},

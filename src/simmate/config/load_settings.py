@@ -39,7 +39,7 @@ class SimmateSettings:
         This handles how `getattr(self, "example")` or `self.example` behaves
         when `example` is not actually defined.
         """
-        if name not in self.final_settings.keys():
+        if name not in self.final_settings:
             raise Exception(f"Unknown property or setting: {name}")
 
         setting = self.final_settings.get(name, None)
@@ -505,7 +505,7 @@ class SimmateSettings:
         # 2. check if using environment variables
         prefix = "SIMMATE__"
         env_vars = dict(os.environ)
-        if any(var.startswith(prefix) for var in env_vars.keys()):
+        if any(var.startswith(prefix) for var in env_vars):
             return "environment variables"
 
         # 3. settings.yaml file

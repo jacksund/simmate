@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.toolkit import Molecule as ToolkitMolecule
 from simmate.toolkit import Structure
 from simmate.website.data_explorer.components import TableComponent
@@ -101,7 +99,7 @@ class SubstanceComponent(TableComponent, MoleculeInput, StructureInput):
             from ..models import Molecule
 
             inchi_key = molecule_toolkit.to_inchi_key()
-            molecule_db, created = Molecule.objects.get_or_create(
+            molecule_db, _created = Molecule.objects.get_or_create(
                 inchi_key=inchi_key,
                 defaults=Molecule.from_toolkit(as_dict=True, molecule=molecule_toolkit),
             )

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 There are not any custom inputs for Bader analysis. The inputs required
 are actually outputs from VASP or some other DFT code. This module lists out

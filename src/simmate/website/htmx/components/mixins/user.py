@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from functools import cached_property
 
 from django.contrib.auth.models import User

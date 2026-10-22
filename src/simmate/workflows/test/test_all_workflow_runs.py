@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 import pytest
@@ -111,7 +109,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
         ]
         for workflow_name in dynamics_flows:
             workflow = get_workflow(workflow_name)
-            result = workflow.run(
+            workflow.run(
                 structure=structure,
                 command="mpirun -n 14 vasp_std > vasp.out",
                 nsteps=50,
@@ -125,7 +123,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
         structure = sample_structures["Y2CI2_mp-1206803_primitive"]
         workflow_name = "diffusion.vasp.neb-all-paths-mit"
         workflow = get_workflow(workflow_name)
-        result = workflow.run(
+        workflow.run(
             structure=structure,
             migrating_specie="I",
             command="mpirun -n 14 vasp_std > vasp.out",
@@ -147,7 +145,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
         # which can be used for partitioning, each of which needs to be tested
         algorithms = ["badelf", "voronelf", "zero-flux"]
         for algorithm in algorithms:
-            result = workflow.run(
+            workflow.run(
                 structure=structure,
                 command="mpirun -n 14 vasp_std > vasp.out",
                 algorithm=algorithm,

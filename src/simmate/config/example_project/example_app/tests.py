@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This file is important as your project grows and starts getting users.
 Here, you need to make sure any changes you make don't break old features and
@@ -12,7 +10,7 @@ looking through other packges such as...
 - [django test tutorials](https://docs.djangoproject.com/en/4.0/intro/tutorial05/)
 """
 
-from django.test import TestCase
+from django.test import TestCase  # noqa: F401
 
 # Create your tests here. (optional for beginners & super small projects)
 

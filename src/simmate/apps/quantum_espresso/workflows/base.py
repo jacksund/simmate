@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from django.utils.functional import classproperty
@@ -167,9 +165,9 @@ class PwscfWorkflow(S3Workflow, StructureWorkflow):
                 "run",
                 "--rm",
                 "--volume",
-                f'"{str(directory)}":/qe_calc',
+                f'"{directory!s}":/qe_calc',
                 "--volume",
-                f'"{str(settings.quantum_espresso.pseudo_dir)}":/potentials',
+                f'"{settings.quantum_espresso.pseudo_dir!s}":/potentials',
                 settings.quantum_espresso.docker.image,
                 "sh",
                 "-c",

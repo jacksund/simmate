@@ -317,11 +317,11 @@ def grip_icon(size: int = GEAR_SIZE, color: str | None = None) -> QIcon:
 def _icon(path: QPainterPath, size: int, color: str | None = None) -> QIcon:
     """`path` filled in grey (or `color`), or in white when the button is checked."""
     icon = QIcon()
-    for color, state in [
+    for fill, state in [
         (color or theme.MUTED_COLOR, QIcon.State.Off),
         ("white", QIcon.State.On),
     ]:
-        pixmap = _pixmap(path, size, QColor(color))
+        pixmap = _pixmap(path, size, QColor(fill))
         for mode in (QIcon.Mode.Normal, QIcon.Mode.Active):
             icon.addPixmap(pixmap, mode, state)
     return icon

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.warren_lab.workflows.relaxation.pbe_metal import (
     Relaxation__Vasp__PbeMetalWarren,
 )

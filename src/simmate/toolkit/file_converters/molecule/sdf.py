@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import re
 from pathlib import Path
@@ -119,7 +117,7 @@ class SdfAdapter:
                     )
                     continue
                 else:
-                    raise error
+                    raise
             molecules.append(molecule)
 
         return molecules if len(molecules) > 1 else molecules[0]

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.compute import schedule
 
 from .models import TableCount
@@ -15,7 +13,7 @@ def run_update_table_counts():
     caches their row counts in the TableCount model to prevent slow queries
     on the website's homepage.
     """
-    for section_name, components in get_data_explorer_components().items():
+    for components in get_data_explorer_components().values():
         for component in components:
             table = component.table
             count = table.objects.count()

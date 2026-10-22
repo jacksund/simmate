@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Simmate will build interfaces for your workflows and tables. However, if you
 want to add extra webpages for your app, then you'll need to build "views" in

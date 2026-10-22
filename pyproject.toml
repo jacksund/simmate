@@ -172,17 +172,39 @@ omit = ["*/test_*", "*/conftest.py", "*/*_test.py"]
 
 [tool.ruff]
 src = ["src"]
-# docs code blocks are often partial snippets, so don't format them
-extend-exclude = ["*.md"]
+extend-exclude = [
+    # docs code blocks are often partial snippets, so don't format them
+    "*.md",
+    # unfinished code that hasn't been refactored yet
+    "src/simmate/apps/vasp/error_handlers/to_do",
+    "src/simmate/toolkit/creators/structure/_todo",
+]
 
 [tool.ruff.lint]
-# import sorting only (replaces isort)
-select = ["I"]
-# TODO: switch to ruff's default lint rules (E4, E7, E9, F) plus import sorting.
-# Remove the `select` above, uncomment the lines below, then run
-# `ruff check . --fix` and resolve the remaining errors by hand.
-# extend-select = ["I"]
-#
-# [tool.ruff.lint.per-file-ignores]
-# # imports in __init__.py files are re-exports, not unused imports
-# "__init__.py" = ["F401"]
+# we use ruff's default rules (which include import sorting), minus these
+ignore = [
+    "RUF012",  # class-level lists/dicts are used for config (e.g. `required_files`)
+    "RUF013",  # we use `x: Path = None` instead of `x: Path | None = None`
+    "C408",  # `dict(a=1)` is often easier to read than `{"a": 1}`
+    "PLR2044",  # empty `#` lines are used to space out comment blocks
+    "SIM114",  # if/elif branches with the same body often have their own comments
+    # TODO: these need larger refactors. Remove one at a time as they're addressed.
+    "LOG015",  # use module loggers instead of the root logger
+    "TRY002",  # raise custom exception classes instead of `Exception`
+    "B006",  # mutable argument defaults
+    "BLE001",  # catching broad `Exception`
+]
+
+[tool.ruff.lint.per-file-ignores]
+# imports in __init__.py files are re-exports, not unused imports
+"__init__.py" = ["F401"]
+# typer options are function calls by design, and `Path.cwd()` at import is
+# the same as at call time for a CLI
+"**/command_line/**" = ["B008"]
+
+[tool.ruff.lint.pyflakes]
+# this import sets up django and is never used directly
+allowed-unused-imports = ["simmate.database.connect"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["PySide6.QtCore.QModelIndex"]

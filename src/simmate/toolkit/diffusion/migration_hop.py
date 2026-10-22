@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from pymatgen.analysis.diffusion.neb.pathfinder import (
@@ -28,12 +26,9 @@ class MigrationHop(PymatgenMigrationHop):
 
         if isinstance(migration_hop, PymatgenMigrationHop):
             migration_hop_cleaned = migration_hop
-        elif isinstance(migration_hop, dict) and "@module" in migration_hop.keys():
+        elif isinstance(migration_hop, dict) and "@module" in migration_hop:
             migration_hop_cleaned = cls.from_dict(migration_hop)
-        elif (
-            isinstance(migration_hop, dict)
-            and "migration_hop_table" in migration_hop.keys()
-        ):
+        elif isinstance(migration_hop, dict) and "migration_hop_table" in migration_hop:
             is_from_past_calc = True
             migration_hop_cleaned = cls.from_database_dict(migration_hop)
         else:
@@ -106,7 +101,7 @@ class MigrationHop(PymatgenMigrationHop):
         # to mess with, so I just hack fix here.
         try:
             assert supercell_start != supercell_end
-        except:
+        except Exception:
             raise Exception(
                 "This structure has a bug due to a rounding error. "
                 "Our team is aware of this bug and it has been fixed for the next "

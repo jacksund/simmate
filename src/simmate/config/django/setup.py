@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import os
 
@@ -32,7 +30,7 @@ def setup_django():
     # installation is out of date, print a message for the user.
     try:
         check_if_using_latest_version()
-    except:
+    except Exception:
         logging.warning("Unable to check if using the latest Simmate version.")
 
     logging.info("Configuring database and workflows :hammer_and_wrench:")

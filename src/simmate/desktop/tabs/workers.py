@@ -67,7 +67,7 @@ def _launcher():
     sets up Django, which must not happen before Qt WebEngine starts (web views
     then hang), so this waits until a worker action needs it.
     """
-    from simmate.database import connect  # isort:skip
+    from simmate.database import connect  # ruff: isort: skip
     from simmate.compute import launcher
 
     return launcher

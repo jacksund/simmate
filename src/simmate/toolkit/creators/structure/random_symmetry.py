@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from numpy.random import choice
@@ -281,8 +279,8 @@ class RandomSymStructure(StructureCreator):
         # Also make sure that structure != False
         if self.cleanup and structure:
             # convert the conventional unitcell to the primitive
-            #!!! should I use a spacegroup analyzer instead?
-            #!!! Should I LLL reduce?
+            # !!! should I use a spacegroup analyzer instead?
+            # !!! Should I LLL reduce?
             structure = structure.get_primitive_structure()
             # make sure the sites are sorted by electronegativity of their elements
             # this is important for some mutations

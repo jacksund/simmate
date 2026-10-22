@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.config import settings
 from simmate.database.core import DatabaseTable, table_column
 from simmate.database.mixins import ThirdPartyData
@@ -105,7 +103,7 @@ class EthereumWallet(ThirdPartyData, DatabaseTable):
                     v
                     for k, v in assets.items()
                     if k in cls.stablecoin_options
-                    or any([k.startswith(f"{sc}_") for sc in cls.stablecoin_options])
+                    or any(k.startswith(f"{sc}_") for sc in cls.stablecoin_options)
                 ]
             )
             cls.objects.update_or_create(
@@ -147,7 +145,7 @@ class EthereumWallet(ThirdPartyData, DatabaseTable):
                     v
                     for k, v in wallet_cleaned.items()
                     if k in cls.stablecoin_options
-                    or any([k.startswith(f"{sc}_") for sc in cls.stablecoin_options])
+                    or any(k.startswith(f"{sc}_") for sc in cls.stablecoin_options)
                 ]
             )
             cls.objects.update_or_create(

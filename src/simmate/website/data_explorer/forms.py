@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django import forms
 
 from simmate.utils import get_chemical_subsystems

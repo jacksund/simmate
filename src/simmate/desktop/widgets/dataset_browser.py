@@ -117,9 +117,12 @@ class DatasetFileModel(QFileSystemModel):
             # the extension, rather than the OS's description (e.g. "parquet File")
             return "Folder" if self.isDir(index) else self.fileInfo(index).suffix()
         value = super().data(index, role)
-        if role in (Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.EditRole):
-            if self._is_dataset(index) and value.endswith(DATASET_SUFFIX):
-                return value.removesuffix(DATASET_SUFFIX)
+        if (
+            role in (Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.EditRole)
+            and self._is_dataset(index)
+            and value.endswith(DATASET_SUFFIX)
+        ):
+            return value.removesuffix(DATASET_SUFFIX)
         return value
 
     def setData(self, index, value, role=Qt.ItemDataRole.EditRole):

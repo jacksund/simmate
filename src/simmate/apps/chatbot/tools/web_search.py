@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from langchain.tools import tool
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.tools import DuckDuckGoSearchResults

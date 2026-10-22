@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.urls import path
 
 from simmate.website.workflow_explorer import views

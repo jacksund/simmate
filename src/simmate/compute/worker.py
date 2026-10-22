@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import threading
 import time
@@ -290,14 +288,13 @@ class SimmateWorker(DatabaseTable):
 
                 # This is a special condition where we may want to close the
                 # worker if the queue stays empty
-                if self.close_on_empty_queue:
-                    # after we just waited, let's check the queue size again
-                    if self.queue_size() == 0:
-                        # if it's still empty, we should close the worker
-                        logging.info("The task queue is empty. Shutting down.")
-                        self.status = "Stopped"
-                        self.save(update_fields=["status", "updated_at"])
-                        return
+                # (after we just waited, we check the queue size again)
+                if self.close_on_empty_queue and self.queue_size() == 0:
+                    # if it's still empty, we should close the worker
+                    logging.info("The task queue is empty. Shutting down.")
+                    self.status = "Stopped"
+                    self.save(update_fields=["status", "updated_at"])
+                    return
 
             # make this atomic so that multiple workers don't accidentally
             # grab the same job.

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This is where you add any new database tables.
 

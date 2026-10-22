@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from datetime import datetime
 
 import numpy
@@ -532,7 +530,7 @@ class PricedItem(DatabaseTable):
         from ..data import WIKIPEDIA_PRICES_OF_ELEMENTS_DATA
 
         for row in WIKIPEDIA_PRICES_OF_ELEMENTS_DATA.itertuples():
-            priced_item, _ = cls.objects.update_or_create(
+            _priced_item, _ = cls.objects.update_or_create(
                 name=row.name,
                 defaults=dict(
                     category="Chemical Elements",

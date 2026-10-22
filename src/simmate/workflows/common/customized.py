@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 # Example use
 
@@ -69,7 +67,7 @@ class Customized__Toolkit__UserConfig(Workflow):
 
         # ensure this workflow has a S3Task class attribute
         if not issubclass(workflow_base, S3Workflow):
-            raise Exception(
+            raise TypeError(
                 "Dynamically updating settings is only supported for S3Workflows"
             )
 
@@ -94,8 +92,8 @@ class Customized__Toolkit__UserConfig(Workflow):
             # If a user sets EDIFF = 1e-3 and there is EDIFF__per_atom in the
             # incar dictionary, we need to remove that key as well. We therefore
             # remove all other "examplekey__*" settings from the dictionary.
-            for update_key in update_values.keys():
-                for subkey in original_config.keys():
+            for update_key in update_values:
+                for subkey in original_config:
                     if subkey.startswith(f"{update_key}__"):
                         new_config.pop(subkey)
             # BUG: what about keywords like multiple_keywords__smart_ldau? I may need

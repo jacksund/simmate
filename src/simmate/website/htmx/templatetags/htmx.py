@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import json
 import urllib
 
@@ -61,10 +59,8 @@ def _get_input_options(context, name, options=None):
         options = getattr(component, default_name)
     elif default_name in component.form_data:
         options = component.form_data[default_name]
-    elif hasattr(component, "table") and hasattr(
-        getattr(component, "table"), default_name
-    ):
-        options = getattr(getattr(component, "table"), default_name)
+    elif hasattr(component, "table") and hasattr(component.table, default_name):
+        options = getattr(component.table, default_name)
     else:
         options = []
     return options
@@ -225,10 +221,10 @@ def htmx_number_input(
     show_label: bool = True,
     help_text: str = None,
     placeholder: str = None,
-    maximum: float | int = None,
-    minimum: float | int = None,
+    maximum: float = None,
+    minimum: float = None,
     is_int: bool = False,
-    step_size: float | int = None,
+    step_size: float = None,
     defer: bool = True,
     required: bool = False,
     indicator: str = "#loading-spinner-corner",
@@ -512,17 +508,12 @@ def htmx_molecule_input(
     reference_input_name = f"{name}__molecule_reference"
     custom_input_name = f"{name}__molecule_custom"
 
-    show_option_labels = (
-        True
-        if [
-            allow_sketcher_input,
-            allow_text_input,
-            allow_reference_input,
-            allow_custom_input,
-        ].count(True)
-        > 1
-        else False
-    )
+    show_option_labels = [
+        allow_sketcher_input,
+        allow_text_input,
+        allow_reference_input,
+        allow_custom_input,
+    ].count(True) > 1
     if show_option_labels:
         noption = 1
         if allow_custom_input:

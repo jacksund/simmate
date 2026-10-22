@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import shutil
 from pathlib import Path
@@ -19,7 +17,7 @@ class Vasprun(VasprunPymatgen):
         # special-case: check if we have an NEB directory, and if so,
         # we need to switch to the NEB method
         incar = Incar.from_file(directory / "INCAR")
-        if "IMAGES" in incar.keys():
+        if "IMAGES" in incar:
             return cls.from_neb_directory(directory)
 
         vasprun_filename = directory / "vasprun.xml"
@@ -33,7 +31,7 @@ class Vasprun(VasprunPymatgen):
                 exception_on_bad_xml=True,
                 parse_potcar_file=False,
             )
-        except:
+        except Exception:
             logging.warning(
                 "XML is malformed. This typically means there's an error with your"
                 " calculation that wasn't caught by your ErrorHandlers. We try"

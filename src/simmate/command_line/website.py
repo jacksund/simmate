@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This defines commands for the Simmate website. All commands are accessible
 through the `simmate website` command.
@@ -19,7 +17,6 @@ def website():
     """
     Commands for running the Simmate Web UI.
     """
-    pass
 
 
 @website_app.command()
@@ -53,4 +50,5 @@ def start(
     subprocess.run(
         f"django-admin runserver {port} --settings=simmate.config.django.settings --insecure --noreload",
         shell=True,
+        check=False,
     )

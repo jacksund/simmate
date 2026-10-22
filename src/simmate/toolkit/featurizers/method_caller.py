@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import numpy
 
 from simmate.toolkit import Molecule
@@ -23,16 +21,14 @@ class MethodCaller(Featurizer):
             # for MolecularDataFrame special type:
             "_get_smiles_with_h": "smiles",
         }
-        return list(
-            [
-                (
-                    method_name_map.get(k, k)
-                    if isinstance(k, str)
-                    else method_name_map.get(k.__name__, k.__name__)
-                )
-                for k in method_map.keys()
-            ]
-        )
+        return [
+            (
+                method_name_map.get(k, k)
+                if isinstance(k, str)
+                else method_name_map.get(k.__name__, k.__name__)
+            )
+            for k in method_map
+        ]
 
     @staticmethod
     def featurize(

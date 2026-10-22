@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import itertools
 from pathlib import Path
 
@@ -47,7 +45,7 @@ def loadWyckoffData():
     return data
 
 
-def findValidWyckoffCombos(stoich, spacegroup, wy_data=loadWyckoffData()):
+def findValidWyckoffCombos(stoich, spacegroup, wy_data=loadWyckoffData()):  # noqa: B008
     """
     Given a composition's stoichiometry (such as [4,4,12] for Mg4Si4O12) and
     a single spacegroup (1-230), this function will find all valid wyckoff
@@ -148,8 +146,8 @@ def findValidWyckoffCombos(stoich, spacegroup, wy_data=loadWyckoffData()):
     # elements. For example, we ensure that Mg and Si both can't use 0,0,0.
     # Make an empty list that we can store all the valid combinations in
     valid_combos = []
-    #!!! The "*" uses "star expression, which I don't fully understand but it
-    #!!! gives the desired output that I want.
+    # !!! The "*" uses "star expression, which I don't fully understand but it
+    # !!! gives the desired output that I want.
     combos = itertools.product(*wy_combos)
     for combo in combos:
         # say the combo is valid until proven otherwise
@@ -185,7 +183,7 @@ def findValidWyckoffCombos(stoich, spacegroup, wy_data=loadWyckoffData()):
             valid_combos.append(combo)
     # We want to return the valid combinations of wyckoff groups because
     # groups can refer to a number of wy_sites (a,b,c, etc.)
-    #!!! TO-DO: add a better explanation of what's being returned here
+    # !!! TO-DO: add a better explanation of what's being returned here
     return {"WyckoffGroups": wy_groups, "ValidCombinations": valid_combos}
 
 
@@ -209,7 +207,7 @@ def findValidWyckoffCombosForListofSpacegroups(
 
     # We save the outputs as a dictionary where the spacegroup (integer) is
     # the key to combo results.
-    #!!! Consider changing this to a list where index=spacegroup-1
+    # !!! Consider changing this to a list where index=spacegroup-1
     combos_by_sg = {}
     for spacegroup in sg_to_search:
         combos = findValidWyckoffCombos(stoich, spacegroup)

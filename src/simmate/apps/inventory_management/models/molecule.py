@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.rdkit.models import Molecule as MoleculeMixin
 
 

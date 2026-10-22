@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """
 This defines commands for managing your Simmate database. All commands are
 accessible through the `simmate database` command.
 """
-
-from pathlib import Path
 
 import typer
 
@@ -20,7 +16,6 @@ def base_command():
     Commands for managing the Simmate database, including Postgres setup,
     schema migrations, and data I/O.
     """
-    pass
 
 
 @database_app.command()

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .dataframes import filter_pandas_df, filter_polars_df
 from .files import (
     chunk_read,

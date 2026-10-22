@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.vasp.error_handlers import Unconverged
 from simmate.apps.vasp.inputs import Incar
 from simmate.conftest import copy_test_files

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from baderkit.core import SpinElfLabeler
@@ -49,7 +47,6 @@ class SpinElfAnalysis(ElfAnalysis):
         this model, an error is thrown. To account for this, I just create an empty
         update_from_directory method here.
         """
-        pass
 
     @classmethod
     def from_labeler(cls, labeler: SpinElfLabeler, directory: Path, **kwargs):

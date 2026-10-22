@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from rich import print
@@ -150,6 +148,6 @@ class SteadystateSource(DatabaseTable):
         try:
             creator_class = getattr(creation_module, self.name)
             creator = creator_class(composition, **self.kwargs)
-        except:
+        except Exception:
             raise Exception(f"Creator class {self.name} could not be found.")
         return creator

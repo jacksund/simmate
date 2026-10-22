@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """The plots that can be added to the Toolkit tab, one module per type.
 
 Every type subclasses `PlotPanel` (see `base.py`) and is drawn with pyqtgraph's

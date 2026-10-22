@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 from rich.progress import track
 
 try:
     import yfinance
-except:
+except Exception:
     raise Exception(
         "Missing app-specific dependencies. Make sure to read our installation guide."
         "The `price_catalog` app requires an additional dependency: `yfinance`."

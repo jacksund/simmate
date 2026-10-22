@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This defines the base "simmate-qe" command that all other commands stem from.
 """
@@ -20,7 +18,6 @@ def base_command():
     Commands and utilities for managing Quantum Espresso (QE) calculations
     and configurations.
     """
-    pass
 
 
 # All commands are organized into other files, so we need to manually register

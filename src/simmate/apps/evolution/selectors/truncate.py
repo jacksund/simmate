@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pandas
 
 from simmate.apps.evolution.selectors import Selector
@@ -27,10 +25,8 @@ class TruncatedSelection(Selector):
         # truncate the population to those with energies in the lowest X%. This
         # value should be greater or equal to our minimum set above
         ntruncate = int(len(individuals) * percentile)
-        if ntruncate < ntruncate_min:
-            ntruncate = ntruncate_min
-        if ntruncate > ntruncate_max:
-            ntruncate = ntruncate_max
+        ntruncate = max(ntruncate, ntruncate_min)
+        ntruncate = min(ntruncate, ntruncate_max)
 
         # limit our potential selection to the top X% and then randomly select
         # the correct number of parents

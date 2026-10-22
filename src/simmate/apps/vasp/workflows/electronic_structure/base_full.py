@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
 from simmate.workflows import Workflow
@@ -45,13 +43,13 @@ class ElectronicStructureWorkflow(Workflow):
             standardize_structure="primitive",
         )
 
-        dos_result = cls.density_of_states_workflow.run(
+        cls.density_of_states_workflow.run(
             structure=static_result,
             command=command,
             directory=directory / cls.density_of_states_workflow.name_full,
         )
 
-        bs_result = cls.band_structure_workflow.run(
+        cls.band_structure_workflow.run(
             structure=static_result,
             command=command,
             directory=directory / cls.band_structure_workflow.name_full,

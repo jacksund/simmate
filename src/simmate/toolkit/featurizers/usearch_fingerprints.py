@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .ecfp4_fingerprint import Ecfp4Fingerprint
 from .fcfp4_fingerprint import Fcfp4Fingerprint
 from .maccs_fingerprint import MaccsFingerprint

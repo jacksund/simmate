@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import json
 from collections import defaultdict
 from datetime import datetime, timedelta

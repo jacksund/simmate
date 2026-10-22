@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This file contains tables related to results from the ElfLabeler class.
 Since this class is often used during other workfows (e.g. BadELF) there
@@ -172,7 +171,6 @@ class ElfAnalysis(Structure):
         this model, an error is thrown. To account for this, I just create an empty
         update_from_directory method here.
         """
-        pass
 
     @classmethod
     def from_labeler(cls, labeler: ElfLabeler, directory: Path, **kwargs):
@@ -191,7 +189,7 @@ class ElfAnalysis(Structure):
         model_columns = cls.get_column_names()
         for key in model_columns:
             # skip columns in the structure dict
-            if key in structure_dict.keys():
+            if key in structure_dict:
                 continue
             results[key] = labeler_dict.get(key, None)
 
@@ -244,7 +242,7 @@ class ElfAnalysis(Structure):
         # get radii model
         # radii_model = self.atom_nn_elf_radii.model
         # get radii info
-        site_indices, neigh_indices, neigh_frac_coords, neigh_dists = (
+        site_indices, neigh_indices, neigh_frac_coords, _neigh_dists = (
             labeler.nearest_neighbor_data
         )
         site_frac_coords = labeler.structure.frac_coords[site_indices]

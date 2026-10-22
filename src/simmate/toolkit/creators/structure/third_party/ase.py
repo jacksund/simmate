@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from ase import Atoms
 from ase_ga.startgenerator import StartGenerator
 from ase_ga.utilities import CellBounds, closest_distances_generator

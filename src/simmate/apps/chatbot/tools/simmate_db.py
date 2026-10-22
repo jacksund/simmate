@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pandas as pd
 from langchain.prompts.prompt import PromptTemplate
 from langchain.tools import tool

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 from functools import cached_property
 from pathlib import Path
@@ -91,7 +89,7 @@ class PwscfXml:
             # the step list does not contain the final scf calc, so this is
             # appended
             structures.append(self.final_structure)
-        except:
+        except Exception:
             # If only one iteration was run, or the calculation is a static energy
             # calc we want to return just the final structure as a list
             structures = [self.final_structure]
@@ -121,7 +119,7 @@ class PwscfXml:
                 for step in self.data["qes:espresso"]["step"]
             ]
             energy_data.append(self.final_energy)
-        except:
+        except Exception:
             # If only one iteration was run, or the calculation is a static energy
             # calc we want to return just the final energy
             energy_data = [self.final_energy]
@@ -142,7 +140,7 @@ class PwscfXml:
             ]
             all_site_forces = [self._str_to_vector(force) for force in all_force_data]
             all_site_forces.append(self.final_site_forces)
-        except:
+        except Exception:
             # If only one iteration was run, or the calculation is a static energy
             # calc we want to return just the site forces
             all_site_forces = [self.final_site_forces]
@@ -163,7 +161,7 @@ class PwscfXml:
             ]
             all_stresses = [self._str_to_vector(stress) for stress in all_stress_data]
             all_stresses.append(self.final_lattice_stress)
-        except:
+        except Exception:
             # If only one iteration was run, or the calculation is a static energy
             # calc we want to return just the lattice stresses
             all_stresses = self.final_lattice_stress
@@ -201,8 +199,8 @@ class PwscfXml:
             # if all of the energy levels are occupied at this kpoint, the above
             # line will throw an out of bounds error. We give a more useful
             # error instead.
-            except:
-                logging.warn(
+            except Exception:
+                logging.warning(
                     "All energy levels fill at at least one kpoint. Increase nbnd."
                 )
                 return {

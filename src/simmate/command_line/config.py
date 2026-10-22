@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This defines commands for managing your Simmate configuration settings. All commands are
 accessible through the "simmate config" command.
@@ -21,7 +19,6 @@ def config():
     Commands for managing Simmate settings, including viewing, updating, and testing
     app configurations.
     """
-    pass
 
 
 @config_app.command()

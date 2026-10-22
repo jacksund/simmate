@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.toolkit import Molecule
 from simmate.toolkit.featurizers.base import Featurizer
 

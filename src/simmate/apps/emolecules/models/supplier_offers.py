@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 from pathlib import Path
 
@@ -148,12 +146,10 @@ class EmoleculesSupplierOffer(ThirdPartyData, DatabaseTable):
             ]
 
         chunk_size = 25_000
-        nchunk = 0
         nchunks_total = (len(vendor_offers) // chunk_size) + 1
         failed = []
-        for emol_chunk in chunk_list(vendor_offers, chunk_size):
+        for nchunk, emol_chunk in enumerate(chunk_list(vendor_offers, chunk_size)):
             logging.info(f"CHUNK # {nchunk} of {nchunks_total}")
-            nchunk += 1
 
             logging.info("Generating database objects...")
             db_objs = []
@@ -172,7 +168,7 @@ class EmoleculesSupplierOffer(ThirdPartyData, DatabaseTable):
                         sku=row.sku,
                     )
                     db_objs.append(new_obj)
-                except:
+                except Exception:
                     failed.append(row.to_dict())
 
             logging.info("Saving to Simmate database...")
@@ -237,12 +233,10 @@ class EmoleculesSupplierOffer(ThirdPartyData, DatabaseTable):
             ]
 
         chunk_size = 25_000
-        nchunk = 0
         nchunks_total = (len(custom_offers) // chunk_size) + 1
         failed = []
-        for emol_chunk in chunk_list(custom_offers, chunk_size):
+        for nchunk, emol_chunk in enumerate(chunk_list(custom_offers, chunk_size)):
             logging.info(f"CHUNK # {nchunk} of {nchunks_total}")
-            nchunk += 1
 
             logging.info("Generating database objects...")
             db_objs = []
@@ -262,7 +256,7 @@ class EmoleculesSupplierOffer(ThirdPartyData, DatabaseTable):
                         tier_number=row.tier_num,
                     )
                     db_objs.append(new_obj)
-                except:
+                except Exception:
                     failed.append(row.to_dict())
 
             logging.info("Saving to Simmate database...")

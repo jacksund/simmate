@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-
-# isort: skip_file
+# ruff: isort: skip_file
 
 from simmate.database import connect
 

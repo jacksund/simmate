@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 This module defines the Composition class.
 
@@ -247,7 +245,7 @@ class Composition(PymatgenComposition):
 
         # if the "@module" key is in the dictionary, then we have a pymatgen
         # structure dict which we convert to a pymatgen object and return
-        elif isinstance(composition, dict) and "@module" in composition.keys():
+        elif isinstance(composition, dict) and "@module" in composition:
             return cls.from_dict(composition)
 
         # Otherwise attempt to initialize the input, where we expect it to

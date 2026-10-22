@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import bz2
 import logging
 from pathlib import Path

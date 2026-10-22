@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pandas
 from langchain.agents.agent_types import AgentType
 from langchain.tools import tool

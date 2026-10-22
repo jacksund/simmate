@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import numpy
 import pandas
 import plotly.express as plotly_express

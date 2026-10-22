@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.db import connection
 
 _PARAMETERS = (
@@ -16,12 +14,12 @@ _PARAMETERS = (
 )
 
 
-class RdkitPgConfig(object):
+class RdkitPgConfig:
     def __getattr__(self, name):
         if not name in _PARAMETERS:
             raise AttributeError
         with connection.cursor() as c:
-            c.execute("SHOW rdkit.{}".format(name))
+            c.execute(f"SHOW rdkit.{name}")
             value = c.fetchone()[0]
         return value
 
@@ -29,7 +27,7 @@ class RdkitPgConfig(object):
         if not name in _PARAMETERS:
             raise AttributeError
         with connection.cursor() as c:
-            c.execute("SET rdkit.{}=%s".format(name), (value,))
+            c.execute(f"SET rdkit.{name}=%s", (value,))
 
 
 rdkit_pg_config = RdkitPgConfig()

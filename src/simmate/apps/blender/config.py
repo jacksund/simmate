@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
-
 import platform
 import subprocess
 from pathlib import Path
 
 import yaml
 
-from simmate.config.utils import check_app_reg, check_command_exists, show_test_results
+from simmate.config.utils import check_app_reg, show_test_results
 
 
 def get_blender_command():
@@ -69,7 +67,7 @@ def find_blender_installation():
         if expected_folder.exists():
             # grab all the folders and find the highest blender version, which
             # be the last one when sorted alphabetically
-            blender_version = sorted(expected_folder.iterdir())[-1]
+            blender_version = max(expected_folder.iterdir())
 
             # To call blender in python, we write the full path to the blender
             # executable. For example, the command looks like this:
@@ -117,6 +115,7 @@ def test_blender_command(blender_command):
         command_to_test,
         shell=True,  # to access commands in the path
         capture_output=True,  # capture any ouput + error logs
+        check=False,
     )
 
     # see if the command works, which means the return code is 0
@@ -146,7 +145,7 @@ def test_config(run_calcs: bool = False):
 
     # 2 - check for command
     try:
-        command = get_blender_command()
+        get_blender_command()
         found_command = True
     except BlenderNotInstalledError:
         found_command = False

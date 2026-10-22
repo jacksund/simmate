@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import json
 import logging
 import shutil
@@ -131,9 +129,9 @@ class ArchiveMixin:
             # convert JSON columns
             json_parsing_columns = ["site_forces", "lattice_stress"]
             for column in json_parsing_columns:
-                if column in entry:
-                    if entry[column]:  # sometimes it has a value of None
-                        entry[column] = json.loads(entry[column])
+                # sometimes it has a value of None
+                if entry.get(column):
+                    entry[column] = json.loads(entry[column])
             # OPTIMIZE: consider applying this to the df column for faster loading
 
             return cls.from_toolkit(**entry)
@@ -372,7 +370,7 @@ class ArchiveMixin:
         # We pass a filename so it writes to the correct location.
         from datetime import datetime
 
-        today = datetime.today()
+        today = datetime.now()
         columns_label = (
             "full"
             if columns == "full"

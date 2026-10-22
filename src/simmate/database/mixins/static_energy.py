@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.quantum_espresso.outputs import PwscfXml
 from simmate.apps.vasp.outputs import Vasprun
 
-from ..core import table_column
 from .calculation import Calculation
 from .forces import Forces
 from .structure import Structure

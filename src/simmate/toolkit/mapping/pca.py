@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from sklearn.decomposition import PCA
 
 from simmate.toolkit.mapping.base import ChemSpaceMapper

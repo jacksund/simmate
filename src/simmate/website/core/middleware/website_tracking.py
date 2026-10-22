@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.contrib.auth.models import AnonymousUser
 
 from simmate.website.utils import parse_request_get
@@ -32,7 +30,7 @@ class WebsitePageVisitMiddleware:
             "/accounts/login/",
             "/accounts/microsoft/login/",
         ]
-        if not any([url_path.startswith(u) for u in excluded_urls]):
+        if not any(url_path.startswith(u) for u in excluded_urls):
             visit = WebsitePageVisit(
                 user=user,
                 url_path=url_path,

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from numpy.random import choice
@@ -93,10 +91,10 @@ class PyXtalStructure(StructureCreator):
                 # tm=<pyxtal.crystal.Tol_matrix object> # not supported yet
             )
 
-        except Comp_CompatibilityError as exception:
+        except Comp_CompatibilityError:
             # if the user wanted this spacegroup, raise the error
             if requested_spacegroup:
-                raise exception
+                raise
             # otherwise remove the spacegroup from our allowed list
             self.spacegroup_options.remove(spacegroup)
             # And retry. Note: recursion is a shortcut here, but shouldn't

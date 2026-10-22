@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import os
 import re
@@ -300,13 +298,9 @@ class Molecule:
     def is_smarts(self):
         smiles = self.to_smiles()
 
-        if "*" in smiles:
-            return True
-
         # TODO: what else can I check?
         # https://www.daylight.com/dayhtml/doc/theory/theory.smarts.html
-
-        return False
+        return "*" in smiles
 
     # -------------------------------------------------------------------------
 
@@ -425,7 +419,7 @@ class Molecule:
                 if not allow_h_in_wildcard:
                     smarts = smarts.replace("*", "!#1")
 
-            except:
+            except Exception:
                 logging.warning(
                     "Failed to read SMARTS with expand_explicit_notation=True. "
                     "This can happen when you have a more advanced SMARTS. "
@@ -677,16 +671,14 @@ class Molecule:
         # if the value is a str and it relates to a filepath, then we load the
         # structure from a file.
         elif isinstance(molecule, str) and any(
-            [
-                molecule.endswith(ext)
-                for ext in [
-                    ".smi",
-                    ".sdf",
-                    ".inchi",
-                    ".cxsmiles",
-                    ".mol",
-                    ".mol2",
-                ]
+            molecule.endswith(ext)
+            for ext in [
+                ".smi",
+                ".sdf",
+                ".inchi",
+                ".cxsmiles",
+                ".mol",
+                ".mol2",
             ]
         ):
             if Path(molecule).exists():
@@ -705,7 +697,7 @@ class Molecule:
         elif isinstance(molecule, str):
             try:
                 return cls.from_smiles(molecule)
-            except:
+            except Exception:
                 raise Exception("Unknown string format OR incorrect smiles.")
 
         # If we have a list, then we likely have a list of molecules, where
@@ -1549,7 +1541,7 @@ class Molecule:
         # score will be between 1 (easy to make) and 10 (very difficult to make)
         try:  # BUG: what if it's a mixture?
             return sascorer.calculateScore(self.rdkit_molecule)
-        except:
+        except Exception:
             return None
 
     # -------------------------------------------------------------------------
@@ -1563,7 +1555,7 @@ class Molecule:
         query match location in the molecule and then return the R-groups
         that were connected to the match.
         """
-        matches, failures = rdRGroupDecomposition.RGroupDecompose(
+        matches, _failures = rdRGroupDecomposition.RGroupDecompose(
             [smarts.rdkit_molecule],
             [self.rdkit_molecule],
             # asSmiles=True,
@@ -1589,7 +1581,7 @@ class Molecule:
         rdkit_scaffold = MurckoScaffold.GetScaffoldForMol(self.rdkit_molecule)
         try:
             return self.__class__(rdkit_scaffold)
-        except:
+        except Exception:
             # BUG: should I raise error for failed scaffolds? e.g. "CC(=O)O" gives ""
             return None
 
@@ -1616,7 +1608,7 @@ class Molecule:
         results = {}
 
         fragment_types = [
-            d for d in Descriptors.__dict__.keys() if d.startswith("fr_")
+            d for d in Descriptors.__dict__ if d.startswith("fr_")
         ]  # + ["NHOHCount", "NOCount"]
 
         for fragment_type in fragment_types:

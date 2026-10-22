@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import datetime
 import logging
 import os
@@ -162,6 +160,7 @@ class Walltime(ErrorHandler):
                 shell=True,
                 capture_output=True,
                 text=True,
+                check=False,
             ).stdout.strip()
             # parse the output into a time
             if output == "INVALID":
@@ -177,7 +176,7 @@ class Walltime(ErrorHandler):
                 # Converts a string like "199-21:58:12" to ['199', '21', '58', '12']
                 try:
                     output = [int(i) for i in output.replace("-", ":").split(":")]
-                except:
+                except Exception:
                     logging.warning(
                         "Failed to parse SLURM output. Please report this to the"
                         f"Simmate team. Output was {output}"

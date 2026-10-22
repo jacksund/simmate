@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import re
 import threading
 from typing import get_args, get_origin
@@ -12,7 +10,7 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonRes
 from django.shortcuts import render
 from django.utils.functional import classproperty
 
-from simmate.toolkit import Molecule, Structure
+from simmate.toolkit import Structure
 from simmate.utils import dotdict, str_to_datatype
 from simmate.website.utils import parse_request_get
 
@@ -168,7 +166,6 @@ class HtmxComponent:
         """
         No-op action method. Calling it simply re-renders the component.
         """
-        pass
 
     # -------------------------------------------------------------------------
 

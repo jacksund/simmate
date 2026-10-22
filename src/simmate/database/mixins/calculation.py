@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import platform
 from datetime import datetime
 
@@ -278,8 +276,7 @@ class Calculation(DatabaseTable):
             # if we run the workflow locally, this can sometimes give a negative
             # value for queue time because of database hit / python continutation
             # inconsistencies. We therefore give a minimum value of 0
-            if queue_time < 0:
-                queue_time = 0
+            queue_time = max(queue_time, 0)
             calculation.queue_time = queue_time
             calculation.save()
 

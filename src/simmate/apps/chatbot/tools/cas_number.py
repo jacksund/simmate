@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-
 import json
+from contextlib import suppress
 
 from langchain.tools import tool
 
@@ -111,7 +110,7 @@ def lookup_cas_number(compound_name: str, clean_name: bool = False) -> dict:
         }
 
     # 3. search pubchem api
-    try:
+    with suppress(Exception):
         cid_data = PubChemClient.get_data_from_name(compound_name_clean)
         if cid_data["cas_number"]:
             return {
@@ -123,8 +122,6 @@ def lookup_cas_number(compound_name: str, clean_name: bool = False) -> dict:
                     "is not guaranteed to be correct."
                 ),
             }
-    except Exception:
-        pass
 
     # 4. do a deeper web search
     try:

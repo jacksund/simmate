@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pymatgen.analysis.structure_matcher import StructureMatcher
 
 from simmate.toolkit import Composition, Structure

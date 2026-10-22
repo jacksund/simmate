@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import time
 
@@ -48,8 +46,8 @@ class Transformation:
     SiteTransformation subclasses? Here, io_type could be either
     'structure', 'lattice', or 'site' as to indicate the input.
     """
-    #!!! For now, I have all transformations as StructureTransformation
-    #!!! so I assume io_type here. This may change in the future.
+    # !!! For now, I have all transformations as StructureTransformation
+    # !!! so I assume io_type here. This may change in the future.
 
     allow_parallel: bool = False
     """
@@ -189,7 +187,7 @@ class Transformation:
         # a serious problem!
         if not new_structure and attempt > max_attempts:
             logging.warning(
-                f"Failed to create a structure after {max_attempts} attempts.Giving up."
+                f"Failed to create a structure after {max_attempts} attempts. Giving up."
             )
             return False
         elif not new_structure and current_time >= stop_time:

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from simmate.apps.vasp.inputs.potcar_mappings import FOLDER_MAPPINGS

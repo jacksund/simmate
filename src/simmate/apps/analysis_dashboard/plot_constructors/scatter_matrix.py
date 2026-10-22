@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -51,10 +49,7 @@ class ScatterMatrix(PlotConstructor):
                 return False
 
         # There should be more than 1 dimension
-        if len(plot_config["dimensions"]) < 2:
-            return False
-
-        return True
+        return len(plot_config["dimensions"]) > 1
 
     @staticmethod
     def get_plot(df: pd.DataFrame, plot_config: dict):

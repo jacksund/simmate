@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ##############################################################################
 
 from abc import ABC, abstractmethod
@@ -57,7 +55,7 @@ class SerialFixes(FixIndicator):
         # for example, the maxFails=[20,40,10] needs to be converted to [20,60,70]
         # if infinite attempts are allowed, be sure to use float('inf') as the value
         # This list is more efficient to work with in the point_to_fix()
-        #!!! should I make this numpy for speed below?
+        # !!! should I make this numpy for speed below?
         self.cutoffs_cum = [sum(cutoffs[: x + 1]) for x in range(len(cutoffs))]
 
     def point_to_fix(self, attempt=0):
@@ -100,10 +98,10 @@ class NestedFixes(FixIndicator):
         # To do this, I make a list of all the the attempts. The list is the length
         # of the total number of attempts and each entry points to the index of fixes
         # that should be used.
-        #!!! the size of this list is an issue if many attempts are allowed
-        #!!! for example cutoffs=[100,100,100] would make a list of length 1,010,100
-        #!!! For validators where I want thousands of nested attempts, this could cause a memory issue.
-        #!!! Should I warn the user if this is too large?
+        # !!! the size of this list is an issue if many attempts are allowed
+        # !!! for example cutoffs=[100,100,100] would make a list of length 1,010,100
+        # !!! For validators where I want thousands of nested attempts, this could cause a memory issue.
+        # !!! Should I warn the user if this is too large?
         # grab the total number of attempts allowed accross all portions
         self.max_attempt = get_nested_size(cutoffs)
         # grab the map which will be a list of length max_attempt
@@ -121,7 +119,7 @@ class NestedFixes(FixIndicator):
         return self.fixes[self.attempt_map[attempt - 1]]  # -1 for index counting from 0
 
 
-#!!! should I make the two functions below @staticmethods of the above class?
+# !!! should I make the two functions below @staticmethods of the above class?
 def get_nested_map(a):
     l = []
     for i in range(len(a) - 1, -1, -1):

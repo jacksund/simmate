@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 from simmate.toolkit import Structure
@@ -59,7 +57,7 @@ class ExtremeSymmetry(Transformation):
                 continue
 
             # We only store the results if we generated a brand-new spacegroup
-            if new_spacegroup not in results.keys():
+            if new_spacegroup not in results:
                 results.update({new_spacegroup: sga.get_primitive_standard_structure()})
 
             # For the next cycle, I simple scale the angle and distance tolerances

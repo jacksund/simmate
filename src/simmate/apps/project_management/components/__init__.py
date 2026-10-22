@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .dashboard import ProjectDashboardComponent
 from .mixins import ProjectInput, ProjectManagementInput
 from .project import ProjectComponent

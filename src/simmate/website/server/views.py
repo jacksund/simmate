@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-
 import importlib
+from contextlib import suppress
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -19,7 +18,6 @@ from simmate.website.core.dashboard import (
     get_quick_actions,
     get_widget_catalog,
 )
-from simmate.website.core.models import Notification
 from simmate.website.data_explorer.forms import ChemicalSystemForm
 from simmate.website.utils import get_website_apps
 
@@ -58,7 +56,7 @@ def profile_default_view(request):
     ]
     user_calcs = []
     for model in calc_models:
-        try:
+        with suppress(Exception):
             # grab the most recent 10 from each to avoid huge queries
             calcs = list(
                 model.objects.filter(submitted_by=request.user)
@@ -66,8 +64,6 @@ def profile_default_view(request):
                 .order_by("-updated_at")[:10]
             )
             user_calcs += calcs
-        except:
-            pass
     user_calcs.sort(key=lambda x: x.updated_at, reverse=True)
     user_calcs = user_calcs[:50]
 
@@ -94,7 +90,7 @@ def profile(request):
     else:
         # we assume the view is named "profile" inside this module
         profile_module = importlib.import_module(settings.website.profile_view)
-        profile_view = getattr(profile_module, "profile")
+        profile_view = profile_module.profile
         return profile_view(request)
 
 
@@ -187,7 +183,7 @@ def home(request):
     else:
         # we assume the view is named "home" inside this module
         home_module = importlib.import_module(settings.website.home_view)
-        home_view = getattr(home_module, "home")
+        home_view = home_module.home
         return home_view(request)
 
 
@@ -274,5 +270,5 @@ def dashboard(request):
         return dashboard_default_view(request)
     else:
         dashboard_module = importlib.import_module(settings.website.dashboard_view)
-        dashboard_view = getattr(dashboard_module, "dashboard")
+        dashboard_view = dashboard_module.dashboard
         return dashboard_view(request)

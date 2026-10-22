@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-
 """
 This module is experimental and not used at the moment.
 """
+
+# ruff: noqa: F821
 
 import logging
 from inspect import signature
@@ -47,7 +47,7 @@ class TriggeredAction:
         # we also need to see if composition is a required input, which we don't require the user to specify for convenience
         trigger_class_parameters = signature(trigger_class).parameters
 
-        #!!! in the future, should I just require that all mutators take composition (or **kwargs) as an input even if they don't need it?
+        # !!! in the future, should I just require that all mutators take composition (or **kwargs) as an input even if they don't need it?
         # now we can init with the dictionary of options depending on if composition is needed or not
         if "composition" in trigger_class_parameters:
             trigger_object = trigger_class(composition, **trigger_options)
@@ -58,8 +58,8 @@ class TriggeredAction:
         return trigger_object
 
 
-#!!! In the future, should I reduce triggers down to lower order objects?
-#!!! One example of this would be reducing a Trigger to a Check/Validation and an Action
+# !!! In the future, should I reduce triggers down to lower order objects?
+# !!! One example of this would be reducing a Trigger to a Check/Validation and an Action
 
 # -----------------------------------------------------------------------------
 
@@ -73,11 +73,8 @@ class InitStructures:
         # Number of initial structures to create
         self.n_initial_structures = n_initial_structures
 
-    def check(self, search):  #!!! can I move 'search' to the init?
-        if not search.structures:  # same as len(structures) == 0
-            return True
-        else:
-            return False
+    def check(self, search):  # !!! can I move 'search' to the init?
+        return not search.structures  # same as len(structures) == 0
 
     def action(self, search):
         logging.info("Making new structures...")
@@ -98,16 +95,13 @@ class AddStructures:
         # Number of structures to create if the pending_limit is hit
         self.n_add_structures = n_add_structures
 
-    def check(self, search):  #!!! can I move 'search' to the init?
+    def check(self, search):  # !!! can I move 'search' to the init?
         # if no structures have completed yet, we don't want to add any new structure with this trigger
         if search.njobs_completed == 0:
             return False
 
         # See if the number of jobs pending has dropped below the limit
-        if search.njobs_pending <= self.n_pending_limit:
-            return True
-        else:
-            return False
+        return search.njobs_pending <= self.n_pending_limit
 
     def action(self, search):
         logging.info("Making new structures...")

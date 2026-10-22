@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 from pathlib import Path
 
@@ -127,7 +125,7 @@ class EnamineRealMolecule(ThirdPartyData, Molecule):
                         is_diverse_subset=True,  # I haven't looked at the full set yet
                     )
                     db_objs.append(molecule_db)
-                except:
+                except Exception:
                     failed_rows.append(entry)
             # save each entry to simmate database
             logging.info("Saving to Simmate database...")

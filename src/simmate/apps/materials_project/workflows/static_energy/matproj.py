@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from simmate.apps.materials_project.workflows.relaxation.matproj import (
     Relaxation__Vasp__Matproj,
 )

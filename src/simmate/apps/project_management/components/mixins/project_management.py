@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from ...models import Project, Tag
 from .project import ProjectInput
 

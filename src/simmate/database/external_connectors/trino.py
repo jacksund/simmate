@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import time
 
 import numpy
@@ -123,19 +121,21 @@ class TrinoDB:
         # chunk_size: str = None,
 
         connect_kwargs = dict(source=self.source) if self.source else {}
-        with connect(
-            host=self.host,
-            port=self.port,
-            auth=self.auth or JWTAuthentication(self.get_access_token()),
-            http_scheme="https",
-            **connect_kwargs,
-        ) as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(query)
-                data = pandas.DataFrame(
-                    data=cursor.fetchall(),
-                    columns=[c[0] for c in cursor.description],
-                )
+        with (
+            connect(
+                host=self.host,
+                port=self.port,
+                auth=self.auth or JWTAuthentication(self.get_access_token()),
+                http_scheme="https",
+                **connect_kwargs,
+            ) as connection,
+            connection.cursor() as cursor,
+        ):
+            cursor.execute(query)
+            data = pandas.DataFrame(
+                data=cursor.fetchall(),
+                columns=[c[0] for c in cursor.description],
+            )
 
         # ---- BUG FIXES -----------------------
         # BUG-FIX (nan-->None)
