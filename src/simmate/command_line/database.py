@@ -63,6 +63,11 @@ def reset(
         "--use-prebuilt/--no-use-prebuilt",
         help="Whether to use a pre-populated database (SQLite only). If not provided, you will be prompted.",
     ),
+    use_template: bool = typer.Option(
+        None,
+        "--use-template/--no-use-template",
+        help="Whether to copy the `<name>_template` database made by `simmate database snapshot` (Postgres only). If not provided and the template exists, you will be prompted.",
+    ),
 ):
     """
     Wipes the existing database and initializes a fresh, empty schema.
@@ -97,7 +102,22 @@ def reset(
     from simmate.database import connect
     from simmate.database.utils import reset_database
 
-    reset_database(use_prebuilt=use_prebuilt)
+    reset_database(use_prebuilt=use_prebuilt, use_template=use_template)
+
+
+@database_app.command()
+def snapshot():
+    """
+    Copies your database to `<name>_template` (Postgres only), which `reset`
+    can then start from. Any existing template is replaced.
+
+    This is useful in local development to avoid reloading large datasets
+    after every reset. Make sure nothing else is connected to the database.
+    """
+
+    from simmate.database.utils import snapshot_database
+
+    snapshot_database()
 
 
 @database_app.command()

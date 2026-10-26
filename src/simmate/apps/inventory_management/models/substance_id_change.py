@@ -68,7 +68,8 @@ class SubstanceIdChange(DatabaseTable):
     """
     The version of the uniqueness/matching rules that led to this change
     (if any). This allows changes to be traced back to (and potentially
-    reverted for) a specific update to `Substance.register_molecules`.
+    reverted for) a specific update to
+    `SubstanceDatastore.get_or_create_ids`.
     """
 
     extra_metadata = table_column.JSONField(blank=True, null=True)

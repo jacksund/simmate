@@ -79,6 +79,27 @@ class Structure(PymatgenStructure):
         # return back the sanitized structure
         return structure_sanitized
 
+    def get_fingerprint(self) -> numpy.ndarray:
+        """
+        Generates the PartialCrystalNN fingerprint of this structure, which is
+        the **simmate preferred** fingerprint for comparing crystal structures
+        (e.g. with `simmate.toolkit.similarity.Euclidean`).
+
+        Elements are given in a fixed order (that of the reduced formula), so
+        that fingerprints of the same composition can be compared. Because
+        per-site stats are used, the fingerprint does not depend on the cell
+        size (e.g. a supercell gives the same fingerprint).
+
+        This can fail for some structures, such as disordered ones.
+        """
+        from simmate.toolkit import Composition
+        from simmate.toolkit.validators.fingerprint import PartialCrystalNNFingerprint
+
+        featurizer = PartialCrystalNNFingerprint.get_featurizer(
+            composition=Composition(self.composition.reduced_formula)
+        )
+        return numpy.array(featurizer.featurize(self))
+
     @classmethod
     def from_dynamic(cls, structure):
         """

@@ -217,7 +217,18 @@ def postgres_connect_maintenance_db():
 def reset_database(
     apps_to_migrate: list[str] = APPS_TO_MIGRATE,
     use_prebuilt: bool = False,
+    use_template: bool = None,
 ):
+    """
+    Deletes the database and builds a new one.
+
+    Args:
+        apps_to_migrate: The apps to build tables for.
+        use_prebuilt: Whether to start from the prebuilt database (SQLite only).
+        use_template: Whether to copy the `<name>_template` database rather
+            than building an empty one (Postgres only). See `snapshot_database`.
+            If not provided and the template exists, the user is prompted.
+    """
     # TODO: call_command("flush") could be used in the future to simply
     # delete all data -- without rerunning migrations
 
@@ -255,12 +266,32 @@ def reset_database(
         # Build out database extensions and tables
         db_name = settings.database.name
 
+        # if there is a template database (see `snapshot_database`), ask if
+        # the user would like to start from it
+        if use_template is None:
+            cursor.execute(
+                "SELECT 1 FROM pg_database WHERE datname = %s;",
+                [f"{db_name}_template"],
+            )
+            if cursor.fetchone() is not None:
+                import typer
+
+                use_template = typer.confirm(
+                    f"\nFound a template database ({db_name}_template). \n"
+                    "Would you like to copy it rather than building an empty database?"
+                )
+
         cursor.execute(f'DROP DATABASE IF EXISTS "{db_name}";')
         # BUG: if others are connected I could add 'WITH (FORCE)' above.
         # For now, I don't use this but should consider adding it for convenience.
         # I think this is buggy with older versions of postgres (like RDkit),
         # so I hold off on this for now.
-        cursor.execute(f'CREATE DATABASE "{db_name}";')
+        if use_template:
+            cursor.execute(
+                f'CREATE DATABASE "{db_name}" TEMPLATE "{db_name}_template";'
+            )
+        else:
+            cursor.execute(f'CREATE DATABASE "{db_name}";')
 
         # Make the changes to the database persistent
         connection.commit()
@@ -287,6 +318,12 @@ def reset_database(
         # now update the database based on the registered apps
         update_database(apps_to_migrate, show_logs=False)
 
+    # the template already has data loaded, so we only apply any migrations
+    # that are newer than it
+    elif settings.database_backend == "postgresql" and use_template:
+        logging.info("Updating database copied from template...")
+        update_database(apps_to_migrate, show_logs=False)
+
     # Otherwise we make an empty database.
     # Because this is our first time building the database, we also want to
     # load the Spacegroup metadata for us to query Structures by.
@@ -305,6 +342,36 @@ def reset_database(
 
     # Let the user know everything succeeded
     logging.info("Success! Your database has been reset. :sparkles:")
+
+
+def snapshot_database():
+    """
+    Copies the current database to `<name>_template` (Postgres only), which
+    `reset_database(use_template=True)` can then start from. Any existing
+    template is replaced.
+
+    This is useful in local development to avoid reloading large datasets
+    (e.g. `simmate database download pdb`) after every reset.
+
+    NOTE: Postgres requires that nothing else is connected to the database
+    while it is being copied (e.g. a running website or python shell).
+    """
+    if settings.database_backend != "postgresql":
+        raise Exception("Database snapshots are only supported for Postgres.")
+
+    db_name = settings.database.name
+    logging.info(f"Copying '{db_name}' to '{db_name}_template'...")
+
+    connection = postgres_connect_maintenance_db()
+    connection.set_isolation_level(0)
+    cursor = connection.cursor()
+    cursor.execute(f'DROP DATABASE IF EXISTS "{db_name}_template";')
+    cursor.execute(f'CREATE DATABASE "{db_name}_template" TEMPLATE "{db_name}";')
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+    logging.info("Success! Your database snapshot has been saved. :sparkles:")
 
 
 def get_all_table_names() -> list[str]:
