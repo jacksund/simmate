@@ -1,4 +1,3 @@
-import logging
 from contextlib import suppress
 
 import requests
@@ -6,7 +5,7 @@ from bs4 import BeautifulSoup
 
 from simmate.config import settings
 from simmate.toolkit import Molecule
-from simmate.utils import download_file, get_directory
+from simmate.utils import download_file, get_directory, logger
 
 
 class PubChemClient:
@@ -187,13 +186,13 @@ class PubChemClient:
     @classmethod
     def download_all_compounds(cls):
 
-        logging.info("Starting download of PubChem data...")
+        logger.info("Starting download of PubChem data...")
 
         target_dir = get_directory(settings.config_directory / "pubchem")
 
         # 1. Get the list of all available files
         all_files = cls.get_compound_file_list()
-        logging.info(f"Found {len(all_files)} files to download.")
+        logger.info(f"Found {len(all_files)} files to download.")
 
         # 2. Iterate and download
         for filename in all_files:
@@ -202,13 +201,13 @@ class PubChemClient:
 
             # Check if file already exists to avoid redundant downloads
             if local_path.exists():
-                logging.info(f"Skipping {filename} (already exists)")
+                logger.info(f"Skipping {filename} (already exists)")
                 continue
 
-            logging.info(f"Downloading {filename}...")
+            logger.info(f"Downloading {filename}...")
             try:
                 download_file(full_url, local_path)
             except Exception as e:
-                logging.warning(f"Error downloading {filename}: {e}")
+                logger.warning(f"Error downloading {filename}: {e}")
 
-        logging.info("Done!")
+        logger.info("Done!")

@@ -6,6 +6,7 @@ from pymatgen.analysis.structure_prediction.substitutor import Substitutor
 from pymatgen.core import Species
 
 from simmate.toolkit import Composition, Structure
+from simmate.utils import logger
 
 from .known import get_known_structures
 
@@ -48,8 +49,7 @@ def get_structures_from_substitution_of_known(
     # of elements (starting with all of them and then try smaller combos) and
     # exits as soon as I find one that works. Pymatgen also randomly logs
     # within this function call, so we disable the logger while running this.
-    logger = logging.getLogger()
-    logger.disabled = True
+    logging.disable(logging.CRITICAL)
     nelements = len(oxi_composition.elements)
     has_subs = False
     while (not has_subs) and (nelements > 0):
@@ -66,7 +66,7 @@ def get_structures_from_substitution_of_known(
         else:
             # try the cycle again but with one less element in the combinations
             nelements -= 1
-    logger.disabled = False
+    logging.disable(logging.NOTSET)
 
     # Confirm charge balance for most-likely structures
     # This loop is copy/pasted from...
@@ -86,10 +86,10 @@ def get_structures_from_substitution_of_known(
     expected_substituitions = output
 
     if not expected_substituitions:
-        # logging.warning(f"Failed to find viable substituitions for {composition}")
+        # logger.warning(f"Failed to find viable substituitions for {composition}")
         return []
 
-    # logging.info(f"{len(expected_substituitions)} subsitutions charge balance")
+    # logger.info(f"{len(expected_substituitions)} subsitutions charge balance")
 
     # ----------
 
@@ -119,7 +119,7 @@ def get_structures_from_substitution_of_known(
         # pass a copy instead
 
         # log the substituition for debugging
-        logging.debug([oxi_composition, composition_source, substituition_cleaned])
+        logger.debug([oxi_composition, composition_source, substituition_cleaned])
 
         # Now grab all known structures with this composition
         source_structures = get_known_structures(composition_source, **kwargs)
@@ -173,6 +173,6 @@ def get_structures_from_substitution_of_known(
             # TODO: scale structures to reasonable volume..?
             structures_final.append(new_structure)
 
-    # logging.info(f"{len(structures_final)} final subsitutions using known structures")
+    # logger.info(f"{len(structures_final)} final subsitutions using known structures")
 
     return structures_final

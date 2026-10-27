@@ -1,12 +1,11 @@
 import bz2
-import logging
 from pathlib import Path
 
 import polars
 
 from simmate.config import settings
 from simmate.database.external_connectors.s3 import S3Bucket
-from simmate.utils import get_directory
+from simmate.utils import get_directory, logger
 
 
 class ChemspaceClient(S3Bucket):
@@ -61,7 +60,7 @@ class ChemspaceClient(S3Bucket):
         )
 
         for i, file in enumerate(all_files):
-            logging.info(f"Reading file {i + 1} of {len(all_files)}: {file.name}")
+            logger.info(f"Reading file {i + 1} of {len(all_files)}: {file.name}")
             with bz2.open(file, "rb") as f_in:
                 file_content = f_in.read()
                 yield polars.read_csv(file_content, separator="\t")

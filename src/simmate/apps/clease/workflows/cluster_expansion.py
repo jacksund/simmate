@@ -1,4 +1,3 @@
-import logging
 import re
 from pathlib import Path
 
@@ -13,7 +12,7 @@ from clease.tools import update_db as update_clease_db
 
 from simmate.toolkit import Structure
 from simmate.toolkit.file_converters import AseAtomsAdaptor
-from simmate.utils import get_chemical_subsystems, get_directory
+from simmate.utils import get_chemical_subsystems, get_directory, logger
 from simmate.workflows import Workflow
 from simmate.workflows.utils import get_workflow
 
@@ -47,7 +46,7 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
         directory: Path = None,
         **kwargs,
     ):
-        logging.critical(
+        logger.critical(
             "This is a highly experimental (and largely incomplete) workflow. "
             "Proceed with caution and pay attention to the changelog for updates."
         )
@@ -134,8 +133,8 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
             try:
                 ns.insert_structure(init_struct=atoms, final_struct=atoms)
             except Exception as error:
-                logging.warning("Failed to load past structure due to:")
-                logging.warning(error)
+                logger.warning("Failed to load past structure due to:")
+                logger.warning(error)
 
         # ---------------------------------------------------------------------
 
@@ -143,7 +142,7 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
 
         # Start looping through CE generations
         for generation_number in range(current_generation, max_generations):
-            logging.info(f"Starting Generation {generation_number}")
+            logger.info(f"Starting Generation {generation_number}")
 
             # create a subdirectory to store results in
             generation_directory = get_directory(
@@ -189,7 +188,7 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
                 try:
                     result = state.result()  # structure_step
                 except Exception:
-                    logging.warning("CALC {row.id} FAILED.")
+                    logger.warning("CALC {row.id} FAILED.")
                     continue
                 # if isinstance(result, Exception):
                 #     # TODO: do something with those that failed.
@@ -255,12 +254,12 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
 
             # check if the fit is converged
             if eva.rmse() <= convergence_limit and eva.loocv() <= convergence_limit:
-                logging.info("CE model is converged. Exitting generation loop.")
+                logger.info("CE model is converged. Exitting generation loop.")
                 break
 
         # double check that the loop above exited thanks to convergence
         if eva.rmse() >= convergence_limit or eva.loocv() >= convergence_limit:
-            logging.warning("Maximum generations hit before CE model converged.")
+            logger.warning("Maximum generations hit before CE model converged.")
 
         # ---------------------------------------------------------------------
 

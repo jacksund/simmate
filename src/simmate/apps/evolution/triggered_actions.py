@@ -4,8 +4,9 @@ This module is experimental and not used at the moment.
 
 # ruff: noqa: F821
 
-import logging
 from inspect import signature
+
+from simmate.utils import logger
 
 
 class TriggeredAction:
@@ -77,7 +78,7 @@ class InitStructures:
         return not search.structures  # same as len(structures) == 0
 
     def action(self, search):
-        logging.info("Making new structures...")
+        logger.info("Making new structures...")
 
         # we want n total structures so we are going to loop this number of times
         for n in range(self.n_initial_structures):
@@ -104,7 +105,7 @@ class AddStructures:
         return search.njobs_pending <= self.n_pending_limit
 
     def action(self, search):
-        logging.info("Making new structures...")
+        logger.info("Making new structures...")
 
         # we want n total structures so we are going to loop this number of times
         for n in range(self.n_add_structures):

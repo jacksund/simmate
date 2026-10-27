@@ -1,6 +1,8 @@
 import logging
 from pathlib import Path
 
+from simmate.utils import logger
+
 # Silence noisy initialization logs from faiss (AVX2 fallback etc)
 logging.getLogger("faiss.loader").setLevel(logging.ERROR)
 
@@ -131,12 +133,12 @@ class FaissIvfPqIndex(VectorIndex):
 
         vectors = self._sample_training_vectors()
         if len(vectors) < 39 * self.nlist:
-            logging.warning(
+            logger.warning(
                 f"Only {len(vectors):,} training vectors for nlist={self.nlist} "
                 f"(faiss wants >= {39 * self.nlist:,}). Consider lowering nlist."
             )
 
-        logging.info(
+        logger.info(
             f"Training {self.column_name} IVF+PQ on {len(vectors):,} vectors | "
             f"nlist={self.nlist}, m={self.m}, nbits={self.nbits}"
         )
@@ -154,7 +156,7 @@ class FaissIvfPqIndex(VectorIndex):
         # `_build_batch`) out to parallel workers -- a faiss index cannot be
         # pickled, and each worker reads the template from disk anyway
         self._cached_template = None
-        logging.info(f"Saved training template → {template_file}")
+        logger.info(f"Saved training template → {template_file}")
         return template_file
 
     def _sample_training_vectors(self) -> numpy.ndarray:
@@ -164,7 +166,7 @@ class FaissIvfPqIndex(VectorIndex):
         """
         training_file = self._training_set_file()
         if training_file.exists():
-            logging.info(f"Loading training set from {training_file}")
+            logger.info(f"Loading training set from {training_file}")
             return self._unpacked_vectors(polars.read_parquet(training_file))
 
         chunk_files = self.datastore.chunk_files[: self.max_training_files]
@@ -182,7 +184,7 @@ class FaissIvfPqIndex(VectorIndex):
         training_df = polars.concat(samples)
 
         training_df.write_parquet(training_file)
-        logging.info(f"Saved {len(training_df):,} training vectors → {training_file}")
+        logger.info(f"Saved {len(training_df):,} training vectors → {training_file}")
         return self._unpacked_vectors(training_df)
 
     # -------------------------------------------------------------------------
@@ -193,14 +195,14 @@ class FaissIvfPqIndex(VectorIndex):
         self.train_template()
 
     def _build_batch(self, batch: list[int]) -> None:
-        logging.info(
+        logger.info(
             f"Building {self.column_name} batch {batch[0]}-{batch[-1]} → "
             f"{self._final_shard_path(batch)}"
         )
 
         index = faiss.clone_index(self._template())
         for chunk_key in batch:
-            logging.info(f"  {self.column_name} chunk_key={chunk_key}")
+            logger.info(f"  {self.column_name} chunk_key={chunk_key}")
             num_added = 0
             for df in self._iter_row_batches(chunk_key):
                 index.add_with_ids(
@@ -208,14 +210,14 @@ class FaissIvfPqIndex(VectorIndex):
                     df["datastore_id"].to_numpy().astype(numpy.int64),
                 )
                 num_added += len(df)
-            logging.info(f"  Added {num_added:,} | Vectors: {index.ntotal:,}")
+            logger.info(f"  Added {num_added:,} | Vectors: {index.ntotal:,}")
 
         # written to a temp file first so that an interrupted write is never
         # mistaken for a completed shard
         temp_path = self._shard_path(batch, ".partial")
         faiss.write_index(index, str(temp_path))
         index_path = self._finalize_shard(batch, temp_path)
-        logging.info(f"  Saved {index.ntotal:,} vectors → {index_path}")
+        logger.info(f"  Saved {index.ntotal:,} vectors → {index_path}")
 
     def _iter_row_batches(self, chunk_key: int):
         """

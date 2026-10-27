@@ -1,4 +1,3 @@
-import logging
 import threading
 import time
 import traceback
@@ -12,7 +11,7 @@ from django.utils import timezone
 from rich import print
 
 from simmate.database.core import DatabaseTable, table_column
-from simmate.utils import get_class
+from simmate.utils import get_class, logger
 
 from .utils import handle_sigterm
 from .work_item import WorkerInterruptedError, WorkItem
@@ -180,7 +179,7 @@ class SimmateWorker(DatabaseTable):
             # if the user signals to stop with crtl+c (SIGINT = signal interrupt)
             # or the process is terminated (SIGTERM)
             except KeyboardInterrupt:
-                logging.info("Stop signal recieved. Shutting down.")
+                logger.info("Stop signal recieved. Shutting down.")
                 self._shutdown_on_interrupt()
 
     def _shutdown_on_interrupt(self):
@@ -202,7 +201,7 @@ class SimmateWorker(DatabaseTable):
             updated_at=timezone.now(),
         )
         if ninterrupted:
-            logging.warning(
+            logger.warning(
                 "Shut down worker while WorkItem was still running. "
                 "It has been marked as INTERRUPTED and can be requeued "
                 "with `WorkItem.requeue_interrupted()`."
@@ -230,10 +229,10 @@ class SimmateWorker(DatabaseTable):
         # print the header in the console to let the user know the worker started
         print("[bold dark_cyan]" + HEADER_ART)
 
-        logging.info(f"Starting worker with tags {list(self.tags)}")
+        logger.info(f"Starting worker with tags {list(self.tags)}")
 
         if self.startup_method:
-            logging.info(f"Running startup method: '{self.startup_method}'")
+            logger.info(f"Running startup method: '{self.startup_method}'")
             startup_method = get_class(self.startup_method)
             # keep our heartbeat alive in case of a long warmup
             with WorkerHeartbeat(worker_id=self.id):
@@ -243,7 +242,7 @@ class SimmateWorker(DatabaseTable):
         time_start = time.time()
         self.nitems_completed = 0
 
-        logging.info("Worker is ready & listening for WorkItems")
+        logger.info("Worker is ready & listening for WorkItems")
         # Loop endlessly until one of the following happens...
         #   the timeout limit is hit
         #   the queue is empty
@@ -252,7 +251,7 @@ class SimmateWorker(DatabaseTable):
             # check for timeout before starting a new workitem and exit
             # if we've hit the limit.
             if (time.time() - time_start) > timeout:
-                logging.info(
+                logger.info(
                     "The time-limit for this worker has been hit. Shutting down."
                 )
                 self.status = "Stopped"
@@ -262,7 +261,7 @@ class SimmateWorker(DatabaseTable):
             # check the number of jobs completed so far, and exit if we hit
             # the limit
             if self.nitems_completed >= nitems_max:
-                logging.info(
+                logger.info(
                     f"Maximum number of WorkItems reached ({nitems_max}). "
                     "Shutting down."
                 )
@@ -291,7 +290,7 @@ class SimmateWorker(DatabaseTable):
                 # (after we just waited, we check the queue size again)
                 if self.close_on_empty_queue and self.queue_size() == 0:
                     # if it's still empty, we should close the worker
-                    logging.info("The task queue is empty. Shutting down.")
+                    logger.info("The task queue is empty. Shutting down.")
                     self.status = "Stopped"
                     self.save(update_fields=["status", "updated_at"])
                     return
@@ -330,7 +329,7 @@ class SimmateWorker(DatabaseTable):
                 )
 
             # Print out the job ID that is being ran for the user to see
-            logging.info(f"Running WorkItem with id {workitem.id}")
+            logger.info(f"Running WorkItem with id {workitem.id}")
 
             # now let's unpickle the WorkItem components
             fxn = cloudpickle.loads(workitem.fxn)
@@ -347,7 +346,7 @@ class SimmateWorker(DatabaseTable):
             except Exception as exception:
                 traceback.print_exc()
 
-                logging.warning(
+                logger.warning(
                     "Task failed with the error shown above. \n\n"
                     "If you are unfamilar with error tracebacks and find this error "
                     "difficult to read, you can learn more about these errors "
@@ -383,7 +382,7 @@ class SimmateWorker(DatabaseTable):
 
             # mark down that we've completed one WorkItem
             # status stays as running
-            logging.info("Completed WorkItem")
+            logger.info("Completed WorkItem")
             self.nitems_completed += 1
             self.save(update_fields=["nitems_completed", "updated_at"])
 
@@ -411,7 +410,7 @@ class SimmateWorker(DatabaseTable):
         self.refresh_from_db(fields=["shutdown_flag"])
         if not self.shutdown_flag:
             return False
-        logging.info("Shutdown was requested for this worker. Shutting down.")
+        logger.info("Shutdown was requested for this worker. Shutting down.")
         self.status = "Stopped"
         self.save(update_fields=["status", "updated_at"])
         return True
@@ -483,7 +482,7 @@ class SimmateWorker(DatabaseTable):
             nstale = cls.get_stale().update(status="Stale Heartbeat")
 
         if ncrashed or ninterrupted:
-            logging.warning(
+            logger.warning(
                 f"Marked {ncrashed} worker(s) as crashed and {ninterrupted} "
                 "WorkItem(s) as INTERRUPTED. These items can be requeued "
                 "with `WorkItem.requeue_interrupted()`."
@@ -520,7 +519,7 @@ class WorkerHeartbeat(ContextDecorator):
                         status="Stale Heartbeat",
                     ).update(status="Running")
                 except Exception as error:
-                    logging.warning(f"Worker heartbeat failed: {error}")
+                    logger.warning(f"Worker heartbeat failed: {error}")
         finally:
             # each thread gets its own db connection, so close it on exit
             connection.close()

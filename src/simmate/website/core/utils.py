@@ -1,4 +1,3 @@
-import logging
 import os
 import shutil
 import zipfile
@@ -7,6 +6,7 @@ from pathlib import Path
 import requests
 
 from simmate.config import settings
+from simmate.utils import logger
 
 
 def download_ketcher() -> Path:
@@ -26,7 +26,7 @@ def download_ketcher() -> Path:
     if (static_dir / "index.html").exists():
         return static_dir
 
-    logging.info("Downloading Ketcher...")
+    logger.info("Downloading Ketcher...")
 
     # ensure directory exists and is empty
     if static_dir.exists():
@@ -40,7 +40,7 @@ def download_ketcher() -> Path:
         with open(zip_path, "wb") as f:
             f.writelines(response.iter_content(chunk_size=8192))
     else:
-        logging.error(f"Failed to download Ketcher (status {response.status_code})")
+        logger.error(f"Failed to download Ketcher (status {response.status_code})")
         return static_dir
 
     with zipfile.ZipFile(zip_path, "r") as zip_ref:
@@ -66,5 +66,5 @@ def download_ketcher() -> Path:
                         shutil.copyfileobj(source, target)
 
     os.remove(zip_path)
-    logging.info("Ketcher installation complete.")
+    logger.info("Ketcher installation complete.")
     return static_dir

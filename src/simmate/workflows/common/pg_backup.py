@@ -1,6 +1,7 @@
-import logging
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+
+from simmate.utils import logger
 
 from ..core import Workflow
 from .pg_dump import Maintenance__Postgres__PgDump
@@ -72,6 +73,6 @@ class Maintenance__Postgres__BackupToS3(Workflow):
                 if obj.last_modified < cutoff and obj.key != s3_key
             ]
             SimmatePrivateS3Bucket.delete_keys(old_keys)
-            logging.info(
+            logger.info(
                 f"Removed {len(old_keys)} backups older than {days_to_keep} days"
             )

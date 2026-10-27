@@ -1,9 +1,8 @@
-import logging
-
 from numpy.random import choice, randint
 from pymatgen.analysis.structure_matcher import StructureMatcher
 
 from simmate.toolkit.transformations.base import Transformation
+from simmate.utils import logger
 
 
 class AtomicPermutation(Transformation):
@@ -86,7 +85,7 @@ class AtomicPermutation(Transformation):
 
         # if we make it this far, then we hit our max_attempts limit without
         # making a new structure therefore, we failed the mutation
-        logging.warning(
+        logger.warning(
             "Failed to make a new structure that is different from the original"
         )
         return False

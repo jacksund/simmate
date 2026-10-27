@@ -1,5 +1,3 @@
-import logging
-
 import numpy
 import polars
 
@@ -8,7 +6,7 @@ from simmate.toolkit.datastores import MoleculeDatastore
 from simmate.toolkit.featurizers import MethodCaller
 from simmate.toolkit.similarity import Euclidean
 from simmate.toolkit.validators.fingerprint import PartialCrystalNNFingerprint
-from simmate.utils import chunk_list
+from simmate.utils import chunk_list, logger
 
 
 class SubstanceDatastore(MoleculeDatastore):
@@ -142,7 +140,7 @@ class SubstanceDatastore(MoleculeDatastore):
 
         output_path = cls.staging_directory / "source.parquet"
         df.write_parquet(output_path, compression=cls.compression_mode)
-        logging.info(f"Converted Substance table | Rows: {len(df):,}")
+        logger.info(f"Converted Substance table | Rows: {len(df):,}")
 
     # -------------------------------------------------------------------------
 
@@ -452,12 +450,12 @@ class SubstanceDatastore(MoleculeDatastore):
                         }
                     rows.append(row)
                 cls.upsert_rows(polars.DataFrame(rows, infer_schema_length=None))
-                logging.warning(
+                logger.warning(
                     "Vector indexes are now stale. Rerun `build_fingerprint_index` "
                     "to include the new rows in similarity searches."
                 )
 
-        logging.info(f"Registered {len(new_rows):,} new substances")
+        logger.info(f"Registered {len(new_rows):,} new substances")
         return substance_ids
 
     @classmethod
@@ -529,7 +527,7 @@ class SubstanceDatastore(MoleculeDatastore):
                 fields=["substance"],
                 batch_size=batch_size,
             )
-            logging.info(f"Linked {len(batch):,} {table.table_name} entries")
+            logger.info(f"Linked {len(batch):,} {table.table_name} entries")
 
     @classmethod
     def _get_candidates(
@@ -748,7 +746,7 @@ class SubstanceDatastore(MoleculeDatastore):
             for index, feature in zip(indexes, features):
                 feature = numpy.array(feature, dtype=float)
                 if numpy.isnan(feature).any():
-                    logging.warning(
+                    logger.warning(
                         f"Fingerprint failed for {formula}. "
                         "It will be treated as a unique structure."
                     )
@@ -831,7 +829,7 @@ class SubstanceDatastore(MoleculeDatastore):
         df = dirty.to_dataframe(columns=cls.source_columns, engine="polars")
         cls.upsert_rows(df.rename(cls.column_renames))
         dirty.update(datastore_synced_at=synced_at)
-        logging.info(f"Flushed {len(df):,} substances from Postgres")
+        logger.info(f"Flushed {len(df):,} substances from Postgres")
 
         # 2. evict
         if not evict:
@@ -856,4 +854,4 @@ class SubstanceDatastore(MoleculeDatastore):
                 substances__isnull=True,
             ).delete()
             num_evicted += len(evict_ids)
-        logging.info(f"Evicted {num_evicted:,} substances from Postgres")
+        logger.info(f"Evicted {num_evicted:,} substances from Postgres")

@@ -1,9 +1,10 @@
-import logging
 import time
 from datetime import datetime
 from pathlib import Path
 
 import cv2
+
+from simmate.utils import logger
 
 
 class Camera:
@@ -148,7 +149,7 @@ class Camera:
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
 
-        logging.info(
+        logger.info(
             f"Starting timelapse on Cam {self.camera_index}: {total_frames} frames"
         )
 
@@ -156,9 +157,9 @@ class Camera:
             filename = output_path / f"frame_{i:05d}.jpg"
             try:
                 self.capture_frame(filename=filename)
-                logging.info(f"Saved {filename}")
+                logger.info(f"Saved {filename}")
             except Exception as e:
-                logging.error(f"Frame {i} failed: {e}")
+                logger.error(f"Frame {i} failed: {e}")
 
             if i < total_frames - 1:
                 time.sleep(interval)
@@ -176,7 +177,7 @@ class Camera:
         images = sorted(folder.glob("*.jpg"))
 
         if not images:
-            logging.warning(f"No images found in {image_folder}")
+            logger.warning(f"No images found in {image_folder}")
             return
 
         # Use first image to determine video dimensions
@@ -190,4 +191,4 @@ class Camera:
             video.write(cv2.imread(str(img_path)))
 
         video.release()
-        logging.info(f"Video saved to {output_video}")
+        logger.info(f"Video saved to {output_video}")

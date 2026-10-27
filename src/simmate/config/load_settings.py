@@ -1,4 +1,3 @@
-import logging
 import os
 from functools import cached_property
 from pathlib import Path
@@ -11,6 +10,7 @@ from simmate.utils import (
     deep_update,
     dotdict,
     get_directory,
+    logger,
     str_to_datatype,
 )
 
@@ -90,7 +90,7 @@ class SimmateSettings:
         else:
             assert isinstance(settings, dict)  # bug check
 
-        logging.info(f"Writing settings to: '{filename}'")
+        logger.info(f"Writing settings to: '{filename}'")
         with filename.open("w") as file:
             content = yaml.dump(settings)
             file.write(content)
@@ -110,7 +110,7 @@ class SimmateSettings:
                 f"a YAML config. You are using {self.settings_source}."
             )
 
-        logging.info("Updating the following settings:\n")
+        logger.info("Updating the following settings:\n")
         print(yaml.dump(updates))
 
         final_user_settings = deep_update(self.user_settings, updates)

@@ -1,10 +1,8 @@
 import operator
 from functools import reduce
 
-import pandas
 
-
-def filter_pandas_df(data: pandas.DataFrame, **kwargs) -> pandas.DataFrame:
+def filter_pandas_df(data, **kwargs):  # pandas.DataFrame -> pandas.DataFrame
     """
     Filters a pandas DataFrame using django-like ORM queries
     """

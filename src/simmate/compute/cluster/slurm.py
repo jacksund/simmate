@@ -1,5 +1,6 @@
-import logging
 import subprocess
+
+from simmate.utils import logger
 
 from .base import Cluster
 
@@ -49,6 +50,6 @@ class SlurmCluster(Cluster):
             if process.returncode == 0 and process.stdout.count("\n") == 2:
                 still_running.append(job_id)
             else:
-                logging.info(f"Slurm job {job_id} completed")
+                logger.info(f"Slurm job {job_id} completed")
 
         return still_running

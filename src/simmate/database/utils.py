@@ -2,7 +2,6 @@ import base64
 import csv
 import io
 import json
-import logging
 import shutil
 import subprocess
 import urllib
@@ -21,7 +20,7 @@ from django.db.utils import DatabaseError
 from django.utils import timezone
 
 from simmate.config import settings
-from simmate.utils import get_directory
+from simmate.utils import get_directory, logger
 
 # Lists off which apps to update/create. By default, I do all apps that are installed
 # so this list is grabbed directly from django. I also grab the CUSTOM_APPS to
@@ -111,8 +110,8 @@ def check_db_conn(original_function: callable):
         # Fix is from:
         #   https://stackoverflow.com/questions/48329685
         except DatabaseError as error:
-            logging.critical(error)
-            logging.info("retrying with new db connection")
+            logger.critical(error)
+            logger.info("retrying with new db connection")
 
             # Note, this import needs to be done locally! Having it imported
             # above causes pickling errors.
@@ -133,7 +132,7 @@ def update_database(
 ):
     # check Django if there are any updates to be made
     if show_logs:
-        logging.info("Checking for and applying updates...")
+        logger.info("Checking for and applying updates...")
 
     # execute the following commands to update the database
     call_command("makemigrations", *apps_to_migrate)
@@ -141,7 +140,7 @@ def update_database(
 
     # Let the user know everything succeeded
     if show_logs:
-        logging.info("Success! Your database tables are now up to date. :sparkles:")
+        logger.info("Success! Your database tables are now up to date. :sparkles:")
 
 
 def postgres_connect_maintenance_db():
@@ -233,7 +232,7 @@ def reset_database(
     # delete all data -- without rerunning migrations
 
     # We can now proceed with reseting the database
-    logging.info("Removing database and rebuilding...")
+    logger.info("Removing database and rebuilding...")
 
     # BUG: this is only for SQLite3 and Postgres
     # If I wish to add FULL functionality of all DBs, I could consider
@@ -301,7 +300,7 @@ def reset_database(
         connection.close()
 
     elif settings.database_backend not in ["postgresql", "sqlite3"]:
-        logging.warning(
+        logger.warning(
             "reseting your database is only supported for SQLite and Postgres."
             " Make sure you only use this function when initially building your "
             "database and not after."
@@ -312,7 +311,7 @@ def reset_database(
     if settings.database_backend == "sqlite3" and use_prebuilt:
         from simmate.database.utils import load_default_sqlite3_build
 
-        logging.info("Setting up prebuilt database...")
+        logger.info("Setting up prebuilt database...")
         load_default_sqlite3_build()
 
         # now update the database based on the registered apps
@@ -321,7 +320,7 @@ def reset_database(
     # the template already has data loaded, so we only apply any migrations
     # that are newer than it
     elif settings.database_backend == "postgresql" and use_template:
-        logging.info("Updating database copied from template...")
+        logger.info("Updating database copied from template...")
         update_database(apps_to_migrate, show_logs=False)
 
     # Otherwise we make an empty database.
@@ -330,10 +329,10 @@ def reset_database(
     else:
         from simmate.database.mixins import Spacegroup
 
-        logging.info("Building empty database...")
+        logger.info("Building empty database...")
         update_database(apps_to_migrate, show_logs=False)
 
-        logging.info("Loading default data...")
+        logger.info("Loading default data...")
         Spacegroup.load_source_data()
 
         from simmate.apps.project_management.models import Wallet
@@ -341,7 +340,7 @@ def reset_database(
         Wallet.load_source_data()
 
     # Let the user know everything succeeded
-    logging.info("Success! Your database has been reset. :sparkles:")
+    logger.info("Success! Your database has been reset. :sparkles:")
 
 
 def snapshot_database():
@@ -360,7 +359,7 @@ def snapshot_database():
         raise Exception("Database snapshots are only supported for Postgres.")
 
     db_name = settings.database.name
-    logging.info(f"Copying '{db_name}' to '{db_name}_template'...")
+    logger.info(f"Copying '{db_name}' to '{db_name}_template'...")
 
     connection = postgres_connect_maintenance_db()
     connection.set_isolation_level(0)
@@ -371,7 +370,7 @@ def snapshot_database():
     cursor.close()
     connection.close()
 
-    logging.info("Success! Your database snapshot has been saved. :sparkles:")
+    logger.info("Success! Your database snapshot has been saved. :sparkles:")
 
 
 def get_all_table_names() -> list[str]:
@@ -455,10 +454,10 @@ def download_app_data(app_name: str, source: str = "direct", **kwargs):
     try:
         app_config = apps.get_app_config(app_name)
     except LookupError:
-        logging.critical(f"Unknown app '{app_name}'. Failed to download data.")
+        logger.critical(f"Unknown app '{app_name}'. Failed to download data.")
         return
 
-    logging.info(f"Loading data for the '{app_name}' app")
+    logger.info(f"Loading data for the '{app_name}' app")
 
     # Get all models for the app
     models = list(app_config.get_models())
@@ -506,14 +505,14 @@ def download_app_data(app_name: str, source: str = "direct", **kwargs):
             elif has_load_source:
                 model.load_source_data(**kwargs)
         else:
-            logging.error(f"Unknown source '{source}'. Use 'direct' or 'archive'.")
+            logger.error(f"Unknown source '{source}'. Use 'direct' or 'archive'.")
             return
 
     if not found_any:
-        logging.info(f"'{app_name}' does not have any datasets to download. Exiting.")
+        logger.info(f"'{app_name}' does not have any datasets to download. Exiting.")
         return
 
-    logging.info(
+    logger.info(
         f"Success! Your database now contains all data associated with the '{app_name}' app."
     )
 
@@ -539,15 +538,15 @@ def load_default_sqlite3_build():
     if not archive_filename_full.exists():
         remote_archive_link = f"https://assets.simmate.org/{archive_filename}"
         # Download the archive zip file from the URL to the current working dir
-        logging.info("Downloading database file...")
+        logger.info("Downloading database file...")
         urllib.request.urlretrieve(remote_archive_link, archive_filename_full)
-        logging.info("Done downloading.")
+        logger.info("Done downloading.")
     else:
-        logging.info(
+        logger.info(
             f"Found past download at {archive_filename_full}. Using archive as base."
         )
 
-    logging.info("Unpacking prebuilt to active database...")
+    logger.info("Unpacking prebuilt to active database...")
     # uncompress the zip file to archive directory
     shutil.unpack_archive(
         archive_filename_full,
@@ -558,7 +557,7 @@ def load_default_sqlite3_build():
     db_filename_orig = archive_filename_full.with_suffix(".sqlite3")  # was .zip
     db_filename_new = settings.database.name
     shutil.move(db_filename_orig, db_filename_new)
-    logging.info("Done unpacking.")
+    logger.info("Done unpacking.")
 
 
 def start_postgres_docker(
@@ -581,10 +580,10 @@ def start_postgres_docker(
 
     if result.returncode == 0:
         # Container exists, just start it
-        logging.info("Container 'simmate_db' already exists. Restarting...")
+        logger.info("Container 'simmate_db' already exists. Restarting...")
         start_command = ["docker", "start", "simmate_db"]
         subprocess.run(start_command, check=True)
-        logging.info("Success! Container 'simmate_db' is running.")
+        logger.info("Success! Container 'simmate_db' is running.")
     else:
         # Define the docker command to create and run a new container
         docker_command = [
@@ -603,9 +602,9 @@ def start_postgres_docker(
         ]
 
         # execute the command
-        logging.info("Starting Postgres container via Docker...")
+        logger.info("Starting Postgres container via Docker...")
         subprocess.run(docker_command, check=True)
-        logging.info("Success! Container 'simmate_db' is running.")
+        logger.info("Success! Container 'simmate_db' is running.")
 
     # check the current settings and update if they don't match
     new_db_settings = {
@@ -617,7 +616,7 @@ def start_postgres_docker(
         "password": password,
     }
     if settings.database != new_db_settings:
-        logging.info("Updating Simmate settings to use this database...")
+        logger.info("Updating Simmate settings to use this database...")
         settings.write_updated_settings({"database": new_db_settings})
 
 
@@ -630,12 +629,12 @@ def stop_postgres_docker():
     stop_command = ["docker", "stop", "simmate_db"]
 
     # execute the commands
-    logging.info("Stopping Postgres container via Docker...")
+    logger.info("Stopping Postgres container via Docker...")
     try:
         subprocess.run(stop_command, check=True, capture_output=True)
-        logging.info("Success! Container 'simmate_db' has been stopped.")
+        logger.info("Success! Container 'simmate_db' has been stopped.")
     except subprocess.CalledProcessError as error:
-        logging.error(f"Failed to stop container: {error.stderr.decode()}")
+        logger.error(f"Failed to stop container: {error.stderr.decode()}")
 
 
 def create_prebuild():
@@ -656,11 +655,11 @@ def create_prebuild():
     archive_dir = get_directory(settings.config_directory / "sqlite-prebuilds")
     zip_filename = archive_dir / f"{prebuild_name}.zip"
 
-    logging.info(f"Creating prebuild archive at {zip_filename}...")
+    logger.info(f"Creating prebuild archive at {zip_filename}...")
     with zipfile.ZipFile(zip_filename, "w", zipfile.ZIP_DEFLATED) as zip_file:
         zip_file.write(db_filename, arcname=f"{prebuild_name}.sqlite3")
 
-    logging.info(f"Success! Prebuild created: {zip_filename.name}")
+    logger.info(f"Success! Prebuild created: {zip_filename.name}")
 
 
 def get_fake_data_path(app_label: str) -> Path:
@@ -736,7 +735,7 @@ def write_fake_data(
             for row in rows:
                 writer.writerow({k: _to_csv_value(v) for k, v in row.items()})
             archive.writestr(f"{i:02d}_{label}.csv", buffer.getvalue())
-            logging.info(f"Wrote {len(rows):,} rows for {label}")
+            logger.info(f"Wrote {len(rows):,} rows for {label}")
 
 
 def _to_csv_value(value):
@@ -855,7 +854,7 @@ def load_fake_data(app_label: str) -> dict[str, int]:
                         setattr(obj, column, entry[column])
                 model.objects.bulk_update(objs, auto_columns)
 
-            logging.info(f"Loaded {len(objs):,} rows into {label}")
+            logger.info(f"Loaded {len(objs):,} rows into {label}")
 
         # explicit ids don't advance the auto-increment sequences (Postgres)
         sql = connection.ops.sequence_reset_sql(no_style(), loaded_models)

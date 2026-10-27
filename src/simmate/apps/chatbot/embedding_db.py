@@ -50,8 +50,7 @@ class EmbeddingDbHelper:
         documents = cls._get_documents()
 
         # Chroma prints a bunch of ugly SSL errors so we disable logging
-        logger = logging.getLogger()
-        logger.disabled = True
+        logging.disable(logging.CRITICAL)
 
         vectorstore = Chroma.from_documents(
             documents=documents,
@@ -62,7 +61,7 @@ class EmbeddingDbHelper:
         )
 
         # reactivate logging
-        logger.disabled = False
+        logging.disable(logging.NOTSET)
 
         return vectorstore
 

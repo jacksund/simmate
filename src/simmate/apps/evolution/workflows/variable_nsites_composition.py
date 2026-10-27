@@ -1,4 +1,3 @@
-import logging
 from pathlib import Path
 
 from simmate.apps.evolution.models.variable_nsites_composition import (
@@ -8,6 +7,7 @@ from simmate.apps.evolution.workflows.fixed_composition import (
     StructurePrediction__Toolkit__FixedComposition,
 )
 from simmate.toolkit import Composition
+from simmate.utils import logger
 from simmate.workflows import Workflow
 
 
@@ -34,7 +34,7 @@ class StructurePrediction__Toolkit__VariableNsitesComposition(Workflow):
         **kwargs,  # passed to fixed_comp_workflow
     ):
         # Start by submitting the singleshot sources for each factor size.
-        logging.warning("Single-shot sources are not implemented yet")
+        logger.warning("Single-shot sources are not implemented yet")
 
         # Now we are going to cycle through factor sizes, starting at the lowest
         # and working our way up. We do this because:
@@ -62,7 +62,7 @@ class StructurePrediction__Toolkit__VariableNsitesComposition(Workflow):
             # for this to the Workflow class itself.
             kwargs.pop("started_at", None)
 
-            # logging.info(f"Beginning composition {composition_current}")
+            # logger.info(f"Beginning composition {composition_current}")
             cls.fixed_comp_workflow.run(
                 composition=composition_current,
                 # we keep the same base directory as we don't mind files overwriting
@@ -74,4 +74,4 @@ class StructurePrediction__Toolkit__VariableNsitesComposition(Workflow):
                 **kwargs,
             )
 
-            # logging.info(f"Completed composition {composition_current}")
+            # logger.info(f"Completed composition {composition_current}")

@@ -1,9 +1,8 @@
-import logging
 from abc import ABC, abstractmethod
 
 from django.utils.functional import classproperty
 
-from simmate.utils import dispatch
+from simmate.utils import dispatch, logger
 
 
 class StructureCreator(ABC):
@@ -98,7 +97,7 @@ class StructureCreator(ABC):
         # Until we get a new valid structure (or run out of attempts), keep trying
         # with our given source. Assume we don't have a valid structure until
         # proven otherwise
-        logging.info(f"Creating new structure with {self.name}")
+        logger.info(f"Creating new structure with {self.name}")
         new_structure = False
         attempt = 0
         while not new_structure and attempt <= max_attempts:
@@ -115,7 +114,7 @@ class StructureCreator(ABC):
                     if not is_valid:
                         # if it is not unique, we can throw away the structure and
                         # try the loop again.
-                        logging.info(
+                        logger.info(
                             "Generated structure is failed validation by "
                             f"{validator.name}. Trying again."
                         )
@@ -128,14 +127,14 @@ class StructureCreator(ABC):
         # see if we got a structure or if we hit the max attempts and there's
         # a serious problem!
         if not new_structure:
-            logging.warning(
+            logger.warning(
                 "Failed to create a structure! Consider changing your settings or"
                 " contact our team for help."
             )
             return False, False
 
         # Otherwise we were successful
-        logging.info("Creation Successful.")
+        logger.info("Creation Successful.")
 
         # return the structure and its parents
         return new_structure

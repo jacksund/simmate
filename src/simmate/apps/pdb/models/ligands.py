@@ -1,5 +1,4 @@
 import json
-import logging
 import urllib.request
 from datetime import datetime
 from pathlib import Path
@@ -15,6 +14,7 @@ from simmate.database.core import table_column
 from simmate.database.mixins import ThirdPartyData
 from simmate.database.utils import batch_bulk_create
 from simmate.toolkit import Molecule as ToolkitMolecule
+from simmate.utils import logger
 
 
 class PdbLigand(ThirdPartyData, Molecule):
@@ -133,7 +133,7 @@ class PdbLigand(ThirdPartyData, Molecule):
         # 1. Download the listing of all ligands
         data_filename = pdb_config_dir / "components.cif"
         if not data_filename.exists():
-            logging.info("Downloading ligands from PDB...")
+            logger.info("Downloading ligands from PDB...")
             data_url = "https://files.wwpdb.org/pub/pdb/data/monomers/components.cif"
             urllib.request.urlretrieve(data_url, data_filename)
 
@@ -144,7 +144,7 @@ class PdbLigand(ThirdPartyData, Molecule):
             with map_filename.open() as f:
                 pdb_id_map = json.load(f)
         elif include_protein_ids:
-            logging.info("Fetching ligand-to-protein mappings (this is slow)...")
+            logger.info("Fetching ligand-to-protein mappings (this is slow)...")
             with data_filename.open() as f:
                 ligand_ids = [
                     line[5:].strip() for line in f if line.startswith("data_")
@@ -159,7 +159,7 @@ class PdbLigand(ThirdPartyData, Molecule):
             pdb_id_map = {}
 
         # 3. Parse metadata and molecules
-        logging.info("Parsing metadata and molecules...")
+        logger.info("Parsing metadata and molecules...")
         for entry_data in track(cls._iter_cif_blocks(data_filename)):
             smiles_str = cls._get_smiles(entry_data)
             try:

@@ -1,4 +1,3 @@
-import logging
 import traceback
 import warnings
 from pathlib import Path
@@ -6,7 +5,7 @@ from pathlib import Path
 from simmate.database.core import table_column
 from simmate.database.mixins import Calculation
 from simmate.toolkit import Composition
-from simmate.utils import get_chemical_subsystems, get_directory
+from simmate.utils import get_chemical_subsystems, get_directory, logger
 
 # BUG: This prints a tqdm error so we silence it here.
 with warnings.catch_warnings(record=True):
@@ -125,10 +124,10 @@ class ChemicalSystemSearch(Calculation):
         # error here -- but instead warn the user and then continue the search
         try:
             if not self.individuals_completed.exists():
-                logging.info("No structures completed yet. Skipping output writing.")
+                logger.info("No structures completed yet. Skipping output writing.")
                 return
 
-            logging.info(f"Writing search summary to {directory}")
+            logger.info(f"Writing search summary to {directory}")
 
             super().write_output_summary(directory=directory)
 
@@ -153,7 +152,7 @@ class ChemicalSystemSearch(Calculation):
                 isinstance(error, ValueError)
                 and "no entries for the terminal elements" in error.args[0]
             ):
-                logging.warning(
+                logger.warning(
                     "The convex hull and structure stabilities cannot be calculated "
                     "without terminal elements. Either manually submit pure-element "
                     "structures to your subworkflow, or make sure you run your "
@@ -163,7 +162,7 @@ class ChemicalSystemSearch(Calculation):
                 )
 
             else:
-                logging.warning(
+                logger.warning(
                     "Failed to write the output summary. This issue will be silenced "
                     "to avoid stopping the search. But please report the following "
                     "error to our github: https://github.com/jacksund/simmate/issues/"
@@ -183,8 +182,8 @@ class ChemicalSystemSearch(Calculation):
             try:
                 file.unlink()
             except OSError:
-                logging.warning("Unable to delete a CIF file: {file}")
-                logging.warning(
+                logger.warning("Unable to delete a CIF file: {file}")
+                logger.warning(
                     "Updating the 'best structures' directory involves deleting "
                     "and re-writing all CIF files each cycle. If you have a file "
                     "open while this step occurs, then you'll see this warning."

@@ -1,7 +1,8 @@
-import logging
 from pathlib import Path
 
 import typer
+
+from simmate.utils import logger
 
 simmate_analysis_dashboard_app = typer.Typer(rich_markup_mode="markdown")
 
@@ -50,7 +51,7 @@ def start(
     if address:
         extra_config += f"--server.address={address} "  # 0.0.0.0 for prod
 
-    logging.info("Setting up local test server...")
+    logger.info("Setting up local test server...")
     subprocess.run(
         f"streamlit run {server_file} {extra_config}",
         shell=True,

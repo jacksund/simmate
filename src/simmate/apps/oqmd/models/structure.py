@@ -1,4 +1,3 @@
-import logging
 import shutil
 import urllib.request
 import zipfile
@@ -12,6 +11,7 @@ from simmate.database.core import table_column
 from simmate.database.mixins import Structure, ThirdPartyData
 from simmate.database.utils import batch_bulk_create
 from simmate.toolkit import Structure as ToolkitStructure
+from simmate.utils import logger
 
 
 class OqmdStructure(ThirdPartyData, Structure):
@@ -109,7 +109,7 @@ class OqmdStructure(ThirdPartyData, Structure):
             file_path = base_directory / filename
             files[filename] = file_path
             if not file_path.exists():
-                logging.info(f"Downloading {filename}...")
+                logger.info(f"Downloading {filename}...")
                 url = f"https://assets.simmate.org/oqmd/raw/{filename}"
                 urllib.request.urlretrieve(url, file_path)
 
@@ -120,7 +120,7 @@ class OqmdStructure(ThirdPartyData, Structure):
         energy_dict = dict(zip(df["oqmd_id"], df["final_energy"]))
 
         if only_add_new_cifs:
-            logging.info("Gathering existing IDs...")
+            logger.info("Gathering existing IDs...")
             existing_ids = set(cls.objects.values_list("id", flat=True))
         else:
             existing_ids = set()

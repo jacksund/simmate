@@ -1,9 +1,9 @@
-import logging
 import time
 from pathlib import Path
 
 from simmate.apps.evolution.models import FixedCompositionSearch
 from simmate.toolkit import Composition
+from simmate.utils import logger
 from simmate.workflows import Workflow
 
 
@@ -91,7 +91,7 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         # BUG: what if I want to rerun any of these even though its been ran before?
         #######################################################################
 
-        logging.info(f"Setting up evolutionary search for {composition}")
+        logger.info(f"Setting up evolutionary search for {composition}")
 
         # grab the calculation table linked to this workflow run
         search_datatable = cls.database_table.objects.get(run_id=run_id)
@@ -102,7 +102,7 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         # sometimes the conditions are already met by a previous search so we
         # check for this up front.
         if search_datatable.check_stop_condition():
-            logging.info("Looks like this search was already ran by someone else!")
+            logger.info("Looks like this search was already ran by someone else!")
             return
 
         # BUG-FIX: There is a race condition when generating a search's
@@ -112,8 +112,8 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         # submitting workers below
         search_datatable.validator  # noqa: B018
 
-        logging.info("Finished setup")
-        logging.info(
+        logger.info("Finished setup")
+        logger.info(
             f"Assigned this to FixedCompositionSearch id={search_datatable.id}."
         )
 
@@ -166,4 +166,4 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             time.sleep(sleep_step)
             sleep_counter += 1
 
-        logging.info("Stopping the search (running calcs will be left to finish).")
+        logger.info("Stopping the search (running calcs will be left to finish).")

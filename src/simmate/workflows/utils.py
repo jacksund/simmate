@@ -5,7 +5,6 @@ a workflow using its name.
 """
 
 import importlib
-import logging
 import shutil
 import sys
 import time
@@ -15,7 +14,7 @@ from pathlib import Path
 import yaml
 
 from simmate.config import settings
-from simmate.utils import get_app_submodule, get_directory, make_archive
+from simmate.utils import get_app_submodule, get_directory, logger, make_archive
 
 from .core import Workflow
 
@@ -331,7 +330,7 @@ def load_results_from_directories(base_directory: Path | str = "."):
     # and load the data from each.
     for foldername in foldernames:
         # Print message for monitoring progress.
-        logging.info(f"Loading data from {foldername}")
+        logger.info(f"Loading data from {foldername}")
 
         # There may be many folders that contain failed or incomplete data.
         # We don't want those to prevent others from being loaded so we put
@@ -370,10 +369,10 @@ def load_results_from_directories(base_directory: Path | str = "."):
             results_db.save()
             make_archive(foldername)
 
-            logging.info("Successfully loaded into database.")
+            logger.info("Successfully loaded into database.")
 
         except Exception:
-            logging.warning("Failed to load into database")
+            logger.warning("Failed to load into database")
 
 
 # OPTIMIZE: I needed to return a dictionary because Prefect struggles to handle

@@ -1,9 +1,8 @@
-import logging
-
 from pymatgen.analysis.structure_matcher import StructureMatcher
 from rich.progress import track
 
 from simmate.toolkit import Composition, Structure
+from simmate.utils import logger
 
 
 class StopCondition:
@@ -81,7 +80,7 @@ class BasicStopConditions:
         # structures that failed to be calculated
         # {f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
         if self.search.individuals_completed.count() > self.max_structures:
-            logging.info(
+            logger.info(
                 "Maximum number of completed calculations hit "
                 f"(n={self.max_structures})."
             )
@@ -112,7 +111,7 @@ class BasicStopConditions:
             finished_at__gte=best.finished_at,
         ).count()
         if num_new_structures_since_best > self.best_survival_cutoff:
-            logging.info(
+            logger.info(
                 "Best individual has not changed after "
                 f"{self.best_survival_cutoff} new individuals added."
             )
@@ -170,8 +169,8 @@ class ExpectedStructure(StopCondition):
                 break
 
         if not is_match:
-            logging.info("Search has not found expected structure yet")
+            logger.info("Search has not found expected structure yet")
             return False
         else:
-            logging.info("Found expected structure!")
+            logger.info("Found expected structure!")
             return True

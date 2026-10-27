@@ -1,5 +1,3 @@
-import logging
-
 import numpy
 import scipy
 from django.core.exceptions import MultipleObjectsReturned
@@ -8,7 +6,7 @@ from rich.progress import track
 
 from simmate.toolkit import Structure
 from simmate.toolkit.validators import Validator
-from simmate.utils import chunk_list
+from simmate.utils import chunk_list, logger
 
 
 class FingerprintValidator(Validator):
@@ -246,7 +244,7 @@ class FingerprintValidator(Validator):
         # first we can check if these structures have fingerprints already
         # calculated and load those.
         if self.use_database:
-            logging.info("Checking database for already-calculated fingerprints")
+            logger.info("Checking database for already-calculated fingerprints")
 
             # a single query might be too large for some querysets. Several
             # smaller queries are more stable so we never grab more than 500
@@ -289,7 +287,7 @@ class FingerprintValidator(Validator):
         if not new_ids:
             return
 
-        logging.info(f"Found {len(new_ids)} new structure(s) for the fingerprint pool.")
+        logger.info(f"Found {len(new_ids)} new structure(s) for the fingerprint pool.")
 
         new_structures = self.structure_pool_queryset.filter(
             id__in=new_ids
@@ -391,13 +389,13 @@ class FingerprintValidator(Validator):
             self.structure_pool_queryset
             and not self.structure_pool_queryset.query.order_by
         ):
-            logging.warning(
+            logger.warning(
                 "The order of your structures is important. You should set "
                 "order_by('some_column') on your database search. If duplicates "
                 " are found, only the first structure will be returned."
             )
 
-        logging.info("Isolating unique structures")
+        logger.info("Isolating unique structures")
 
         # The first structure in our pool is unique by default so this
         # starts out our list
@@ -418,7 +416,7 @@ class FingerprintValidator(Validator):
                     unique_fingerprints, [fingerprint], axis=0
                 )
 
-        logging.info(
+        logger.info(
             f"{len(unique_sources)} unique entries found. "
             "Pulling structures from database."
         )

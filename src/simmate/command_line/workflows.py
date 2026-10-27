@@ -1,4 +1,3 @@
-import logging
 from pathlib import Path
 
 import typer
@@ -6,6 +5,7 @@ from rich import print
 from typer import Context
 
 from simmate.command_line.utilities import AlphabeticalGroup
+from simmate.utils import logger
 
 workflows_app = typer.Typer(rich_markup_mode="markdown", cls=AlphabeticalGroup)
 
@@ -272,7 +272,7 @@ def setup_only(
     # ensure a path obj and that directory is created
     kwargs_cleaned["directory"] = get_directory(directory)
 
-    logging.info("Writing inputs")
+    logger.info("Writing inputs")
 
     # Not all workflows have a single input because some are NestWorkflows,
     # meaning they are made of multiple smaller workflows.
@@ -287,7 +287,7 @@ def setup_only(
             "added a setup-only feature for these yet. "
         )
 
-    logging.info(f"Done! Your input files are located in {directory}")
+    logger.info(f"Done! Your input files are located in {directory}")
 
 
 @workflows_app.command(

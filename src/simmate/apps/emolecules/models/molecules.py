@@ -1,5 +1,4 @@
 import gzip
-import logging
 import shutil
 from pathlib import Path
 
@@ -14,7 +13,7 @@ from simmate.config import settings
 from simmate.database.core import table_column
 from simmate.database.mixins import ThirdPartyData
 from simmate.toolkit import Molecule as ToolkitMolecule
-from simmate.utils import chunk_list, get_directory
+from simmate.utils import chunk_list, get_directory, logger
 
 
 class EmoleculesMolecule(ThirdPartyData, Molecule):
@@ -319,9 +318,9 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
         nchunks_total = (len(current_listing) // chunk_size) + 1
         failed_rows = []
         for nchunk, emol_chunk in enumerate(chunk_list(current_listing, chunk_size)):
-            logging.info(f"CHUNK # {nchunk} of {nchunks_total}")
+            logger.info(f"CHUNK # {nchunk} of {nchunks_total}")
 
-            logging.info("Generating database objects...")
+            logger.info("Generating database objects...")
             db_objs = []
             for i, row in track(emol_chunk.iterrows(), total=len(emol_chunk)):
                 try:
@@ -336,7 +335,7 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
                 except Exception:
                     failed_rows.append(row.to_dict())
 
-            logging.info("Saving to Simmate database...")
+            logger.info("Saving to Simmate database...")
             cls.objects.bulk_create(
                 db_objs,
                 batch_size=1000,
@@ -347,11 +346,11 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
                 # update_fields=[...],
             )
 
-            # logging.info("Adding molecule fingerprints...")
+            # logger.info("Adding molecule fingerprints...")
             # cls.populate_fingerprint_database()
             # disabled until I have enough disk space. Would take >100GB
 
-        logging.info("Done!")
+        logger.info("Done!")
         return failed_rows
 
     @classmethod
@@ -362,7 +361,7 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
     ):
 
         # Load all files and metadata
-        logging.info("Loading building block data...")
+        logger.info("Loading building block data...")
         current_listing = pandas.DataFrame(
             [
                 [
@@ -406,9 +405,9 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
         nchunks_total = (len(current_listing) // chunk_size) + 1
         failed_rows = []
         for nchunk, emol_chunk in enumerate(chunk_list(current_listing, chunk_size)):
-            logging.info(f"CHUNK # {nchunk} of {nchunks_total}")
+            logger.info(f"CHUNK # {nchunk} of {nchunks_total}")
 
-            logging.info("Generating database objects...")
+            logger.info("Generating database objects...")
             db_objs = []
             for i, row in track(emol_chunk.iterrows(), total=len(emol_chunk)):
                 try:
@@ -427,7 +426,7 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
                 except Exception:
                     failed_rows.append(row.to_dict())
 
-            logging.info("Saving to Simmate database...")
+            logger.info("Saving to Simmate database...")
             cls.objects.bulk_create(
                 db_objs,
                 batch_size=1000,
@@ -438,9 +437,9 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
                 # update_fields=[...],
             )
 
-            # logging.info("Adding molecule fingerprints...")
+            # logger.info("Adding molecule fingerprints...")
             # cls.populate_fingerprint_database()
             # disabled until I have enough disk space. Would take >100GB
 
-        logging.info("Done!")
+        logger.info("Done!")
         return failed_rows

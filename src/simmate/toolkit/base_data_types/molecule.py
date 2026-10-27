@@ -1,4 +1,3 @@
-import logging
 import os
 import re
 import sys
@@ -21,6 +20,8 @@ from rdkit.Chem import (
 )
 from rdkit.Chem.Draw import IPythonConsole, rdMolDraw2D
 from rdkit.Chem.Scaffolds import MurckoScaffold
+
+from simmate.utils import logger
 
 # Automatically enable common settings for molecule printing
 IPythonConsole.ipython_useSVG = True
@@ -232,7 +233,7 @@ class Molecule:
                 if key in formal_charge_rules:
                     expected_charge = formal_charge_rules[key]
                     if charge != expected_charge:
-                        logging.warning(
+                        logger.warning(
                             f"WARNING: Setting formal charge {expected_charge:+d} "
                             f"on {symbol} with valence {total_valence} at atom "
                             f"index {error_atom.GetIdx()}"
@@ -420,7 +421,7 @@ class Molecule:
                     smarts = smarts.replace("*", "!#1")
 
             except Exception:
-                logging.warning(
+                logger.warning(
                     "Failed to read SMARTS with expand_explicit_notation=True. "
                     "This can happen when you have a more advanced SMARTS. "
                     "Explicit notation will be skipped."

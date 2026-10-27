@@ -1,7 +1,6 @@
-import logging
-
 from simmate.database.core import DatabaseTable
 from simmate.toolkit import Structure
+from simmate.utils import logger
 
 
 class StructureInput:
@@ -27,7 +26,7 @@ class StructureInput:
                 # we continue to loop to pop() all other keys
 
         if not found_type:
-            logging.warning(f"Failed to find non-null input: '{input_name}'")
+            logger.warning(f"Failed to find non-null input: '{input_name}'")
             return
 
         try:
@@ -69,7 +68,7 @@ class StructureInput:
             )
 
         except Exception as e:
-            logging.warning(
+            logger.warning(
                 f"Failed to load structure for input '{input_name}' of type '{input_type}': {e}"
             )
             self.form_data[input_name] = False  # to display error

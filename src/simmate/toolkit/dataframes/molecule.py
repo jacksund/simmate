@@ -1,4 +1,3 @@
-import logging
 from functools import cached_property
 
 import polars
@@ -6,7 +5,7 @@ from rdkit.Chem import rdSubstructLibrary
 from rich.progress import track
 
 from simmate.toolkit import Molecule, Reaction
-from simmate.utils import filter_polars_df
+from simmate.utils import filter_polars_df, logger
 
 from ..clustering import ClusteringEngine
 from ..featurizers import PatternFingerprint
@@ -67,11 +66,11 @@ class MoleculeDataFrame:
         # 1. molecule_obj (ie nothing to do)
         # 2. molecule (use from_dynamic)
         # 3. smiles (use from_smiles)
-        logging.info("Building `toolkit.Molecule` objects...")
+        logger.info("Building `toolkit.Molecule` objects...")
 
         if "molecule_obj" in self.df.columns:
             if self.explicit_h_mode:
-                logging.warning(
+                logger.warning(
                     "using 'molecule_obj' cache while explicit_h_mode=True. "
                     "Make sure molecule already include hydrogens."
                 )
@@ -88,7 +87,7 @@ class MoleculeDataFrame:
         self.df = self.df.with_columns(polars.Series("molecule_obj", mol_objs))
 
     def init_substructure_lib(self):
-        logging.info(
+        logger.info(
             "Building `pattern_fingerprint` column for substructure searches..."
         )
         mol_col = self._get_molecule_column()
@@ -106,7 +105,7 @@ class MoleculeDataFrame:
 
         elif isinstance(self.df["pattern_fingerprint"][0], str):
             if self.explicit_h_mode:
-                logging.warning(
+                logger.warning(
                     "using 'pattern_fingerprint' base64 cache while explicit_h_mode=True. "
                     "Make sure your cached fingerprint already includes hydrogen."
                 )
@@ -123,7 +122,7 @@ class MoleculeDataFrame:
 
     def init_morgan_fp_lib(self):
         raise NotImplementedError("")  # TODO
-        # logging.info(
+        # logger.info(
         #     "Building `morgan_fingerprint` column for 2D similarity searches..."
         # )
         # mol_col = self._get_molecule_column()
@@ -146,7 +145,7 @@ class MoleculeDataFrame:
     # -------------------------------------------------------------------------
 
     def init_clusters(self):
-        logging.info("Clustering using 'butina-tanimoto-morgan'...")
+        logger.info("Clustering using 'butina-tanimoto-morgan'...")
         cluster_ids = ClusteringEngine.from_preset(
             molecules=self.molecules,
             preset="butina-tanimoto-morgan",
@@ -155,7 +154,7 @@ class MoleculeDataFrame:
         self.add_column(name="cluster_id", values=cluster_ids)
 
     def init_2d_chemspace(self):
-        logging.info("Chemspace mapping using 'umap-morgan'...")
+        logger.info("Chemspace mapping using 'umap-morgan'...")
         x, y = ChemSpaceMapper.from_preset(
             molecules=self.molecules,
             preset="umap-morgan",
@@ -340,7 +339,7 @@ class MoleculeDataFrame:
             - https://www.rdkit.org/docs/source/rdkit.Chem.rdSubstructLibrary.html
             - https://rdkit.blogspot.com/2018/02/introducing-substructlibrary.html
         """
-        logging.info("Generating substructure library...")
+        logger.info("Generating substructure library...")
         if (
             "smiles" not in self.df.columns
             or "pattern_fingerprint" not in self.df.columns
@@ -376,7 +375,7 @@ class MoleculeDataFrame:
             molecule_library,
             fingerprint_library,
         )
-        logging.info("Done")
+        logger.info("Done")
 
         return library
 

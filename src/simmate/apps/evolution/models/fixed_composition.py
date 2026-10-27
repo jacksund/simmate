@@ -18,7 +18,7 @@ from simmate.database.mixins import Calculation
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.validators import fingerprint as validator_module
 from simmate.toolkit.visualization.plotting import PlotlyFigure
-from simmate.utils import dispatch, get_directory
+from simmate.utils import dispatch, get_directory, logger
 
 
 class FixedCompositionSearch(Calculation):
@@ -167,7 +167,7 @@ class FixedCompositionSearch(Calculation):
                 allow_multiples=False,
                 remove_matching=True,
             )
-            logging.info(
+            logger.info(
                 f"Generated {len(structures_known)} structures from third-party databases"
             )
             write_and_submit_structures(
@@ -182,7 +182,7 @@ class FixedCompositionSearch(Calculation):
                 composition,
                 allow_multiples=False,
             )
-            logging.info(
+            logger.info(
                 f"Generated {len(structures_sub)} structures from substitutions"
             )
             write_and_submit_structures(
@@ -198,7 +198,7 @@ class FixedCompositionSearch(Calculation):
                 max_sites=int(composition.num_atoms),
                 remove_matching=True,
             )
-            logging.info(
+            logger.info(
                 f"Generated {len(structures_prototype)} structures from prototypes"
             )
             write_and_submit_structures(
@@ -223,7 +223,7 @@ class FixedCompositionSearch(Calculation):
             if len(composition.elements) == 1 and source_name in [
                 "from_ase.AtomicPermutation"
             ]:
-                logging.warning(
+                logger.warning(
                     f"{source_name} is not possible with single-element structures."
                     " This is being removed from your steadystate_sources."
                 )
@@ -239,7 +239,7 @@ class FixedCompositionSearch(Calculation):
         # these to steady-state integers (and round to the nearest integer)
         sum_proportions = sum(steadystate_source_proportions)
         if not math.isclose(sum_proportions, 1, rel_tol=1e-6):
-            logging.warning(
+            logger.warning(
                 "fractions for steady-state sources do not add to 1. "
                 "We have scaled all sources to equal one to fix this."
             )
@@ -319,7 +319,7 @@ class FixedCompositionSearch(Calculation):
         # completed structures in the database. We want to wait until there's
         # a set amount before we start mutating the best. We check that here.
         if self.individuals_completed.count() < self.nfirst_generation:
-            logging.info(
+            logger.info(
                 "Search hasn't finished nfirst_generation yet "
                 f"({self.individuals_completed.count()}/{self.nfirst_generation} individuals). "
                 "Skipping transformations."
@@ -346,14 +346,13 @@ class FixedCompositionSearch(Calculation):
             )
 
             if nflows_to_submit > 0:
-                logging.info(
+                logger.info(
                     f"Submitting {nflows_to_submit} new individuals for "
                     f"'{source_db.name}'"
                 )
 
             # disable the logs while we submit
-            logger = logging.getLogger()
-            logger.disabled = True
+            logging.disable(logging.CRITICAL)
 
             for n in range(nflows_to_submit):
                 # submit the workflow for the new individual. Note, the structure
@@ -376,7 +375,7 @@ class FixedCompositionSearch(Calculation):
                 source_db.save()
 
             # reactivate logging
-            logger.disabled = False
+            logging.disable(logging.NOTSET)
 
     # -------------------------------------------------------------------------
     # Core methods that help grab key information about the search
@@ -497,7 +496,7 @@ class FixedCompositionSearch(Calculation):
         return best_history
 
     def write_output_summary(self, directory: Path):
-        logging.info(f"Writing search summary to {directory}")
+        logger.info(f"Writing search summary to {directory}")
 
         super().write_output_summary(directory=directory)
 
@@ -527,10 +526,10 @@ class FixedCompositionSearch(Calculation):
             self.write_staged_series_histogram_plot(directory=directory)
             self.write_staged_series_times_plot(directory=directory)
 
-            logging.info("Done writing summary.")
+            logger.info("Done writing summary.")
 
         except Exception:
-            logging.warning(
+            logger.warning(
                 "Failed to write the output summary. This issue will be silenced "
                 "to avoid stopping the search. But please report the following "
                 "error to our github: https://github.com/jacksund/simmate/issues/"
@@ -564,13 +563,13 @@ class FixedCompositionSearch(Calculation):
 
         validator_class = getattr(validator_module, self.validator_name)
 
-        logging.info("Generating fingerprints for past structures...")
+        logger.info("Generating fingerprints for past structures...")
         fingerprint_validator = validator_class(
             composition=Composition(self.composition),
             structure_pool=self.individuals_completed.order_by(self.fitness_field),
             **self.validator_kwargs,
         )
-        logging.info("Done generating fingerprints.")
+        logger.info("Done generating fingerprints.")
 
         # for now I only include final structures that have been calculated
         # OPTIMIZE: should we only do structures that were successfully calculated?
@@ -602,8 +601,8 @@ class FixedCompositionSearch(Calculation):
             try:
                 file.unlink()
             except OSError:
-                logging.warning("Unable to delete a CIF file: {file}")
-                logging.warning(
+                logger.warning("Unable to delete a CIF file: {file}")
+                logger.warning(
                     "Updating this directory involves deleting "
                     "and re-writing all CIF files each cycle. If you have a file "
                     "open while this step occurs, then you'll see this warning."
@@ -774,7 +773,7 @@ class Correctness(PlotlyFigure):
 
         # generating fingerprints is slow so we use dispatch to parallelize
 
-        logging.info("Submitting to dispatch (parallel_core)...")
+        logger.info("Submitting to dispatch (parallel_core)...")
         structures_to_featurize = [
             s.structure for _, s in structures_dataframe.iterrows()
         ]
@@ -785,7 +784,7 @@ class Correctness(PlotlyFigure):
             batch_size=100,
         )
         structures_dataframe["fingerprint"] = [numpy.array(f) for f in fingerprints]
-        logging.info("Done.")
+        logger.info("Done.")
 
         fingerprint_known = numpy.array(featurizer.featurize(structure_known))
 
@@ -804,7 +803,7 @@ class Correctness(PlotlyFigure):
             if distance < smallest_distance:
                 smallest_distance = distance
                 smallest_distance_id = s.id
-        logging.info(
+        logger.info(
             f"The most similar structure is id={smallest_distance_id} "
             f"with distance {smallest_distance:.3f}"
         )

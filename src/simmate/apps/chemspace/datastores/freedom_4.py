@@ -1,11 +1,10 @@
 import bz2
-import logging
 from pathlib import Path
 
 import polars
 
 from simmate.toolkit.datastores import MoleculeDatastore
-from simmate.utils import dispatch, get_hash_key
+from simmate.utils import dispatch, get_hash_key, logger
 
 
 class ChemspaceFreedom4(MoleculeDatastore):
@@ -64,7 +63,7 @@ class ChemspaceFreedom4(MoleculeDatastore):
         files_to_process = [
             f for f in all_files if get_hash_key(str(f)) not in processed_hashes
         ]
-        logging.info(
+        logger.info(
             f"Found {len(all_files)} source files; "
             f"{len(processed_hashes)} already converted, "
             f"{len(files_to_process)} to process"
@@ -75,14 +74,14 @@ class ChemspaceFreedom4(MoleculeDatastore):
             cls._convert_single_source,
             parallel="job" if parallel_job else "single",
         )
-        logging.info("Conversion complete!")
+        logger.info("Conversion complete!")
 
     @classmethod
     def _convert_single_source(cls, file_path: str | Path):
         file_path = Path(file_path)
         output_path = cls.staging_directory / f"{get_hash_key(str(file_path))}.parquet"
         if output_path.exists():
-            logging.info(f"Skipping {file_path.name} - already converted.")
+            logger.info(f"Skipping {file_path.name} - already converted.")
             return
 
         with bz2.open(file_path, "rb") as f_in:
@@ -102,4 +101,4 @@ class ChemspaceFreedom4(MoleculeDatastore):
             )
 
         df.write_parquet(output_path)
-        logging.info(f"Converted {file_path.name} | Rows: {len(df):,}")
+        logger.info(f"Converted {file_path.name} | Rows: {len(df):,}")

@@ -3,12 +3,12 @@ This defines commands for managing your Simmate configuration settings. All comm
 accessible through the "simmate config" command.
 """
 
-import logging
 from pathlib import Path
 
 import typer
 
 from simmate.command_line.utilities import AlphabeticalGroup
+from simmate.utils import logger
 
 config_app = typer.Typer(rich_markup_mode="markdown", cls=AlphabeticalGroup)
 
@@ -170,7 +170,7 @@ def add(
         "eppo_gd",
         "pdb",
     ]:
-        logging.critical(
+        logger.critical(
             "Molecular apps are not available yet! These will be available in the next simmate release (Summer 2025)"
         )
         return
@@ -178,7 +178,7 @@ def add(
         if not custom:
             # The user may have mistyped. We don't want to add a line to the
             # settings file only for them to have to figure out how to delete it
-            logging.warning(
+            logger.warning(
                 f"'{app_name}' is an unknown app. If you are using a custom app, "
                 "please add the tag '--custom'. If this message is unexpected, "
                 "check your command and app name for typos."
@@ -252,7 +252,7 @@ def test(
         passed = test_config()
 
     else:
-        logging.warning(f"Unknown app (or no tests exist): {app_name}")
+        logger.warning(f"Unknown app (or no tests exist): {app_name}")
         passed = False
 
     if not passed:

@@ -1,4 +1,3 @@
-import logging
 import time
 from datetime import datetime
 
@@ -7,6 +6,7 @@ import requests
 from rich.progress import track
 
 from simmate.config import settings
+from simmate.utils import logger
 
 from ..mappings import EthereumMappings
 
@@ -63,7 +63,7 @@ class EtherscanClient:
     def get_all_transaction_data(cls) -> pandas.DataFrame:
         all_data = []
         for ens_name, address in EthereumMappings.wallet_addresses.items():
-            logging.info(f"Loading transactions for '{ens_name}'")
+            logger.info(f"Loading transactions for '{ens_name}'")
             data = cls.get_all_transactions(address=address)
             data["ens_name"] = ens_name
             all_data.append(data)
@@ -73,7 +73,7 @@ class EtherscanClient:
     def get_all_balance_data(cls) -> pandas.DataFrame:
         all_data = []
         for ens_name, address in EthereumMappings.wallet_addresses.items():
-            logging.info(f"Loading balances for '{ens_name}'")
+            logger.info(f"Loading balances for '{ens_name}'")
             balances = cls.get_all_balances(address=address)
             # flatten balances dict into a single dict
             balances_flat = {}
@@ -146,7 +146,7 @@ class EtherscanClient:
 
         balances = {}
         for chain, tokens in EthereumMappings.token_addresses.items():
-            logging.info(f"Loading from '{chain}' chain")
+            logger.info(f"Loading from '{chain}' chain")
             chain_balances = {}
             for token in track(tokens):
                 chain_balances[token] = cls.get_token_balance(
@@ -202,7 +202,7 @@ class EtherscanClient:
     def get_all_transactions(cls, address: str):
         all_data = []
         for chain in cls.chain_map:
-            logging.info(f"Loading from '{chain}' chain")
+            logger.info(f"Loading from '{chain}' chain")
             for transaction_type in track(cls.transaction_type_map):
                 data = cls.get_transactions(
                     chain=chain,

@@ -1,4 +1,3 @@
-import logging
 import uuid
 from datetime import datetime, timedelta
 
@@ -10,6 +9,7 @@ from rich import print
 from rich.progress import track
 
 from simmate.config import settings
+from simmate.utils import logger
 
 from .work_item import WorkItem
 
@@ -100,7 +100,7 @@ class SimmateExecutor:
         # then we return a dictionary of which futures replaced by results.
         # NOTE: this is really for compatibility with Prefect's FlowRunner.
         if isinstance(workitems, dict):
-            logging.info("waiting for workflows to finish")
+            logger.info("waiting for workflows to finish")
             import time
 
             time.sleep(10)
@@ -264,7 +264,7 @@ class SimmateExecutor:
                 updated_at__gte=timezone.now() - timedelta(hours=recent),
             )
 
-        logging.info("Loading data...")
+        logger.info("Loading data...")
         all_items = query.values(
             "status",
             "tags",
@@ -272,13 +272,13 @@ class SimmateExecutor:
 
         all_items["tags"] = all_items.tags.apply(tuple)
         unique_tags = {t for g in all_items.tags.unique() for t in g}
-        logging.info(f"Found {len(unique_tags)} unique tags")
+        logger.info(f"Found {len(unique_tags)} unique tags")
 
         # sort by type of tag then aphlabetical
         unique_tags = list(unique_tags)
         unique_tags.sort(key=lambda item: item.count("."))
 
-        logging.info("Breaking down stats for each tag...")
+        logger.info("Breaking down stats for each tag...")
         tag_data = []
         for tag in track(unique_tags):
             stats = cls.get_stats(tags=[tag])

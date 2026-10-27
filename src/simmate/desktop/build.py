@@ -2,10 +2,11 @@
 Packages a desktop app into a single-file executable with PyInstaller.
 """
 
-import logging
 import os
 import tempfile
 from pathlib import Path
+
+from simmate.utils import logger
 
 
 def build_executable(
@@ -61,10 +62,10 @@ def build_executable(
             *icon_args,
             *(extra_args or []),
         ]
-        logging.info(f"Running PyInstaller with: {' '.join(args)}")
+        logger.info(f"Running PyInstaller with: {' '.join(args)}")
         PyInstaller.__main__.run(args)
 
-    logging.info(f"Done! Your executable is in: {output_dir}")
+    logger.info(f"Done! Your executable is in: {output_dir}")
 
 
 def _bundle_dir(file: Path) -> str:

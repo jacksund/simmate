@@ -1,4 +1,3 @@
-import logging
 import shutil
 from collections import defaultdict
 from pathlib import Path
@@ -13,6 +12,7 @@ from simmate.utils import (
     filter_polars_df,
     get_chunk_key,
     get_directory,
+    logger,
 )
 
 from .utils import update_column
@@ -132,7 +132,7 @@ class Datastore:
         directory to old.
         """
         if not any(cls.staging_directory.iterdir()):
-            logging.warning("Staging directory is empty. Nothing to promote.")
+            logger.warning("Staging directory is empty. Nothing to promote.")
             return
 
         # 1. Remove old_directory if it exists
@@ -369,7 +369,7 @@ class Datastore:
             ),
             mkdir=True,
         )
-        logging.info("Repartition complete!")
+        logger.info("Repartition complete!")
 
     @classmethod
     def repartition_slow(
@@ -384,7 +384,7 @@ class Datastore:
         """
 
         if partition_values is None:
-            logging.info(f"Looking up distinct values for {partition_column}...")
+            logger.info(f"Looking up distinct values for {partition_column}...")
             partition_values = (
                 cls.lf.select(partition_column)
                 .unique()
@@ -396,7 +396,7 @@ class Datastore:
             output_dir = cls.staging_directory / f"{partition_column}={val}"
             output_path = output_dir / "combined.parquet"
             if output_path.exists():
-                logging.info(f"Skipping {partition_column}={val} - already done.")
+                logger.info(f"Skipping {partition_column}={val} - already done.")
                 return
 
             output_dir.mkdir(parents=True, exist_ok=True)
@@ -404,11 +404,11 @@ class Datastore:
             df = cls.lf.filter(polars.col(partition_column) == val).collect()
 
             if len(df) == 0:
-                logging.info(f"Skipping {partition_column}={val} - no rows found.")
+                logger.info(f"Skipping {partition_column}={val} - no rows found.")
                 return
 
             df.write_parquet(output_path, compression=cls.compression_mode)
-            logging.info(f"Repartitioned {partition_column}={val} | Rows: {len(df):,}")
+            logger.info(f"Repartitioned {partition_column}={val} | Rows: {len(df):,}")
 
         dispatch(
             partition_values,
@@ -432,7 +432,7 @@ class Datastore:
         """
 
         batches = list(chunk_list(cls.chunk_files, batch_size))
-        logging.info(f"repartition_batched: {len(batches)} batches of ≤{batch_size}")
+        logger.info(f"repartition_batched: {len(batches)} batches of ≤{batch_size}")
 
         def _make_provider(batch_idx: int):
             batch_name = f"batch_{batch_idx:06d}.parquet"
@@ -447,7 +447,7 @@ class Datastore:
 
         for i, batch in enumerate(batches):
             if any(cls.staging_directory.rglob(f"batch_{i:06d}.parquet")):
-                logging.info(f"Skipping batch {i + 1}/{len(batches)} - already done")
+                logger.info(f"Skipping batch {i + 1}/{len(batches)} - already done")
                 continue
 
             polars.scan_parquet([str(f) for f in batch]).sink_parquet(
@@ -458,9 +458,9 @@ class Datastore:
                 ),
                 mkdir=True,
             )
-            logging.info(f"Batch {i + 1}/{len(batches)} complete")
+            logger.info(f"Batch {i + 1}/{len(batches)} complete")
 
-        logging.info(
+        logger.info(
             "repartition_batched complete! Run consolidate_staging() then promote_staging()."
         )
 
@@ -495,18 +495,18 @@ class Datastore:
 
             combined_path = partition_dir / "combined.parquet"
             if combined_path.exists():
-                logging.info(f"Skipping {partition_dir.name} - already consolidated")
+                logger.info(f"Skipping {partition_dir.name} - already consolidated")
                 continue
 
             df = polars.read_parquet(batch_files)
             df.write_parquet(combined_path, compression=cls.compression_mode)
             for f in batch_files:
                 f.unlink()
-            logging.info(
+            logger.info(
                 f"Consolidated {len(batch_files)} batch files → {partition_dir.name}/combined.parquet ({len(df):,} rows)"
             )
 
-        logging.info("consolidate_staging complete! Run promote_staging() to go live.")
+        logger.info("consolidate_staging complete! Run promote_staging() to go live.")
 
     # -------------------------------------------------------------------------
 

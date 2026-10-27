@@ -1,5 +1,4 @@
 import contextlib
-import logging
 import urllib.request
 import warnings
 import zipfile
@@ -12,6 +11,7 @@ from simmate.config import settings
 from simmate.database.core import table_column
 from simmate.database.mixins import Structure, ThirdPartyData
 from simmate.database.utils import batch_bulk_create
+from simmate.utils import logger
 
 
 class CodStructure(ThirdPartyData, Structure):
@@ -96,7 +96,7 @@ class CodStructure(ThirdPartyData, Structure):
 
         # Download zip if no CIFs are present and zip doesn't exist
         if not cif_files and not file_path.exists():
-            logging.info(f"Downloading {filename}...")
+            logger.info(f"Downloading {filename}...")
             url = f"https://www.crystallography.net/archives/2025/data/{filename}"
             try:
                 urllib.request.urlretrieve(url, file_path)
@@ -130,7 +130,7 @@ class CodStructure(ThirdPartyData, Structure):
                         if cif_id not in existing_ids:
                             targets.append((cif_id, info))
 
-            logging.info(f"Adding {len(targets)} new entries...")
+            logger.info(f"Adding {len(targets)} new entries...")
 
             for cif_id, target in track(targets, description="Parsing CIFs..."):
                 try:
@@ -141,7 +141,7 @@ class CodStructure(ThirdPartyData, Structure):
                     )
                     yield cls._from_cif(cif_string=cif_string, cif_id=cif_id)
                 except Exception:
-                    logging.warning(f"Failed to parse CIF: {cif_id}")
+                    logger.warning(f"Failed to parse CIF: {cif_id}")
 
     @classmethod
     def _from_cif(cls, cif_string: str, cif_id: int):

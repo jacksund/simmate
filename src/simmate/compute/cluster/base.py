@@ -1,11 +1,12 @@
-import logging
 import time
+
+from simmate.utils import logger
 
 
 class Cluster:
     @classmethod
     def start_cluster(cls, nworkers: int, sleep_step: float = 5):
-        logging.info(f"Starting cluster with {nworkers} workers")
+        logger.info(f"Starting cluster with {nworkers} workers")
 
         # on start-up we need to submit the target number of jobs
         job_ids = cls.submit_jobs(nworkers)
@@ -33,7 +34,7 @@ class Cluster:
         Calls submit_to_queue a set number of times and returns the new job ids
         """
         job_ids = [cls.submit_job() for n in range(njobs)]
-        logging.info(f"{njobs} new workers have been submitted")
+        logger.info(f"{njobs} new workers have been submitted")
         return job_ids
 
     @staticmethod

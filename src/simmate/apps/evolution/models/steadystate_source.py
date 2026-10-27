@@ -1,5 +1,3 @@
-import logging
-
 from rich import print
 
 import simmate.toolkit.creators as creation_module
@@ -8,6 +6,7 @@ import simmate.toolkit.transformations.from_ase as ase_transform_module
 from simmate.compute import WorkItem
 from simmate.database.core import DatabaseTable, table_column
 from simmate.toolkit import Composition
+from simmate.utils import logger
 
 
 class SteadystateSource(DatabaseTable):
@@ -48,7 +47,7 @@ class SteadystateSource(DatabaseTable):
         ).values_list("id", flat=True)
 
         if failed_ids:
-            logging.warning(
+            logger.warning(
                 f"The following WorkItem IDs failed or were cancelled: {list(failed_ids)}."
             )
 

@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime
 
 from django.utils.timezone import make_aware
@@ -6,6 +5,7 @@ from rich.progress import track
 
 from simmate.database.external_connectors.web_scrape import WebScraper
 from simmate.toolkit import Molecule
+from simmate.utils import logger
 
 
 class PpdbWebScraper(WebScraper):
@@ -23,14 +23,14 @@ class PpdbWebScraper(WebScraper):
                 entry_data = cls.get_id_data(entry_id)
                 all_data.append(entry_data)
             except Exception:
-                logging.warning(f"Failed to load {entry_id}")
+                logger.warning(f"Failed to load {entry_id}")
 
         return all_data
 
     @classmethod
     def get_all_id_links(cls, **kwargs) -> list[str]:
 
-        logging.info("Loading all entries from index...")
+        logger.info("Loading all entries from index...")
         index_url = "https://sitem.herts.ac.uk/aeru/ppdb/en/atoz.htm"
         html_data = cls.get_html(index_url)
 
@@ -47,7 +47,7 @@ class PpdbWebScraper(WebScraper):
         links = list(set(links))
         links.sort()
 
-        logging.info(f"Done. Found {len(links)} names.")
+        logger.info(f"Done. Found {len(links)} names.")
         return links
 
     @classmethod
