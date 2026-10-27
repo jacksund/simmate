@@ -15,23 +15,22 @@ Pseudo-Dojo:
 """
 
 import json
-import logging
 import tarfile
 import urllib
 
 from simmate.config import settings
-from simmate.utils import get_directory
+from simmate.utils import get_directory, logger
 
 
 def setup_sssp() -> bool:
     """
     Downloads all of the SSSP potentials and mapping files needed for this app
     """
-    logging.info("Setting up Standard solid-state pseudopotentials (SSSP).")
+    logger.info("Setting up Standard solid-state pseudopotentials (SSSP).")
     for file_type in ["mappings", "pseudos"]:
         for pseudo_type in ["precision", "efficiency"]:
             _setup_sssp_single(file_type, pseudo_type)
-    logging.info("Done!")
+    logger.info("Done!")
 
 
 def _setup_sssp_single(file_type: str, pseudo_type: str):
@@ -53,10 +52,10 @@ def _setup_sssp_single(file_type: str, pseudo_type: str):
     url = f"https://archive.materialscloud.org/api/records/rcyfm-68h65/files/{filename}/content"
     file = qe_directory / filename
     if not file.exists():
-        logging.info(f"Downloading SSSP {pseudo_type} {file_type}...")
+        logger.info(f"Downloading SSSP {pseudo_type} {file_type}...")
         urllib.request.urlretrieve(url, file)
     else:
-        logging.info(f"Found existing SSSP {pseudo_type} {file_type}.")
+        logger.info(f"Found existing SSSP {pseudo_type} {file_type}.")
 
     # pseudos files are downloaded in compressed format (tar.gz). We need
     # to unpack these and move them into the /potentials folder

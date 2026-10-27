@@ -1,4 +1,3 @@
-import logging
 import shutil
 import subprocess
 
@@ -6,7 +5,7 @@ from numpy.random import choice
 
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.creators.structure.base import StructureCreator
-from simmate.utils import get_directory
+from simmate.utils import get_directory, logger
 
 # This input is based off of...
 #   https://github.com/xtalopt/randSpg/blob/master/sample/randSpg.in
@@ -177,7 +176,7 @@ class XtaloptStructure(StructureCreator):
         shutil.rmtree(temp_directory)
 
         if not structure:
-            logging.info(
+            logger.info(
                 f"Removed spacegroup {spacegroup} from options due to failure. "
                 "This will not be selected moving forward."
             )

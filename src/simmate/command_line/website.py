@@ -3,11 +3,10 @@ This defines commands for the Simmate website. All commands are accessible
 through the `simmate website` command.
 """
 
-import logging
-
 import typer
 
 from simmate.command_line.utilities import AlphabeticalGroup
+from simmate.utils import logger
 
 website_app = typer.Typer(rich_markup_mode="markdown", cls=AlphabeticalGroup)
 
@@ -41,7 +40,7 @@ def start(
     from simmate.config import settings
     from simmate.website.core.utils import download_ketcher
 
-    logging.info("Setting up local test server...")
+    logger.info("Setting up local test server...")
 
     # Ensure Ketcher is available locally to avoid CORS issues
     if not settings.website.get("chemdraw_js", False):

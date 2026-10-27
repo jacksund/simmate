@@ -14,6 +14,7 @@ from simmate.command_line.dev import dev_app
 from simmate.command_line.utilities import AlphabeticalGroup
 from simmate.command_line.website import website_app
 from simmate.command_line.workflows import workflows_app
+from simmate.utils import logger
 
 simmate_app = typer.Typer(
     rich_markup_mode="markdown",
@@ -55,7 +56,6 @@ def init():
     starting point for building custom Simmate apps.
     """
 
-    import logging
     import shutil
 
     from simmate import config  # needed for the filepath
@@ -74,7 +74,7 @@ def init():
     shutil.copytree(template_directory, new_project_directory)
 
     # Let the user know what we did and how to continue.
-    logging.info(
+    logger.info(
         "Successfully made a new project! \n\n"
         f"You'll find it at {new_project_directory}\n\n"
         "Note, this project's app has not yet been named, installed, or "

@@ -1,4 +1,4 @@
-import logging
+from simmate.utils import logger
 
 from ..core import table_column
 from .calculation import Calculation
@@ -31,7 +31,7 @@ class StagedWorkflow(Calculation):
             return results
 
         if len(self.subworkflow_runs) != len(self.database_tables):
-            logging.warning(
+            logger.warning(
                 "This staged workflow did not complete. Some results may be missing."
             )
             # We don't return early here because we might still want the results of the subworkflows that DID complete.

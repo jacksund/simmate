@@ -2,13 +2,12 @@
 # https://gitlab.com/ase/ase/-/blob/master/ase/io/espresso.py
 # https://github.com/materialsproject/pymatgen/blob/master/pymatgen/io/pwscf.py
 
-import logging
 from pathlib import Path
 
 from pymatgen.core import Lattice
 
 from simmate.toolkit import Structure
-from simmate.utils import str_to_datatype
+from simmate.utils import logger, str_to_datatype
 
 from .k_points import Kpoints
 from .pwscf_in_modifiers import (
@@ -217,7 +216,7 @@ class PwscfInput:
 
         # check for pseudo mappings:
         if not pseudo_mappings:
-            logging.warning(
+            logger.warning(
                 "No pseudopotential mappings were provided. If you are trying to "
                 "use the Simmate defaults (from SSSP), then make sure you have "
                 "ran 'simmate-qe setup sssp' to download the files for you. "

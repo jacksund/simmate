@@ -1,5 +1,4 @@
 import itertools
-import logging
 import time
 from pathlib import Path
 
@@ -17,6 +16,7 @@ from simmate.apps.evolution.workflows.fixed_composition import (
 )
 from simmate.apps.evolution.workflows.utils import write_and_submit_structures
 from simmate.toolkit import Composition
+from simmate.utils import logger
 from simmate.workflows import Workflow
 from simmate.workflows.utils import get_workflow
 
@@ -124,7 +124,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
                 compositions_cleaned.append(composition)
         compositions = compositions_cleaned
 
-        logging.info(f"{len(compositions)} unique compositions will be explored")
+        logger.info(f"{len(compositions)} unique compositions will be explored")
 
         # now condense this list down to just the reduced formulas
         compositions_reduced = []
@@ -132,7 +132,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
             reduced = composition.reduced_composition
             if reduced not in compositions_reduced:
                 compositions_reduced.append(reduced)
-        logging.info(
+        logger.info(
             f"This corresponds to {len(compositions_reduced)} reduced compositions"
         )
 
@@ -155,7 +155,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         # ---------------------------------------------------------------------
         states_known = []
         if "third_parties" in singleshot_sources:
-            logging.info("Generating input structures from third-party databases")
+            logger.info("Generating input structures from third-party databases")
             structures_known = []
             for composition in track(compositions_maxed):
                 new_structures = get_known_structures(
@@ -165,7 +165,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
                     nsites__lte=max_atoms,
                 )
                 structures_known += new_structures
-            logging.info(
+            logger.info(
                 f"Generated {len(structures_known)} structures from other databases"
             )
             states_known = write_and_submit_structures(
@@ -181,7 +181,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         states_prototype = []
         if "prototypes" in singleshot_sources:
             # Start by generating the singleshot sources for each factor size.
-            logging.info("Generating input structures from prototypes")
+            logger.info("Generating input structures from prototypes")
             structures_prototype = []
             # for singleshot_source in singleshot_sources: ## TODO
             for composition in track(compositions_maxed):
@@ -192,7 +192,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
                     remove_matching=True,
                 )
                 structures_prototype += new_structures
-            logging.info(
+            logger.info(
                 f"Generated {len(structures_prototype)} structures from prototypes"
             )
             states_prototype = write_and_submit_structures(
@@ -210,7 +210,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         if len(all_submissions) > (nsteadystate * 2):
             number_to_wait_for = len(all_submissions) - nsteadystate - 20
             number_to_resume_on = nsteadystate + 20
-            logging.info(
+            logger.info(
                 f"Waiting for at least {number_to_wait_for} singleshot "
                 "submissions to finish."
             )
@@ -274,7 +274,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
             #         # f"\t{convergence_cutoff}"
             #     )
 
-            logging.info(f"Beginning compositional searches with natoms = {natoms}")
+            logger.info(f"Beginning compositional searches with natoms = {natoms}")
             current_compositions = [c for c in compositions if c.num_atoms == natoms]
 
             for composition in current_compositions:
@@ -282,9 +282,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
                 # BUG: I do skip these for now because compositions like "N1"
                 # are failing in vasp for me.
                 if len(composition.elements) == 1:
-                    logging.warning(
-                        f"Skipping single-element composition {composition}"
-                    )
+                    logger.warning(f"Skipping single-element composition {composition}")
                     continue
 
                 # For this first cycle, we only look at non-reduced compositions
@@ -295,7 +293,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
                     composition.reduced_composition.num_atoms / composition.num_atoms
                 )
                 if current_factor > max_stoich_factor:
-                    logging.warning(
+                    logger.warning(
                         f"Skipping composition {composition} bc it exceeds the max "
                         f"factor of {max_stoich_factor}"
                     )

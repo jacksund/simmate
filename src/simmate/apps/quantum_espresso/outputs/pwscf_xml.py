@@ -1,4 +1,3 @@
-import logging
 from functools import cached_property
 from pathlib import Path
 
@@ -7,6 +6,7 @@ import xmltodict
 from scipy.constants import physical_constants
 
 from simmate.toolkit import Structure
+from simmate.utils import logger
 
 
 class PwscfXml:
@@ -200,7 +200,7 @@ class PwscfXml:
             # line will throw an out of bounds error. We give a more useful
             # error instead.
             except Exception:
-                logging.warning(
+                logger.warning(
                     "All energy levels fill at at least one kpoint. Increase nbnd."
                 )
                 return {

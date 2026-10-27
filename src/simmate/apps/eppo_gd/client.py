@@ -1,9 +1,10 @@
-import logging
 import warnings
 
 import requests
 from bs4 import BeautifulSoup
 from rich.progress import track
+
+from simmate.utils import logger
 
 
 class EppoWebScrapper:
@@ -38,7 +39,7 @@ class EppoWebScrapper:
         if response.status_code == 200:
             html_content = response.text
         elif response.status_code == 404:
-            logging.warning(f"Failed to find EPPO code: {eppo_code}")
+            logger.warning(f"Failed to find EPPO code: {eppo_code}")
             return None
         else:
             raise Exception(

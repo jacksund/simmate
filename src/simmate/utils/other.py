@@ -9,9 +9,30 @@ from functools import wraps
 
 import cloudpickle
 import requests
+from rich.logging import RichHandler
 from rich.progress import track
 
 import simmate
+
+# The shared logger for all of simmate (`from simmate.utils import logger`).
+# These settings only apply to simmate's logs, so third-party packages keep
+# python's default logging behavior.
+logger = logging.getLogger("simmate")
+logger.setLevel(logging.INFO)
+# Spyder can reload this module, so only add the handler once to avoid
+# printing every message twice
+if not logger.handlers:
+    logger.addHandler(
+        RichHandler(
+            show_path=False,
+            markup=True,
+            rich_tracebacks=True,
+            log_time_format="%Y-%m-%d %H:%M:%S",
+        )
+    )
+# Don't pass messages up to the root logger, which would print them twice if
+# the root logger also has a handler (e.g. from a user's `basicConfig`)
+logger.propagate = False
 
 
 def get_latest_version() -> str:
@@ -37,7 +58,7 @@ def check_if_using_latest_version(current_version=simmate.__version__):
     latest_version = get_latest_version()
 
     if current_version != latest_version:
-        logging.warning(
+        logger.warning(
             "There is a new version of Simmate available. "
             f"You are currently using v{current_version} while v{latest_version} "
             "is the latest."
@@ -211,7 +232,7 @@ def str_to_datatype(
 
     # If it is not in the common keys listed, just leave it as a string.
     else:
-        logging.warning(
+        logger.warning(
             f"Unknown parameter mapping of {parameter}: {target_type}. Leaving as str."
         )
         return value

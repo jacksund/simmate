@@ -1,4 +1,3 @@
-import logging
 import shutil
 import sqlite3
 from pathlib import Path
@@ -6,7 +5,7 @@ from pathlib import Path
 import polars
 
 from simmate.config import settings
-from simmate.utils import download_file, get_directory
+from simmate.utils import download_file, get_directory, logger
 
 
 class ChemblClient:
@@ -40,14 +39,14 @@ class ChemblClient:
         filename = f"{db_name}_sqlite.tar.gz"
         download_filename = target_dir / filename
 
-        logging.info("Downloading ChEMBL db...")
+        logger.info("Downloading ChEMBL db...")
         if not download_filename.exists():
             download_file(
                 url=base_url + filename,
                 dest_path=download_filename,
             )
 
-        logging.info("Unpacking ChEMBL db...")
+        logger.info("Unpacking ChEMBL db...")
         shutil.unpack_archive(download_filename, target_dir)
         shutil.move(
             target_dir / db_name / f"{db_name}_sqlite" / db_filename.name,
@@ -56,7 +55,7 @@ class ChemblClient:
         shutil.rmtree(target_dir / db_name)
         download_filename.unlink()
 
-        logging.info("ChEMBL data ready.")
+        logger.info("ChEMBL data ready.")
         return db_filename
 
     @classmethod
@@ -84,7 +83,7 @@ class ChemblClient:
         connection = sqlite3.connect(database_file)
         cursor = connection.cursor()
 
-        logging.info("Pulling molecule data from ChEMBL db...")
+        logger.info("Pulling molecule data from ChEMBL db...")
         query = """
         SELECT
             S1.molregno,
@@ -149,7 +148,7 @@ class ChemblClient:
         connection = sqlite3.connect(database_file)
         cursor = connection.cursor()
 
-        logging.info("Pulling document data from ChEMBL db...")
+        logger.info("Pulling document data from ChEMBL db...")
         query = """
             SELECT
               doc_id,
@@ -209,7 +208,7 @@ class ChemblClient:
         connection = sqlite3.connect(database_file)
         cursor = connection.cursor()
 
-        logging.info("Pulling assay data from ChEMBL db...")
+        logger.info("Pulling assay data from ChEMBL db...")
         query = f"""
             SELECT
               a1.activity_id,

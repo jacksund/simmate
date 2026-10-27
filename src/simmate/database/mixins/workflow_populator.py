@@ -1,6 +1,4 @@
-import logging
-
-from simmate.utils import chunk_list
+from simmate.utils import chunk_list, logger
 
 
 class WorkflowPopulator:
@@ -42,7 +40,7 @@ class WorkflowPopulator:
 
         # BUG: using 'id__in' below might cause batches >1k to fail
         if batch_size > 1000:
-            logging.info(
+            logger.info(
                 "This method uses a 'IN' clause to select batches of IDs, so "
                 "batches larger than 1k can cause performance issues and errors."
             )
@@ -94,7 +92,7 @@ class WorkflowPopulator:
             cls.objects.filter(**query_filters).values_list("id", flat=True).all()
         )
 
-        logging.info(
+        logger.info(
             f"Updating '{column_name}' column using '{workflow_name}' "
             f"for {len(ids_to_update)} entries"
         )
@@ -116,7 +114,7 @@ class WorkflowPopulator:
                         molecules=objs_to_update.to_toolkit(),
                         compress_output=True,
                     )
-                    logging.info("Saving results to db")
+                    logger.info("Saving results to db")
                     if columns_mapping:
                         # Multi-column workflow: results is a dict keyed
                         # by result_key, each value is a list of values
@@ -132,7 +130,7 @@ class WorkflowPopulator:
                             setattr(entry, column_name, entry_result)
                         cls.objects.bulk_update(objs_to_update, [column_name])
             except Exception:
-                logging.warning("BATCH FAILED")
+                logger.warning("BATCH FAILED")
                 continue
 
     @classmethod

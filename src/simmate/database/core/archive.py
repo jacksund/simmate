@@ -1,5 +1,4 @@
 import json
-import logging
 import shutil
 import urllib
 import warnings
@@ -9,7 +8,7 @@ import polars
 from django.utils.functional import classproperty
 
 from simmate.config import settings
-from simmate.utils import dispatch
+from simmate.utils import dispatch, logger
 
 
 class ArchiveMixin:
@@ -273,7 +272,7 @@ class ArchiveMixin:
 
         # tell the user where the data comes from
         if cls._meta.app_label == "data_explorer":
-            logging.warning(
+            logger.warning(
                 "this data is NOT from the Simmate team, so be sure "
                 "to visit the provider's website and to cite their work."
                 f" This data is from {getattr(cls, 'source', 'the provider')} "
@@ -291,25 +290,23 @@ class ArchiveMixin:
 
         # Download the archive zip file from the URL if it doesn't already exist
         if archive_path.exists():
-            logging.info(
-                f"Archive already exists at {archive_path}. Skipping download."
-            )
+            logger.info(f"Archive already exists at {archive_path}. Skipping download.")
         else:
-            logging.info(f"Downloading archive file to {archive_path}...")
+            logger.info(f"Downloading archive file to {archive_path}...")
             # ensure the directory exists
             archive_dir.mkdir(parents=True, exist_ok=True)
             # download the file
             urllib.request.urlretrieve(remote_archive_link, archive_path)
-            logging.info("Done.")
+            logger.info("Done.")
 
         # now that the archive is downloaded, we can load it into our db
-        logging.info("Loading data into Simmate database")
+        logger.info("Loading data into Simmate database")
         cls.load_archive(
             archive_path,
             delete_on_completion=False,
             parallel=parallel,
         )
-        logging.info("Done.")
+        logger.info("Done.")
 
     # -------------------------------------------------------------------------
     # Methods that handle building and uploading archives
@@ -364,7 +361,7 @@ class ArchiveMixin:
         archive_dir = settings.config_directory / app_label / "archive"
         archive_dir.mkdir(parents=True, exist_ok=True)
 
-        logging.info(f"Exporting {cls.table_name} as {format}...")
+        logger.info(f"Exporting {cls.table_name} as {format}...")
 
         # Use to_archive to build the file locally in the archive directory.
         # We pass a filename so it writes to the correct location.
@@ -398,8 +395,8 @@ class ArchiveMixin:
 
         # Upload to S3
         s3_key = f"{s3_prefix}/{archive_file.name}"
-        logging.info(f"Uploading {archive_file.name} to s3://{s3_key}...")
+        logger.info(f"Uploading {archive_file.name} to s3://{s3_key}...")
         s3_bucket.upload_file(archive_file, s3_key)
-        logging.info(f"Uploaded {archive_file.name}")
+        logger.info(f"Uploaded {archive_file.name}")
 
-        logging.info(f"Export and upload complete for {cls.table_name}.")
+        logger.info(f"Export and upload complete for {cls.table_name}.")

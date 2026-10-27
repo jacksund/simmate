@@ -1,10 +1,9 @@
-import logging
-
 import polars
 from rich.progress import track
 
 from simmate.database.core import DatabaseTable, table_column
 from simmate.database.utils import batch_bulk_create
+from simmate.utils import logger
 
 from ..client import ChemblClient
 from .document import ChemblDocument
@@ -158,7 +157,7 @@ class ChemblAssayResult(DatabaseTable):
         the Simmate database.
         """
         if update_only and cls.objects.exists():
-            logging.info("Checking last update...")
+            logger.info("Checking last update...")
             min_activity_id = str(
                 cls.objects.order_by("-id").values_list("id").first()[0]
             )
@@ -166,7 +165,7 @@ class ChemblAssayResult(DatabaseTable):
             min_activity_id = -1
 
         if not hasattr(cls, "_doc_ids"):
-            logging.info("Filtering for existing IDs...")
+            logger.info("Filtering for existing IDs...")
             cls._doc_ids = set(
                 ChemblDocument.objects.values_list("id", flat=True).all()
             )

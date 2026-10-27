@@ -1,4 +1,3 @@
-import logging
 import re
 from pathlib import Path
 
@@ -6,6 +5,7 @@ from rdkit.Chem import AllChem
 from rich.progress import track
 
 from simmate.toolkit import Molecule
+from simmate.utils import logger
 
 
 class SdfAdapter:
@@ -111,7 +111,7 @@ class SdfAdapter:
                 molecule = Molecule.from_sdf(sdf_str, **kwargs)
             except Exception as error:
                 if skip_failed:
-                    logging.warning(
+                    logger.warning(
                         f"Failed to load SDF record {record_number} "
                         f"of {filename.name}: {error}"
                     )

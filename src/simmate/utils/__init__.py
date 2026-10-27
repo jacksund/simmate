@@ -22,5 +22,6 @@ from .other import (
     get_class,
     get_hash_key,
     get_latest_version,
+    logger,
     str_to_datatype,
 )

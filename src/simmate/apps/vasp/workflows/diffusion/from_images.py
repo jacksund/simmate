@@ -1,9 +1,9 @@
-import logging
 from pathlib import Path
 
 from simmate.apps.vasp.inputs import Incar, Poscar, Potcar
 from simmate.apps.vasp.workflows.base import VaspWorkflow
 from simmate.toolkit.diffusion import MigrationImages
+from simmate.utils import logger
 
 
 class VaspNebFromImagesWorkflow(VaspWorkflow):
@@ -139,7 +139,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         From a working directory of a past calculation, sets up for the calculation
         to be restarted.
         """
-        logging.warning("CONTCARs are not yet copied to POSCARs for NEB restarts.")
+        logger.warning("CONTCARs are not yet copied to POSCARs for NEB restarts.")
 
         # establish filenames
         stopcar_filename = directory / "STOPCAR"

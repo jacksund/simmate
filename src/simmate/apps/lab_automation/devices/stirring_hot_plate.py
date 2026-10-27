@@ -1,10 +1,10 @@
-import logging
 import time
 
 from gpiozero import DigitalOutputDevice, Motor
 
 from simmate.apps.lab_automation.controllers import Controller, TimeProportional
 from simmate.apps.lab_automation.sensors.temperature import DS18B20
+from simmate.utils import logger
 
 
 class StirringHotPlate:
@@ -80,7 +80,7 @@ class StirringHotPlate:
             speed: A value between -1.0 and 1.0. Positive values spin forward,
                 negative values spin backward. 0 stops the stirrer.
         """
-        logging.info(f"Setting stirrer speed to {speed}")
+        logger.info(f"Setting stirrer speed to {speed}")
         if speed == 0:
             self.stirrer.stop()
         elif speed > 0:
@@ -95,7 +95,7 @@ class StirringHotPlate:
         Args:
             temperature: The target temperature in Celsius.
         """
-        logging.info(f"Setting target temperature to {temperature}°C")
+        logger.info(f"Setting target temperature to {temperature}°C")
         self.temp_controller.setpoint = temperature
 
     def update(self) -> float:
@@ -111,10 +111,10 @@ class StirringHotPlate:
         output = self.temp_controller.eval(current_temp)
 
         if output > 0 and not self.heater.is_active:
-            logging.info("Heater turned ON")
+            logger.info("Heater turned ON")
             self.heater.on()
         elif output <= 0 and self.heater.is_active:
-            logging.info("Heater turned OFF")
+            logger.info("Heater turned OFF")
             self.heater.off()
 
         return current_temp
@@ -123,7 +123,7 @@ class StirringHotPlate:
         """
         Stops both the stirrer and the heater immediately.
         """
-        logging.info("Stopping stirrer and heater")
+        logger.info("Stopping stirrer and heater")
         self.stirrer.stop()
         self.heater.off()
 
@@ -146,7 +146,7 @@ class StirringHotPlate:
             update_interval: The time (in seconds) between each update of
                 the control loop.
         """
-        logging.info(
+        logger.info(
             f"Starting run: target={temperature}°C, stir_speed={stir_speed}, "
             f"duration={total_time if total_time else 'indefinite'}s"
         )
@@ -160,7 +160,7 @@ class StirringHotPlate:
                 current_time = time.monotonic()
                 elapsed_time = current_time - start_time
                 if total_time and elapsed_time > total_time:
-                    logging.info("Total run time reached.")
+                    logger.info("Total run time reached.")
                     break
 
                 temp = self.update()
@@ -170,12 +170,12 @@ class StirringHotPlate:
                     status_msg = f"Status: {temp:.2f}°C"
                     if total_time:
                         status_msg += f" ({elapsed_time:.1f}/{total_time}s)"
-                    logging.info(status_msg)
+                    logger.info(status_msg)
                     last_log_time = current_time
 
                 time.sleep(update_interval)
         except KeyboardInterrupt:
-            logging.warning("Run interrupted by user.")
+            logger.warning("Run interrupted by user.")
         finally:
             self.stop()
-            logging.info("Run finished.")
+            logger.info("Run finished.")

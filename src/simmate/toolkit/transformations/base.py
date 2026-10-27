@@ -1,9 +1,9 @@
-import logging
 import time
 
 from django.utils.functional import classproperty
 
 from simmate.toolkit import Structure
+from simmate.utils import logger
 
 
 class Transformation:
@@ -106,8 +106,8 @@ class Transformation:
         select_kwargs: dict = {},
         **kwargs,  # for apply_transformation_with_validation
     ):
-        logging.info(f"Creating a transformed structure with '{self.name}'")
-        logging.info(f"Parent(s) will be selected using '{selector.name}'")
+        logger.info(f"Creating a transformed structure with '{self.name}'")
+        logger.info(f"Parent(s) will be selected using '{selector.name}'")
 
         # grab parent structures using the selection method
         parent_ids, parent_structures = selector.select_from_datatable(
@@ -116,7 +116,7 @@ class Transformation:
             **select_kwargs,
         )
 
-        logging.info(f"Selected parents: {parent_ids}")
+        logger.info(f"Selected parents: {parent_ids}")
 
         # Until we get a new valid structure (or run out of attempts), keep trying
         # with our given source. Assume we don't have a valid structure until
@@ -134,7 +134,7 @@ class Transformation:
             return False
 
         # Otherwise we were successful
-        logging.info("Creation Successful.")
+        logger.info("Creation Successful.")
 
         return parent_ids, new_structure
 
@@ -173,7 +173,7 @@ class Transformation:
                     if not is_valid:
                         # if it is not unique, we can throw away the structure and
                         # try the loop again.
-                        logging.debug(
+                        logger.debug(
                             "Generated structure failed validation by "
                             f"{validator.name}. Trying again."
                         )
@@ -186,12 +186,12 @@ class Transformation:
         # see if we got a structure or if we hit the max attempts and there's
         # a serious problem!
         if not new_structure and attempt > max_attempts:
-            logging.warning(
+            logger.warning(
                 f"Failed to create a structure after {max_attempts} attempts. Giving up."
             )
             return False
         elif not new_structure and current_time >= stop_time:
-            logging.warning(
+            logger.warning(
                 f"Failed to create a structure after {num_atoms * max_time_per_atom} seconds."
                 "Giving up."
             )

@@ -1,5 +1,4 @@
 import copy
-import logging
 from collections.abc import Callable
 from pathlib import Path
 
@@ -8,7 +7,7 @@ import polars
 import pyarrow
 import zstandard as zstd
 
-from simmate.utils import chunk_list, dispatch, get_directory
+from simmate.utils import chunk_list, dispatch, get_directory, logger
 
 
 class VectorIndex:
@@ -212,7 +211,7 @@ class VectorIndex:
         """
         batches = self._pending_batches()
         if not batches:
-            logging.info(f"{self.index_suffix} index is already built!")
+            logger.info(f"{self.index_suffix} index is already built!")
             return
 
         self._prepare_build()
@@ -226,7 +225,7 @@ class VectorIndex:
 
         # "job" mode only submits the work to the executor
         status = "submitted" if parallel_job else "complete"
-        logging.info(f"{self.index_suffix} index build {status}!")
+        logger.info(f"{self.index_suffix} index build {status}!")
 
     def _pending_batches(self) -> list[list[int]]:
         """Determines which batches of chunk_keys still need a shard built."""
@@ -234,7 +233,7 @@ class VectorIndex:
         batches = [list(b) for b in chunk_list(chunk_keys, self.batch_size)]
         pending = [b for b in batches if not self._shard_exists(b)]
 
-        logging.info(
+        logger.info(
             f"{len(batches) - len(pending)} batches already done, "
             f"{len(pending)} to process"
         )
@@ -292,7 +291,7 @@ class VectorIndex:
                 "be memory-mapped. Use load_mode 'memory' or 'scan'."
             )
 
-        logging.info(
+        logger.info(
             f"Loading {len(shard_files)} {self.column_name} {self.index_suffix} "
             f"shard(s) in {self.load_mode!r} mode..."
         )
@@ -304,7 +303,7 @@ class VectorIndex:
         else:
             self._loaded_indexes = self._load_indexes(shard_files)
             num_vectors = sum(self._num_vectors(i) for i in self._loaded_indexes)
-            logging.info(f"Loaded {num_vectors:,} vectors.")
+            logger.info(f"Loaded {num_vectors:,} vectors.")
         # set last, so a failed load is never mistaken for a cached one
         self._loaded_mode = self.load_mode
 

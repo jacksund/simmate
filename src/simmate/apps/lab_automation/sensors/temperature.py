@@ -1,8 +1,9 @@
 import glob
-import logging
 import time
 from datetime import datetime
 from pathlib import Path
+
+from simmate.utils import logger
 
 
 class DS18B20:
@@ -149,7 +150,7 @@ class DS18B20:
             with open(output_path, "w") as f:
                 f.write("timestamp,temp_c,temp_f\n")
 
-        logging.info(
+        logger.info(
             f"Starting temperature log for {self.device_id}: {total_readings} readings"
         )
 
@@ -159,11 +160,9 @@ class DS18B20:
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 with open(output_path, "a") as f:
                     f.write(f"{timestamp},{temp_c:.2f},{temp_f:.2f}\n")
-                logging.info(f"Logged {self.device_id}: {temp_c:.2f}°C")
+                logger.info(f"Logged {self.device_id}: {temp_c:.2f}°C")
             except Exception as e:
-                logging.error(
-                    f"Logging failed for {self.device_id} at reading {i}: {e}"
-                )
+                logger.error(f"Logging failed for {self.device_id} at reading {i}: {e}")
 
             if i < total_readings - 1:
                 time.sleep(interval)

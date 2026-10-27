@@ -1,11 +1,10 @@
-import logging
-
 from simmate.apps.vasp.inputs.potcar_mappings import FOLDER_MAPPINGS
 from simmate.config.utils import (
     check_app_reg,
     check_command_exists,
     show_test_results,
 )
+from simmate.utils import logger
 
 
 def test_config(run_calcs: bool = False):
@@ -23,9 +22,9 @@ def test_config(run_calcs: bool = False):
     has_potcars = True
     for potential, folder in FOLDER_MAPPINGS.items():
         if folder.exists():
-            logging.info(f"{potential} POTCARS found :heavy_check_mark:")
+            logger.info(f"{potential} POTCARS found :heavy_check_mark:")
         else:
-            logging.warning(
+            logger.warning(
                 f"{potential} POTCARS not found. These should be placed at... "
                 f"'{folder}'"
             )

@@ -139,6 +139,7 @@ The web interface is built with Django and HTMX.
 
 - **Type Hints:** Required for all new code. Keep them simple and use built-in types.
 - **File Paths:** Always use `pathlib.Path`.
+- **Logging:** Use the shared simmate logger (`from simmate.utils import logger`) instead of the root logger (`logging.info(...)`).
 - **Docstrings:** Use Google-style docstrings (`Args:`, `Returns:`). Some older code uses a markdown `#### Parameters` style; don't copy it.
 - **Formatting:** Use `ruff` for Python (linting, formatting, and import sorting) and `djlint` for HTML templates (`simmate dev lint` runs both). Lint rules are ruff's defaults minus the `ignore` list in `pyproject.toml`. Don't add `# -*- coding: utf-8 -*-` headers.
 - **Import Order:** `from simmate.database import connect` sets up Django, so it must come before model imports. Pin it with `# ruff: isort: skip` (or `# ruff: isort: skip_file` for whole files with circular-import ordering).

@@ -1,4 +1,3 @@
-import logging
 from pathlib import Path
 
 import numpy
@@ -11,6 +10,8 @@ from usearch.index import (
     MetricSignature,
     ScalarKind,
 )
+
+from simmate.utils import logger
 
 from .base import VectorIndex
 
@@ -28,7 +29,7 @@ class UsearchHnswIndex(VectorIndex):
         # usearch builds into a plain file, which is then renamed (or
         # compressed) into place once the whole batch is done
         working_path = self._shard_path(batch, ".partial")
-        logging.info(
+        logger.info(
             f"Building {self.column_name} batch {batch[0]}-{batch[-1]} → "
             f"{self._final_shard_path(batch)}"
         )
@@ -46,28 +47,28 @@ class UsearchHnswIndex(VectorIndex):
         )
 
         for chunk_key in batch:
-            logging.info(f"  {self.column_name} chunk_key={chunk_key}")
+            logger.info(f"  {self.column_name} chunk_key={chunk_key}")
             df = self._chunk_vectors(chunk_key).collect()
             if df.is_empty():
                 continue
 
             keys = df["datastore_id"].to_numpy()
             if len(index) > 0 and keys[0] in index:
-                logging.info(f"  Skipping chunk_key={chunk_key} - already indexed.")
+                logger.info(f"  Skipping chunk_key={chunk_key} - already indexed.")
                 continue
 
             index.add(keys, self._packed_vectors(df))
 
             # saved after every chunk so an interrupted batch resumes mid-way
             index.save(str(working_path))
-            logging.info(f"  Saved progress | Vectors: {len(index):,}")
+            logger.info(f"  Saved progress | Vectors: {len(index):,}")
 
         if not working_path.exists():
             # every chunk was empty, so the loop above never saved anything
             index.save(str(working_path))
 
         index_path = self._finalize_shard(batch, working_path)
-        logging.info(f"  Saved {len(index):,} vectors → {index_path}")
+        logger.info(f"  Saved {len(index):,} vectors → {index_path}")
 
     def _load_indexes(self, shard_files: list[Path]) -> list:
         if self.load_mode == "view":

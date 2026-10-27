@@ -1,4 +1,3 @@
-import logging
 from pathlib import Path
 
 import numpy as np
@@ -7,6 +6,7 @@ from pandas import DataFrame
 
 from simmate.database.core import table_column
 from simmate.database.mixins import Calculation, Structure
+from simmate.utils import logger
 
 
 class Bader(Structure, Calculation):
@@ -181,7 +181,7 @@ class Bader(Structure, Calculation):
                 directory / "POTCAR"
             ).tolist()
         except Exception:
-            logging.warning(
+            logger.warning(
                 "No POTCAR found in file. Oxidation states will not be calculated"
             )
 

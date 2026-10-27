@@ -1,4 +1,3 @@
-import logging
 from pathlib import Path
 
 import pandas
@@ -9,6 +8,7 @@ from simmate.database.core import table_column
 from simmate.database.mixins import ThirdPartyData
 from simmate.toolkit import Molecule as ToolkitMolecule
 from simmate.toolkit.file_converters import SmilesAdapter
+from simmate.utils import logger
 
 
 class EnamineRealMolecule(ThirdPartyData, Molecule):
@@ -86,30 +86,30 @@ class EnamineRealMolecule(ThirdPartyData, Molecule):
 
         # The SDF file is too large to load, so we split it into chunks first
         if chunk_file:
-            logging.info("Splitting cxSmiles file into chunks...")
+            logger.info("Splitting cxSmiles file into chunks...")
             chunk_filenames = SmilesAdapter.split_smi_file(
                 filename=input_file,
                 chunk_size=10000,
                 has_headers=True,
             )
             nchunks = len(chunk_filenames)
-            logging.info(f"Made {nchunks} total chunks of 10k molecules each.")
+            logger.info(f"Made {nchunks} total chunks of 10k molecules each.")
         else:
             chunk_filenames = [Path(input_file)]  # we only have the one file to act on
             nchunks = 1
 
         # go through each chunk and load into the database
-        logging.info("The progress bars below are for EACH chunk.")
-        logging.info("Saving to simmate database...")
+        logger.info("The progress bars below are for EACH chunk.")
+        logger.info("Saving to simmate database...")
 
         for i, chunk_filename in enumerate(chunk_filenames):
-            logging.info(f"Chunk {i + 1} of {nchunks}")
+            logger.info(f"Chunk {i + 1} of {nchunks}")
 
             # read the file text (without loading as Molecule objects)
             data = pandas.read_csv(chunk_filename, delimiter="\t")
 
             # autopopulate database columns for each molecule (no saving yet)
-            logging.info("Generating database objects...")
+            logger.info("Generating database objects...")
             failed_rows = []
             db_objs = []
             for i, entry in track(data.iterrows(), total=len(data)):
@@ -128,19 +128,19 @@ class EnamineRealMolecule(ThirdPartyData, Molecule):
                 except Exception:
                     failed_rows.append(entry)
             # save each entry to simmate database
-            logging.info("Saving to Simmate database...")
+            logger.info("Saving to Simmate database...")
             cls.objects.bulk_create(
                 db_objs,
                 batch_size=1000,
                 ignore_conflicts=True,
             )
 
-            logging.info("Adding molecule fingerprints...")
+            logger.info("Adding molecule fingerprints...")
             cls.populate_fingerprint_database()
 
             # delete the file if successful AND if chunking was requested
             if chunk_file:
                 chunk_filename.unlink()
 
-        logging.info("Done!")
+        logger.info("Done!")
         return failed_rows

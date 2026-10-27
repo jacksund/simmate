@@ -1,4 +1,3 @@
-import logging
 import os
 import platform
 import signal
@@ -8,7 +7,7 @@ from pathlib import Path
 
 import pandas
 
-from simmate.utils import get_directory
+from simmate.utils import get_directory, logger
 from simmate.workflows.utils import make_error_archive
 
 from ..core import ErrorHandler, Workflow
@@ -212,9 +211,9 @@ class S3Workflow(Workflow):
         elif is_restart and not is_complete:
             cls.setup_restart(directory=directory, **kwargs)
         elif is_restart and is_complete:
-            logging.info("Calculation is already completed. Skipping setup.")
+            logger.info("Calculation is already completed. Skipping setup.")
         else:  # (not is_restart and is_complete)
-            logging.warning(
+            logger.warning(
                 "It looks like you are running a new workflow inside of a folder "
                 "where another has already completed. This is fine "
                 "for now, but be aware that a future version of Simmate may "
@@ -234,7 +233,7 @@ class S3Workflow(Workflow):
             # a list of any corrections applied during the run.
             corrections = cls.execute(directory, command)
         else:
-            logging.info("Calculation is already completed. Skipping execution.")
+            logger.info("Calculation is already completed. Skipping execution.")
 
             # load the corrections from file for reference
             corrections_filename = directory / "simmate_corrections.csv"
@@ -426,8 +425,8 @@ class S3Workflow(Workflow):
             # a bug if another is another parallel command used besides mpirun.
             # An example of this might be deepmd which automatically submits
             # things in parallel without calling mpirun up-front.
-            logging.info(f"Using {directory}")
-            logging.info(f"Running '{command}'")
+            logger.info(f"Using {directory}")
+            logger.info(f"Running '{command}'")
             process = subprocess.Popen(
                 command,
                 cwd=directory,
@@ -540,7 +539,7 @@ class S3Workflow(Workflow):
                     correction = error_handler.correct(directory)
                     # record what's been changed
                     corrections.append((error_handler.name, correction))
-                    logging.info(
+                    logger.info(
                         f"Found error '{error_handler.name}'. Fixed with '{correction}'"
                     )
                     # break from the error_handler for-loop as we only apply the

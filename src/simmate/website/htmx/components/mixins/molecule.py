@@ -1,7 +1,6 @@
-import logging
-
 from simmate.database.core import DatabaseTable
 from simmate.toolkit import Molecule
+from simmate.utils import logger
 
 
 class MoleculeInput:
@@ -48,7 +47,7 @@ class MoleculeInput:
                 molecule_input = i
                 # we continue to loop to pop() all other keys
         if not found_type:
-            logging.warning(f"Failed to find non-null input: '{input_name}'")
+            logger.warning(f"Failed to find non-null input: '{input_name}'")
             return  # nothing to load
 
         # How the molecule is loaded varies depending on the input type and
@@ -95,7 +94,7 @@ class MoleculeInput:
                 self.load_molecule_custom(input_name)
 
         except Exception:
-            logging.warning(
+            logger.warning(
                 f"Failed to load molecule for input '{input_name}' of type '{input_type}': '{molecule_input}'"
             )
             self.form_data[input_name] = False  # to display error

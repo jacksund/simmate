@@ -1,4 +1,3 @@
-import logging
 from pathlib import Path
 
 import pandas
@@ -6,7 +5,7 @@ from rich.progress import track
 
 from simmate.database.core import DatabaseTable, table_column
 from simmate.database.mixins import ThirdPartyData
-from simmate.utils import chunk_list, get_hash_key
+from simmate.utils import chunk_list, get_hash_key, logger
 
 from .molecules import EmoleculesMolecule
 
@@ -121,7 +120,7 @@ class EmoleculesSupplierOffer(ThirdPartyData, DatabaseTable):
         update_only: bool = False,
     ):
 
-        logging.info("Loading metadata...")
+        logger.info("Loading metadata...")
         vendor_offers = pandas.read_csv(metadata_file, sep="\t")
         all_ids = set(EmoleculesMolecule.objects.values_list("id", flat=True).all())
 
@@ -149,9 +148,9 @@ class EmoleculesSupplierOffer(ThirdPartyData, DatabaseTable):
         nchunks_total = (len(vendor_offers) // chunk_size) + 1
         failed = []
         for nchunk, emol_chunk in enumerate(chunk_list(vendor_offers, chunk_size)):
-            logging.info(f"CHUNK # {nchunk} of {nchunks_total}")
+            logger.info(f"CHUNK # {nchunk} of {nchunks_total}")
 
-            logging.info("Generating database objects...")
+            logger.info("Generating database objects...")
             db_objs = []
             for i, row in track(emol_chunk.iterrows(), total=len(emol_chunk)):
                 try:
@@ -171,7 +170,7 @@ class EmoleculesSupplierOffer(ThirdPartyData, DatabaseTable):
                 except Exception:
                     failed.append(row.to_dict())
 
-            logging.info("Saving to Simmate database...")
+            logger.info("Saving to Simmate database...")
             cls.objects.bulk_create(
                 db_objs,
                 batch_size=1000,
@@ -193,7 +192,7 @@ class EmoleculesSupplierOffer(ThirdPartyData, DatabaseTable):
         # !!! While this method is close to _load_metadata, there are subtle
         # differences. Read closely.
 
-        logging.info("Loading metadata...")
+        logger.info("Loading metadata...")
         # BUG: this is a tsv file, but emol uses a mix of tabs AND commas...
         # So I need to do some funky patching here.
         custom_offers = pandas.read_csv(custom_file, sep="\t|,", engine="python")
@@ -236,9 +235,9 @@ class EmoleculesSupplierOffer(ThirdPartyData, DatabaseTable):
         nchunks_total = (len(custom_offers) // chunk_size) + 1
         failed = []
         for nchunk, emol_chunk in enumerate(chunk_list(custom_offers, chunk_size)):
-            logging.info(f"CHUNK # {nchunk} of {nchunks_total}")
+            logger.info(f"CHUNK # {nchunk} of {nchunks_total}")
 
-            logging.info("Generating database objects...")
+            logger.info("Generating database objects...")
             db_objs = []
             for i, row in track(emol_chunk.iterrows(), total=len(emol_chunk)):
                 try:
@@ -259,7 +258,7 @@ class EmoleculesSupplierOffer(ThirdPartyData, DatabaseTable):
                 except Exception:
                     failed.append(row.to_dict())
 
-            logging.info("Saving to Simmate database...")
+            logger.info("Saving to Simmate database...")
             cls.objects.bulk_create(
                 db_objs,
                 batch_size=1000,

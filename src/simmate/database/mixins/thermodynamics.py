@@ -1,11 +1,10 @@
-import logging
 import warnings
 
 from rich.progress import track
 
 from simmate.toolkit import Structure as ToolkitStructure
 from simmate.toolkit.visualization.plotting import PlotlyFigure
-from simmate.utils import get_chemical_subsystems
+from simmate.utils import get_chemical_subsystems, logger
 
 from ..core import DatabaseTable, table_column
 
@@ -171,7 +170,7 @@ class Thermodynamics(DatabaseTable):
                     workflow_name,
                 )
             except ValueError as exception:
-                logging.warning(f"Failed for {chemical_system} with error: {exception}")
+                logger.warning(f"Failed for {chemical_system} with error: {exception}")
 
     @classmethod
     def get_phase_diagram(

@@ -1,10 +1,9 @@
-import logging
-
 from rich.progress import track
 
 from simmate.apps.rdkit.models import Molecule
 from simmate.database.core import table_column
 from simmate.database.mixins import ThirdPartyData
+from simmate.utils import logger
 
 from ..web_scraper import BcpcWebScraper
 
@@ -90,7 +89,7 @@ class BcpcIsoPesticide(ThirdPartyData, Molecule):
             **kwargs,
         )
 
-        logging.info("Saving to simmate database...")
+        logger.info("Saving to simmate database...")
         for entry_data in track(all_data):
             entry_name = entry_data.pop("name")
             cls.objects.update_or_create(
@@ -101,5 +100,5 @@ class BcpcIsoPesticide(ThirdPartyData, Molecule):
                 ),
             )
 
-        logging.info("Adding molecule fingerprints...")
+        logger.info("Adding molecule fingerprints...")
         cls.populate_fingerprint_database()

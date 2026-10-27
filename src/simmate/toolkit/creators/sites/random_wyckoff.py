@@ -1,5 +1,3 @@
-import logging
-
 from numpy.random import choice, randint
 from rich.progress import track
 
@@ -10,6 +8,7 @@ from simmate.toolkit.symmetry.wyckoff import (
     loadAsymmetricUnitData,
     loadWyckoffData,
 )
+from simmate.utils import logger
 
 
 class RandomWySites:
@@ -68,13 +67,13 @@ class RandomWySites:
         # done with this system.
         self.lazily_generate_combinations = lazily_generate_combinations
         if not lazily_generate_combinations:
-            logging.info("Generating Wyckoff combinations for every spacegroup")
+            logger.info("Generating Wyckoff combinations for every spacegroup")
             for spacegroup in track(self.spacegroup_options):
                 self._setup_spacegroup_wyckoff_generator(
                     spacegroup,
                     show_logging=False,
                 )
-            logging.info("Done.")
+            logger.info("Done.")
 
         # below, I'll need to repeatedly reference wy_data
         # !!! I want to find a better way of loading wy_data - maybe load
@@ -203,7 +202,7 @@ class RandomWySites:
 
             # Make sure the spacegroup is valid for the given composition
             if spacegroup in self.spacegroups_invalid:
-                logging.warning(
+                logger.warning(
                     f"Spacegroup {spacegroup} is invalid for {self.composition}"
                 )
                 return False
@@ -214,12 +213,12 @@ class RandomWySites:
         self, spacegroup: int, show_logging: bool = True
     ):
         if show_logging:
-            logging.info(
+            logger.info(
                 f"Generating possible wyckoff combinations for spacegroup {spacegroup}"
             )
         sg_combo_data = findValidWyckoffCombos(self.stoichiometry, spacegroup)
         if show_logging:
-            logging.info("Done generating combinations.")
+            logger.info("Done generating combinations.")
         # If the spacegroup + stoich combination has no valid combinations,
         # the generator will not work
         if not sg_combo_data["ValidCombinations"]:

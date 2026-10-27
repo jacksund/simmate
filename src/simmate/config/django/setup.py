@@ -1,10 +1,9 @@
-import logging
 import os
 
 import django
 from django.conf import settings
 
-from simmate.utils import check_if_using_latest_version
+from simmate.utils import check_if_using_latest_version, logger
 
 
 def setup_django():
@@ -31,15 +30,15 @@ def setup_django():
     try:
         check_if_using_latest_version()
     except Exception:
-        logging.warning("Unable to check if using the latest Simmate version.")
+        logger.warning("Unable to check if using the latest Simmate version.")
 
-    logging.info("Configuring database and workflows :hammer_and_wrench:")
+    logger.info("Configuring database and workflows :hammer_and_wrench:")
     # The code below is the equiv of running 'python manage.py shell'
     # This sets up all of django for its full use. You can being importing
     # models after this is setup.
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "simmate.config.django.settings")
     django.setup()
-    logging.info("Configuration complete :rocket:")
+    logger.info("Configuration complete :rocket:")
 
 
 # When I import this module, it automatically configures django for us, including

@@ -1,7 +1,6 @@
 import datetime
 import inspect
 import json
-import logging
 import platform
 import re
 import uuid
@@ -22,6 +21,7 @@ from simmate.utils import (
     copy_directory,
     copy_files_from_directory,
     get_directory,
+    logger,
     make_archive,
 )
 
@@ -195,7 +195,7 @@ class Workflow:
 
         """
 
-        logging.info(f"Starting '{cls.name_full}'")
+        logger.info(f"Starting '{cls.name_full}'")
         kwargs_cleaned, database_entry = cls._load_input_and_register(
             run_id=run_id,
             directory=directory,
@@ -231,7 +231,7 @@ class Workflow:
                     "required format. If you do not want to save to the database "
                     "(and avoid this message), set `use_database=False`"
                 )
-            logging.info("Saving to database and writing outputs")
+            logger.info("Saving to database and writing outputs")
 
             database_entry = cls._update_database_with_results(
                 results=results if results != None else {},
@@ -242,14 +242,14 @@ class Workflow:
         # if requested, compresses the directory to a zip file and then removes
         # the directory.
         if compress_output:
-            logging.info("Compressing result to a ZIP file.")
+            logger.info("Compressing result to a ZIP file.")
             make_archive(
                 directory=kwargs_cleaned["directory"],
                 files_to_exclude=cls.exclude_from_archives,
             )
 
         # If we made it this far, we successfully completed the workflow run
-        logging.info(f"Completed '{cls.name_full}'")
+        logger.info(f"Completed '{cls.name_full}'")
 
         # If we are using the database, then we return the database object.
         # Otherwise, we want to return the original result from run_config
@@ -277,7 +277,7 @@ class Workflow:
             workflow.
         """
 
-        logging.info(f"Submitting new run of `{cls.name_full}` to cloud")
+        logger.info(f"Submitting new run of `{cls.name_full}` to cloud")
 
         # To help with tracking the flow in cloud, we load all of the inputs up
         # front. This will include creating a run_id for us.
@@ -314,7 +314,7 @@ class Workflow:
         if cls.use_database:
             state.results_db_entry = calculation
 
-        logging.info(f"Successfully submitted (workitem_id={state.pk})")
+        logger.info(f"Successfully submitted (workitem_id={state.pk})")
 
         return state
 

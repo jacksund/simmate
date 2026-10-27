@@ -1,11 +1,10 @@
-import logging
-
 from simmate.config import settings
 from simmate.config.utils import (
     check_app_reg,
     check_command_exists,
     show_test_results,
 )
+from simmate.utils import logger
 
 from .inputs import check_pseudo_setup
 
@@ -26,9 +25,9 @@ def test_config(run_calcs: bool = False):
     # 3 - check for pseudopotentials
     has_pseudos = check_pseudo_setup()
     if has_pseudos:
-        logging.info("Pseudopotentials (SSSP) found :heavy_check_mark:")
+        logger.info("Pseudopotentials (SSSP) found :heavy_check_mark:")
     else:
-        logging.warning("Pseudopotentials (SSSP) not found.")
+        logger.warning("Pseudopotentials (SSSP) not found.")
 
     # 4 - run some sample workflows
     if run_calcs:

@@ -1,5 +1,4 @@
 import base64
-import logging
 import time
 import traceback
 
@@ -8,7 +7,7 @@ import requests
 from rich import print
 
 from simmate.config import settings
-from simmate.utils import get_class
+from simmate.utils import get_class, logger
 
 from ..utils import handle_sigterm
 from ..work_item import WorkerInterruptedError
@@ -67,7 +66,7 @@ class ApiWorker:
             try:
                 self._run_loop()
             except KeyboardInterrupt:
-                logging.info("Stop signal recieved. Shutting down.")
+                logger.info("Stop signal recieved. Shutting down.")
                 self._shutdown_on_interrupt()
 
     def _shutdown_on_interrupt(self):
@@ -77,7 +76,7 @@ class ApiWorker:
         if not self.current_workitem_id:
             return
 
-        logging.warning(
+        logger.warning(
             "Shut down worker while WorkItem was still running. "
             "It will be marked as INTERRUPTED."
         )
@@ -113,7 +112,7 @@ class ApiWorker:
             )
             response.raise_for_status()
         except requests.exceptions.RequestException as exc:
-            logging.error(
+            logger.error(
                 f"Failed to update WorkItem {workitem_id} result via API: {exc}"
             )
 
@@ -122,12 +121,12 @@ class ApiWorker:
         The main loop of `start`, which runs until a stop condition is hit.
         """
         print("[bold dark_cyan]" + HEADER_ART)
-        logging.info(
+        logger.info(
             f"Starting API worker with tags {self.tags} pointing to {self.server_url}"
         )
 
         if self.startup_method:
-            logging.info(f"Running startup method: '{self.startup_method}'")
+            logger.info(f"Running startup method: '{self.startup_method}'")
             startup_method = get_class(self.startup_method)
             startup_method()
 
@@ -135,17 +134,17 @@ class ApiWorker:
         self.nitems_completed = 0
         empty_queue_streak = 0
 
-        logging.info("Worker is ready & listening for WorkItems via API")
+        logger.info("Worker is ready & listening for WorkItems via API")
 
         while True:
             if (time.time() - time_start) > self.timeout:
-                logging.info(
+                logger.info(
                     "The time-limit for this worker has been hit. Shutting down."
                 )
                 return
 
             if self.nitems_completed >= self.nitems_max:
-                logging.info(
+                logger.info(
                     f"Maximum number of WorkItems reached ({self.nitems_max}). "
                     "Shutting down."
                 )
@@ -160,7 +159,7 @@ class ApiWorker:
                 )
                 response.raise_for_status()
             except requests.exceptions.RequestException as exc:
-                logging.warning(
+                logger.warning(
                     f"Failed to connect to API: {exc}. Retrying in {self.waittime_on_empty_queue}s..."
                 )
                 time.sleep(self.waittime_on_empty_queue)
@@ -171,7 +170,7 @@ class ApiWorker:
                 empty_queue_streak += 1
                 time.sleep(self.waittime_on_empty_queue)
                 if self.close_on_empty_queue and empty_queue_streak >= 2:
-                    logging.info("The task queue is empty. Shutting down.")
+                    logger.info("The task queue is empty. Shutting down.")
                     return
                 continue
             else:
@@ -181,7 +180,7 @@ class ApiWorker:
             workitem_id = workitem_data["id"]
             self.current_workitem_id = workitem_id
 
-            logging.info(f"Running WorkItem with id {workitem_id}")
+            logger.info(f"Running WorkItem with id {workitem_id}")
 
             try:
                 fxn = cloudpickle.loads(base64.b64decode(workitem_data["fxn"]))
@@ -192,7 +191,7 @@ class ApiWorker:
             except Exception as exception:
                 traceback.print_exc()
 
-                logging.warning(
+                logger.warning(
                     "Task failed with the error shown above. \n\n"
                     "If you are unfamilar with error tracebacks and find this error "
                     "difficult to read, you can learn more about these errors "
@@ -213,5 +212,5 @@ class ApiWorker:
             self._report_result(workitem_id, status, result_pickled)
 
             self.current_workitem_id = None
-            logging.info("Completed WorkItem")
+            logger.info("Completed WorkItem")
             self.nitems_completed += 1

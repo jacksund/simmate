@@ -4,7 +4,7 @@ from pathlib import Path
 from rich.progress import track
 
 from simmate.toolkit import Structure
-from simmate.utils import get_directory
+from simmate.utils import get_directory, logger
 
 
 def write_and_submit_structures(
@@ -16,14 +16,13 @@ def write_and_submit_structures(
     if not structures:
         return []
 
-    logging.info("Writing CIFs and submitting structures")
+    logger.info("Writing CIFs and submitting structures")
 
     # sort structure by increasing size (smallest first)
     structures.sort(key=lambda s: s.num_sites)
 
     # disable the logs while we submit
-    logger = logging.getLogger()
-    logger.disabled = True
+    logging.disable(logging.CRITICAL)
 
     nalready_submitted = 0
     directory = get_directory(foldername)
@@ -43,10 +42,10 @@ def write_and_submit_structures(
         )
         states.append(state)
 
-    logger.disabled = False
+    logging.disable(logging.NOTSET)
 
     if nalready_submitted > 0:
-        logging.info(
+        logger.info(
             f"{nalready_submitted} structures were already submitted "
             "and therefore skipped."
         )

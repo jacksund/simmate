@@ -1,4 +1,3 @@
-import logging
 import shutil
 from pathlib import Path
 
@@ -6,6 +5,7 @@ from pymatgen.analysis.transition_state import NEBAnalysis
 from pymatgen.io.vasp.outputs import Vasprun as VasprunPymatgen
 
 from simmate.apps.vasp.inputs import Incar
+from simmate.utils import logger
 
 
 class Vasprun(VasprunPymatgen):
@@ -32,7 +32,7 @@ class Vasprun(VasprunPymatgen):
                 parse_potcar_file=False,
             )
         except Exception:
-            logging.warning(
+            logger.warning(
                 "XML is malformed. This typically means there's an error with your"
                 " calculation that wasn't caught by your ErrorHandlers. We try"
                 " salvaging data here though."

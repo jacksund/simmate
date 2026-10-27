@@ -1,9 +1,8 @@
-import logging
-
 from numpy.random import choice
 
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.creators.structure.base import StructureCreator
+from simmate.utils import logger
 
 
 class PyXtalStructure(StructureCreator):
@@ -50,7 +49,7 @@ class PyXtalStructure(StructureCreator):
         self.default_lattice = default_lattice
         # TODO: I need to allow the user to specify the tolerance matrix
         if tolerance_matrix:
-            logging.warning(
+            logger.warning(
                 "Simmate's wrapper for PyXtal does not currently support "
                 "setting the tolerance matrix for PyXtal's random_crystal()."
             )

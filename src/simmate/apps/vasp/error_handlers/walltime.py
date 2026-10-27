@@ -1,5 +1,4 @@
 import datetime
-import logging
 import os
 import subprocess
 import time
@@ -9,6 +8,7 @@ import numpy
 from pymatgen.io.vasp.outputs import Outcar
 
 from simmate.apps.vasp.error_handlers import Unconverged
+from simmate.utils import logger
 from simmate.workflows import ErrorHandler
 
 
@@ -88,7 +88,7 @@ class Walltime(ErrorHandler):
             # make sure the calculation didn't "finish at the buzzer"
             is_finished = self._check_if_finished(directory)
             if is_finished:
-                logging.info(
+                logger.info(
                     "BUZZER BEATER!!! This job finished right when it was "
                     "about to hit the walltime!"
                 )
@@ -141,9 +141,7 @@ class Walltime(ErrorHandler):
             # handlers updating them)
             filename = directory / "simmate_metadata_01.yaml"
             if not filename.exists():
-                logging.warning(
-                    "Unable to detect the time remaining. Ignoring Timeout."
-                )
+                logger.warning("Unable to detect the time remaining. Ignoring Timeout.")
                 return
                 # !!! What if I looked at the creation time of the current directory?
 
@@ -164,7 +162,7 @@ class Walltime(ErrorHandler):
             ).stdout.strip()
             # parse the output into a time
             if output == "INVALID":
-                logging.warning(
+                logger.warning(
                     "SLURM node improperly configured. Cannot detect TimeLeft"
                 )
                 return
@@ -177,7 +175,7 @@ class Walltime(ErrorHandler):
                 try:
                     output = [int(i) for i in output.replace("-", ":").split(":")]
                 except Exception:
-                    logging.warning(
+                    logger.warning(
                         "Failed to parse SLURM output. Please report this to the"
                         f"Simmate team. Output was {output}"
                     )

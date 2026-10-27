@@ -1,9 +1,8 @@
-import logging
-
 import requests
 
 from simmate.config import settings
 from simmate.toolkit import Molecule
+from simmate.utils import logger
 
 
 class CasRegistryClient:
@@ -96,7 +95,7 @@ class CasRegistryClient:
         results = search_results.get("results", [])
 
         if not results:
-            logging.warning(f"No results found for query: {query}")
+            logger.warning(f"No results found for query: {query}")
             return None
 
         cas_rn = results[0]["rn"]

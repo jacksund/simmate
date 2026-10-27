@@ -1,10 +1,9 @@
-import logging
-
 import numpy
 import pandas
 import requests
 
 from simmate.config import settings
+from simmate.utils import logger
 
 from ..mappings import EthereumMappings
 
@@ -51,7 +50,7 @@ class AlchemyClient:
     def get_all_transaction_data(cls) -> pandas.DataFrame:
         all_data = []
         for ens_name, address in EthereumMappings.wallet_addresses.items():
-            logging.info(f"Loading transactions for '{ens_name}'")
+            logger.info(f"Loading transactions for '{ens_name}'")
             data = cls.get_transactions(address=address)
             data["ens_name"] = ens_name
             all_data.append(data)
@@ -61,7 +60,7 @@ class AlchemyClient:
     def get_transactions(cls, address: str):
         all_data = []
         for chain in cls.chain_map:
-            logging.info(f"Loading from '{chain}' chain")
+            logger.info(f"Loading from '{chain}' chain")
             data = cls.get_transactions_for_chain(
                 chain=chain,
                 address=address,
@@ -154,7 +153,7 @@ class AlchemyClient:
     def get_all_balance_data(cls) -> pandas.DataFrame:
         all_data = []
         for ens_name, address in EthereumMappings.wallet_addresses.items():
-            logging.info(f"Loading balances for '{ens_name}'")
+            logger.info(f"Loading balances for '{ens_name}'")
             balances = cls.get_balances(address=address)
             # flatten balances dict into a single dict
             balances_flat = {}
@@ -176,7 +175,7 @@ class AlchemyClient:
     def get_balances(cls, address: str) -> dict:
         balances = {}
         for chain in cls.chain_map:
-            logging.info(f"Loading from '{chain}' chain")
+            logger.info(f"Loading from '{chain}' chain")
             chain_balances = cls.get_balances_for_chain(address, chain)[
                 ["token_name", "token_amount"]
             ].to_dict(orient="records")
@@ -263,7 +262,7 @@ class AlchemyClient:
 
         # perform a recursive call if the results are over multiple pages
         if recursive and "pageKey" in data["result"]:
-            logging.info("API Results are paginated. Enumerating next.")
+            logger.info("API Results are paginated. Enumerating next.")
 
             full_results = cls.get_response(
                 method=method,

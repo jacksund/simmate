@@ -36,7 +36,7 @@ input_parameters:
 ```
 """
 
-import logging
+from simmate.utils import logger
 
 from ..core import Workflow
 from .s3 import S3Workflow
@@ -58,7 +58,7 @@ class Customized__Toolkit__UserConfig(Workflow):
         input_parameters: dict,
         **kwargs,
     ):
-        logging.warning(
+        logger.warning(
             "WARNING: customized workflows are meant only for quick testing. "
             "If you are using custom settings regularly, we highly recommend "
             "making a new workflow inside a Simmate project instead. "

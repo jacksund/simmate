@@ -1,7 +1,6 @@
-import logging
-
 import pytest
 
+from simmate.utils import logger
 from simmate.workflows.utils import get_all_workflow_names, get_workflow
 
 
@@ -159,7 +158,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
     missing_failed_flows = list(set(all_flows) - set(successful_flows))
     missing_failed_flows.sort()
 
-    logging.info(
+    logger.info(
         f"The following workflows either failed or were not tested: {missing_failed_flows}"
     )
     # assert missing_failed_flows == []

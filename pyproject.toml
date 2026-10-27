@@ -189,7 +189,6 @@ ignore = [
     "PLR2044",  # empty `#` lines are used to space out comment blocks
     "SIM114",  # if/elif branches with the same body often have their own comments
     # TODO: these need larger refactors. Remove one at a time as they're addressed.
-    "LOG015",  # use module loggers instead of the root logger
     "TRY002",  # raise custom exception classes instead of `Exception`
     "B006",  # mutable argument defaults
     "BLE001",  # catching broad `Exception`

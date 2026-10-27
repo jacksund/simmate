@@ -1,5 +1,3 @@
-import logging
-
 from numpy.random import choice
 
 from simmate.toolkit import Composition, Structure
@@ -8,6 +6,7 @@ from simmate.toolkit.creators.sites.random_wyckoff import RandomWySites
 from simmate.toolkit.creators.structure.base import StructureCreator
 from simmate.toolkit.creators.utils import NestedFixes
 from simmate.toolkit.validators.structure import SiteDistanceMatrix
+from simmate.utils import logger
 
 
 class RandomSymStructure(StructureCreator):
@@ -122,7 +121,7 @@ class RandomSymStructure(StructureCreator):
         if not spacegroup:
             # randomly select a spacegroup
             spacegroup = choice(self.spacegroup_options)
-        logging.info(f"Creating structure with spacegroup {spacegroup}")
+        logger.info(f"Creating structure with spacegroup {spacegroup}")
 
         # Use the lattice generator to make a starting lattice
         lattice = self.lattice_generator.new_lattice(spacegroup)
@@ -192,7 +191,7 @@ class RandomSymStructure(StructureCreator):
                     # if the generator returns None - then the spacegroup is
                     # incompatible with the composition
                     if not sites:
-                        logging.warning(
+                        logger.warning(
                             f"Failed to create a structure using spacegroup {spacegroup}."
                         )
                         return False
@@ -210,7 +209,7 @@ class RandomSymStructure(StructureCreator):
                     # if the generator returns None - then the spacegroup is
                     # incompatible with the composition
                     if not sites:
-                        logging.warning(
+                        logger.warning(
                             f"Failed to create a structure using spacegroup {spacegroup}."
                         )
                         return False
@@ -258,11 +257,11 @@ class RandomSymStructure(StructureCreator):
         # If the structure creation failed (structure = False), then see if the
         # failed spacegroup should be removed from future choices.
         if not structure:
-            logging.warning(
+            logger.warning(
                 f"Failed to create a structure using spacegroup {spacegroup}."
             )
             if self.remove_failed_spacegroups:
-                logging.info(
+                logger.info(
                     f"Removed spacegroup {spacegroup} from options. "
                     "This will not be selected moving forward."
                 )
@@ -271,7 +270,7 @@ class RandomSymStructure(StructureCreator):
                 # and remove the spacegroup from our list of options
                 self.creator.spacegroup_options.remove(spacegroup)
         else:
-            logging.info("Creation successful.")
+            logger.info("Creation successful.")
 
         # Cleanup does 'fix-up' steps before returning the final structure.
         # This includes converting from the conventional cell to primitive as

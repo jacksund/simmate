@@ -1,4 +1,3 @@
-import logging
 from contextlib import suppress
 from io import StringIO
 
@@ -8,6 +7,7 @@ from rich.progress import track
 
 from simmate.database.external_connectors.web_scrape import WebScraper
 from simmate.toolkit import Molecule
+from simmate.utils import logger
 
 from .data import BCPC_NEWS_ARCHIVE
 
@@ -69,14 +69,14 @@ class BcpcWebScraper(WebScraper):
                     all_data.append(entry_data)
 
             except Exception:
-                logging.warning(f"Failed to load {iso_name}")
+                logger.warning(f"Failed to load {iso_name}")
 
         return all_data
 
     @classmethod
     def get_all_name_links(cls, **kwargs) -> list[str]:
 
-        logging.info("Loading all common names from index...")
+        logger.info("Loading all common names from index...")
         index_url = "http://www.bcpcpesticidecompendium.org/index_cn.html"
         html_data = cls.get_html(index_url)
 
@@ -113,7 +113,7 @@ class BcpcWebScraper(WebScraper):
         links = list(set(links))
         links.sort()
 
-        logging.info(f"Done. Found {len(links)} names.")
+        logger.info(f"Done. Found {len(links)} names.")
         return links
 
     @classmethod
@@ -281,14 +281,14 @@ class BcpcWebScraper(WebScraper):
                 entry_data = cls.get_news_data(xml_name)
                 all_data += entry_data
             except Exception:
-                logging.warning(f"Failed to load {xml_name}")
+                logger.warning(f"Failed to load {xml_name}")
 
         return all_data
 
     @classmethod
     def get_all_news_links(cls) -> list[str]:
 
-        logging.info("Loading all news archives from index...")
+        logger.info("Loading all news archives from index...")
         index_url = "http://www.bcpcpesticidecompendium.org/news/index.html"
         html_data = cls.get_html(index_url)
 
@@ -305,7 +305,7 @@ class BcpcWebScraper(WebScraper):
         links = list(set(links))
         links.sort()
 
-        logging.info(f"Done. Found {len(links)} names.")
+        logger.info(f"Done. Found {len(links)} names.")
         return links
 
     @classmethod

@@ -1,6 +1,5 @@
 import datetime
 import importlib
-import logging
 import time
 from traceback import format_exc
 from typing import Literal
@@ -12,7 +11,7 @@ from rich import print
 from schedule import Scheduler
 
 from simmate.config import settings
-from simmate.utils import get_app_submodule
+from simmate.utils import get_app_submodule, logger
 
 from .executor import SimmateExecutor
 
@@ -79,7 +78,7 @@ class SimmateScheduler(Scheduler):
         cls._register_app_schedules()
 
         # And now run the infinite loop of schedules
-        logging.info("Starting schedules...")
+        logger.info("Starting schedules...")
         while True:  # Run indefinitely
             schedule.run_pending()
             # save some CPU time by sleeping for an extra second
@@ -92,7 +91,7 @@ class SimmateScheduler(Scheduler):
         By default, this will grab all installed 'settings.apps' as well as
         Simmate's built-in apps that have schedules
         """
-        logging.info("Searching for registrations...")
+        logger.info("Searching for registrations...")
         for app_name in apps_to_search + [
             "simmate.website.configs.DataExplorerConfig",
             "simmate.website.configs.ComputeManagementConfig",
@@ -104,8 +103,8 @@ class SimmateScheduler(Scheduler):
             # We use the python 'schedule' package, so simply importing these
             # modules is enough to register them.
             importlib.import_module(schedule_path)
-            logging.info(f"Registered schedules for '{schedule_path}'")
-        logging.info("Completed registrations :sparkles:")
+            logger.info(f"Registered schedules for '{schedule_path}'")
+        logger.info("Completed registrations :sparkles:")
 
     def _run_job(self, job):
         # This is a modified run method that catches failed jobs and optionally
@@ -116,7 +115,7 @@ class SimmateScheduler(Scheduler):
         except Exception:
             # log errors but still continue
             error_msg = format_exc()
-            logging.critical(error_msg)
+            logger.critical(error_msg)
             job.last_run = datetime.datetime.now()
             job._schedule_next_run()
 
@@ -161,7 +160,7 @@ def schedule(
     def decorator(func):
         # Determine how to submit the object
         def submit_to_worker():
-            logging.info(
+            logger.info(
                 f"Submitting scheduled task: {getattr(func, '__name__', str(func))}"
             )
             SimmateExecutor.submit(func, tags=tags, **job_kwargs)

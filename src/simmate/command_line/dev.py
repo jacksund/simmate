@@ -3,7 +3,6 @@ This defines commands for Simmate development tasks. All commands are
 accessible through the `simmate dev` command.
 """
 
-import logging
 import shutil
 import subprocess
 from pathlib import Path
@@ -11,6 +10,7 @@ from pathlib import Path
 import typer
 
 from simmate.command_line.utilities import AlphabeticalGroup
+from simmate.utils import logger
 
 from .k8s import k8s_app
 from .s3 import s3_app
@@ -33,13 +33,13 @@ def lint():
     """
     Runs ruff and djlint to format and lint the codebase.
     """
-    logging.info("Running ruff (linting)...")
+    logger.info("Running ruff (linting)...")
     subprocess.run("ruff check . --fix", shell=True, check=False)
 
-    logging.info("Running ruff (formatting)...")
+    logger.info("Running ruff (formatting)...")
     subprocess.run("ruff format .", shell=True, check=False)
 
-    logging.info("Running djlint...")
+    logger.info("Running djlint...")
     subprocess.run("djlint . --reformat", shell=True, check=False)
 
 
@@ -66,7 +66,7 @@ def test(
     if parallel:
         command += " -n auto"
 
-    logging.info(f"Running command: {command}")
+    logger.info(f"Running command: {command}")
     subprocess.run(command, shell=True, check=False)
 
 
@@ -75,7 +75,7 @@ def docs():
     """
     Starts a local development server for the documentation.
     """
-    logging.info("Starting zensical serve...")
+    logger.info("Starting zensical serve...")
     subprocess.run("zensical serve", shell=True, check=False)
 
 
@@ -97,7 +97,7 @@ def clean():
         "**/.ruff_cache",
     ]
 
-    logging.info("Removing artifacts and cache files...")
+    logger.info("Removing artifacts and cache files...")
     for pattern in patterns:
         for path in Path.cwd().glob(pattern):
             try:
@@ -106,10 +106,10 @@ def clean():
                 else:
                     path.unlink()
             except Exception as e:
-                logging.warning(f"Failed to remove {path}: {e}")
+                logger.warning(f"Failed to remove {path}: {e}")
 
     # 2. Remove empty directories
-    logging.info("Removing empty directories...")
+    logger.info("Removing empty directories...")
     # We walk bottom-up so that we can remove parent directories that become
     # empty after their children are removed.
     for path in sorted(Path.cwd().glob("**/"), reverse=True):
@@ -123,9 +123,9 @@ def clean():
             try:
                 path.rmdir()
             except Exception as e:
-                logging.warning(f"Failed to remove empty directory {path}: {e}")
+                logger.warning(f"Failed to remove empty directory {path}: {e}")
 
-    logging.info("Cleanup complete! :sparkles:")
+    logger.info("Cleanup complete! :sparkles:")
 
 
 @dev_app.command()
@@ -164,10 +164,10 @@ def load_test_data(
         ]
 
     for app_label in app_labels:
-        logging.info(f"Loading fake data for '{app_label}'...")
+        logger.info(f"Loading fake data for '{app_label}'...")
         load_fake_data(app_label)
 
-    logging.info("Done! :sparkles:")
+    logger.info("Done! :sparkles:")
 
 
 @dev_app.command()

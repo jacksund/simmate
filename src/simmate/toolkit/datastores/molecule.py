@@ -1,5 +1,3 @@
-import logging
-
 import numpy
 import polars
 
@@ -9,7 +7,7 @@ from simmate.toolkit.datastores.vector_indexes import (
     UsearchHnswIndex,
     VectorIndex,
 )
-from simmate.utils import filter_polars_df
+from simmate.utils import filter_polars_df, logger
 
 from ..dataframes import MoleculeDataFrame
 from ..featurizers import (
@@ -93,7 +91,7 @@ class MoleculeDatastore(Datastore):
         if limit and not similarity:
             lazy_df = lazy_df.limit(limit)
 
-        logging.info("Loading from datastore...")
+        logger.info("Loading from datastore...")
         df = lazy_df.collect()
         if similarity:
             df = df.join(sim_df, on="datastore_id", how="left").sort("distance")
@@ -124,7 +122,7 @@ class MoleculeDatastore(Datastore):
         )
         num_failed = len(is_valid) - sum(is_valid)
         if num_failed > 0:
-            logging.warning(f"Removed {num_failed} invalid molecules.")
+            logger.warning(f"Removed {num_failed} invalid molecules.")
         return df.filter(is_valid)
 
     default_properties: list[str] = [
@@ -387,7 +385,7 @@ class MoleculeDatastore(Datastore):
         # files stay consistent. chunk_key is kept for grouping below
         extra_columns = set(df.columns) - live_columns - {"chunk_key"}
         if extra_columns:
-            logging.warning(
+            logger.warning(
                 f"Dropping columns not in the live datastore: {extra_columns}"
             )
             df = df.drop(extra_columns)
@@ -436,7 +434,7 @@ class MoleculeDatastore(Datastore):
             )
             df_combined.write_parquet(file, compression=cls.compression_mode)
 
-        logging.info(f"Wrote {len(df):,} rows")
+        logger.info(f"Wrote {len(df):,} rows")
 
     @classmethod
     def _featurize_new_rows(

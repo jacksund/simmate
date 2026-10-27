@@ -1,5 +1,4 @@
 import itertools
-import logging
 from functools import cached_property
 from pathlib import Path
 from typing import Literal
@@ -12,6 +11,8 @@ from pymatgen.io.vasp import VolumetricData
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from scipy.interpolate import RegularGridInterpolator
 from scipy.ndimage import label, zoom
+
+from simmate.utils import logger
 
 
 class Grid(VolumetricData):
@@ -436,7 +437,7 @@ class Grid(VolumetricData):
         Returns:
             Grid from the specified file.
         """
-        logging.info(f"Loading {grid_file} from file")
+        logger.info(f"Loading {grid_file} from file")
         # Create string to add structure to.
         poscar, data, _ = cls.parse_file(grid_file)
 
@@ -470,7 +471,7 @@ class Grid(VolumetricData):
             cores (int):
                 The number of threads to use when running the Bader algorithm
         """
-        logging.info("Running Bader")
+        logger.info("Running Bader")
         bader = self.to_pybader()
         bader.load_config("speed")
         bader.threads = threads
@@ -596,7 +597,7 @@ class Grid(VolumetricData):
 
         """
         if not np.all(grid1.shape == grid2.shape):
-            logging.exception("Grids must have the same size.")
+            logger.exception("Grids must have the same size.")
         total1 = grid1.total
         diff1 = grid1.diff
 

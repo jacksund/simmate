@@ -3,12 +3,12 @@ This defines commands for managing local Kubernetes/Helm deployments. All comman
 accessible through the `simmate dev k8s` command.
 """
 
-import logging
 import subprocess
 
 import typer
 
 from simmate.command_line.utilities import AlphabeticalGroup
+from simmate.utils import logger
 
 k8s_app = typer.Typer(rich_markup_mode="markdown", cls=AlphabeticalGroup)
 
@@ -36,14 +36,14 @@ def deploy(
     k8s_values = settings.config_directory / "k8s-values.yaml"
 
     if template:
-        logging.info(f"Running helm template for release {release_name}...")
+        logger.info(f"Running helm template for release {release_name}...")
         subprocess.run(
             f"helm template {release_name} envs/helm --debug -f {k8s_values}",
             shell=True,
             check=False,
         )
     else:
-        logging.info(f"Running helm upgrade --install for release {release_name}...")
+        logger.info(f"Running helm upgrade --install for release {release_name}...")
         subprocess.run(
             f"helm upgrade --install {release_name} envs/helm -f {k8s_values}",
             shell=True,
@@ -56,7 +56,7 @@ def exec():
     """
     Lists all Simmate pods and prompts the user to select one to enter.
     """
-    logging.info("Finding simmate pods...")
+    logger.info("Finding simmate pods...")
     try:
         output = (
             subprocess.check_output(
@@ -67,14 +67,14 @@ def exec():
             .strip()
         )
     except subprocess.CalledProcessError:
-        logging.error("Could not run kubectl command.")
+        logger.error("Could not run kubectl command.")
         raise typer.Exit(1)
 
     pods = [p for p in output.split() if "simmate" in p]
     pods.sort()
 
     if not pods:
-        logging.error("Could not find any simmate pods.")
+        logger.error("Could not find any simmate pods.")
         raise typer.Exit(1)
 
     for i, pod in enumerate(pods):
@@ -83,11 +83,11 @@ def exec():
     choice = typer.prompt("Enter the index of the pod to enter", type=int)
 
     if choice < 0 or choice >= len(pods):
-        logging.error("Invalid choice.")
+        logger.error("Invalid choice.")
         raise typer.Exit(1)
 
     pod = pods[choice]
-    logging.info(f"Opening bash in pod: {pod}")
+    logger.info(f"Opening bash in pod: {pod}")
     subprocess.run(f"kubectl exec -it {pod} -- /bin/bash", shell=True, check=False)
 
 
@@ -99,7 +99,7 @@ def scale(
     """
     Scales a Simmate deployment to the specified number of replicas.
     """
-    logging.info(f"Scaling {service} to {replicas} replicas...")
+    logger.info(f"Scaling {service} to {replicas} replicas...")
     subprocess.run(
         f"kubectl scale deployment simmate-{service}-deployment --replicas={replicas}",
         shell=True,
@@ -118,11 +118,11 @@ def _get_gunicorn_pod() -> str:
             .strip()
         )
     except subprocess.CalledProcessError:
-        logging.error("Could not run kubectl command.")
+        logger.error("Could not run kubectl command.")
         raise typer.Exit(1)
 
     if not pod:
-        logging.error("Could not find a gunicorn pod.")
+        logger.error("Could not find a gunicorn pod.")
         raise typer.Exit(1)
 
     return pod
@@ -133,10 +133,10 @@ def update_static():
     """
     Copies static files from the gunicorn pod to the shared /staticfiles volume.
     """
-    logging.info("Finding gunicorn pod...")
+    logger.info("Finding gunicorn pod...")
     pod = _get_gunicorn_pod()
 
-    logging.info("Copying static files to /staticfiles volume...")
+    logger.info("Copying static files to /staticfiles volume...")
     subprocess.run(
         f"kubectl exec -it {pod} -- sh -c 'cp -r /root/simmate/src/simmate/website/static/* /staticfiles/'",
         shell=True,
@@ -149,10 +149,10 @@ def update_db():
     """
     Runs `simmate database update` inside the gunicorn pod.
     """
-    logging.info("Finding gunicorn pod...")
+    logger.info("Finding gunicorn pod...")
     pod = _get_gunicorn_pod()
 
-    logging.info("Running `simmate database update`...")
+    logger.info("Running `simmate database update`...")
     subprocess.run(
         f"kubectl exec -it {pod} -- simmate database update", shell=True, check=False
     )

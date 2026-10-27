@@ -1,8 +1,8 @@
-import logging
 import shutil
 from pathlib import Path
 
 from simmate.apps.evolution.models.fixed_composition import FixedCompositionSearch
+from simmate.utils import logger
 from simmate.workflows import Workflow
 
 
@@ -43,7 +43,7 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
         # is even needed. This will catch when a search ends while a new
         # individual was waiting in the queue
         if search_db.check_stop_condition():
-            logging.info(
+            logger.info(
                 "The search ended while this individual was in the queue. "
                 "Canceling new individual."
             )
@@ -79,7 +79,7 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
                 # TODO: consider more advanced logic for changing the steady
                 # state values of each source -- rather than just disabling
                 # them here.
-                logging.warning(
+                logger.warning(
                     "Failed to create new individual with steady-state "
                     f"source {source_db.name}. Removing steady-state."
                 )
@@ -134,7 +134,7 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
         #     # if it fails the check, we want to stop the series of calculations
         #     # and just exit the workflow run. We can, however, update the
         #     # database entry with the final structure.
-        #     logging.info(
+        #     logger.info(
         #         "Did not pass validation checkpoint. Stopping workflow series."
         #     )
         #     return {"structure": current_structure}
