@@ -8,10 +8,11 @@ To generate a new release:
 
 2. Update the changelog with the new release and its release date.
 
-3. Confirm all tests pass using the pre-built database. If they don't, generate a new one using the commands below, rename your db file (e.g., `prebuild-2022-07-05.sqlite3`), compress the db file into a zip file, upload it to the Simmate CDN, and modify the `archive_filename` in `simmate.database.utilites.load_default_sqlite3_build`.
+3. Confirm all tests pass using the pre-built database. If they don't, generate a new one using the commands below (`prebuild` saves a date-stamped zip, e.g. `prebuild-2022-07-05.zip`, to `~/simmate/sqlite-prebuilds/`), upload it to the Simmate CDN, and modify the `archive_filename` in `simmate.database.utils.load_default_sqlite3_build`.
 ``` bash
 simmate database reset --confirm-delete --no-use-prebuilt
-simmate database load-remote-archives
+simmate database load <app_name>   # repeat for each app
+simmate database prebuild
 ```
 
 4. Generate a [release](https://github.com/jacksund/simmate/releases/new) on Github, which will automatically release to pypi.

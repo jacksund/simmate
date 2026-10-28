@@ -41,7 +41,7 @@ simmate database update
 
 4. Download all JARVIS datasets:
 ``` shell
-simmate database download jarvis
+simmate database load jarvis
 ```
 
 --------------------------------------------------------------------------------

@@ -43,7 +43,7 @@ simmate database update
 
 4. Download all BCPC datasets:
 ``` shell
-simmate database download bcpc
+simmate database load bcpc
 ```
 
 --------------------------------------------------------------------------------

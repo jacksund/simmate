@@ -1,6 +1,6 @@
 """
 Generates `fake_data.zip`, which holds fake workers and work items for tests
-and for exploring the compute dashboard (see `simmate dev load-test-data`).
+and for exploring the compute dashboard (see `simmate database load-test-data`).
 
 Rerun this script whenever the compute models change. The output is
 deterministic (fixed random seed), so the zip only changes when this script

@@ -66,7 +66,7 @@ simmate config test materials_project
 
 1. Download all Materials Project datasets:
 ``` shell
-simmate database download materials_project
+simmate database load materials_project
 ```
 
 --------------------------------------------------------------------------------

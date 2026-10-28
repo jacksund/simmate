@@ -350,7 +350,7 @@ def snapshot_database():
     template is replaced.
 
     This is useful in local development to avoid reloading large datasets
-    (e.g. `simmate database download pdb`) after every reset.
+    (e.g. `simmate database load pdb`) after every reset.
 
     NOTE: Postgres requires that nothing else is connected to the database
     while it is being copied (e.g. a running website or python shell).

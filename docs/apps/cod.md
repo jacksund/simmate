@@ -44,7 +44,7 @@ simmate database update
 
 4. Download all COD datasets:
 ``` shell
-simmate database download cod
+simmate database load cod
 ```
 
 --------------------------------------------------------------------------------

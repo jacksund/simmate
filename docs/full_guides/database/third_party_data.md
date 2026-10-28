@@ -23,7 +23,7 @@ Downloading thousands (or millions) of entries through a REST API is often slow 
 ### From the Command Line
 To download the archive for a specific app (e.g., Materials Project):
 ```shell
-simmate database download materials_project
+simmate database load materials_project
 ```
 
 ### In Python

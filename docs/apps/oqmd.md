@@ -40,7 +40,7 @@ simmate database update
 
 4. Download all OQMD datasets:
 ``` shell
-simmate database download oqmd
+simmate database load oqmd
 ```
 
 --------------------------------------------------------------------------------

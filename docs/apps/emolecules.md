@@ -45,7 +45,7 @@ simmate database update
 
 4. Download all eMolecules datasets:
 ``` shell
-simmate database download emolecules
+simmate database load emolecules
 ```
 
 --------------------------------------------------------------------------------

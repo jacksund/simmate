@@ -51,7 +51,7 @@ simmate database update
 
 4. Download all CAS datasets:
 ``` shell
-simmate database download cas_registry
+simmate database load cas_registry
 ```
 
 --------------------------------------------------------------------------------

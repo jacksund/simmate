@@ -42,7 +42,7 @@ simmate database update
 
 4. Download all AFLOW datasets:
 ``` shell
-simmate database download aflow
+simmate database load aflow
 ```
 
 --------------------------------------------------------------------------------
