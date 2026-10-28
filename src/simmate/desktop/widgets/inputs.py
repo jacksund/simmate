@@ -3,7 +3,12 @@ from pathlib import Path
 
 from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPixmap
-from PySide6.QtWidgets import QCheckBox, QComboBox, QStyledItemDelegate
+from PySide6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QRadioButton,
+    QStyledItemDelegate,
+)
 
 from simmate.desktop import theme
 from simmate.desktop.theme import rgba
@@ -99,11 +104,33 @@ QCheckBox::indicator:checked {{
     border-color: {theme.PRIMARY_COLOR};
     image: url("{check}");
 }}
+QRadioButton {{ spacing: 8px; }}
+QRadioButton::indicator {{
+    width: 16px; height: 16px;
+    background: palette(base);
+    border: 1px solid palette(mid);
+    border-radius: 9px;
+}}
+QRadioButton::indicator:hover {{ border-color: {theme.PRIMARY_COLOR}; }}
+/* a thick ring around a dot of the background, the same size overall */
+QRadioButton::indicator:checked {{
+    width: 8px; height: 8px;
+    border: 5px solid {theme.PRIMARY_COLOR};
+}}
+QRadioButton::indicator:disabled {{ background: palette(window); }}
 """
 
 
 class StyledCheckBox(QCheckBox):
     """A check box that shows a pointing hand on hover, like the buttons."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+
+class StyledRadioButton(QRadioButton):
+    """A radio button that shows a pointing hand on hover, like the buttons."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

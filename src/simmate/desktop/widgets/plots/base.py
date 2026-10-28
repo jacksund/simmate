@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
 from simmate.desktop import theme
 from simmate.desktop.widgets.inputs import StyledCheckBox, StyledComboBox, input_style
 from simmate.desktop.widgets.plot_toolbar import ResetViewButton, SettingsButton
-from simmate.desktop.widgets.plots.columns import DATE, NUMBER, DataColumns
+from simmate.desktop.widgets.plots.columns import DATE, DataColumns
 
 NONE = "None"  # the choice for an optional column left unset
 OPACITIES = ["100%", "80%", "60%", "40%", "20%"]
@@ -34,7 +34,6 @@ class PlotPanel(QWidget):
       clicked on, if it was a single row (else None).
     - `background_clicked()`: a plain click on empty plot space.
     - `view_changed()`: the plot was zoomed or panned.
-    - `status(text)`: a message for the status bar.
 
     A subclass declares its settings in `__init__` with the `*_setting` methods
     (each named, so `config`/`apply_config` can read and set them all as a dict),
@@ -52,7 +51,6 @@ class PlotPanel(QWidget):
     rows_clicked = Signal(object, object, object)
     background_clicked = Signal()
     view_changed = Signal()
-    status = Signal(str)
 
     def __init__(
         self,
@@ -62,7 +60,6 @@ class PlotPanel(QWidget):
         super().__init__()
         # Pass the dataset's `DataColumns` to share its profile and cached values.
         self.columns = df if isinstance(df, DataColumns) else DataColumns(df)
-        self.df = self.columns.df
         # how a row's compound is drawn, e.g. for a card on hover
         self.svg_of = svg_of
         # By row index: which rows pass the filters.
@@ -71,9 +68,15 @@ class PlotPanel(QWidget):
         self.settings: dict[str, QWidget] = {}
         self._setting_rows: list = []  # (label, input) pairs, or an input alone
         self._required_columns: list[tuple[str, str]] = []  # (name, label)
-        self._column_settings: set[str] = set()  # whose "None" means no column
+        # name -> (kinds, optional) of each column setting (whose "None" means no column)
+        self._column_settings: dict[str, tuple[tuple[str, ...], bool]] = {}
         self.plot: pg.PlotWidget | None = None
         self.view_box: pg.ViewBox | None = None
+
+    @property
+    def df(self) -> polars.DataFrame:
+        # read through `columns`, which swaps in a new frame as columns are added
+        return self.columns.df
 
     # --- settings -------------------------------------------------------------------------
 
@@ -96,10 +99,26 @@ class PlotPanel(QWidget):
             combo.setCurrentText(default)
         elif not optional and options:
             combo.setCurrentIndex(min(fallback, len(options) - 1))
-        self._column_settings.add(name)
+        self._column_settings[name] = (kinds, optional)
         if not optional:
             self._required_columns.append((name, label))
         return self._add_setting(name, label, combo, on_change)
+
+    def refresh_columns(self):
+        """Offer columns added to the dataset since the plot was made (see
+        `DataColumns.add_columns`), keeping each current choice, then redraw (which
+        also picks up new values of replaced columns)."""
+        for name, (kinds, optional) in self._column_settings.items():
+            combo = self.settings[name]
+            current = combo.currentText()
+            options = self.columns.of_kind(*kinds)
+            combo.blockSignals(True)
+            combo.clear()
+            combo.addItems([NONE] + options if optional else options)
+            if combo.findText(current) >= 0:
+                combo.setCurrentText(current)
+            combo.blockSignals(False)
+        self.draw()
 
     def choice_setting(
         self,
@@ -279,18 +298,6 @@ class PlotPanel(QWidget):
             plot_item.setLogMode(x=log)
         else:
             plot_item.setLogMode(y=log)
-
-    def describe_row(self, row: int, keys: list[str]) -> str:
-        """`row` for the status bar: its label (e.g. ID) and its values of `keys`."""
-        values = []
-        for key in dict.fromkeys(k for k in keys if k):
-            if self.columns.kinds.get(key) in (NUMBER, DATE):
-                values.append(
-                    f"{key} {self.columns.format(key, self.columns.numbers(key)[row])}"
-                )
-            else:
-                values.append(f"{key} {self.df[key][row]}")
-        return f"{self.columns.label(row)}: " + ", ".join(values)
 
     # --- what the dashboard calls ----------------------------------------------------------
 

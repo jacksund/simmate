@@ -70,3 +70,46 @@ def build(
         output_dir=output_dir,
         console=console,
     )
+
+
+@desktop_app.command()
+def upload(
+    output_dir: Path = typer.Option(
+        Path.cwd() / "dist",
+        "--output-dir",
+        help="Directory holding the executable from `simmate desktop build`.",
+        resolve_path=True,
+    ),
+    name: str = typer.Option(
+        "simmate-desktop",
+        "--name",
+        help="Name of the executable.",
+    ),
+):
+    """
+    Uploads the executable from `simmate desktop build` to the configured S3
+    bucket (`settings.s3`), at `desktop/<name>-<version>-<os>` (plus `.exe` on
+    Windows), where `<version>` is the installed Simmate version.
+
+    Re-uploading the same version replaces that version's file. Run it on the
+    OS the executable was built on, since that OS goes into the file name.
+    """
+    import platform
+
+    import simmate
+    from simmate.database.external_connectors.s3 import SimmateS3Bucket
+    from simmate.desktop.build import get_release_filename
+    from simmate.utils import logger
+
+    # PyInstaller only adds an extension on Windows
+    suffix = ".exe" if platform.system() == "Windows" else ""
+    executable = output_dir / f"{name}{suffix}"
+    if not executable.exists():
+        raise typer.BadParameter(
+            f"No executable at {executable}. Run `simmate desktop build` first."
+        )
+
+    s3_key = f"desktop/{get_release_filename(simmate.__version__, name)}"
+    logger.info(f"Uploading {executable} to S3...")
+    SimmateS3Bucket.upload_file(executable, s3_key)
+    logger.info(f"Uploaded to s3://{SimmateS3Bucket.bucket}/{s3_key}")

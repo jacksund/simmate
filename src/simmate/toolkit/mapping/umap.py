@@ -4,11 +4,6 @@ import numpy
 
 from simmate.toolkit.mapping.base import ChemSpaceMapper
 
-# BUG: Importing umap prints various deprec warnings, so we catch
-# and silence those here.
-with warnings.catch_warnings(record=True):
-    import umap
-
 
 class Umap(ChemSpaceMapper):
     @classmethod
@@ -21,6 +16,13 @@ class Umap(ChemSpaceMapper):
         low_memory: bool = False,
         **kwargs,
     ):
+        # Imported here as it's slow (~5s, as numba compiles it), so importing
+        # this module stays fast.
+        # BUG: Importing umap prints various deprec warnings, so we catch
+        # and silence those here.
+        with warnings.catch_warnings(record=True):
+            import umap
+
         mapper = umap.UMAP(
             n_components=n_outputs,  # 2 would mean we want an XY plot
             metric="jaccard",  # aka Tanimoto

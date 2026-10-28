@@ -74,19 +74,14 @@ class CompoundDetails(QWidget):
         self.structure_tabs.tabBar().setCursor(Qt.CursorShape.PointingHandCursor)
 
         self.value_labels: dict[str, QLabel] = {}
-        form = QFormLayout()
-        for key in dataset.columns.shown:
-            label = QLabel("-")
-            label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-            label.setWordWrap(True)  # e.g. long SMILES or names
-            self.value_labels[key] = label
-            form.addRow(f"{key}:", label)
+        self.form = QFormLayout()
+        self._add_value_rows(dataset.columns.shown)
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.title_label)
         layout.addWidget(self.structure_tabs, stretch=1)
         self.structure_tabs.setVisible(dataset.has_molecules)
-        layout.addLayout(form)
+        layout.addLayout(self.form)
         if not dataset.has_molecules:
             layout.addStretch()
         # the first category column (e.g. a series) is named in the title
@@ -94,6 +89,21 @@ class CompoundDetails(QWidget):
         self.title_category = categories[0] if categories else None
 
         self._render(None)
+
+    def add_columns(self, added: list[str]):
+        """Show columns just added to the dataset, below the others."""
+        shown = set(self.dataset.columns.shown)
+        self._add_value_rows([key for key in added if key in shown])
+        if not self.showing_many:
+            self._render(self.current)  # also shows new values of replaced columns
+
+    def _add_value_rows(self, keys: list[str]):
+        for key in keys:
+            label = QLabel("-")
+            label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+            label.setWordWrap(True)  # e.g. long SMILES or names
+            self.value_labels[key] = label
+            self.form.addRow(f"{key}:", label)
 
     def set_query(self, query: Molecule | None):
         self.query = query

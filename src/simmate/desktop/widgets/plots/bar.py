@@ -101,7 +101,6 @@ class BarPanel(PlotPanel):
         label = "Count" if aggregate == "Count" else f"{aggregate} of {of}"
         if self.bars.percent:
             label = f"Percent ({label.lower()})"
-        self.height_label = label
         self.bars.setLabel("left", label)
         self.bars.set_selected(self.selected_rows)
         self._redraw()
@@ -130,9 +129,3 @@ class BarPanel(PlotPanel):
         rows = set(self.bars.rows_in_bin(bar))
         if self.value("bar_hover"):
             self.rows_hovered.emit(rows)
-        text = f"{self.value('category')} {self.labels[bar]}: {len(rows)} compound(s)"
-        if self.value("aggregate") != "Count" or self.bars.percent:
-            text += (
-                f", {self.height_label.lower()} {self.bars.passing_heights[bar]:.4g}"
-            )
-        self.status.emit(text)

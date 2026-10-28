@@ -6,7 +6,8 @@ with `simmate desktop build`. Requires the `desktop` extra dependencies.
 
 Apps built on Simmate can make their own version of it without forking: rebrand
 it with `simmate.desktop.theme.configure`, subclass `MainWindow` (e.g. to override
-`get_tabs`), launch it with `main(window_class=...)`, and package it with
+`get_tabs`, and to set `check_for_updates = False` so it doesn't offer Simmate
+Desktop's builds), launch it with `main(window_class=...)`, and package it with
 `simmate.desktop.build.build_executable`.
 """
 
@@ -19,8 +20,15 @@ def main(window_class: type | None = None) -> None:
 
     `window_class` is the main window to show, which defaults to `MainWindow`.
     """
+    import multiprocessing
+
+    # Parallel work (e.g. the Featurize panel's) runs in a pool of processes. In a
+    # PyInstaller build, each one starts by re-running the executable, so this
+    # turns those into workers rather than more copies of the app. A no-op otherwise.
+    multiprocessing.freeze_support()
+
     import pyqtgraph as pg
-    from PySide6.QtCore import QCoreApplication, Qt
+    from PySide6.QtCore import QCoreApplication, QLoggingCategory, Qt
     from PySide6.QtQuick import QQuickWindow, QSGRendererInterface
     from PySide6.QtWidgets import QApplication
 
@@ -31,6 +39,10 @@ def main(window_class: type | None = None) -> None:
     # app is created; Qt WebEngine also needs shared contexts to run on OpenGL.
     QQuickWindow.setGraphicsApi(QSGRendererInterface.GraphicsApi.OpenGL)
     QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
+
+    # On Wayland, Qt logs "Trying to disable ... but 0x0 is focused" as focus
+    # moves between widgets. It's a harmless Qt bug, so hide that log category.
+    QLoggingCategory.setFilterRules("qt.qpa.wayland.textinput=false")
 
     app = QApplication(sys.argv)
     # Always use light mode: Ketcher and the molecule images have white

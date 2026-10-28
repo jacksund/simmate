@@ -14,7 +14,13 @@ from simmate.desktop import theme
 from simmate.desktop.theme import rgba
 from simmate.desktop.widgets.button import PrimaryButton
 from simmate.desktop.widgets.compound_table import scroll_bar_style
-from simmate.desktop.widgets.status import heading_label
+from simmate.desktop.widgets.plot_toolbar import SettingsButton, reset_icon
+from simmate.desktop.widgets.status import callout_style, heading_label
+from simmate.desktop.widgets.worker_settings import (
+    REQUIRED_SETTINGS,
+    WorkerSettings,
+    get_missing_settings,
+)
 
 GREETING = (
     "What data are you looking for? Describe what you want, and I'll ask "
@@ -37,7 +43,7 @@ QScrollArea, #history {{ background: transparent; border: none; }}
 """
 
 
-def _bubble_style(color: str, text_color: str = "palette(text)") -> str:
+def bubble_style(color: str, text_color: str = "palette(text)") -> str:
     return f"""
 QLabel {{
     color: {text_color}; background: {rgba(color, theme.HOVER_ALPHA)};
@@ -46,7 +52,7 @@ QLabel {{
 """
 
 
-class _Bubble(QLabel):
+class ChatBubble(QLabel):
     """
     One chat message: as wide as its text (up to `MAX_WIDTH`), then wrapped. It can
     still shrink further, so a long message never holds the window wide.
@@ -71,7 +77,7 @@ class _Bubble(QLabel):
         )
 
 
-class _MessageInput(QPlainTextEdit):
+class MessageInput(QPlainTextEdit):
     """A multi-line text box where Enter sends (and Shift+Enter starts a new line)."""
 
     def __init__(self, on_send):
@@ -86,10 +92,63 @@ class _MessageInput(QPlainTextEdit):
         super().keyPressEvent(event)
 
 
+class ChatHeader(QWidget):
+    """
+    A chat's title row: `title`, then a "Reset chat" button (connect to its
+    `reset_button`) and a gear for the Simmate server settings that the chatbot
+    needs (the same form as the Workers tab's).
+
+    While any of those settings are missing, the gear is red and a callout below the
+    row says so. It checks again each time it's shown and after saving, as they can
+    also be edited elsewhere in the app.
+    """
+
+    def __init__(self, title: QLabel):
+        super().__init__()
+        self.reset_button = PrimaryButton("Reset chat", muted=True)
+        self.reset_button.setIcon(reset_icon())
+        self.reset_button.setToolTip("Clear this chat and start over")
+        server_settings = WorkerSettings()
+        server_settings.saved.connect(self._check_settings)
+        self.settings_button = SettingsButton(
+            server_settings, tooltip="Simmate server settings"
+        )
+        self.settings_alert = QLabel(wordWrap=True)
+        self.settings_alert.setStyleSheet(callout_style(theme.ERROR_COLOR))
+
+        title_row = QHBoxLayout()
+        title_row.setSpacing(2)  # the two buttons sit close together
+        title_row.addWidget(title)
+        title_row.addStretch()
+        title_row.addWidget(self.reset_button)
+        title_row.addWidget(self.settings_button)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(12)
+        layout.addLayout(title_row)
+        layout.addWidget(self.settings_alert)
+
+    def _check_settings(self):
+        """Show whether the server settings are missing, in the callout and gear."""
+        missing = get_missing_settings()
+        names = ", ".join(REQUIRED_SETTINGS[key] for key in missing)
+        self.settings_alert.setText(
+            f"The chatbot needs your Simmate account. Set the missing settings "
+            f"({names}) with the gear button above."
+        )
+        self.settings_alert.setVisible(bool(missing))
+        self.settings_button.set_alert(bool(missing))
+
+    def showEvent(self, event):
+        self._check_settings()
+        super().showEvent(event)
+
+
 class DatasetChat(QWidget):
     """
     A chat for describing the data you want: an assistant asks follow-up questions,
-    then fetches it from the Simmate API into your datasets.
+    then fetches it from the Simmate API into your datasets. Its header (see
+    `ChatHeader`) resets the chat and edits the server settings it needs.
 
     Only the UI exists so far. Replies say the assistant isn't connected yet.
     """
@@ -112,7 +171,7 @@ class DatasetChat(QWidget):
         )
 
         # the message box: a text area with the Send button inside its border
-        self.input = _MessageInput(self.send)
+        self.input = MessageInput(self.send)
         self.input.setPlaceholderText("Describe the data you want…")
         self.input.setFixedHeight(56)
         send_button = PrimaryButton("Send", filled=True)
@@ -133,30 +192,41 @@ class DatasetChat(QWidget):
         composer_row.addWidget(composer)
         chat_layout.addLayout(composer_row)
 
+        self.header = ChatHeader(heading_label("Ask AI"))
+        self.header.reset_button.clicked.connect(self.reset_chat)
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(heading_label("Ask AI"))
+        layout.addWidget(self.header)
         layout.addWidget(chat, stretch=1)
 
+        self.reset_chat()
+
+    def reset_chat(self):
+        """Clear the conversation, back to the greeting."""
+        while self.messages.count() > 1:  # every message, then the stretch
+            self.messages.takeAt(0).widget().deleteLater()
         self.add_message(GREETING, from_user=False)
 
     def add_message(self, text: str, from_user: bool, error: bool = False):
         """Adds a chat bubble: the user's on the right, the assistant's on the left."""
-        bubble = _Bubble(text)
+        bubble = ChatBubble(text)
         if from_user:
-            style = _bubble_style(theme.PRIMARY_COLOR)
+            style = bubble_style(theme.PRIMARY_COLOR)
         elif error:
-            style = _bubble_style(theme.ERROR_COLOR, theme.ERROR_COLOR)
+            style = bubble_style(theme.ERROR_COLOR, theme.ERROR_COLOR)
         else:
-            style = _bubble_style(theme.MUTED_COLOR)
+            style = bubble_style(theme.MUTED_COLOR)
         bubble.setStyleSheet(style)
-        row = QHBoxLayout()
+        message = QWidget()
+        row = QHBoxLayout(message)
+        row.setContentsMargins(0, 0, 0, 0)
         if from_user:
             row.addStretch()
         row.addWidget(bubble)
         if not from_user:
             row.addStretch()
-        self.messages.insertLayout(self.messages.count() - 1, row)
+        self.messages.insertWidget(self.messages.count() - 1, message)
         # scroll to it, once the layout has made room for it
         QTimer.singleShot(0, self._scroll_to_bottom)
 

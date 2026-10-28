@@ -200,6 +200,27 @@ class CompoundTableModel(QAbstractTableModel):
     def column(self, key: str) -> int:
         return self.keys.index(key)
 
+    def add_columns(self, added: list[str], replaced: list[str]):
+        """Show columns just added to the dataset (after the others), and the new
+        values of replaced ones."""
+        self.numeric = set(self.dataset.columns.of_kind(NUMBER))
+        shown = set(self.dataset.columns.shown)
+        new_keys = [key for key in added if key in shown]
+        if new_keys:
+            first = len(self.keys)
+            self.beginInsertColumns(QModelIndex(), first, first + len(new_keys) - 1)
+            self.keys.extend(new_keys)
+            self.n_columns = len(self.keys)
+            self.endInsertColumns()
+        for key in replaced:
+            if key not in self.keys:
+                continue
+            self._columns.pop(key, None)  # re-read on the next paint
+            column = self.column(key)
+            self.dataChanged.emit(
+                self.index(0, column), self.index(self.n_rows - 1, column)
+            )
+
     def index_of(self, row: int, column: int = 0) -> QModelIndex:
         """The model index of dataset row `row` (wherever sorting has put it)."""
         return self.index(self.position[row], column)
@@ -562,16 +583,11 @@ class CompoundTable(QTableView):
         # Sizing to fit measures only the rows near the top, so large datasets
         # open quickly.
         header.setResizeContentsPrecision(RESIZE_PRECISION)
-        for key in model.dataset.columns.hidden_by_default:
-            self.setColumnHidden(model.column(key), True)
-        # Size text columns to fit. Skip the image column (measuring it would render
-        # every image) and hidden ones (measuring them is wasted work).
-        for column in range(model.columnCount()):
-            if column != model.structure_column and not self.isColumnHidden(column):
-                self.resizeColumnToContents(column)
-                # still room for others when the values are long (e.g. names)
-                if self.columnWidth(column) > MAX_COLUMN_WIDTH:
-                    self.setColumnWidth(column, MAX_COLUMN_WIDTH)
+        self._set_up_columns(0, model.columnCount() - 1)
+        # and likewise for columns added later (e.g. by the Featurize panel)
+        model.columnsInserted.connect(
+            lambda _, first, last: self._set_up_columns(first, last)
+        )
         if has_images:
             self.setColumnWidth(
                 model.structure_column, THUMBNAIL_SIZE.width() + THUMBNAIL_PADDING
@@ -579,6 +595,22 @@ class CompoundTable(QTableView):
         # the images (and so the rows) grow and shrink with the column's width
         header.sectionResized.connect(self._on_section_resized)
         self.setMouseTracking(True)  # needed for the `entered` (hover) signal
+
+    def _set_up_columns(self, first: int, last: int):
+        """Hide model columns `first` to `last` that start hidden, and size the
+        rest to fit."""
+        model = self.model().sourceModel()
+        hidden = model.dataset.columns.hidden_by_default
+        for column in range(first, last + 1):
+            if model.keys[column] in hidden:
+                self.setColumnHidden(column, True)
+            # Skip the image column (measuring it would render every image) and
+            # hidden ones (measuring them is wasted work).
+            elif column != model.structure_column:
+                self.resizeColumnToContents(column)
+                # still room for others when the values are long (e.g. names)
+                if self.columnWidth(column) > MAX_COLUMN_WIDTH:
+                    self.setColumnWidth(column, MAX_COLUMN_WIDTH)
 
     def _on_section_resized(self, column: int, _old_width: int, new_width: int):
         model = self.model().sourceModel()
@@ -619,14 +651,11 @@ class ColumnChooser(QWidget):
         self.table = table
         model = table.model().sourceModel()
         # Columns hidden at startup were never sized; size them when first shown.
-        self.unsized = {
-            i
-            for i in range(model.columnCount())
-            if i != model.structure_column and table.isColumnHidden(i)
-        }
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 12, 12, 12)
-        layout.setSpacing(10)
+        self.unsized: set[int] = set()
+        # not `self.layout`, which would hide QWidget.layout()
+        self.list_layout = QVBoxLayout(self)
+        self.list_layout.setContentsMargins(12, 12, 12, 12)
+        self.list_layout.setSpacing(10)
 
         select_all = PrimaryButton("Select all", muted=True)
         select_all.clicked.connect(lambda: self._set_all(True))
@@ -636,18 +665,31 @@ class ColumnChooser(QWidget):
         buttons.setSpacing(6)
         buttons.addWidget(select_all)
         buttons.addWidget(deselect_all)
-        layout.addLayout(buttons)
+        self.list_layout.addLayout(buttons)
 
         self.checkboxes: list[StyledCheckBox] = []
-        for column in range(model.columnCount()):
+        self._add_checkboxes(0, model.columnCount() - 1)
+        # Columns added later (e.g. by the Featurize panel) come after the rest.
+        # Connected after the table's own handler, so they're already set up.
+        model.columnsInserted.connect(
+            lambda _, first, last: self._add_checkboxes(first, last)
+        )
+
+    def _add_checkboxes(self, first: int, last: int):
+        """A checkbox for each of model columns `first` to `last`."""
+        model = self.table.model().sourceModel()
+        for column in range(first, last + 1):
+            hidden = self.table.isColumnHidden(column)
+            if hidden and column != model.structure_column:
+                self.unsized.add(column)
             checkbox = StyledCheckBox(
                 model.headerData(column, Qt.Orientation.Horizontal)
             )
-            checkbox.setChecked(not table.isColumnHidden(column))
+            checkbox.setChecked(not hidden)
             checkbox.toggled.connect(
                 lambda on, column=column: self._set_shown(column, on)
             )
-            layout.addWidget(checkbox)
+            self.list_layout.addWidget(checkbox)
             self.checkboxes.append(checkbox)
         self._update_enabled()
 

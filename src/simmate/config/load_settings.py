@@ -182,12 +182,11 @@ class SimmateSettings:
                 "host": "http://127.0.0.1:8000",
                 "api_key": None,
             },
-            # Containerized API workers launched by the desktop app
+            # The Simmate server the desktop app connects to (for its API workers
+            # and chatbot)
             "desktop": {
                 "api_host": "https://simmate.org",
                 "api_key": None,
-                # also run other users' jobs, rather than only your own
-                "contribute": True,
             },
             "website": {
                 # Sometimes we lock down the website to registered/approved users.

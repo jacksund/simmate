@@ -1,5 +1,3 @@
-import numpy
-
 from simmate.toolkit import Molecule
 
 from .base import Featurizer
@@ -41,7 +39,8 @@ class MethodCaller(Featurizer):
         molecule: Molecule,
         method_map: dict,  # e.g. {"to_inchi_key": {}, "get_fingerprint": {"fingerprint_type": "topological"}}
         **kwargs,
-    ) -> numpy.array:
+    ) -> list:
+        # a plain list, so values of mixed types keep their own types
         values = []
         for method_name, method_kwargs in method_map.items():
             if not isinstance(method_name, str):  # assume callable
@@ -53,4 +52,4 @@ class MethodCaller(Featurizer):
                 result = getattr(obj, name)()
                 obj = obj if result is None else result
             values.append(getattr(obj, final_name)(**method_kwargs))
-        return numpy.array(values)
+        return values

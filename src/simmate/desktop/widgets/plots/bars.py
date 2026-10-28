@@ -55,7 +55,6 @@ class GroupedBars(pg.PlotWidget):
         self.percent = False
         self.cumulative = False
         self.heights = np.zeros(1)  # as drawn, for hit-testing
-        self.passing_heights = np.zeros(1)  # of the passing rows' bars
         self.hovered: int | None = None
         self.focus_bin: int | None = None
 
@@ -183,7 +182,6 @@ class GroupedBars(pg.PlotWidget):
         passing, passing_counts = self._heights(self.passing, total)
         every, every_counts = self._heights(np.ones_like(self.passing), total)
         selected, selected_counts = self._heights(self.selected & self.passing, total)
-        self.passing_heights = passing
         # hit-test (and outline) whichever bar reaches furthest
         self.heights = passing
         if self.show_filtered:
@@ -290,6 +288,3 @@ class HistogramPlot(GroupedBars):
             np.digitize(np.nan_to_num(values), self.edges) - 1, 0, n_bins - 1
         )
         self.set_groups(groups, self.edges[:-1], self.edges[1:])
-
-    def bin_range(self, bin: int) -> tuple[float, float]:
-        return float(self.edges[bin]), float(self.edges[bin + 1])

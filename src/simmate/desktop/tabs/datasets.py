@@ -15,7 +15,6 @@ class DatasetsTab(QWidget):
     """
 
     open_requested = Signal(Path)  # a dataset to open in the Toolkit tab
-    status = Signal(str)
 
     def __init__(self):
         super().__init__()
@@ -23,8 +22,6 @@ class DatasetsTab(QWidget):
         self.downloads = DatasetDownloads()
         self.chat = DatasetChat()
 
-        for section in [self.browser, self.downloads]:
-            section.status.connect(self.status)
         self.browser.open_requested.connect(self.open_requested)
         # reveal finished downloads, and keep the "Downloaded" labels up to date
         # as datasets are moved, renamed or deleted

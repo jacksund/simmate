@@ -28,6 +28,7 @@ from simmate.desktop import theme
 from simmate.desktop.widgets import (
     PrimaryButton,
     SettingsButton,
+    StyledCheckBox,
     WorkerSettings,
     callout_style,
     input_style,
@@ -43,7 +44,6 @@ from simmate.desktop.widgets import (
 )
 from simmate.desktop.widgets.worker_settings import (
     REQUIRED_SETTINGS,
-    ContributeToggle,
     get_missing_settings,
 )
 
@@ -73,19 +73,43 @@ def _launcher():
     return launcher
 
 
+class ContributeToggle(QWidget):
+    """
+    A check box (on by default) for whether workers also run other users' jobs,
+    with a line of muted text explaining it.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.check_box = StyledCheckBox("Help run community jobs (and earn)")
+        self.check_box.setChecked(True)
+        note = note_label(
+            "Your workers help run jobs submitted by others, and you earn USDC for "
+            "the compute you contribute. Turn this off to run only your own jobs."
+        )
+        note.setContentsMargins(24, 0, 0, 0)  # lined up with the check box's text
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(4)
+        layout.addWidget(self.check_box)
+        layout.addWidget(note)
+
+    def isChecked(self) -> bool:
+        return self.check_box.isChecked()
+
+
 class WorkersTab(QWidget):
     """
     Starts containerized API workers (via Podman or Docker) and lists them, with
-    their logs. Where they connect, and whether they run other users' jobs by
-    default, are set by
-    `settings.desktop` (edited from the gear button). While workers can't start
-    (e.g. a setting is missing), a message above the list says why.
+    their logs. Where they connect is set by `settings.desktop` (edited from the
+    gear button), and whether they also run other users' jobs is chosen each time
+    in the "Start worker(s)" popout. While workers can't start (e.g. a setting is
+    missing), a message above the list says why.
 
     Containers keep running after the app closes, and are listed again the next
     time it opens.
     """
 
-    status = Signal(str)
     # fires (from a background thread) with the podman/docker path, or None
     _engine_found = Signal(object)
 
@@ -143,12 +167,6 @@ class WorkersTab(QWidget):
             text="Start worker(s)",
             icon=plus_icon(color=theme.PRIMARY_COLOR),
         )
-        # each time it opens, start from the default in the settings
-        self.start_popout.toggled.connect(
-            lambda open: (
-                open and self.contribute.setChecked(settings.desktop.contribute)
-            )
-        )
 
         # --- toolbar ---
         refresh_button = PrimaryButton("Refresh", muted=True, icon=reset_icon())
@@ -160,7 +178,7 @@ class WorkersTab(QWidget):
         )
         self.remove_all_button.clicked.connect(self.remove_all)
         worker_settings = WorkerSettings()
-        worker_settings.saved.connect(self._on_settings_saved)
+        worker_settings.saved.connect(lambda _path: self._update_form())
         buttons = QHBoxLayout()
         buttons.addWidget(self.start_popout)
         buttons.addWidget(refresh_button)
@@ -279,26 +297,19 @@ class WorkersTab(QWidget):
             command = launcher.get_container_command(
                 self.engine, name, WORKER_IMAGE, [], env
             )
-            self.status.emit(
-                f"Starting {name}... (the first one downloads the worker image)"
-            )
             self._run(command, partial(self._started, name), env=env)
 
     def _started(self, name: str, exit_code: int, output: str):
         self.starting -= 1
         if exit_code:
-            self.status.emit(f"Couldn't start {name}: {output.strip()}")
-        else:
-            self.status.emit(f"Started {name}")
+            QMessageBox.warning(
+                self, "Couldn't start a worker", f"{name}: {output.strip()}"
+            )
         self.refresh()
 
     # -------------------------------------------------------------------------
     # the worker list
     # -------------------------------------------------------------------------
-
-    def _on_settings_saved(self, path: str):
-        self.status.emit(f"Worker settings saved to {path}")
-        self._update_form()
 
     def check_engine(self):
         """

@@ -86,6 +86,7 @@ desktop = [
     "pyopengl>=3.1.10",
     "pyqtgraph>=0.14.0",
     "pyside6>=6.11.2",
+    "xlsxwriter>=3.2.0",
 ]
 # App-specific deps
 baderkit = [

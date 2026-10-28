@@ -69,9 +69,6 @@ class ScatterPanel(PlotPanel):
         self.points = PointsLayer(
             self,
             plot,
-            describe=lambda point: self.describe_row(
-                self.points.rows[point][0], [self.value("x"), self.value("y")]
-            ),
             show_card=lambda: self.value("hover_card"),
         )
         self.key = PlotKey(plot)

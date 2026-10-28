@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from rdkit.Chem.rdDetermineBonds import DetermineBonds
 from rdkit.Chem.rdmolfiles import MolFromXYZBlock, MolToXYZBlock
 
 from simmate.toolkit import Molecule
@@ -9,15 +10,14 @@ class XyzAdapter:
     @staticmethod
     def get_toolkit_from_str(
         xyz: str,
-        remove_hs: bool = True,
         **kwargs,
     ) -> Molecule:
         rdkit_molecule = Molecule._load_rdkit(
             rdkit_loader=MolFromXYZBlock,
             molecule_input=xyz,
-            removeHs=remove_hs,
-            **kwargs,
         )
+        # XYZ only lists atoms and positions, so bonds are worked out from those
+        DetermineBonds(rdkit_molecule, **kwargs)  # e.g. charge=1
         return Molecule(rdkit_molecule)
 
     @classmethod

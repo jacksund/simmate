@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QMainWindow, QTabWidget, QWidget
 
 from simmate.desktop import theme
 from simmate.desktop.tabs import DashboardTab, DatasetsTab, WorkersTab
-from simmate.desktop.widgets import SystemMonitor, TitleBar
+from simmate.desktop.widgets import SystemMonitor, TitleBar, UpdateNotice
 
 # Width (px) of the invisible border you can drag to resize the window.
 RESIZE_MARGIN = 5
@@ -45,14 +45,18 @@ QTabBar::tab:selected {{
 
 class MainWindow(QMainWindow):
     """
-    The top-level window of the Simmate desktop app. It holds each tab and
-    owns the status bar.
+    The top-level window of the Simmate desktop app. It holds each tab, with
+    machine usage in the status bar.
 
     The window is frameless so it can use our own teal `TitleBar`. Without the
     OS frame, it handles resizing itself through a thin margin around its edges.
 
-    Apps built on Simmate can subclass this and override `get_tabs`.
+    Apps built on Simmate can subclass this and override `get_tabs`. They should
+    also set `check_for_updates = False`, since the startup check offers Simmate
+    Desktop's own builds (see `UpdateNotice`).
     """
+
+    check_for_updates: bool = True
 
     def __init__(self):
         super().__init__()
@@ -82,10 +86,7 @@ class MainWindow(QMainWindow):
         tabs = QTabWidget()
         self.tabs = tabs
         for title, make_tab in self.get_tabs():
-            tab = make_tab()
-            # Each tab reports what it's doing via a signal; the window owns the status bar.
-            tab.status.connect(self.statusBar().showMessage)
-            tabs.addTab(tab, title)
+            tabs.addTab(make_tab(), title)
         self.setCentralWidget(tabs)
         self._connect_tabs()
 
@@ -95,25 +96,22 @@ class MainWindow(QMainWindow):
             child.setCursor(Qt.CursorShape.ArrowCursor)
         tabs.tabBar().setCursor(Qt.CursorShape.PointingHandCursor)
 
-        # Messages show on the left; machine usage stays on the right.
+        # Machine usage on the right, and any update notice on the left.
         self.statusBar().addPermanentWidget(SystemMonitor())
-        # The window's edges already resize it, so skip the grip in the corner. That
-        # also lets the text on each side sit the same distance from the edge.
+        if self.check_for_updates:
+            self.statusBar().addWidget(UpdateNotice())
+        # The window's edges already resize it, so skip the grip in the corner.
         self.statusBar().setSizeGripEnabled(False)
         # Extra room below the text, which otherwise sits low against the window's edge.
         self.statusBar().setContentsMargins(0, 0, 0, 4)
-        # Messages in the same grey as the usage readout.
-        self.statusBar().setStyleSheet(f"QStatusBar {{ color: {theme.MUTED_COLOR}; }}")
 
         self._add_shortcuts()
-        self.statusBar().showMessage("Ready")
 
     def get_tabs(self) -> list[tuple[str, Callable[[], QWidget]]]:
         """
         The (title, factory) pairs of the tabs to show, in order. Each factory
         (e.g. a class) builds its tab, so an override can add, drop, or swap tabs
-        without building the ones it replaces. Each tab needs a
-        `status = Signal(str)`, like `PlaceholderTab`.
+        without building the ones it replaces.
         """
         return [
             ("Datasets", DatasetsTab),
