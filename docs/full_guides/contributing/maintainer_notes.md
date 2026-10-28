@@ -27,6 +27,25 @@ simmate database prebuild
 conda create -n my_env -c conda-forge simmate -y
 ```
 
+## Desktop App Builds
+
+PyInstaller can only build for the OS it runs on, so the desktop app is built and uploaded separately on each OS. This requires `settings.s3` to be configured with write access to the Simmate CDN bucket. Uploads are named with the installed Simmate version, so update the version number (step 1 above) before building for a new release. On each machine:
+
+``` bash
+uv sync --all-extras
+simmate desktop build
+# launch dist/simmate-desktop (or dist/simmate-desktop.exe) to check it works
+simmate desktop upload
+```
+
+Re-uploading the same version replaces that version's file. For example, the links for version 0.19.0 are:
+
+- Windows: `https://assets.simmate.org/desktop/simmate-desktop-0.19.0-windows.exe`
+- Linux: `https://assets.simmate.org/desktop/simmate-desktop-0.19.0-linux`
+- macOS (untested): `https://assets.simmate.org/desktop/simmate-desktop-0.19.0-macos`
+
+The builds are not code-signed, so Windows shows a SmartScreen warning ("More info → Run anyway") and macOS Gatekeeper blocks the app until it is allowed in *System Settings → Privacy & Security*.
+
 ## Full Test Suite
 
 Unit tests that require third-party programs (like VASP) are disabled by default. However, it's advisable to run a full test before new releases. To execute all unit tests that call programs like VASP:
