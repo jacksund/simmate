@@ -99,7 +99,7 @@ class FeaturizePanel(QWidget):
                 row = _FeatureRow(feature)
                 row.changed.connect(self._update_button)
                 # a new setting (e.g. 3D) may need columns the dataset lacks
-                row.changed.connect(self._mark_present)
+                row.changed.connect(self.mark_present)
                 content_layout.addWidget(row)
                 self.rows.append(row)
         else:
@@ -146,7 +146,7 @@ class FeaturizePanel(QWidget):
         layout.addLayout(footer)
         self.add_button.setVisible(dataset.has_molecules)
 
-        self._mark_present()
+        self.mark_present()
         self._update_button()
 
     def add_chosen(self):
@@ -190,7 +190,7 @@ class FeaturizePanel(QWidget):
         added, replaced = self.dataset.add_columns(new)
         for row in self.rows:
             row.checkbox.setChecked(False)
-        self._mark_present()
+        self.mark_present()
         self.loading_bar.hide()
         self.note.hide()
         self._update_button()
@@ -227,7 +227,7 @@ class FeaturizePanel(QWidget):
         self.result.show()
         self._update_button()
 
-    def _mark_present(self):
+    def mark_present(self):
         """Tag the options whose columns are all in the dataset already."""
         present = set(self.dataset.df.columns)
         for row in self.rows:

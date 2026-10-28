@@ -1,3 +1,4 @@
+from .analyze_panel import AnalyzePanel
 from .background import BackgroundTask, IncrementalTask
 from .button import PrimaryButton
 from .chatbot_panel import ChatbotPanel
@@ -26,9 +27,11 @@ from .export_panel import ExportPanel
 from .featurize_panel import FeaturizePanel
 from .filter_panel import FilterPanel
 from .inputs import StyledCheckBox, StyledComboBox, StyledRadioButton, input_style
+from .multi_choice import MultiChoice
 from .pane_layout import Pane, PaneLayout
 from .panel_tab import SidePanel
 from .plot_toolbar import (
+    HelpButton,
     MouseModeToggle,
     ResetViewButton,
     SettingsButton,

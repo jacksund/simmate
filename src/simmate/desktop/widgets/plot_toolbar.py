@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QFrame,
     QGraphicsDropShadowEffect,
     QHBoxLayout,
+    QLabel,
     QScrollArea,
     QToolButton,
     QVBoxLayout,
@@ -257,6 +258,33 @@ class SettingsButton(QToolButton):
         if event.type() == QEvent.Type.Resize:
             self._place_panel()
         return False
+
+
+class HelpButton(SettingsButton):
+    """A small round "?" button that opens a panel of `text` (rich text), e.g. to
+    explain a setting to someone new to it. Like `SettingsButton`'s, the panel
+    closes when anything else is clicked."""
+
+    SIZE = 20  # px
+    WIDTH = 300  # px of the panel's text
+
+    def __init__(self, text: str):
+        # lists indented less than Qt's default 40px, which suits a narrow panel
+        text = text.replace("<ul>", "<ul style='margin-left: -24px;'>")
+        label = QLabel(text, wordWrap=True, textFormat=Qt.TextFormat.RichText)
+        label.setContentsMargins(14, 12, 14, 12)
+        label.setFixedWidth(self.WIDTH)
+        # word-wrapped labels don't size their own height, which the panel follows
+        label.setFixedHeight(label.heightForWidth(self.WIDTH))
+        super().__init__(label, tooltip="What's this?", text="?")
+        self.setProperty("muted", True)  # grey, read by button_style
+        self.setStyleSheet(
+            button_style()
+            + f"""QToolButton {{
+                padding: 0; border-radius: {self.SIZE // 2}px; font-weight: 600;
+            }}"""
+        )
+        self.setFixedSize(self.SIZE, self.SIZE)
 
 
 def gear_icon(size: int = GEAR_SIZE, color: str | None = None) -> QIcon:

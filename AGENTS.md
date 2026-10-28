@@ -89,6 +89,7 @@ Scientific logic independent of the database. Look here first for reusable tools
 - **`datastores/`**: Parquet-backed storage and search for very large datasets (see Datastores below).
 - **`featurizers/`**: Fingerprints and ML features (ECFP4, MACCS, Morgan, etc.).
 - **`filters/`, `similarity/`, `clustering/`, `mapping/`**: Molecule screening and analysis (SMARTS and duplicate filters, Tanimoto and other similarity metrics, Butina/k-means clustering, PCA/t-SNE/UMAP).
+- **`modeling/`**: Models that predict a column from inputs like properties or fingerprint bits (`Predictor` subclasses with `cross_validate`: Ridge, random forest, gradient boosting, Tanimoto k-NN), plus `LinearFit` for least-squares fits with p-values.
 - **`symmetry/`, `transformations/`, `creators/`, `validators/`**: Crystal tools (Wyckoff/spacegroup data, strains and perturbations, random structure generation, structure validation).
 - **`file_converters/`**: Readers and writers for molecule and structure file formats.
 - **`visualization/`**: Plotting and rendering utilities for toolkit objects.

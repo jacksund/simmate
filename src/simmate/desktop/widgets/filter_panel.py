@@ -13,7 +13,6 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QScrollArea,
-    QSizePolicy,
     QToolButton,
     QVBoxLayout,
     QWidget,
@@ -24,10 +23,10 @@ from simmate.desktop.data import CATEGORY, DATE, NUMBER, ToolkitDataset
 from simmate.desktop.data.columns import to_date, to_seconds
 from simmate.desktop.theme import rgba
 from simmate.desktop.widgets.button import PrimaryButton, button_style
-from simmate.desktop.widgets.compound_table import scroll_bar_style
-from simmate.desktop.widgets.inputs import StyledCheckBox, input_style
+from simmate.desktop.widgets.inputs import input_style
 from simmate.desktop.widgets.ketcher import KetcherWidget
-from simmate.desktop.widgets.plot_toolbar import SettingsButton, reset_icon
+from simmate.desktop.widgets.multi_choice import MultiChoice
+from simmate.desktop.widgets.plot_toolbar import reset_icon
 from simmate.desktop.widgets.status import note_label
 
 
@@ -152,7 +151,7 @@ class FilterPanel(QWidget):
                 reset_search,
             )
 
-        self.category_inputs: dict[str, _MultiChoice] = {}
+        self.category_inputs: dict[str, MultiChoice] = {}
         # Each min/max pair defaults to the full range of its column (i.e. no
         # filtering), read back from the boxes so it's rounded as they show it.
         self.range_inputs: dict[str, tuple[QWidget, QWidget]] = {}
@@ -289,7 +288,7 @@ class FilterPanel(QWidget):
         for key in self.columns.of_kind(CATEGORY):
             if key not in keys:
                 continue
-            choice = _MultiChoice(self.columns.codes(key)[1])
+            choice = MultiChoice(self.columns.codes(key)[1])
             choice.changed.connect(self.filters_changed)
             self.category_inputs[key] = choice
             self._add_row(
@@ -405,71 +404,6 @@ class FilterPanel(QWidget):
             return  # applied once the index is ready
         self.query_changed.emit(query)
         self.filters_changed.emit()
-
-
-class _MultiChoice(QWidget):
-    """A button that opens a checklist of `options`, to pick any number of them.
-
-    Picking none (the default) means no filter, and the button reads "All" in grey;
-    it turns the primary color once something is picked. `changed` fires as boxes
-    are checked or unchecked.
-    """
-
-    changed = Signal()
-
-    MAX_LABEL = 24  # characters of the chosen options shown on the button
-
-    def __init__(self, options: list[str]):
-        super().__init__()
-        self.checkboxes: dict[str, StyledCheckBox] = {}
-        content = QWidget()
-        content.setStyleSheet(input_style() + scroll_bar_style())
-        content_layout = QVBoxLayout(content)
-        content_layout.setContentsMargins(12, 12, 12, 12)
-        content_layout.setSpacing(8)
-        clear = PrimaryButton("Clear", muted=True)
-        clear.clicked.connect(lambda: self.set_chosen([]))
-        content_layout.addWidget(clear)
-        for option in options:
-            checkbox = StyledCheckBox(option)
-            checkbox.toggled.connect(self._on_toggled)
-            content_layout.addWidget(checkbox)
-            self.checkboxes[option] = checkbox
-
-        self.button = SettingsButton(content, tooltip="Choose values to keep", text=" ")
-        self.button.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
-        )
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self.button)
-        self._update_text()
-
-    def chosen(self) -> list[str]:
-        return [option for option, box in self.checkboxes.items() if box.isChecked()]
-
-    def set_chosen(self, options: list[str]):
-        for option, box in self.checkboxes.items():
-            box.blockSignals(True)
-            box.setChecked(option in options)
-            box.blockSignals(False)
-        self._on_toggled()
-
-    def _on_toggled(self, *_):
-        self._update_text()
-        self.changed.emit()
-
-    def _update_text(self):
-        chosen = self.chosen()
-        text = ", ".join(chosen) if chosen else "All"
-        if len(text) > self.MAX_LABEL:
-            text = f"{len(chosen)} selected"
-        self.button.setText(text)
-        # grey while it isn't filtering, read by button_style
-        if self.button.property("muted") != (not chosen):
-            self.button.setProperty("muted", not chosen)
-            self.button.style().unpolish(self.button)
-            self.button.style().polish(self.button)
 
 
 class _FilterRow:

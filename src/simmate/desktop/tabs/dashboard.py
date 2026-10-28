@@ -28,6 +28,7 @@ from simmate.desktop.example_data.compounds import build_dataset
 from simmate.desktop.tabs.placeholder import PlaceholderTab
 from simmate.desktop.widgets import (
     PLOT_TYPES,
+    AnalyzePanel,
     BackgroundTask,
     ChatbotPanel,
     ColumnChooser,
@@ -180,6 +181,10 @@ class ToolkitWorkspace(QWidget):
       chemical-space maps, clusters, ...), which then show in the table, filters, plots and card.
     - Its Chatbot tab is a chat about the dataset, whose replies can include Python scripts
       to run on it (e.g. to add columns, which then show everywhere like featurized ones).
+    - Its Analyze tab works things out from every row at once (e.g. fitting a model that
+      predicts one column from others), showing each result as a card and adding any
+      columns it gives (e.g. predictions). Hovering or clicking a result's table row
+      highlights or selects its compounds, and its plot button adds a plot of it.
     - Its Export tab saves every row and column (added ones too) to a file: CSV, Excel, or
       Parquet, plus molecule (SDF, SMILES, XYZ) or crystal (CIF, POSCAR) formats.
     - Zooming/panning any plot further narrows the table to the compounds in view.
@@ -253,6 +258,15 @@ class ToolkitWorkspace(QWidget):
         self.featurize_panel.columns_added.connect(self._on_columns_added)
         self.chatbot_panel = ChatbotPanel(dataset)
         self.chatbot_panel.columns_added.connect(self._on_columns_added)
+        self.analyze_panel = AnalyzePanel(dataset)
+        self.analyze_panel.columns_added.connect(self._on_columns_added)
+        self.analyze_panel.rows_hovered.connect(
+            lambda rows: self._on_rows_hovered(rows, None)
+        )
+        self.analyze_panel.rows_selected.connect(
+            lambda rows: self._select_in_table(rows, scroll=True)
+        )
+        self.analyze_panel.plot_requested.connect(self._show_plot)
         self.export_panel = ExportPanel(dataset)
         left_pages = self.get_left_pages()
         # Filters starts open (when a subclass's pages still include it)
@@ -435,7 +449,7 @@ class ToolkitWorkspace(QWidget):
             ("Chatbot", self.chatbot_panel),
             ("Filter", self.filter_panel),
             ("Featurize", self.featurize_panel),
-            ("Analyze", PlaceholderTab("Analyze")),
+            ("Analyze", self.analyze_panel),
             ("Export", self.export_panel),
         ]
 
@@ -509,6 +523,18 @@ class ToolkitWorkspace(QWidget):
         chooser = PlotTypeChooser(self.get_plot_types())
         pane = Pane(chooser, "New plot")
         chooser.chosen.connect(lambda name: self._choose_plot(pane, name))
+        self._add_beside_plots(pane)
+
+    def _show_plot(self, name: str, config: dict):
+        """Add a plot of type `name` with the settings in `config` (as from
+        `PlotPanel.config`) beside the last plot, e.g. a result's parity plot."""
+        plot_type = self.get_plot_types()[name]
+        plot = self._add_plot(plot_type)
+        plot.apply_config(config)
+        self._add_beside_plots(Pane(plot, plot_type.title))
+
+    def _add_beside_plots(self, pane: Pane):
+        """Put a new pane to the right of the last plot, or above the table."""
         others = [p for p in self.pane_layout.panes() if p is not self.table_pane]
         if others:
             self.pane_layout.add_pane(pane, others[-1], "right")
@@ -593,11 +619,13 @@ class ToolkitWorkspace(QWidget):
     # --- added columns ------------------------------------------------------------------------
 
     def _on_columns_added(self, added: list[str], replaced: list[str]):
-        """The Featurize or Chatbot panel added columns to the dataset (replacing
-        any of the same name): show them everywhere."""
+        """The Featurize, Analyze or Chatbot panel added columns to the dataset
+        (replacing any of the same name): show them everywhere."""
         self.df = self.dataset.df
         self.model.add_columns(added, replaced)
         self.filter_panel.add_columns(added, replaced)
+        self.analyze_panel.add_columns(added, replaced)
+        self.featurize_panel.mark_present()  # e.g. a fingerprint a model needed
         self.details.add_columns(added)
         for plot in self.plots:
             plot.refresh_columns()
