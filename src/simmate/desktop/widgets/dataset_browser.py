@@ -149,12 +149,10 @@ class DatasetBrowser(QWidget):
     be uploaded, renamed, deleted and organized into folders (drag to move).
 
     `open_requested` fires with a dataset to open in the Toolkit tab (from "Open in
-    Toolkit" or a double-click), and `status` reports what it did, for the window's
-    status bar.
+    Toolkit" or a double-click).
     """
 
     open_requested = Signal(Path)
-    status = Signal(str)
 
     def __init__(self):
         super().__init__()
@@ -286,19 +284,16 @@ class DatasetBrowser(QWidget):
         task.failed.connect(self._upload_failed)
         self.loading_bar.show()
         self.message.hide()
-        self.status.emit(f"Converting {len(files)} file(s) to parquet…")
         task.start()
 
     def _uploaded(self, paths: list[Path]):
         self.loading_bar.hide()
-        self.status.emit(f"Added {', '.join(path.stem for path in paths)}")
         self.select(paths[-1])
 
     def _upload_failed(self, error: str):
         self.loading_bar.hide()
         set_status(self.message, f"Upload failed: {error}", False)
         self.message.show()
-        self.status.emit("Upload failed")
 
     def new_folder(self):
         folder = self._target_folder()
@@ -329,9 +324,7 @@ class DatasetBrowser(QWidget):
         )
         if answer != QMessageBox.StandardButton.Yes:
             return
-        if self.model.remove(index):  # folders are removed with their contents
-            self.status.emit(f"Deleted {name}")
-        else:
+        if not self.model.remove(index):  # folders are removed with their contents
             set_status(self.message, f"Couldn't delete {name}.", False)
             self.message.show()
 

@@ -27,7 +27,7 @@ def main(window_class: type | None = None) -> None:
     multiprocessing.freeze_support()
 
     import pyqtgraph as pg
-    from PySide6.QtCore import QCoreApplication, Qt
+    from PySide6.QtCore import QCoreApplication, QLoggingCategory, Qt
     from PySide6.QtQuick import QQuickWindow, QSGRendererInterface
     from PySide6.QtWidgets import QApplication
 
@@ -38,6 +38,10 @@ def main(window_class: type | None = None) -> None:
     # app is created; Qt WebEngine also needs shared contexts to run on OpenGL.
     QQuickWindow.setGraphicsApi(QSGRendererInterface.GraphicsApi.OpenGL)
     QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
+
+    # On Wayland, Qt logs "Trying to disable ... but 0x0 is focused" as focus
+    # moves between widgets. It's a harmless Qt bug, so hide that log category.
+    QLoggingCategory.setFilterRules("qt.qpa.wayland.textinput=false")
 
     app = QApplication(sys.argv)
     # Always use light mode: Ketcher and the molecule images have white

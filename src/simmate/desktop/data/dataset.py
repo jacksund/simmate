@@ -15,7 +15,8 @@ from simmate.toolkit import Molecule
 class ToolkitDataset:
     """
     One table opened in the Toolkit tab: the dataframe, what its columns hold (see
-    `DataColumns`), and its molecules when it has a column of SMILES.
+    `DataColumns`), and its molecules when it has a column of SMILES. A column of
+    crystal structures (POSCAR or CIF text) is noted as `structure_column`.
 
     Molecules are made only when asked for (`molecule`), e.g. as a row's image is
     drawn, so even a large dataset opens quickly. Substructure searches need an index
@@ -28,6 +29,7 @@ class ToolkitDataset:
         self.columns = DataColumns(df)
         self.df = self.columns.df  # e.g. with categoricals cast to strings
         self.molecule_column = self.columns.molecule_column
+        self.structure_column = self.columns.structure_column
         self.height = self.df.height
         self._smiles = (
             self.df[self.molecule_column].to_list() if self.has_molecules else []
@@ -52,6 +54,10 @@ class ToolkitDataset:
     @property
     def has_molecules(self) -> bool:
         return self.molecule_column is not None
+
+    @property
+    def has_structures(self) -> bool:
+        return self.structure_column is not None
 
     def add_columns(self, new: polars.DataFrame) -> tuple[list[str], list[str]]:
         """Add `new`'s columns (one value per row), replacing any of the same name.

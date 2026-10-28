@@ -1,13 +1,13 @@
 import requests
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtWidgets import QFormLayout, QLabel, QLineEdit, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QFormLayout, QLabel, QLineEdit, QWidget
 
 from simmate.config import settings
 from simmate.desktop import theme
 from simmate.desktop.widgets.button import PrimaryButton
-from simmate.desktop.widgets.inputs import StyledCheckBox, input_style
-from simmate.desktop.widgets.status import link, note_label, set_status
+from simmate.desktop.widgets.inputs import input_style
+from simmate.desktop.widgets.status import link, set_status
 
 REQUIRED_SETTINGS = {
     "api_host": "API server",
@@ -47,38 +47,14 @@ def check_api_server(host: str, api_key: str | None) -> tuple[bool, str]:
     return True, f"Signed in as {data['username']}."
 
 
-class ContributeToggle(QWidget):
-    """
-    A check box for whether workers also run other users' jobs (the default), with
-    a line of muted text explaining it.
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.check_box = StyledCheckBox("Help run community jobs (and earn)")
-        note = note_label(
-            "Your workers help run jobs submitted by others, and you earn USDC for "
-            "the compute you contribute. Turn this off to run only your own jobs."
-        )
-        note.setContentsMargins(24, 0, 0, 0)  # lined up with the check box's text
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(4)
-        layout.addWidget(self.check_box)
-        layout.addWidget(note)
-
-    def isChecked(self) -> bool:
-        return self.check_box.isChecked()
-
-    def setChecked(self, checked: bool):
-        self.check_box.setChecked(checked)
-
-
 class WorkerSettings(QWidget):
     """
     Edits the `desktop` section of the settings file (`~/simmate/settings.yaml`):
-    which Simmate server workers connect to, and whether they run other users' jobs
-    by default. Missing required settings are shown in red.
+    the Simmate server that workers and the chatbot connect to, and the API key to
+    sign in with. Missing required settings are shown in red.
+
+    It reloads the file each time it's shown, as several of these forms can be
+    open in the app (e.g. the Workers tab's and the Chatbot panel's).
 
     `saved` fires with the file's path after saving. Settings set by `SIMMATE__`
     env vars override the file, so then nothing can be saved.
@@ -89,11 +65,12 @@ class WorkerSettings(QWidget):
     def __init__(self):
         super().__init__()
         self.setStyleSheet(input_style())
-        self.setMinimumWidth(460)
         self.api_host = QLineEdit(placeholderText="e.g. https://simmate.org")
+        # Wide enough for a URL or key. Set on the input, as popouts size to the
+        # form's size hint, which a minimum width on the form itself doesn't change.
+        self.api_host.setMinimumWidth(320)
         self.api_key = QLineEdit(echoMode=QLineEdit.EchoMode.Password)
         self.api_key_hint = QLabel(openExternalLinks=True)  # opens the browser
-        self.contribute = ContributeToggle()
         self.message = QLabel()
         test_button = PrimaryButton("Test connection")
         test_button.clicked.connect(self.test_connection)
@@ -107,7 +84,6 @@ class WorkerSettings(QWidget):
         self.form.addRow("API server", self.api_host)
         self.form.addRow("API key", self.api_key)
         self.form.addRow("", self.api_key_hint)
-        self.form.addRow("", self.contribute)
         self.form.addRow(self.message)
         self.form.addRow(test_button, self.save_button)
         self.load()
@@ -118,7 +94,6 @@ class WorkerSettings(QWidget):
         desktop = settings.desktop
         self.api_host.setText(desktop.api_host or "")
         self.api_key.setText(desktop.api_key or "")
-        self.contribute.setChecked(desktop.contribute)
 
         missing = get_missing_settings()
         for key in REQUIRED_SETTINGS:
@@ -150,6 +125,11 @@ class WorkerSettings(QWidget):
                 False,
             )
 
+    def showEvent(self, event):
+        # the settings may have been saved from another of these forms
+        self.load()
+        super().showEvent(event)
+
     def test_connection(self):
         set_status(self.message, "Testing…")
         QGuiApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
@@ -168,7 +148,6 @@ class WorkerSettings(QWidget):
         user_settings["desktop"] = {
             "api_host": self.api_host.text().strip(),
             "api_key": self.api_key.text().strip() or None,
-            "contribute": self.contribute.isChecked(),
         }
         settings.write_settings(filename=settings.settings_file, settings=user_settings)
         self.load()

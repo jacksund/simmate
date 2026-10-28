@@ -22,20 +22,18 @@ class PointsLayer:
     show as grey points (`set_dimmed`), under everything so they never take the mouse.
 
     It reports through the `panel`'s signals (see `PlotPanel`), and asks it for
-    `describe(point)` (the status bar text) and `show_card()` (whether to show the card).
+    `show_card()` (whether to show the card).
     """
 
     def __init__(
         self,
         panel,
         plot: pg.PlotWidget,
-        describe: Callable[[int], str],
         show_card: Callable[[], bool] = lambda: False,
     ):
         self.panel = panel
         self.plot = plot
         self.view_box = plot.getPlotItem().getViewBox()
-        self.describe = describe
         self.show_card = show_card
         n_rows = panel.df.height
         # by point: x, y, size, and the rows it stands for
@@ -177,7 +175,6 @@ class PointsLayer:
             )
         else:
             self.tooltip.hide()
-        self.panel.status.emit(self.describe(point))
 
     def _on_click(self, _item, points, event):
         point = self._nearest(points, event)

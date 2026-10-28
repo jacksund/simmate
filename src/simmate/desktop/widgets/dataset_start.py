@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
     QFileDialog,
     QFrame,
     QGridLayout,
+    QHBoxLayout,
     QLabel,
     QVBoxLayout,
     QWidget,
@@ -29,7 +30,7 @@ class DatasetStart(QWidget):
     The Toolkit tab before a dataset is open: ways to pick one, plus a loading bar
     and message while it opens.
 
-    - `sample_requested`: open the practice dataset, for trying out the Toolkit.
+    - `sample_requested`: open the sample dataset, for trying out the Toolkit.
     - `datasets_requested`: go to the Datasets tab, for the official datasets.
     - `upload_requested(path)`: a file the user chose to add and open.
     """
@@ -41,57 +42,64 @@ class DatasetStart(QWidget):
     def __init__(self):
         super().__init__()
         intro = QLabel(
-            "Plot, filter and search a table of molecules, or any other tabular "
-            "data. Choose a dataset to get started."
+            "Plot, filter, and search a table of molecules, or any other tabular data."
         )
         intro.setWordWrap(True)
         intro.setStyleSheet(f"color: {theme.MUTED_COLOR};")
 
         self.sample_button = PrimaryButton("Open sample", filled=True)
         self.sample_button.clicked.connect(self.sample_requested)
-        self.datasets_button = PrimaryButton("Go to Datasets", icon=folder_icon())
+        self.datasets_button = PrimaryButton(
+            "Go to Datasets", icon=folder_icon(color=theme.PRIMARY_COLOR)
+        )
         self.datasets_button.clicked.connect(self.datasets_requested)
         self.upload_button = PrimaryButton(
-            "Upload a file…", icon=plus_icon(color=theme.PRIMARY_COLOR)
+            "Upload file…", icon=plus_icon(color=theme.PRIMARY_COLOR)
         )
         self.upload_button.clicked.connect(self._choose_file)
 
-        # one row per option: what it is, and its button
+        # one row per option (what it is, and its button), with a line between rows
         options = QGridLayout()
         options.setHorizontalSpacing(24)
-        options.setVerticalSpacing(20)
+        options.setVerticalSpacing(14)
         options.setColumnStretch(0, 1)
-        for row, (title, text, button) in enumerate(
+        for index, (title, text, button) in enumerate(
             [
                 (
-                    "New here? Try the sample dataset",
+                    "Try the sample dataset",
                     (
-                        "400 made-up compounds in six chemical series, with assay results. "
-                        "Small and quick to load, so it's a good place to explore what "
-                        "the Toolkit can do."
+                        "400 made-up compounds from six chemical series, with assay "
+                        "results. It opens in seconds, so it's an easy way to learn "
+                        "the Toolkit."
                     ),
                     self.sample_button,
                 ),
                 (
-                    "Official datasets",
+                    "Download a public dataset",
                     (
-                        "Download catalogs like ChEMBL and the PDB's ligands from the "
-                        "Datasets tab, then open them with “Open in Toolkit”."
+                        "Get catalogs like ChEMBL and the PDB ligands from the Datasets "
+                        "tab, then click “Open in Toolkit”."
                     ),
                     self.datasets_button,
                 ),
                 (
-                    "Your own data",
+                    "Upload your own data",
                     (
-                        "Upload an .sdf, .smi, .csv or .parquet file. A copy is saved to "
-                        "My datasets (in the Datasets tab) so you can open it again."
+                        "An .sdf, .smi, .csv or .parquet file. A copy is kept in My "
+                        "datasets (on the Datasets tab), so you can reopen it later."
                     ),
                     self.upload_button,
                 ),
             ]
         ):
+            row = 2 * index
+            if index:
+                divider = QFrame()
+                divider.setFixedHeight(1)
+                divider.setStyleSheet("background: palette(mid);")
+                options.addWidget(divider, row - 1, 0, 1, 2)
             text_layout = QVBoxLayout()
-            text_layout.setSpacing(2)
+            text_layout.setSpacing(4)
             option_title = QLabel(title)
             option_title.setStyleSheet("font-weight: 600;")
             text_layout.addWidget(option_title)
@@ -105,23 +113,34 @@ class DatasetStart(QWidget):
 
         card = QFrame(objectName="startCard")
         card.setStyleSheet(
-            "#startCard { border: 1px solid palette(mid); border-radius: 10px; }"
+            "#startCard { background: palette(base); border: 1px solid palette(mid); "
+            f"border-radius: {theme.CORNER_RADIUS}px; }}"
         )
         card.setFixedWidth(CARD_WIDTH)
         card_layout = QVBoxLayout(card)
         card_layout.setContentsMargins(28, 24, 28, 24)
         card_layout.setSpacing(12)
-        card_layout.addWidget(heading_label("Open a dataset"))
-        card_layout.addWidget(intro)
-        card_layout.addSpacing(8)
+        header_layout = QVBoxLayout()
+        header_layout.setSpacing(4)
+        header_layout.addWidget(heading_label("Open a dataset"))
+        header_layout.addWidget(intro)
+        card_layout.addLayout(header_layout)
+        card_layout.addSpacing(12)
         card_layout.addLayout(options)
         card_layout.addSpacing(4)
         card_layout.addWidget(self.loading_bar)
         card_layout.addWidget(self.message)
 
+        # Centered with stretches, not alignment=AlignHCenter: an aligned item is
+        # asked for its height at the page's full width, so the wrapped text above
+        # gets one line's height and is cut off.
+        row = QHBoxLayout()
+        row.addStretch()
+        row.addWidget(card)
+        row.addStretch()
         layout = QVBoxLayout(self)
         layout.addStretch()
-        layout.addWidget(card, alignment=Qt.AlignmentFlag.AlignHCenter)
+        layout.addLayout(row)
         layout.addStretch()
 
     def set_loading(self, text: str):

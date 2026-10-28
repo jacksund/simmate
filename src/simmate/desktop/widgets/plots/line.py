@@ -58,7 +58,7 @@ class LinePanel(PlotPanel):
         style_plot(plot)
         self._build(plot)
         self.curves: list[pg.PlotCurveItem] = []
-        self.points = PointsLayer(self, plot, describe=self._describe)
+        self.points = PointsLayer(self, plot)
         self.key = PlotKey(plot)
         self.draw()
 
@@ -161,25 +161,6 @@ class LinePanel(PlotPanel):
         curve.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
         self.plot.addItem(curve)
         self.curves.append(curve)
-
-    def _describe(self, point: int) -> str:
-        rows = self.points.rows[point]
-        x_key, y_key = self.value("x"), self.value("y")
-        aggregate = self.value("aggregate")
-        if aggregate == "None":
-            text = self.describe_row(rows[0], [x_key, y_key])
-        else:
-            value = self.points.y[point]
-            label = "count" if aggregate == "Count" else f"{aggregate.lower()} {y_key}"
-            text = (
-                f"{x_key} {self.columns.format(x_key, self.points.x[point])}: "
-                f"{label} {value:.4g} ({len(rows)} compound(s))"
-            )
-        group = self.value("group")
-        if group is None:
-            return text
-        line = self.labels[self.columns.codes(group)[0][rows[0]]]
-        return f"{group} {line}: {text}"
 
     def set_selected(self, rows: set[int]):
         super().set_selected(rows)

@@ -528,7 +528,7 @@ class Molecule:
             return cls.from_mae_file(filename)
 
         elif filename.suffix == ".xyz":
-            return cls.from_xyz_file(filename)
+            return cls.from_xyz_file(filename, **kwargs)
 
         elif filename.suffix == ".cxsmiles":
             raise NotImplementedError()
@@ -587,6 +587,16 @@ class Molecule:
         from simmate.toolkit.file_converters import MaeAdapter
 
         return MaeAdapter.get_toolkits_from_file(filename, **kwargs)
+
+    @classmethod
+    def from_xyz_file(cls, filename: str | Path, **kwargs):
+        """
+        Takes a XYZ file (*.xyz) and converts it to a `Molecule` object. Bonds are
+        worked out from the atoms' positions (see `XyzAdapter`).
+        """
+        from simmate.toolkit.file_converters import XyzAdapter
+
+        return XyzAdapter.get_toolkit_from_file(filename, **kwargs)
 
     @classmethod
     def from_csv_file(
@@ -717,14 +727,28 @@ class Molecule:
 
     # OUTPUT METHODS
 
-    def to_sdf(self, include_metadata: bool = False) -> str:
+    def to_sdf(
+        self,
+        include_metadata: bool = False,
+        properties: dict | None = None,
+    ) -> str:
         """
         Converts the current `Molecule` object to an SDF string
+
+        Args:
+            include_metadata: Whether to write the molecule's metadata (e.g. as read
+                from an SDF file) as properties.
+            properties: Extra key-value pairs to write as properties, e.g. a table
+                row's columns. Keys with a value of None are skipped.
         """
         sdf = AllChem.MolToMolBlock(self.rdkit_molecule)
 
         if include_metadata and self.metadata:
             for key, value in self.metadata.items():
+                sdf += f"\n>  <{key}>\n{value}\n"
+
+        for key, value in (properties or {}).items():
+            if value is not None:
                 sdf += f"\n>  <{key}>\n{value}\n"
 
         sdf += "\n$$$$\n"

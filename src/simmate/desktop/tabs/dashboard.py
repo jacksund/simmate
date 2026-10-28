@@ -29,12 +29,14 @@ from simmate.desktop.tabs.placeholder import PlaceholderTab
 from simmate.desktop.widgets import (
     PLOT_TYPES,
     BackgroundTask,
+    ChatbotPanel,
     ColumnChooser,
     CompoundDetails,
     CompoundFilterProxy,
     CompoundTable,
     CompoundTableModel,
     DatasetStart,
+    ExportPanel,
     FeaturizePanel,
     FilterPanel,
     HistogramPanel,
@@ -75,7 +77,6 @@ class DashboardTab(QStackedWidget):
     their own workspace by setting `workspace_class`.
     """
 
-    status = Signal(str)
     go_to_datasets = Signal()
 
     workspace_class: type["ToolkitWorkspace"]  # set below the class
@@ -129,13 +130,11 @@ class DashboardTab(QStackedWidget):
         self._drop_workspace()
         self.start.reset()
         self.setCurrentWidget(self.start)
-        self.status.emit("Ready")
 
     def _load(self, name: str, work):
         self._drop_workspace()
         self.setCurrentWidget(self.start)
         self.start.set_loading(f"Opening {name}…")
-        self.status.emit(f"Opening {name}…")
         task = BackgroundTask(work, self)
         self.load_task = task
         task.finished.connect(lambda dataset: self._loaded(task, dataset))
@@ -148,7 +147,6 @@ class DashboardTab(QStackedWidget):
         self.load_task = None
         self.start.reset()
         self.workspace = self.workspace_class(dataset)
-        self.workspace.status.connect(self.status)
         self.workspace.close_requested.connect(self.close_dataset)
         self.addWidget(self.workspace)
         self.setCurrentWidget(self.workspace)
@@ -158,7 +156,6 @@ class DashboardTab(QStackedWidget):
             return
         self.load_task = None
         self.start.set_error(f"Couldn't open {name}: {error}")
-        self.status.emit(f"Couldn't open {name}")
 
     def _drop_workspace(self):
         if self.load_task is not None:
@@ -181,6 +178,10 @@ class ToolkitWorkspace(QWidget):
       and/or set column filters. Filtered-out points/bars show in grey, or are hidden (plot settings).
     - Its Featurize tab adds columns made with `simmate.toolkit` (properties, fingerprints,
       chemical-space maps, clusters, ...), which then show in the table, filters, plots and card.
+    - Its Chatbot tab is a chat about the dataset, whose replies can include Python scripts
+      to run on it (e.g. to add columns, which then show everywhere like featurized ones).
+    - Its Export tab saves every row and column (added ones too) to a file: CSV, Excel, or
+      Parquet, plus molecule (SDF, SMILES, XYZ) or crystal (CIF, POSCAR) formats.
     - Zooming/panning any plot further narrows the table to the compounds in view.
     - Hovering a point (or a row) highlights its row, rings its point in every scatter
       and line plot, and outlines its bin or bar in every histogram and bar chart.
@@ -202,7 +203,6 @@ class ToolkitWorkspace(QWidget):
     `close_requested` fires from its "Close" button, once the user confirms.
     """
 
-    status = Signal(str)
     close_requested = Signal()
 
     def __init__(self, dataset: ToolkitDataset):
@@ -238,6 +238,9 @@ class ToolkitWorkspace(QWidget):
         # to notice the mouse leaving the table
         self.table.viewport().installEventFilter(self)
         self.table.selectionModel().selectionChanged.connect(self._on_table_selection)
+        # how many rows are shown (and selected), above the table on the left
+        self.count_label = QLabel()
+        self.count_label.setStyleSheet(f"color: {theme.MUTED_COLOR};")
 
         # --- side panels --------------------------------------------------------------
         # One page per tab; only the open tab's page shows.
@@ -248,7 +251,9 @@ class ToolkitWorkspace(QWidget):
         self.filter_panel.query_changed.connect(self.details.set_query)
         self.featurize_panel = FeaturizePanel(dataset)
         self.featurize_panel.columns_added.connect(self._on_columns_added)
-        self.featurize_panel.status.connect(self.status)
+        self.chatbot_panel = ChatbotPanel(dataset)
+        self.chatbot_panel.columns_added.connect(self._on_columns_added)
+        self.export_panel = ExportPanel(dataset)
         left_pages = self.get_left_pages()
         # Filters starts open (when a subclass's pages still include it)
         left_widgets = [page for _, page in left_pages]
@@ -299,6 +304,7 @@ class ToolkitWorkspace(QWidget):
         column_chooser.setStyleSheet(input_style())
         table_controls = QHBoxLayout()
         table_controls.setSpacing(2)  # the two buttons sit close together
+        table_controls.addWidget(self.count_label)
         table_controls.addStretch()
         table_controls.addWidget(
             SettingsButton(
@@ -402,8 +408,6 @@ class ToolkitWorkspace(QWidget):
         layout.addWidget(self.outer_splitter)
 
         self._apply_filters()
-        # Again once the window is listening, so the count replaces its "Ready".
-        QTimer.singleShot(0, self._update_count)
 
         # The sketcher's substructure search needs an index of every molecule. It's
         # slow to build for large datasets, so it's built a little at a time (and
@@ -428,10 +432,11 @@ class ToolkitWorkspace(QWidget):
         Tabs not built yet open a "coming soon" page for now.
         """
         return [
-            ("Logs", PlaceholderTab("Logs")),
+            ("Chatbot", self.chatbot_panel),
             ("Filter", self.filter_panel),
             ("Featurize", self.featurize_panel),
             ("Analyze", PlaceholderTab("Analyze")),
+            ("Export", self.export_panel),
         ]
 
     def get_right_pages(self) -> list[tuple[str, QWidget]]:
@@ -492,7 +497,6 @@ class ToolkitWorkspace(QWidget):
         plot.rows_clicked.connect(self._on_rows_clicked)
         plot.background_clicked.connect(self._clear_selection)
         plot.view_changed.connect(self.range_timer.start)
-        plot.status.connect(self.status)
         plot.set_mouse_mode(self.mouse_mode.mode)
         plot.set_passing(self.proxy.passing)
         plot.set_selected(self.selected_rows)
@@ -542,8 +546,10 @@ class ToolkitWorkspace(QWidget):
             self.details.show_row(self.focus_row)
 
     def _update_count(self):
-        shown = self.proxy.rowCount()
-        self.status.emit(f"{shown:,} of {self.df.height:,} rows shown")
+        text = f"{self.proxy.rowCount():,} of {self.df.height:,} rows shown"
+        if self.selected_rows:
+            text += f", {len(self.selected_rows):,} selected"
+        self.count_label.setText(text)
 
     # --- side panels -----------------------------------------------------------------------
 
@@ -587,8 +593,8 @@ class ToolkitWorkspace(QWidget):
     # --- added columns ------------------------------------------------------------------------
 
     def _on_columns_added(self, added: list[str], replaced: list[str]):
-        """The Featurize panel added columns to the dataset (replacing any of the
-        same name): show them everywhere."""
+        """The Featurize or Chatbot panel added columns to the dataset (replacing
+        any of the same name): show them everywhere."""
         self.df = self.dataset.df
         self.model.add_columns(added, replaced)
         self.filter_panel.add_columns(added, replaced)
@@ -628,10 +634,7 @@ class ToolkitWorkspace(QWidget):
         for plot in self.plots:
             if plot is not source:
                 plot.show_hovered(rows)
-        if not rows:
-            if source is not None:
-                self._update_count()  # back to the count once off the points/bars
-        elif (
+        if (
             source is not None
             and len(rows) == 1
             and self.scroll_to_hover_checkbox.isChecked()
@@ -705,8 +708,7 @@ class ToolkitWorkspace(QWidget):
         self._show_selection_card()
 
         self._refresh_selection_marks()
-        if self.selected_rows:
-            self.status.emit(f"{len(self.selected_rows):,} row(s) selected")
+        self._update_count()
 
     def _refresh_selection_marks(self):
         for plot in self.plots:

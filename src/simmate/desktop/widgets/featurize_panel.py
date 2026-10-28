@@ -61,7 +61,6 @@ class FeaturizePanel(QWidget):
     """
 
     columns_added = Signal(object, object)
-    status = Signal(str)
 
     MAX_NAMES = 6  # columns named in the "Added" message
 
@@ -182,7 +181,6 @@ class FeaturizePanel(QWidget):
         self.note.show()
         self.result.hide()
         self.loading_bar.show()
-        self.status.emit(message)
         self._update_button()
         self.started = time.perf_counter()
         self.task.start()
@@ -217,8 +215,6 @@ class FeaturizePanel(QWidget):
         self.result.setStyleSheet(callout_style(theme.PRIMARY_COLOR))
         self.result.setText(f"<b>✓ {message}</b><br>{names}<br>Done in {took}")
         self.result.show()
-        # after the columns are shown, which updates the status bar's row count
-        self.status.emit(message)
 
     def _on_failed(self, error: str):
         self.task = None
@@ -229,7 +225,6 @@ class FeaturizePanel(QWidget):
             f"<b>✗ Couldn't add the columns</b><br>{html.escape(error)}"
         )
         self.result.show()
-        self.status.emit("Couldn't add the columns")
         self._update_button()
 
     def _mark_present(self):

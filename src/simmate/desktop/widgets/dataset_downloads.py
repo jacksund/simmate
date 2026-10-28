@@ -131,7 +131,6 @@ class DatasetDownloads(QWidget):
     """
 
     downloaded = Signal(Path)
-    status = Signal(str)
 
     def __init__(self):
         super().__init__()
@@ -251,24 +250,19 @@ class DatasetDownloads(QWidget):
         task.finished.connect(lambda path: self._finished(url, path))
         task.failed.connect(lambda error: self._failed(url, error))
         self.message.hide()
-        self.status.emit(f"Downloading {target.name}…")
         task.start()
 
     def _finished(self, url: str, path: Path | None):
         del self.tasks[url]
         self.refresh()
-        if path is None:
-            self.status.emit("Download cancelled")
-            return
-        self.status.emit(f"Downloaded {path.name}")
-        self.downloaded.emit(path)
+        if path is not None:  # else cancelled
+            self.downloaded.emit(path)
 
     def _failed(self, url: str, error: str):
         del self.tasks[url]
         self.refresh()
         set_status(self.message, f"Download failed: {error}", False)
         self.message.show()
-        self.status.emit("Download failed")
 
 
 def _cell(widget: QWidget) -> QWidget:

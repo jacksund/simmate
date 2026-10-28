@@ -56,6 +56,8 @@ def build_executable(
             # PyOpenGL selects its platform backend at runtime, which
             # PyInstaller can't detect on its own
             "--collect-submodules=OpenGL.platform",
+            # polars imports xlsxwriter (for Excel exports) only when it's used
+            "--hidden-import=xlsxwriter",
             # simmate/__init__.py reads its version from package metadata
             "--copy-metadata=simmate",
             "--console" if console else "--windowed",

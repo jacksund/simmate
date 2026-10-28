@@ -135,14 +135,3 @@ class HistogramPanel(PlotPanel):
         rows = set(self.histogram.rows_in_bin(bin))
         if self.value("bin_hover"):
             self.rows_hovered.emit(rows)
-        key = self.value("column")
-        low, high = self.histogram.bin_range(bin)
-        if self.histogram.cumulative:
-            low = self.histogram.edges[0]
-        text = (
-            f"{key} {self.columns.format(key, low)} to "
-            f"{self.columns.format(key, high)}: {len(rows)} compound(s)"
-        )
-        if self.value("aggregate") != "Count" or self.histogram.percent:
-            text += f", {self._height_label().lower()} {self.histogram.passing_heights[bin]:.4g}"
-        self.status.emit(text)

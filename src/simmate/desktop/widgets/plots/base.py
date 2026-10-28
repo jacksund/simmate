@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
 from simmate.desktop import theme
 from simmate.desktop.widgets.inputs import StyledCheckBox, StyledComboBox, input_style
 from simmate.desktop.widgets.plot_toolbar import ResetViewButton, SettingsButton
-from simmate.desktop.widgets.plots.columns import DATE, NUMBER, DataColumns
+from simmate.desktop.widgets.plots.columns import DATE, DataColumns
 
 NONE = "None"  # the choice for an optional column left unset
 OPACITIES = ["100%", "80%", "60%", "40%", "20%"]
@@ -34,7 +34,6 @@ class PlotPanel(QWidget):
       clicked on, if it was a single row (else None).
     - `background_clicked()`: a plain click on empty plot space.
     - `view_changed()`: the plot was zoomed or panned.
-    - `status(text)`: a message for the status bar.
 
     A subclass declares its settings in `__init__` with the `*_setting` methods
     (each named, so `config`/`apply_config` can read and set them all as a dict),
@@ -52,7 +51,6 @@ class PlotPanel(QWidget):
     rows_clicked = Signal(object, object, object)
     background_clicked = Signal()
     view_changed = Signal()
-    status = Signal(str)
 
     def __init__(
         self,
@@ -300,18 +298,6 @@ class PlotPanel(QWidget):
             plot_item.setLogMode(x=log)
         else:
             plot_item.setLogMode(y=log)
-
-    def describe_row(self, row: int, keys: list[str]) -> str:
-        """`row` for the status bar: its label (e.g. ID) and its values of `keys`."""
-        values = []
-        for key in dict.fromkeys(k for k in keys if k):
-            if self.columns.kinds.get(key) in (NUMBER, DATE):
-                values.append(
-                    f"{key} {self.columns.format(key, self.columns.numbers(key)[row])}"
-                )
-            else:
-                values.append(f"{key} {self.df[key][row]}")
-        return f"{self.columns.label(row)}: " + ", ".join(values)
 
     # --- what the dashboard calls ----------------------------------------------------------
 

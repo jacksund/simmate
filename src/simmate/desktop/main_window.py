@@ -45,8 +45,8 @@ QTabBar::tab:selected {{
 
 class MainWindow(QMainWindow):
     """
-    The top-level window of the Simmate desktop app. It holds each tab and
-    owns the status bar.
+    The top-level window of the Simmate desktop app. It holds each tab, with
+    machine usage in the status bar.
 
     The window is frameless so it can use our own teal `TitleBar`. Without the
     OS frame, it handles resizing itself through a thin margin around its edges.
@@ -82,10 +82,7 @@ class MainWindow(QMainWindow):
         tabs = QTabWidget()
         self.tabs = tabs
         for title, make_tab in self.get_tabs():
-            tab = make_tab()
-            # Each tab reports what it's doing via a signal; the window owns the status bar.
-            tab.status.connect(self.statusBar().showMessage)
-            tabs.addTab(tab, title)
+            tabs.addTab(make_tab(), title)
         self.setCentralWidget(tabs)
         self._connect_tabs()
 
@@ -95,25 +92,20 @@ class MainWindow(QMainWindow):
             child.setCursor(Qt.CursorShape.ArrowCursor)
         tabs.tabBar().setCursor(Qt.CursorShape.PointingHandCursor)
 
-        # Messages show on the left; machine usage stays on the right.
+        # Machine usage on the right; the left is empty for now.
         self.statusBar().addPermanentWidget(SystemMonitor())
-        # The window's edges already resize it, so skip the grip in the corner. That
-        # also lets the text on each side sit the same distance from the edge.
+        # The window's edges already resize it, so skip the grip in the corner.
         self.statusBar().setSizeGripEnabled(False)
         # Extra room below the text, which otherwise sits low against the window's edge.
         self.statusBar().setContentsMargins(0, 0, 0, 4)
-        # Messages in the same grey as the usage readout.
-        self.statusBar().setStyleSheet(f"QStatusBar {{ color: {theme.MUTED_COLOR}; }}")
 
         self._add_shortcuts()
-        self.statusBar().showMessage("Ready")
 
     def get_tabs(self) -> list[tuple[str, Callable[[], QWidget]]]:
         """
         The (title, factory) pairs of the tabs to show, in order. Each factory
         (e.g. a class) builds its tab, so an override can add, drop, or swap tabs
-        without building the ones it replaces. Each tab needs a
-        `status = Signal(str)`, like `PlaceholderTab`.
+        without building the ones it replaces.
         """
         return [
             ("Datasets", DatasetsTab),
