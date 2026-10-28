@@ -98,7 +98,7 @@ This step is optional but highly recommended if you want to search existing data
 
 To download and load data from a specific provider, use:
 ``` shell
-simmate database download materials-project
+simmate database load materials-project
 ```
 You can repeat this for other apps like `cod`, `oqmd`, or `jarvis`. Depending on the dataset size and your connection, this can take anywhere from a few minutes to several hours.
 

@@ -93,8 +93,8 @@ def exec():
 
 @k8s_app.command()
 def scale(
+    service: str = typer.Argument(..., help="The service to scale (e.g. worker)."),
     replicas: int = typer.Argument(..., help="The number of replicas to scale to."),
-    service: str = typer.Option("worker", help="The service to scale."),
 ):
     """
     Scales a Simmate deployment to the specified number of replicas.

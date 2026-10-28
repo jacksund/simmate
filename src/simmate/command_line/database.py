@@ -6,6 +6,7 @@ accessible through the `simmate database` command.
 import typer
 
 from simmate.command_line.utilities import AlphabeticalGroup
+from simmate.utils import logger
 
 database_app = typer.Typer(rich_markup_mode="markdown", cls=AlphabeticalGroup)
 
@@ -133,10 +134,10 @@ def update():
 
 
 @database_app.command()
-def download(
+def load(
     app_name: str = typer.Argument(
         ...,
-        help="The name of the app to download data for (e.g., 'cod').",
+        help="The name of the app to load data for (e.g., 'cod').",
     ),
     source: str = typer.Option(
         "direct",
@@ -144,10 +145,52 @@ def download(
     ),
 ):
     """
-    Downloads and populates the database with third-party data for a specific app.
+    Downloads and loads third-party data for a specific app into the database.
     """
 
     from simmate.database import connect
     from simmate.database.utils import download_app_data
 
     download_app_data(app_name, source=source)
+
+
+@database_app.command()
+def load_test_data(
+    app_labels: list[str] = typer.Argument(
+        None,
+        help="The apps to load (e.g. inventory_management). Defaults to all apps.",
+    ),
+):
+    """
+    Loads fake data (from each app's `test/fake_data.zip`) into the database.
+
+    This is meant for an empty dev database, so that UIs can be explored
+    without real data. Run `simmate database reset` first if needed.
+    """
+    from django.apps import apps
+
+    from simmate.database import connect
+    from simmate.database.utils import get_fake_data_path, load_fake_data
+
+    if not app_labels:
+        app_labels = [
+            config.label
+            for config in apps.get_app_configs()
+            if get_fake_data_path(config.label).exists()
+        ]
+
+    for app_label in app_labels:
+        logger.info(f"Loading fake data for '{app_label}'...")
+        load_fake_data(app_label)
+
+    logger.info("Done! :sparkles:")
+
+
+@database_app.command()
+def prebuild():
+    """
+    Creates a date-stamped zip file of the current SQLite3 database.
+    """
+    from simmate.database.utils import create_prebuild
+
+    create_prebuild()

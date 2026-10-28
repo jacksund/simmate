@@ -39,7 +39,7 @@ simmate database update
 
 4. Download all EPPO GD datasets:
 ``` shell
-simmate database download eppo_gd
+simmate database load eppo_gd
 ```
 
 --------------------------------------------------------------------------------

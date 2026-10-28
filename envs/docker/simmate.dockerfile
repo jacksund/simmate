@@ -47,7 +47,7 @@ RUN curl -Ls https://astral.sh/uv/install.sh | sh
 COPY . simmate
 RUN uv sync && \
     uv pip install gunicorn && \
-    simmate dev download-ketcher && \
+    simmate website download-ketcher && \
     django-admin collectstatic --noinput
 
 # =============================================================================

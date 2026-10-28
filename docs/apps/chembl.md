@@ -44,7 +44,7 @@ simmate database update
 
 4. Download all ChEMBL datasets:
 ``` shell
-simmate database download chembl
+simmate database load chembl
 ```
 
 --------------------------------------------------------------------------------

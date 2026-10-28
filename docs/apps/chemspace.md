@@ -41,7 +41,7 @@ simmate database update
 
 4. Download all ChemSpace datasets:
 ``` shell
-simmate database download chemspace
+simmate database load chemspace
 ```
 
 --------------------------------------------------------------------------------

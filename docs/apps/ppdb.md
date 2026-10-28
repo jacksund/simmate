@@ -45,7 +45,7 @@ simmate database update
 
 4. Download all PDB datasets:
 ``` shell
-simmate database download ppdb
+simmate database load ppdb
 ```
 
 --------------------------------------------------------------------------------

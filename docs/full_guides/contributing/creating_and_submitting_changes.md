@@ -23,7 +23,7 @@ pytest
 ```
 
 !!! tip
-    Some apps (inventory, project, and compute management) include fake data for testing and exploring the website (stored as zipped CSVs at `<app>/test/fake_data.zip`). Load it into a fresh dev database with `simmate dev load-test-data` (or `simmate dev load-test-data inventory_management` for a single app), or use the `fake_data` fixture in tests (e.g. `fake_data("inventory_management")`). Each app's `test/make_fake_data.py` script regenerates its zip file, and all apps share the same fake users (`simmate.database.utils.FAKE_USERNAMES`).
+    Some apps (inventory, project, and compute management) include fake data for testing and exploring the website (stored as zipped CSVs at `<app>/test/fake_data.zip`). Load it into a fresh dev database with `simmate database load-test-data` (or `simmate database load-test-data inventory_management` for a single app), or use the `fake_data` fixture in tests (e.g. `fake_data("inventory_management")`). Each app's `test/make_fake_data.py` script regenerates its zip file, and all apps share the same fake users (`simmate.database.utils.FAKE_USERNAMES`).
 
 7. If all tests are successful, your changes are ready for submission to Simmate!
 

@@ -1,6 +1,6 @@
 """
 Generates `fake_data.zip`, which holds fake projects, tags, wallets, and
-transactions for tests and for exploring the UI (see `simmate dev load-test-data`).
+transactions for tests and for exploring the UI (see `simmate database load-test-data`).
 
 Rerun this script whenever the project models change. The output is
 deterministic (fixed random seed), so the zip only changes when this script

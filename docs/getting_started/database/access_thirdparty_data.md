@@ -46,7 +46,7 @@ If the count returns 0, it means you still need to load data. You can download t
 This is the easiest way to populate your database. Open your terminal and run:
 
 ``` bash
-simmate database download jarvis
+simmate database load jarvis
 ```
 
 ### Option 2: Python
