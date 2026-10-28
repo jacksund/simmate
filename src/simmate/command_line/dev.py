@@ -168,13 +168,3 @@ def load_test_data(
         load_fake_data(app_label)
 
     logger.info("Done! :sparkles:")
-
-
-@dev_app.command()
-def download_ketcher():
-    """
-    Downloads and extracts the Ketcher standalone zip to the static directory.
-    """
-    from simmate.website.core.utils import download_ketcher as _download_ketcher
-
-    _download_ketcher()

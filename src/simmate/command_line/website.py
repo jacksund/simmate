@@ -51,3 +51,13 @@ def start(
         shell=True,
         check=False,
     )
+
+
+@website_app.command()
+def download_ketcher():
+    """
+    Downloads and extracts the Ketcher standalone zip to the static directory.
+    """
+    from simmate.website.core.utils import download_ketcher as _download_ketcher
+
+    _download_ketcher()
