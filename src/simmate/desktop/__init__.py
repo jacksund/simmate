@@ -6,7 +6,8 @@ with `simmate desktop build`. Requires the `desktop` extra dependencies.
 
 Apps built on Simmate can make their own version of it without forking: rebrand
 it with `simmate.desktop.theme.configure`, subclass `MainWindow` (e.g. to override
-`get_tabs`), launch it with `main(window_class=...)`, and package it with
+`get_tabs`, and to set `check_for_updates = False` so it doesn't offer Simmate
+Desktop's builds), launch it with `main(window_class=...)`, and package it with
 `simmate.desktop.build.build_executable`.
 """
 

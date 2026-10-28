@@ -217,7 +217,7 @@ class DatasetBrowser(QWidget):
 
         folder_url = QUrl.fromLocalFile(str(self.root)).toString()
         location = note_label(
-            f"Saved in {_display_path(self.root)} &nbsp;·&nbsp; "
+            f"Saved in {display_path(self.root)} &nbsp;·&nbsp; "
             f"{link(folder_url, 'Open folder')}"
         )
         location.setOpenExternalLinks(True)  # file:// opens the file explorer
@@ -334,7 +334,7 @@ def _off_only(icon: QIcon, size: int = 16) -> QIcon:
     return QIcon(icon.pixmap(size, QIcon.Mode.Normal, QIcon.State.Off))
 
 
-def _display_path(path: Path) -> str:
+def display_path(path: Path) -> str:
     """`path`, with the home folder shortened to `~`."""
     try:
         return str(Path("~") / path.relative_to(Path.home()))

@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QMainWindow, QTabWidget, QWidget
 
 from simmate.desktop import theme
 from simmate.desktop.tabs import DashboardTab, DatasetsTab, WorkersTab
-from simmate.desktop.widgets import SystemMonitor, TitleBar
+from simmate.desktop.widgets import SystemMonitor, TitleBar, UpdateNotice
 
 # Width (px) of the invisible border you can drag to resize the window.
 RESIZE_MARGIN = 5
@@ -51,8 +51,12 @@ class MainWindow(QMainWindow):
     The window is frameless so it can use our own teal `TitleBar`. Without the
     OS frame, it handles resizing itself through a thin margin around its edges.
 
-    Apps built on Simmate can subclass this and override `get_tabs`.
+    Apps built on Simmate can subclass this and override `get_tabs`. They should
+    also set `check_for_updates = False`, since the startup check offers Simmate
+    Desktop's own builds (see `UpdateNotice`).
     """
+
+    check_for_updates: bool = True
 
     def __init__(self):
         super().__init__()
@@ -92,8 +96,10 @@ class MainWindow(QMainWindow):
             child.setCursor(Qt.CursorShape.ArrowCursor)
         tabs.tabBar().setCursor(Qt.CursorShape.PointingHandCursor)
 
-        # Machine usage on the right; the left is empty for now.
+        # Machine usage on the right, and any update notice on the left.
         self.statusBar().addPermanentWidget(SystemMonitor())
+        if self.check_for_updates:
+            self.statusBar().addWidget(UpdateNotice())
         # The window's edges already resize it, so skip the grip in the corner.
         self.statusBar().setSizeGripEnabled(False)
         # Extra room below the text, which otherwise sits low against the window's edge.

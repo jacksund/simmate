@@ -3,10 +3,28 @@ Packages a desktop app into a single-file executable with PyInstaller.
 """
 
 import os
+import platform
 import tempfile
 from pathlib import Path
 
 from simmate.utils import logger
+
+
+def get_release_filename(version: str, name: str = "simmate-desktop") -> str:
+    """
+    The file name of a build for this OS, as `simmate desktop upload` saves it
+    under `desktop/` on the CDN (e.g. "simmate-desktop-0.19.0-windows.exe").
+
+    Args:
+        version: The Simmate version of the build.
+        name: Name of the executable.
+    """
+    os_label = {"Windows": "windows", "Darwin": "macos", "Linux": "linux"}[
+        platform.system()
+    ]
+    # PyInstaller only adds an extension on Windows
+    suffix = ".exe" if platform.system() == "Windows" else ""
+    return f"{name}-{version}-{os_label}{suffix}"
 
 
 def build_executable(

@@ -63,4 +63,5 @@ from .point_tooltip import PointTooltip
 from .status import callout_style, loading_bar, note_label, set_status
 from .system_monitor import SystemMonitor
 from .title_bar import TitleBar
+from .update_notice import UpdateNotice
 from .worker_settings import WorkerSettings

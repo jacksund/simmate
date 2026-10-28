@@ -98,6 +98,7 @@ def upload(
 
     import simmate
     from simmate.database.external_connectors.s3 import SimmateS3Bucket
+    from simmate.desktop.build import get_release_filename
     from simmate.utils import logger
 
     # PyInstaller only adds an extension on Windows
@@ -108,10 +109,7 @@ def upload(
             f"No executable at {executable}. Run `simmate desktop build` first."
         )
 
-    os_label = {"Windows": "windows", "Darwin": "macos", "Linux": "linux"}[
-        platform.system()
-    ]
-    s3_key = f"desktop/{name}-{simmate.__version__}-{os_label}{suffix}"
+    s3_key = f"desktop/{get_release_filename(simmate.__version__, name)}"
     logger.info(f"Uploading {executable} to S3...")
     SimmateS3Bucket.upload_file(executable, s3_key)
     logger.info(f"Uploaded to s3://{SimmateS3Bucket.bucket}/{s3_key}")

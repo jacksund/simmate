@@ -44,6 +44,8 @@ Re-uploading the same version replaces that version's file. For example, the lin
 - Linux: `https://assets.simmate.org/desktop/simmate-desktop-0.19.0-linux`
 - macOS (untested): `https://assets.simmate.org/desktop/simmate-desktop-0.19.0-macos`
 
+On startup, packaged apps compare their version to the latest GitHub release and offer to download the matching build from these links into `~/simmate/desktop/`. They only do so once that OS's build is uploaded, so upload builds for each OS soon after a release.
+
 The builds are not code-signed, so Windows shows a SmartScreen warning ("More info → Run anyway") and macOS Gatekeeper blocks the app until it is allowed in *System Settings → Privacy & Security*.
 
 ## Full Test Suite
