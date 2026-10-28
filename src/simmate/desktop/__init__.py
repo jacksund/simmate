@@ -19,6 +19,13 @@ def main(window_class: type | None = None) -> None:
 
     `window_class` is the main window to show, which defaults to `MainWindow`.
     """
+    import multiprocessing
+
+    # Parallel work (e.g. the Featurize panel's) runs in a pool of processes. In a
+    # PyInstaller build, each one starts by re-running the executable, so this
+    # turns those into workers rather than more copies of the app. A no-op otherwise.
+    multiprocessing.freeze_support()
+
     import pyqtgraph as pg
     from PySide6.QtCore import QCoreApplication, Qt
     from PySide6.QtQuick import QQuickWindow, QSGRendererInterface

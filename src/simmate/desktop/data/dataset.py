@@ -53,6 +53,13 @@ class ToolkitDataset:
     def has_molecules(self) -> bool:
         return self.molecule_column is not None
 
+    def add_columns(self, new: polars.DataFrame) -> tuple[list[str], list[str]]:
+        """Add `new`'s columns (one value per row), replacing any of the same name.
+        Returns the (added, replaced) column names."""
+        added, replaced = self.columns.add_columns(new)
+        self.df = self.columns.df
+        return added, replaced
+
     # --- molecules ------------------------------------------------------------------------
 
     def smiles(self, row: int) -> str | None:

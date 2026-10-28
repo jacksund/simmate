@@ -35,6 +35,7 @@ from simmate.desktop.widgets import (
     CompoundTable,
     CompoundTableModel,
     DatasetStart,
+    FeaturizePanel,
     FilterPanel,
     HistogramPanel,
     IncrementalTask,
@@ -178,6 +179,8 @@ class ToolkitWorkspace(QWidget):
       it, or remove panes. By default, a scatter plot and a histogram sit above the table.
     - The left panel holds bulk tools; its Filters tab narrows everything: draw a substructure in the sketcher
       and/or set column filters. Filtered-out points/bars show in grey, or are hidden (plot settings).
+    - Its Featurize tab adds columns made with `simmate.toolkit` (properties, fingerprints,
+      chemical-space maps, clusters, ...), which then show in the table, filters, plots and card.
     - Zooming/panning any plot further narrows the table to the compounds in view.
     - Hovering a point (or a row) highlights its row, rings its point in every scatter
       and line plot, and outlines its bin or bar in every histogram and bar chart.
@@ -243,6 +246,9 @@ class ToolkitWorkspace(QWidget):
         # re-draw thumbnails and the card with the new substructure highlighted & aligned
         self.filter_panel.query_changed.connect(self.model.set_highlight)
         self.filter_panel.query_changed.connect(self.details.set_query)
+        self.featurize_panel = FeaturizePanel(dataset)
+        self.featurize_panel.columns_added.connect(self._on_columns_added)
+        self.featurize_panel.status.connect(self.status)
         left_pages = self.get_left_pages()
         # Filters starts open (when a subclass's pages still include it)
         left_widgets = [page for _, page in left_pages]
@@ -424,7 +430,7 @@ class ToolkitWorkspace(QWidget):
         return [
             ("Logs", PlaceholderTab("Logs")),
             ("Filter", self.filter_panel),
-            ("Featurize", PlaceholderTab("Featurize")),
+            ("Featurize", self.featurize_panel),
             ("Analyze", PlaceholderTab("Analyze")),
         ]
 
@@ -458,9 +464,9 @@ class ToolkitWorkspace(QWidget):
         if confirm(
             self,
             "Close this dataset?",
-            f"Your plots, filters and selection for {self.dataset.name} will be "
-            "cleared. The dataset itself stays in My datasets, so you can open it "
-            "again anytime.",
+            f"Your plots, filters, selection and added columns for "
+            f"{self.dataset.name} will be cleared. The dataset itself stays in My "
+            "datasets, so you can open it again anytime.",
         ):
             self.close_requested.emit()
 
@@ -577,6 +583,21 @@ class ToolkitWorkspace(QWidget):
                 if panel.tabs.current() < 0:
                     panel.tabs.set_current(panel.currentIndex(), emit=False)
             self._update_min_widths(panel)
+
+    # --- added columns ------------------------------------------------------------------------
+
+    def _on_columns_added(self, added: list[str], replaced: list[str]):
+        """The Featurize panel added columns to the dataset (replacing any of the
+        same name): show them everywhere."""
+        self.df = self.dataset.df
+        self.model.add_columns(added, replaced)
+        self.filter_panel.add_columns(added, replaced)
+        self.details.add_columns(added)
+        for plot in self.plots:
+            plot.refresh_columns()
+        # replaced values may pass the filters (or plots' views) differently
+        self._apply_filters()
+        self._filter_to_view()
 
     # --- filters ----------------------------------------------------------------------------
 

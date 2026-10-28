@@ -1,5 +1,3 @@
-import numpy
-
 from simmate.toolkit import Molecule
 
 from .base import Featurizer
@@ -21,6 +19,7 @@ class PropertyGrabber(Featurizer):
         molecule: Molecule,
         properties: list[str],  # e.g. ["num_rings", "molecular_weight", ...]
         **kwargs,
-    ) -> numpy.array:
-        values = [getattr(molecule, p) for p in properties]
-        return numpy.array(values)
+    ) -> list:
+        # a plain list, so values of mixed types (e.g. a str next to floats) keep
+        # their own types
+        return [getattr(molecule, p) for p in properties]

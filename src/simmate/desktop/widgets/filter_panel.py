@@ -121,29 +121,12 @@ class FilterPanel(QWidget):
         # --- column filters -------------------------------------------------------------
         # A grid rather than a QFormLayout, which won't center labels on taller fields.
         # Columns: label, field, and the row's reset button.
-        form = QGridLayout()
-        form.setContentsMargins(0, 0, 0, 0)
-        form.setHorizontalSpacing(12)
-        form.setVerticalSpacing(10)
-        form.setColumnStretch(1, 1)
+        self.form = QGridLayout()
+        self.form.setContentsMargins(0, 0, 0, 0)
+        self.form.setHorizontalSpacing(12)
+        self.form.setVerticalSpacing(10)
+        self.form.setColumnStretch(1, 1)
         self.rows: list[_FilterRow] = []
-
-        def add_row(
-            label: str,
-            field: QWidget,
-            is_default: Callable[[], bool],
-            reset: Callable[[], None],
-            inputs: list[QWidget] | None = None,
-        ):
-            row = _FilterRow(QLabel(label), field, inputs or [field], is_default, reset)
-            row.label.setToolTip(label)
-            row.button.setToolTip(f"Reset {label}")
-            row.button.clicked.connect(lambda: self._reset_row(row))
-            index = form.rowCount()
-            form.addWidget(row.label, index, 0, Qt.AlignmentFlag.AlignVCenter)
-            form.addWidget(field, index, 1)
-            form.addWidget(row.button, index, 2)
-            self.rows.append(row)
 
         self.search_input = QLineEdit()
         searched = self.columns.searched
@@ -162,7 +145,7 @@ class FilterPanel(QWidget):
             self.search_timer.stop()  # the cleared search would emit again
 
         if searched:
-            add_row(
+            self._add_row(
                 "Search",
                 self.search_input,
                 lambda: not self.search_input.text(),
@@ -170,47 +153,11 @@ class FilterPanel(QWidget):
             )
 
         self.category_inputs: dict[str, _MultiChoice] = {}
-        for key in self.columns.of_kind(CATEGORY):
-            choice = _MultiChoice(self.columns.codes(key)[1])
-            choice.changed.connect(self.filters_changed)
-            self.category_inputs[key] = choice
-            add_row(
-                key,
-                choice,
-                lambda c=choice: not c.chosen(),
-                lambda c=choice: c.set_chosen([]),
-                inputs=[choice.button],
-            )
-
         # Each min/max pair defaults to the full range of its column (i.e. no
         # filtering), read back from the boxes so it's rounded as they show it.
         self.range_inputs: dict[str, tuple[QWidget, QWidget]] = {}
         self.range_defaults: dict[str, tuple] = {}
-        for key in self.columns.of_kind(NUMBER, DATE):
-            if self.columns.bounds(key) is None:
-                continue  # all nulls: nothing to filter
-            is_date = self.columns.kinds[key] == DATE
-            boxes = (
-                (self._date_box(), self._date_box())
-                if is_date
-                else (self._spin_box(), self._spin_box())
-            )
-            range_row = QWidget()
-            range_layout = QHBoxLayout(range_row)
-            range_layout.setContentsMargins(0, 0, 0, 0)
-            range_layout.setSpacing(6)
-            for i, box in enumerate(boxes):
-                if i:
-                    range_layout.addWidget(QLabel("to", objectName="rangeSep"))
-                range_layout.addWidget(box, stretch=1)
-            self.range_inputs[key] = boxes
-            add_row(
-                key,
-                range_row,
-                lambda k=key: self._range_values(k) == self.range_defaults[k],
-                lambda k=key: self._reset_range(k),
-                inputs=list(boxes),
-            )
+        self._add_column_rows(set(self.columns.kinds))
 
         # Long lists of filters (e.g. wide datasets) get a box to find a column's.
         self.row_search = QLineEdit()
@@ -231,7 +178,7 @@ class FilterPanel(QWidget):
             content_layout.addWidget(self.index_note)
             content_layout.addSpacing(20)
         content_layout.addWidget(self.row_search)
-        content_layout.addLayout(form)
+        content_layout.addLayout(self.form)
         content_layout.addStretch()
 
         # Scrolls rather than squashing the fixed-height sketcher on short windows.
@@ -269,6 +216,24 @@ class FilterPanel(QWidget):
             },
         )
 
+    def add_columns(self, added: list[str], replaced: list[str]):
+        """Add filter rows for columns just added to the dataset, and reset the
+        rows of replaced ones, whose values (and so bounds) changed."""
+        first_new = len(self.rows)
+        self._add_column_rows(set(added))
+        # muted like `_reset_form`, for a single emit at the end
+        self.blockSignals(True)
+        for row in self.rows[first_new:]:
+            row.reset()
+        for key in replaced:
+            if key in self.range_inputs:
+                del self.range_defaults[key]  # re-read by `_reset_range`
+                self._reset_range(key)
+        self.blockSignals(False)
+        self.row_search.setVisible(len(self.rows) > self.ROW_SEARCH_MIN)
+        self._show_matching_rows(self.row_search.text())
+        self.filters_changed.emit()
+
     def set_index_progress(self, done: int, total: int):
         """Show how far along the substructure index is."""
         if self.sketcher is None:
@@ -298,6 +263,68 @@ class FilterPanel(QWidget):
         if self.sketcher is not None:
             self.sketcher.clear()
         self._reset_form()
+
+    def _add_row(
+        self,
+        label: str,
+        field: QWidget,
+        is_default: Callable[[], bool],
+        reset: Callable[[], None],
+        inputs: list[QWidget] | None = None,
+    ):
+        row = _FilterRow(QLabel(label), field, inputs or [field], is_default, reset)
+        row.label.setToolTip(label)
+        row.button.setToolTip(f"Reset {label}")
+        row.button.clicked.connect(lambda: self._reset_row(row))
+        index = self.form.rowCount()
+        self.form.addWidget(row.label, index, 0, Qt.AlignmentFlag.AlignVCenter)
+        self.form.addWidget(field, index, 1)
+        self.form.addWidget(row.button, index, 2)
+        self.rows.append(row)
+
+    def _add_column_rows(self, keys: set[str]):
+        """Add a filter row for each of `keys` that can be filtered: a checklist
+        for each category column, then a min/max pair for each number or date
+        column."""
+        for key in self.columns.of_kind(CATEGORY):
+            if key not in keys:
+                continue
+            choice = _MultiChoice(self.columns.codes(key)[1])
+            choice.changed.connect(self.filters_changed)
+            self.category_inputs[key] = choice
+            self._add_row(
+                key,
+                choice,
+                lambda c=choice: not c.chosen(),
+                lambda c=choice: c.set_chosen([]),
+                inputs=[choice.button],
+            )
+
+        for key in self.columns.of_kind(NUMBER, DATE):
+            if key not in keys or self.columns.bounds(key) is None:
+                continue  # all nulls: nothing to filter
+            is_date = self.columns.kinds[key] == DATE
+            boxes = (
+                (self._date_box(), self._date_box())
+                if is_date
+                else (self._spin_box(), self._spin_box())
+            )
+            range_row = QWidget()
+            range_layout = QHBoxLayout(range_row)
+            range_layout.setContentsMargins(0, 0, 0, 0)
+            range_layout.setSpacing(6)
+            for i, box in enumerate(boxes):
+                if i:
+                    range_layout.addWidget(QLabel("to", objectName="rangeSep"))
+                range_layout.addWidget(box, stretch=1)
+            self.range_inputs[key] = boxes
+            self._add_row(
+                key,
+                range_row,
+                lambda k=key: self._range_values(k) == self.range_defaults[k],
+                lambda k=key: self._reset_range(k),
+                inputs=list(boxes),
+            )
 
     def _spin_box(self) -> QDoubleSpinBox:
         spin = QDoubleSpinBox(objectName="rangeBox")  # no arrows, see filter_style

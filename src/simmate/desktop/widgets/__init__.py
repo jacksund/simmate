@@ -15,6 +15,7 @@ from .dataset_browser import DatasetBrowser, get_datasets_dir, import_dataset
 from .dataset_chat import DatasetChat
 from .dataset_downloads import DatasetDownloads
 from .dataset_start import DatasetStart
+from .featurize_panel import FeaturizePanel
 from .filter_panel import FilterPanel
 from .inputs import StyledCheckBox, StyledComboBox, input_style
 from .pane_layout import Pane, PaneLayout

@@ -62,7 +62,6 @@ class PlotPanel(QWidget):
         super().__init__()
         # Pass the dataset's `DataColumns` to share its profile and cached values.
         self.columns = df if isinstance(df, DataColumns) else DataColumns(df)
-        self.df = self.columns.df
         # how a row's compound is drawn, e.g. for a card on hover
         self.svg_of = svg_of
         # By row index: which rows pass the filters.
@@ -71,9 +70,15 @@ class PlotPanel(QWidget):
         self.settings: dict[str, QWidget] = {}
         self._setting_rows: list = []  # (label, input) pairs, or an input alone
         self._required_columns: list[tuple[str, str]] = []  # (name, label)
-        self._column_settings: set[str] = set()  # whose "None" means no column
+        # name -> (kinds, optional) of each column setting (whose "None" means no column)
+        self._column_settings: dict[str, tuple[tuple[str, ...], bool]] = {}
         self.plot: pg.PlotWidget | None = None
         self.view_box: pg.ViewBox | None = None
+
+    @property
+    def df(self) -> polars.DataFrame:
+        # read through `columns`, which swaps in a new frame as columns are added
+        return self.columns.df
 
     # --- settings -------------------------------------------------------------------------
 
@@ -96,10 +101,26 @@ class PlotPanel(QWidget):
             combo.setCurrentText(default)
         elif not optional and options:
             combo.setCurrentIndex(min(fallback, len(options) - 1))
-        self._column_settings.add(name)
+        self._column_settings[name] = (kinds, optional)
         if not optional:
             self._required_columns.append((name, label))
         return self._add_setting(name, label, combo, on_change)
+
+    def refresh_columns(self):
+        """Offer columns added to the dataset since the plot was made (see
+        `DataColumns.add_columns`), keeping each current choice, then redraw (which
+        also picks up new values of replaced columns)."""
+        for name, (kinds, optional) in self._column_settings.items():
+            combo = self.settings[name]
+            current = combo.currentText()
+            options = self.columns.of_kind(*kinds)
+            combo.blockSignals(True)
+            combo.clear()
+            combo.addItems([NONE] + options if optional else options)
+            if combo.findText(current) >= 0:
+                combo.setCurrentText(current)
+            combo.blockSignals(False)
+        self.draw()
 
     def choice_setting(
         self,

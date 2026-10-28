@@ -50,28 +50,50 @@ class DataColumns:
 
     Other columns (lists, objects, all-null) get no kind. Values are cached per column,
     as plots and filters ask for them on every redraw.
+
+    Columns can be added later with `add_columns` (e.g. by the Featurize panel).
     """
 
     def __init__(self, df: polars.DataFrame):
         self.df = df
         self.kinds: dict[str, str] = {}
+        self.long_text: set[str] = set()
         self._dates: dict[str, polars.Series] = {}  # parsed, for string date columns
-        self.molecule_column = self._find_molecule_column()
-        for key, dtype in df.schema.items():
-            kind = MOLECULE if key == self.molecule_column else self._kind(key, dtype)
-            if kind:
-                self.kinds[key] = kind
-        self.long_text = {
-            key
-            for key in self.of_kind(TEXT)
-            if (df[key].str.len_chars().mean() or 0) > MAX_TEXT_LENGTH
-        }
-        self.id_column = self._find_id_column()
         self._numbers: dict[str, np.ndarray] = {}
         self._codes: dict[str, tuple[np.ndarray, list[str]]] = {}
         self._labels: list | None = None
+        self.molecule_column = self._find_molecule_column()
+        for key in df.columns:
+            self._profile(key)
+        self.id_column = self._find_id_column()
+
+    def add_columns(self, new: polars.DataFrame) -> tuple[list[str], list[str]]:
+        """Add `new`'s columns, replacing any of the same name, and work out what
+        each holds. Returns the (added, replaced) column names."""
+        replaced = [key for key in new.columns if key in self.df.columns]
+        added = [key for key in new.columns if key not in replaced]
+        self.df = self.df.with_columns(new)
+        for key in new.columns:
+            # forget what a replaced column held
+            for cache in (self.kinds, self._dates, self._numbers, self._codes):
+                cache.pop(key, None)
+            self.long_text.discard(key)
+            self._profile(key)
+        return added, replaced
 
     # --- column kinds ---------------------------------------------------------------------
+
+    def _profile(self, key: str):
+        """Work out column `key`'s kind, and whether it's long text."""
+        dtype = self.df[key].dtype
+        kind = MOLECULE if key == self.molecule_column else self._kind(key, dtype)
+        if kind:
+            self.kinds[key] = kind
+        if (
+            kind == TEXT
+            and (self.df[key].str.len_chars().mean() or 0) > MAX_TEXT_LENGTH
+        ):
+            self.long_text.add(key)
 
     def _kind(self, key: str, dtype) -> str | None:
         if key in INTERNAL_COLUMNS:
