@@ -12,5 +12,3 @@ class Badelf__VaspBaderkit__SpinBadelfPbesolWarren(StagedWorkflow):
         "static-energy.vasp.prebadelf-pbesol-warren",
         "badelf.baderkit.spin-badelf",
     ]
-
-    use_database = False

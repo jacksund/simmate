@@ -86,7 +86,6 @@ class AlwaysFailsSpecialMonitorNoRetry(AlwaysFailsMonitor):
 def test_s3workflow_methods(tmp_path):
     class Customized__Testing__DummyWorkflow(S3Workflow):
         command = "echo dummy"
-        use_database = False
 
     # for shorthand reference below
     workflow = Customized__Testing__DummyWorkflow
@@ -105,7 +104,6 @@ def test_s3workflow_1(tmp_path):
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
         command = "echo dummy"
-        use_database = False
         monitor = False
 
     output = Customized__Testing__DummyWorkflow.run_config(directory=tmp_path)
@@ -118,7 +116,6 @@ def test_s3workflow_2(tmp_path):
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
         command = "echo dummy"
-        use_database = False
         polling_timestep = 0
         monitor_freq = 2
         error_handlers = [
@@ -136,7 +133,6 @@ def test_s3workflow_3(tmp_path):
     # test nonzero returncodes
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
-        use_database = False
         command = "NonexistantCommand 404"
         polling_timestep = 0
         monitor_freq = 2
@@ -149,7 +145,6 @@ def test_s3workflow_3(tmp_path):
     )
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
-        use_database = False
         command = "cd xyz123"  # will fail with "directory does not exist"
         polling_timestep = 0
         monitor_freq = 2
@@ -166,7 +161,6 @@ def test_s3workflow_4(tmp_path):
     # testing handler-triggered failures
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
-        use_database = False
         command = "echo dummy"
         polling_timestep = 0
         monitor_freq = 2
@@ -183,7 +177,6 @@ def test_s3workflow_5(tmp_path):
     # monitor failure
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
-        use_database = False
         command = "echo dummy"
         polling_timestep = 0
         monitor_freq = 2
@@ -200,7 +193,6 @@ def test_s3workflow_6(tmp_path):
     # special-monitor failure (non-terminating monitor)
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
-        use_database = False
         command = "echo dummy"
         polling_timestep = 0
         monitor_freq = 2
@@ -222,7 +214,6 @@ def test_s3workflow_7(tmp_path):
         return
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
-        use_database = False
         # the command must outlive the first monitor check, otherwise the
         # non-monitor pass catches the error first and triggers a retry
         command = f'"{sys.executable}" -c "import time; time.sleep(0.5)"'
@@ -238,7 +229,6 @@ def test_s3workflow_8(tmp_path):
     # make sure an error is raised when a file is missing
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
-        use_database = False
         command = "echo dummy"
         required_files = ["FILE_THAT_DOESNT_EXIST"]
 

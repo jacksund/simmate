@@ -38,7 +38,6 @@ __all__ = [
 class ConformerGeneration__Surflex__Fgen3d(S3Workflow):
     required_files = ["input_molecules.smi"]
     monitor = False
-    use_database = False
     command = "sf-tools.exe fgen3d input_molecules.smi output"
 
     @staticmethod
@@ -66,7 +65,6 @@ class ConformerGeneration__Surflex__ForceGen(S3Workflow):
 
     required_files = ["input_molecules.mol2"]
     monitor = False
-    use_database = False
     command = "sf-tools.exe -pscreen forcegen input_molecules.mol2 output"
 
     @staticmethod
@@ -84,8 +82,6 @@ class ConformerGeneration__Surflex__ForceGen(S3Workflow):
 
 
 class ConformerGeneration__Surflex__FullGen(Workflow):
-    use_database = False
-
     @staticmethod
     def run_config(
         molecules: list[Molecule],
@@ -114,7 +110,6 @@ class ConformerGeneration__Surflex__FullGen(Workflow):
 class Similarity__Surflex__ESimList(S3Workflow):
     required_files = ["input_molecules.sfdb", "query_molecule.mol2"]
     monitor = False
-    use_database = False
     command = (
         "sf-sim.exe -min_output 6.0 -pscreen -nfinal 1 esim_list "
         "input_molecules.sfdb query_molecule.mol2 output"
@@ -148,7 +143,6 @@ class Similarity__Surflex__ESimList(S3Workflow):
 class PrototypeGen__Surflex__DockProto(S3Workflow):
     required_files = ["ligand.mol2", "protein.mol2"]
     monitor = False
-    use_database = False
     command = "sf-dock.exe proto ligand.mol2 protein.mol2 output"
     # outputs --> output-corevox.mol2  output-protomol.mol2
 
@@ -181,7 +175,6 @@ class Docking__Surflex__DockList(S3Workflow):
         "input_molecules.sfdb",  # from ESimList
     ]
     monitor = False
-    use_database = False
     command = (
         "sf-dock.exe -min_output 6.0 -pscreen dock_list "
         "input_molecules.sfdb protomol.mol2 corevox.mol2 Protein.mol2 output"

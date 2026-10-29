@@ -21,7 +21,6 @@ class PopulationAnalysis__Bader__Badelf(PopulationAnalysis__Bader__Bader):
         "ELFCAR_w_empty_atoms",
         "POTCAR",
     ]
-    use_database = False
     use_previous_directory = ["CHGCAR", "ELFCAR", "POTCAR"]
     parent_workflows = ["population-analysis.vasp-bader.badelf-matproj"]
 

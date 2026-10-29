@@ -47,9 +47,6 @@ from simmate.workflows.utils import get_workflow
 from simmate.workflows import Workflow
 
 class Example__Python__CustomChain(Workflow):
-    
-    use_database = False
-
     @staticmethod
     def run_config(structure, directory, **kwargs):
     
@@ -69,7 +66,6 @@ A workflow can require files from a previous calculation using the `use_previous
 ``` python
 class Example__Python__FileTransfer(Workflow):
     
-    use_database = False
     use_previous_directory = ["CHGCAR", "WAVECAR"]
 
     @staticmethod
@@ -90,9 +86,6 @@ from simmate.workflows.utils import get_workflow
 from simmate.workflows import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
-    
-    use_database = False
-
     @staticmethod
     def run_config(structure, **kwargs):
     

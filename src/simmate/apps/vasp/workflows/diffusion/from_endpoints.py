@@ -40,6 +40,8 @@ class NebFromEndpointWorkflow(Workflow):
 
     description_doc_short = "runs NEB using two endpoint structures as input"
 
+    use_database = True
+
     # Oddly enough, the from_images_workflow and this workflow share a table
     # entry, so nothing needs to be done for working up results. See
     # how we pass run_id=run_id below.

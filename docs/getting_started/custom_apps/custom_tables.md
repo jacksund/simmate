@@ -65,13 +65,14 @@ simmate database update
 The most powerful feature of custom tables is connecting them to a workflow. When you do this, Simmate will **automatically save the results** of every workflow run to your table.
 
 ### 1. Update the Workflow
-In your app's `workflows.py`, set the `database_table` attribute on your workflow class:
+In your app's `workflows.py`, set `use_database = True` and the `database_table` attribute on your workflow class:
 
 ``` python
 from simmate.workflows import Workflow
 from warren_app.models import HighThroughputResult
 
 class My__Custom__Workflow(Workflow):
+    use_database = True
     database_table = HighThroughputResult  # <--- Connect the table!
     
     @staticmethod

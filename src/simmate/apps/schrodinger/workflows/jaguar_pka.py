@@ -24,8 +24,6 @@ class Pka__Schrodinger__JaguarPka(S3Workflow):
      - [Jaguar pKa Settings](https://learn.schrodinger.com/private/edu/release/current/Documentation/html/jaguar/jaguar_command_reference/jaguar_input_gen_pka.htm)
     """
 
-    use_database = False
-
     command = "jaguar run pka.py settings.in > jaguar.out"
     required_files = ["settings.in"]
 

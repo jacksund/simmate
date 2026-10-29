@@ -47,7 +47,6 @@ For instance, let's use the `echo` command to print something:
 from simmate.workflows.common import S3Workflow
 
 class Example__Echo__SayHello(S3Workflow):
-    use_database = False  # no custom table for now
     monitor = False  # no error handling yet
     command = "echo Hello"
 
@@ -67,7 +66,6 @@ from simmate.workflows.common import S3Workflow
 
 class Example__Echo__SayHello(S3Workflow):
     
-    use_database = False  # no custom table for now
     monitor = False  # no error handling yet
 
     command = "echo Hello > output.txt"  # adds "Hello" into a new file

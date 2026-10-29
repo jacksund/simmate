@@ -27,8 +27,6 @@ class Maintenance__Postgres__BackupToS3(Workflow):
         The folder within the bucket to store backups in.
     """
 
-    use_database = False  # we don't have a database table yet
-
     @staticmethod
     def run_config(
         command: str = None,

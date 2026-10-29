@@ -31,8 +31,6 @@ class StagedWorkflow(Workflow):
 
     files_to_copy = []  # Files that should be copied from one run to the next
 
-    use_database = False
-
     @classmethod
     def run_config(
         cls,

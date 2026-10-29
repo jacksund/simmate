@@ -49,11 +49,15 @@ class Workflow:
     If not set, a default structure submission form is used.
     """
 
-    use_database: bool = True
+    use_database: bool = False
     """
-    Whether to use Simmate database features or not.
-    
-    This includes calling the `_register_calculation` and 
+    Whether to use Simmate database features or not. Defaults to False.
+
+    When set to True, the workflow must have a `database_table`, which is
+    either set directly on the class or detected from the workflow's type name
+    (e.g. `StaticEnergy__...` uses the `StaticEnergy` table).
+
+    This includes calling the `_register_calculation` and
     `_update_database_with_results` methods attached to this workflow.
     
     `_register_calculation` will save a database entry before the workflow
@@ -447,8 +451,8 @@ class Workflow:
 
         raise NotImplementedError(
             "Unable to detect proper database table. Are you sure your workflow "
-            "should be using a table? If not, set `use_database=False` on your "
-            "workflow as shown in the 'basic' example workflow from the guides."
+            "should be using a table? If not, set `use_database=False` (the "
+            "default) on your workflow."
         )
 
     @classproperty

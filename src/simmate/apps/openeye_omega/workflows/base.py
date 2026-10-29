@@ -9,7 +9,6 @@ from simmate.workflows.common import S3Workflow
 class OmegaWorkflow(S3Workflow):
     required_files = ["parameters.txt", "input.smi"]
     monitor = False
-    use_database = False
 
     command: str = "oeomega classic -param parameters.txt"
     """

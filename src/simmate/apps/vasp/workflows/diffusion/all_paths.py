@@ -44,6 +44,7 @@ class NebAllPathsWorkflow(Workflow):
     ```
     """
 
+    use_database = True
     update_database_from_results = False
 
     bulk_relaxation_workflow: Workflow = None

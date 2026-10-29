@@ -17,8 +17,6 @@ class ElfAnalysis__VaspBaderkit__SpinElfAnalysisWarren(Workflow):
     Uses the Warren lab r2SCAN settings.
     """
 
-    use_database = False  # nested workflows save to DB instead
-
     @classmethod
     def run_config(
         cls,

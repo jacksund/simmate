@@ -21,6 +21,8 @@ class PwscfWorkflow(S3Workflow, StructureWorkflow):
         S3Workflow._parameter_methods + StructureWorkflow._parameter_methods
     )
 
+    use_database = True
+
     required_files = ["pwscf.in"]
 
     error_handlers = [Bfgs(), MaxSteps()]

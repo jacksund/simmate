@@ -48,9 +48,6 @@ To create a class-based workflow, inherit from `simmate.workflows.Workflow` and 
 from simmate.workflows import Workflow
 
 class Example__Basic__WritePrimitive(Workflow):
-    
-    use_database = False  # we aren't using a custom table yet
-
     @staticmethod
     def run_config(structure, directory, **kwargs):
         new_structure = structure.get_primitive_structure()

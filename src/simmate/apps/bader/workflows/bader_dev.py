@@ -7,7 +7,6 @@ from simmate.workflows.common import S3Workflow
 
 
 class PopulationAnalysis__Bader__BaderDev(S3Workflow):
-    use_database = False
     parent_workflows = ["population-analysis.vasp-bader.bader-matproj"]
     command = "bader {charge_file}"
 

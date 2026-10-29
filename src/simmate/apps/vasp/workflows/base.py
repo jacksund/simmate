@@ -33,6 +33,8 @@ class VaspWorkflow(S3Workflow, StructureWorkflow):
         S3Workflow._parameter_methods + StructureWorkflow._parameter_methods
     )
 
+    use_database = True
+
     required_files = ["INCAR", "POTCAR", "POSCAR"]
     exclude_from_archives = ["POTCAR"]
 

@@ -15,8 +15,6 @@ class Bader__VaspBaderkit__BaderWarren(Workflow):
     carries out Bader analysis on the resulting charge density.
     """
 
-    use_database = False  # nested workflows save separately
-
     @classmethod
     def run_config(
         cls,

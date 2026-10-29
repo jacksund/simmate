@@ -31,7 +31,6 @@ class CosmoConf(S3Workflow):
     command = "cosmoconf.pl -l input.txt -m {ctd_preset} > cosmoconf.out"  # -np 20
     required_files = ["input.txt", "molecule.sdf"]
     monitor = False
-    use_database = False
 
     preset: str = None
     """
@@ -87,7 +86,6 @@ class Solubility__CosmoTherm__LogPowFromCtdPreset(S3Workflow):
     command = "cosmotherm cosmotherm.inp"
     required_files = ["cosmotherm.inp"]
     monitor = False
-    use_database = False
 
     @staticmethod
     def setup(
@@ -164,6 +162,7 @@ class Solubility__CosmoTherm__LogPowFromCtdPreset(S3Workflow):
 
 
 class BioviaCosmo(Workflow):
+    use_database = True
     database_table = LogPowTable
 
     preset: str = None

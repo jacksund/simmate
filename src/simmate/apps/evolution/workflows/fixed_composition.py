@@ -17,6 +17,7 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
 
     submission_form = "fixed-composition-submission-component"
 
+    use_database = True
     database_table = FixedCompositionSearch
 
     @classmethod

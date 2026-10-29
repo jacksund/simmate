@@ -22,8 +22,6 @@ class ElfAnalysis__VaspBaderkit__ElfRadiiWarren(Workflow):
     and then carries out a Bader charge analysis and ELF analysis.
     """
 
-    use_database = False
-
     @classmethod
     def run_config(
         cls,

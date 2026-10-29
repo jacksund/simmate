@@ -22,7 +22,6 @@ class ElfAnalysisBase(Workflow):
 
     labeler_class = None
     required_files = ["CHGCAR", "ELFCAR", "POTCAR"]
-    use_database = False
     use_previous_directory = ["CHGCAR", "ELFCAR", "POTCAR"]
 
     @classmethod

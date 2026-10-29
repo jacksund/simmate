@@ -29,6 +29,8 @@ class SinglePathWorkflow(Workflow):
     have not implemented a file format for MigrationHop's yet.
     """
 
+    use_database = True
+
     endpoint_relaxation_workflow: Workflow = None
     endpoint_energy_workflow: Workflow = None
     from_images_workflow: Workflow = None

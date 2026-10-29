@@ -47,8 +47,6 @@ class Customized__Toolkit__UserConfig(Workflow):
     "VASP calculation with updated INCAR/POTCAR settings
     """
 
-    use_database = False
-
     is_hidden = True
 
     @staticmethod

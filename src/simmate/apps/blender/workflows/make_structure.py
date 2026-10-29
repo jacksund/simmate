@@ -10,8 +10,6 @@ class Visualization__Blender__Structure(S3Workflow):
     Creates a 3D model of a crystal structure in Blender.
     """
 
-    use_database = False
-
     # We don't set a static command because we build it dynamically in
     # get_final_command based on the blender path and script location.
 

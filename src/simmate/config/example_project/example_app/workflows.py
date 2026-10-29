@@ -52,6 +52,7 @@ class Example__Python__MyExample(Workflow):
     calculation. Plus the outputs are saved once it finishes
     """
 
+    use_database = True
     database_table = MyCustomTable2  # tells the workflow to use this table
 
     @staticmethod

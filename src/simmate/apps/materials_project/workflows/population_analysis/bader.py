@@ -15,6 +15,7 @@ class PopulationAnalysis__VaspBader__BaderMatproj(Workflow):
     carries out Bader analysis on the resulting charge density.
     """
 
+    use_database = True
     accuracy_rating = 3
 
     @classmethod

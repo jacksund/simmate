@@ -12,7 +12,6 @@ class PopulationAnalysis__Bader__CombineChgcars(S3Workflow):
     """
 
     is_hidden = True
-    use_database = False
 
     command = "chgsum.pl AECCAR0 AECCAR2 > chgsum.out"
     monitor = False

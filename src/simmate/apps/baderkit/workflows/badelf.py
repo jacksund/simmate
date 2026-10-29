@@ -18,7 +18,6 @@ class BadelfBase(Workflow):
 
     required_files = ["CHGCAR", "ELFCAR", "POTCAR"]
     use_previous_directory = ["CHGCAR", "ELFCAR", "POTCAR"]
-    use_database = False
     badelf_class = None
 
     @classmethod

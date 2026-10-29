@@ -9,8 +9,6 @@ class DummyProject__DummyCaclulator__DummyPreset(Workflow):
     Minimal example of a workflow
     """
 
-    use_database = False
-
     # TODO: test database registration and results
     database_table = TestCalculation
     # @classmethod
