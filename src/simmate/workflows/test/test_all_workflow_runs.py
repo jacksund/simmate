@@ -48,8 +48,8 @@ def test_all_workflow_runs(tmp_path, sample_structures):
         if state.is_completed():
             successful_flows.append(workflow_name)
 
-        # TEST S3Workflows
-        s3_flows = [
+        # TEST ShellWorkflows
+        shell_flows = [
             "relaxation.vasp.matproj",
             "relaxation.vasp.mit",
             "relaxation.vasp.mvl-neb-endpoint",
@@ -91,7 +91,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
             "electronic-structure.vasp.matproj-full",
             "electronic-structure.vasp.matproj-hse-full",  # slow
         ]
-        for workflow_name in s3_flows:
+        for workflow_name in shell_flows:
             workflow = get_workflow(workflow_name)
             state = workflow.run(
                 structure=structure,

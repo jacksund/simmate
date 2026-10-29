@@ -2,10 +2,10 @@ from pathlib import Path
 
 from simmate.apps.schrodinger.inputs import JaguarInput
 from simmate.toolkit import Molecule
-from simmate.workflows.common import S3Workflow
+from simmate.workflows.common import ShellWorkflow
 
 
-class Pka__Schrodinger__JaguarPka(S3Workflow):
+class Pka__Schrodinger__JaguarPka(ShellWorkflow):
     """
     Calculates micro-pKa of a molecule using Schrodinger's Jaguar pKa pipeline.
     By default, we use `ipkasearch=all` which means we let Jaguar automatically
@@ -23,8 +23,6 @@ class Pka__Schrodinger__JaguarPka(S3Workflow):
      - [Jaguar pKa Examples](https://learn.schrodinger.com/private/edu/release/current/Documentation/html/jaguar/jaguar_command_reference/jaguar_input_setup_pka.htm)
      - [Jaguar pKa Settings](https://learn.schrodinger.com/private/edu/release/current/Documentation/html/jaguar/jaguar_command_reference/jaguar_input_gen_pka.htm)
     """
-
-    use_database = False
 
     command = "jaguar run pka.py settings.in > jaguar.out"
     required_files = ["settings.in"]

@@ -15,6 +15,7 @@ class PopulationAnalysis__VaspBader__BaderMatproj(Workflow):
     carries out Bader analysis on the resulting charge density.
     """
 
+    use_database = True
     accuracy_rating = 3
 
     @classmethod
@@ -69,7 +70,7 @@ class StaticEnergy__Vasp__PrebaderMatproj(StaticEnergy__Vasp__Matproj):
 
     We do NOT recommend running this calculation on its own. Instead, you should
     use the full workflow, which runs this calculation AND the following bader
-    analysis for you. This S3Task is only the first step of that workflow.
+    analysis for you. This ShellWorkflow is only the first step of that workflow.
 
     See `bader.workflows.materials_project`.
     """

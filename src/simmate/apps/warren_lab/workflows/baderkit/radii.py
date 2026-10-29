@@ -22,8 +22,6 @@ class ElfAnalysis__VaspBaderkit__ElfRadiiWarren(Workflow):
     and then carries out a Bader charge analysis and ELF analysis.
     """
 
-    use_database = False
-
     @classmethod
     def run_config(
         cls,
@@ -67,7 +65,7 @@ class StaticEnergy__Vasp__PreRadiiWarren(StaticEnergy__Vasp__PbesolWarren):
 
     We do NOT recommend running this calculation on its own. Instead, you should
     use the full workflow, which runs this calculation AND the following bader
-    analysis for you. This S3Task is only the first step of that workflow.
+    analysis for you. This ShellWorkflow is only the first step of that workflow.
 
     See `bader.workflows.materials_project`.
     """

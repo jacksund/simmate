@@ -2,15 +2,13 @@ import json
 from pathlib import Path
 
 from simmate.apps.blender.config import get_blender_command
-from simmate.workflows.common import S3Workflow
+from simmate.workflows.common import ShellWorkflow
 
 
-class Visualization__Blender__Structure(S3Workflow):
+class Visualization__Blender__Structure(ShellWorkflow):
     """
     Creates a 3D model of a crystal structure in Blender.
     """
-
-    use_database = False
 
     # We don't set a static command because we build it dynamically in
     # get_final_command based on the blender path and script location.
@@ -56,6 +54,6 @@ class Visualization__Blender__Structure(S3Workflow):
         if expected_file.exists():
             return {"file": expected_file}
         else:
-            # If the file didn't write, something went wrong, but S3Workflow
+            # If the file didn't write, something went wrong, but ShellWorkflow
             # might have already caught an error. If not, this serves as a check.
             return {}

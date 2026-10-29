@@ -29,12 +29,12 @@ The `@workflow` decorator also accepts several optional parameters to help with 
 - `app_name`: The name of the app this workflow belongs to (defaults to "Basic")
 - `type_name`: The type of analysis (defaults to "Toolkit")
 - `use_database`: Whether to save results to a database table (defaults to `False`)
+- `is_api_worker_safe`: Whether API workers can run this workflow (defaults to `False`). See [Running on API Workers](#running-on-api-workers).
 
 ``` python
 @workflow(
     app_name="Math",
     type_name="Basic",
-    use_database=False,
 )
 def add(x, y, **kwargs):
     return x + y
@@ -57,9 +57,6 @@ For example (using the same function as above):
 from simmate.workflows import Workflow
 
 class Math__Basic__Add(Workflow):
-
-    use_database = False  # we don't have a database table yet
-
     @staticmethod
     def run_config(x, y, **kwargs):
         return x + y
@@ -68,7 +65,7 @@ result = Math__Basic__Add.run(x=1, y=2)
 ```
 
 !!! tip
-    Stick to `@workflow` for simple utilities. Class-based workflows are more important for sharing advanced features. For example, this is how we build reusable classes such as `VaspWorkflow` or `S3Workflow`, which are cover elsewhere in our guides.
+    Stick to `@workflow` for simple utilities. Class-based workflows are more important for sharing advanced features. For example, this is how we build reusable classes such as `VaspWorkflow` or `ShellWorkflow`, which are cover elsewhere in our guides.
 
 !!! example
 
@@ -76,9 +73,6 @@ result = Math__Basic__Add.run(x=1, y=2)
 
     ``` python
     class Example__Python__Add100(Workflow):
-        
-        use_database = False # we don't have a database table yet
-
         constant = 100
 
         @classmethod
@@ -107,6 +101,8 @@ Simmate automatically passes default parameters to your `run_config` or decorate
 - `run_id`: A unique ID for tracking the run (e.g., in the database).
 - `directory`: The `pathlib.Path` where the calculation takes place.
 - `compress_output`: Whether to zip the directory when finished.
+- `upload_output`: Whether to upload the results to S3 when finished.
+- `delete_output`: Whether to delete the directory when finished.
 - `source`: Information about where the inputs came from (experimental).
 
 You should include `**kwargs` in your function signature to accept these parameters, even if you don't use them.
@@ -136,9 +132,6 @@ from simmate.toolkit import Structure
 from simmate.workflows import Workflow
 
 class Example__Python__GetVolume(Workflow):
-    
-    use_database = False  # we don't have a database table yet
-
     @staticmethod
     def run_config(structure, **kwargs):
         assert type(structure) == Structure  # (1) 
@@ -163,9 +156,6 @@ Of all the default parameters (described above in `**kwargs`), you'll likely get
 from simmate.workflows import Workflow
 
 class Example__Python__WriteFile(Workflow):
-    
-    use_database = False  # we don't have a database table yet
-
     @staticmethod
     def run_config(directory, **kwargs):
         output_file = directory / "my_output.txt" # (1)
@@ -234,6 +224,8 @@ class StaticEnergy__Vasp__MyCustomPreset(original_workflow):
 
 ## Linking a Database Table
 
+Workflows do not save to the database by default (`use_database = False`). To save results, set `use_database = True` on your workflow and make sure it has a database table to save to. Note that app base classes like `VaspWorkflow` already set `use_database = True` for you.
+
 Many workflows will want to store common types of data (such as static energy or relaxation data). If you want to use these tables automatically, you simply need to ensure your `name_type` matches what is available.
 
 For example, if we look at a static-energy calculation, you will see the `StaticEnergy` database table is automatically used because the name of our workflow starts with `StaticEnergy`:
@@ -251,14 +243,39 @@ If you want to build or use a custom database, you must first have a registered 
 from my_project.models import MyCustomTable
 
 class Example__Python__MyFavoriteSettings(Workflow):
+    use_database = True
     database_table = MyCustomTable
+```
+
+------------------------------------------------------------
+
+## Running on API Workers
+
+API workers pick up jobs through the Simmate REST API (`simmate compute worker start --api`), so they have no database connection and no shared filesystem. Only workflows that opt in with `is_api_worker_safe = True` are given to API workers. All other workflows are left for regular workers.
+
+A workflow is safe for API workers when its run needs nothing but its input parameters and simply returns its results. Leave this setting off if your workflow:
+
+- queries or writes to the database during the run
+- needs files from other runs (i.e. `use_previous_directory`)
+- submits other workflows (e.g. via `run_cloud`)
+- needs credentials that only the server has
+
+For now, this also excludes workflows with `use_database = True`.
+
+``` python
+class Example__Python__MyFavoriteSettings(Workflow):
+    is_api_worker_safe = True
+
+    @staticmethod
+    def run_config(x, y, **kwargs):
+        return x + y
 ```
 
 ------------------------------------------------------------
 
 ## Workflows that Call a Command
 
-In many cases, you may have a workflow that runs a command or some external program and then reads the results from output files. An example of this would be an energy calculation using VASP. If your workflow involves calling another program, you should read about the "S3" workflow (`S3Workflow`) which helps with writing input files, calling other programs, and handling errors.
+In many cases, you may have a workflow that runs a command or some external program and then reads the results from output files. An example of this would be an energy calculation using VASP. If your workflow involves calling another program, you should read about the shell workflow (`ShellWorkflow`) which helps with writing input files, calling other programs, and handling errors.
 
 ------------------------------------------------------------
 

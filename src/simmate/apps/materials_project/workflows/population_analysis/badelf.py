@@ -19,6 +19,7 @@ class PopulationAnalysis__VaspBader__BadelfMatproj(Workflow):
     as a reference when partitioning.
     """
 
+    use_database = True
     accuracy_rating = 3
 
     @classmethod

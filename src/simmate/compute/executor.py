@@ -45,6 +45,7 @@ class SimmateExecutor:
         *args,
         tags: list[str] = [],
         name: str = None,
+        is_api_worker_safe: bool = False,
         **kwargs,
     ) -> WorkItem:
 
@@ -86,6 +87,7 @@ class SimmateExecutor:
             kwargs=cloudpickle.dumps(kwargs),
             tags=tags,  # should be json serializable already
             name=name,
+            is_api_worker_safe=is_api_worker_safe,
         )
 
         # and return the workitem/future for use

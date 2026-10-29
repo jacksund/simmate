@@ -19,8 +19,6 @@ class ElectronicStructureWorkflow(Workflow):
     use HSE instead.
     """
 
-    use_database = False
-
     static_energy_workflow: Workflow = None
     band_structure_workflow: Workflow = None
     density_of_states_workflow: Workflow = None

@@ -17,7 +17,7 @@ from pathlib import Path
 from simmate.toolkit import Molecule
 from simmate.toolkit.file_converters import SmilesAdapter
 from simmate.workflows import Workflow
-from simmate.workflows.common import S3Workflow
+from simmate.workflows.common import ShellWorkflow
 
 __all__ = [
     "ConformerGeneration__Surflex__Fgen3d",
@@ -35,10 +35,9 @@ __all__ = [
 # then combine together in a bigger workflow
 
 
-class ConformerGeneration__Surflex__Fgen3d(S3Workflow):
+class ConformerGeneration__Surflex__Fgen3d(ShellWorkflow):
     required_files = ["input_molecules.smi"]
     monitor = False
-    use_database = False
     command = "sf-tools.exe fgen3d input_molecules.smi output"
 
     @staticmethod
@@ -55,7 +54,7 @@ class ConformerGeneration__Surflex__Fgen3d(S3Workflow):
         SmilesAdapter.to_file_from_toolkits(molecules, input_filename)
 
 
-class ConformerGeneration__Surflex__ForceGen(S3Workflow):
+class ConformerGeneration__Surflex__ForceGen(ShellWorkflow):
     """
     Force Field Based Conformational Generation (ForceGen)
 
@@ -66,7 +65,6 @@ class ConformerGeneration__Surflex__ForceGen(S3Workflow):
 
     required_files = ["input_molecules.mol2"]
     monitor = False
-    use_database = False
     command = "sf-tools.exe -pscreen forcegen input_molecules.mol2 output"
 
     @staticmethod
@@ -84,8 +82,6 @@ class ConformerGeneration__Surflex__ForceGen(S3Workflow):
 
 
 class ConformerGeneration__Surflex__FullGen(Workflow):
-    use_database = False
-
     @staticmethod
     def run_config(
         molecules: list[Molecule],
@@ -111,10 +107,9 @@ class ConformerGeneration__Surflex__FullGen(Workflow):
 # similar to a given "query" (or known "ligand")
 
 
-class Similarity__Surflex__ESimList(S3Workflow):
+class Similarity__Surflex__ESimList(ShellWorkflow):
     required_files = ["input_molecules.sfdb", "query_molecule.mol2"]
     monitor = False
-    use_database = False
     command = (
         "sf-sim.exe -min_output 6.0 -pscreen -nfinal 1 esim_list "
         "input_molecules.sfdb query_molecule.mol2 output"
@@ -145,10 +140,9 @@ class Similarity__Surflex__ESimList(S3Workflow):
 # and corevox that will be used for high-throughput docking in the next step
 
 
-class PrototypeGen__Surflex__DockProto(S3Workflow):
+class PrototypeGen__Surflex__DockProto(ShellWorkflow):
     required_files = ["ligand.mol2", "protein.mol2"]
     monitor = False
-    use_database = False
     command = "sf-dock.exe proto ligand.mol2 protein.mol2 output"
     # outputs --> output-corevox.mol2  output-protomol.mol2
 
@@ -172,7 +166,7 @@ class PrototypeGen__Surflex__DockProto(S3Workflow):
 # STEP 4: Docking many molecules to a protein
 
 
-class Docking__Surflex__DockList(S3Workflow):
+class Docking__Surflex__DockList(ShellWorkflow):
     required_files = [
         "ligand.mol2",  # from user
         "Protein.mol2",  # from user
@@ -181,7 +175,6 @@ class Docking__Surflex__DockList(S3Workflow):
         "input_molecules.sfdb",  # from ESimList
     ]
     monitor = False
-    use_database = False
     command = (
         "sf-dock.exe -min_output 6.0 -pscreen dock_list "
         "input_molecules.sfdb protomol.mol2 corevox.mol2 Protein.mol2 output"
@@ -207,7 +200,7 @@ class Docking__Surflex__DockList(S3Workflow):
 # STEP 5: Combines all workflows above into a single one.
 
 
-class Docking__Surflex__FullFlow(S3Workflow):
+class Docking__Surflex__FullFlow(ShellWorkflow):
     @staticmethod
     def _run_config(
         ligand: Molecule,

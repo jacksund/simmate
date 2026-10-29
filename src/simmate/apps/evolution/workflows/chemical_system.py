@@ -29,6 +29,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
 
     description_doc_short = "hull diagram for a two-element system (e.g. Na-Cl)"
 
+    use_database = True
     database_table = ChemicalSystemSearch
 
     fixed_comp_workflow = StructurePrediction__Toolkit__FixedComposition

@@ -15,8 +15,6 @@ class Bader__VaspBaderkit__BaderWarren(Workflow):
     carries out Bader analysis on the resulting charge density.
     """
 
-    use_database = False  # nested workflows save separately
-
     @classmethod
     def run_config(
         cls,
@@ -51,7 +49,7 @@ class StaticEnergy__Vasp__PrebaderWarren(StaticEnergy__Vasp__PbesolWarren):
 
     We do NOT recommend running this calculation on its own. Instead, you should
     use the full workflow, which runs this calculation AND the following bader
-    analysis for you. This S3Task is only the first step of that workflow.
+    analysis for you. This ShellWorkflow is only the first step of that workflow.
 
     """
 

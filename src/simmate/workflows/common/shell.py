@@ -13,11 +13,12 @@ from simmate.workflows.utils import make_error_archive
 from ..core import ErrorHandler, Workflow
 
 
-class S3Workflow(Workflow):
+class ShellWorkflow(Workflow):
     """
-    The base Supervised-Staged-Shell that many workflows inherit from. This class
-    encapulates logic for running external programs (like VASP), fixing common
-    errors during a calculation, and working up the results.
+    The base class for workflows that run an external program (like VASP)
+    through a shell command. This class encapulates logic for writing inputs
+    (`setup`), running and supervising the command (`execute`), fixing common
+    errors during a calculation, and working up the results (`workup`).
     """
 
     _parameter_methods = Workflow._parameter_methods + ["setup", "get_final_command"]
@@ -58,7 +59,7 @@ class S3Workflow(Workflow):
 
         The inputs for this function are dynamically pulled from the parameters
         passed to `workflow.run_config`, so this method should not be used directly.
-        The default `run_config` of the `S3Workflow` class handles this for you.
+        The default `run_config` of the `ShellWorkflow` class handles this for you.
         """
         # This is a default method, which is mention to be overwritten in
         # some subclasses.
@@ -274,7 +275,7 @@ class S3Workflow(Workflow):
         allows for some pre-processing, such as writing input files or any other
         analysis.
 
-        When writing a custom S3Task, you can overwrite this method. The only
+        When writing a custom ShellWorkflow, you can overwrite this method. The only
         criteria is that you...
 
         1. include `directory` as the 1st input parameter and add `**kwargs`
@@ -310,7 +311,7 @@ class S3Workflow(Workflow):
         allows for some pre-processing, such as writing input files or any other
         analysis.
 
-        When writing a custom S3Task, you can overwrite this method. The only
+        When writing a custom ShellWorkflow, you can overwrite this method. The only
         criteria is that you...
 
         1. include `directory` as the 1st input parameter and add `**kwargs`
@@ -701,7 +702,7 @@ class S3Workflow(Workflow):
         etc. This should return the result of the entire job, such as a
         the final structure or final energy calculated.
 
-        When writing a custom S3Task, you can overwrite this method. The only
+        When writing a custom ShellWorkflow, you can overwrite this method. The only
         criteria is that you...
 
         1. include `directory` as an input parameters
@@ -722,7 +723,7 @@ class S3Workflow(Workflow):
         """
 
 
-# Custom errors that indicate exactly what causes the S3Task to exit.
+# Custom errors that indicate exactly what causes the ShellWorkflow to exit.
 
 
 class MaxCorrectionsError(Exception):

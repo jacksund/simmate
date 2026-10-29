@@ -18,8 +18,6 @@ from simmate.workflows.utils import get_workflow
 
 
 class ClusterExpansion__Clease__BulkStructure(Workflow):
-    use_database = False
-
     @staticmethod
     def run_config(
         # template structure loaded from file

@@ -13,7 +13,6 @@ class WebApiWorkflow(Workflow):
     as microservices elsewhere.
     """
 
-    use_database = False
     _parameter_methods = Workflow._parameter_methods + ["_get_payload"]
 
     api_url: str = None

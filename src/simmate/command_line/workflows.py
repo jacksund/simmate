@@ -251,7 +251,7 @@ def setup_only(
     Generates input files for a workflow without executing the simulation.
 
     This is useful for reviewing or manually modifying input files before
-    running a job. Supported primarily by `S3Workflow` types (e.g., VASP,
+    running a job. Supported primarily by `ShellWorkflow` types (e.g., VASP,
     Quantum Espresso).
     """
 
@@ -276,13 +276,13 @@ def setup_only(
 
     # Not all workflows have a single input because some are NestWorkflows,
     # meaning they are made of multiple smaller workflows.
-    from simmate.workflows.common import S3Workflow
+    from simmate.workflows.common import ShellWorkflow
 
-    if issubclass(workflow, S3Workflow):
+    if issubclass(workflow, ShellWorkflow):
         workflow.setup(**kwargs_cleaned)
     else:
         raise typer.BadParameter(
-            "This is not a S3-based workflow. It is likely a NestedWorkflow, "
+            "This is not a shell workflow. It is likely a NestedWorkflow, "
             "meaning it is made up of multiple smaller workflows. We have not "
             "added a setup-only feature for these yet. "
         )
@@ -362,7 +362,7 @@ def archive_old_runs(
     ),
 ):
     """
-    Compresses old simulation folders (matching `simmate-task-*`) into ZIP archives.
+    Compresses old workflow run folders (named by their run_id) into ZIP archives.
 
     This helps keep your project directory clean while preserving data from
     older runs.

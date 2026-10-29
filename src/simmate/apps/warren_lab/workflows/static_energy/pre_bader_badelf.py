@@ -12,7 +12,7 @@ class StaticEnergy__Vasp__PrebadelfPbesolWarren(StaticEnergy__Vasp__PbesolWarren
 
     We do NOT recommend running this calculation on its own. Instead, you should
     use the full workflow, which runs this calculation AND the following bader
-    analysis for you. This S3Task is only the first step of that workflow.
+    analysis for you. This ShellWorkflow is only the first step of that workflow.
     """
 
     potcar_mappings = PBE_GW_POTCAR_MAPPINGS
@@ -38,7 +38,7 @@ class StaticEnergy__Vasp__PrebadelfHseWarren(StaticEnergy__Vasp__HseWarren):
 
     We do NOT recommend running this calculation on its own. Instead, you should
     use the full workflow, which runs this calculation AND the following bader
-    analysis for you. This S3Task is only the first step of that workflow.
+    analysis for you. This ShellWorkflow is only the first step of that workflow.
     """
 
     potcar_mappings = PBE_GW_POTCAR_MAPPINGS
@@ -64,7 +64,7 @@ class StaticEnergy__Vasp__PrebadelfScanWarren(StaticEnergy__Vasp__ScanWarren):
 
     We do NOT recommend running this calculation on its own. Instead, you should
     use the full workflow, which runs this calculation AND the following bader
-    analysis for you. This S3Task is only the first step of that workflow.
+    analysis for you. This ShellWorkflow is only the first step of that workflow.
     """
 
     potcar_mappings = PBE_GW_POTCAR_MAPPINGS

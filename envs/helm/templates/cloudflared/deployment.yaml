@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: simmate-cloudflared
-          image: docker.io/cloudflare/cloudflared:latest
+          image: docker.io/cloudflare/cloudflared:2026.10.5
           args:
             - tunnel
             - --no-autoupdate

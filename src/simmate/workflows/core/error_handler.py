@@ -14,7 +14,7 @@ from django.utils.functional import classproperty
 class ErrorHandler(ABC):
     """
     Abstract base class for an ErrorHandler. These handlers should be used in
-    combination with S3Tasks.
+    combination with ShellWorkflows.
 
     As an example of creating a custom error handler for your tasks:
     ``` python
@@ -60,7 +60,7 @@ class ErrorHandler(ABC):
     killing the running process. For example, some programs allow us to create
     a STOP file or keyword that tells the program to wrap things up and finish.
     
-    By default, this is False, which means that the S3Task._terminate_job 
+    By default, this is False, which means that the ShellWorkflow._terminate_job 
     method will be used to kill a command.
     
     If set to True, make sure the class has a custom `terminate_job` method.
@@ -166,7 +166,7 @@ class ErrorHandler(ABC):
         """
         Signals for the end of a job or forces the end of the job. This method
         will only be used if `has_custom_termination` is set to True. Otherwise,
-        the S3Task will handle job termination. Higher level features always
+        the ShellWorkflow will handle job termination. Higher level features always
         pass three parameters (directory, process, and command) to help with
         different scenarios needed to end a job -- but it is optional to use
         them (if you don't make sure to include **kwargs though).

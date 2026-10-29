@@ -3,6 +3,7 @@ import inspect
 import json
 import platform
 import re
+import shutil
 import uuid
 from functools import wraps
 from pathlib import Path
@@ -49,11 +50,15 @@ class Workflow:
     If not set, a default structure submission form is used.
     """
 
-    use_database: bool = True
+    use_database: bool = False
     """
-    Whether to use Simmate database features or not.
-    
-    This includes calling the `_register_calculation` and 
+    Whether to use Simmate database features or not. Defaults to False.
+
+    When set to True, the workflow must have a `database_table`, which is
+    either set directly on the class or detected from the workflow's type name
+    (e.g. `StaticEnergy__...` uses the `StaticEnergy` table).
+
+    This includes calling the `_register_calculation` and
     `_update_database_with_results` methods attached to this workflow.
     
     `_register_calculation` will save a database entry before the workflow
@@ -61,8 +66,30 @@ class Workflow:
     submitted/started but haven't finished yet.
     
     `_update_database_with_results` saves the output of the `workup` method
-    to the database entry -- and this the same entry that was created by 
+    to the database entry -- and this the same entry that was created by
     `_register_calculation`.
+    """
+
+    is_api_worker_safe: bool = False
+    """
+    Whether this workflow can be ran by API workers. Defaults to False.
+
+    API workers pull jobs through the Simmate REST API, so they have no
+    database connection and no shared filesystem. A workflow is only safe for
+    them when its run needs nothing but its input parameters and simply returns
+    its results. This rules out workflows that...
+
+    - query or write to the database during the run
+    - need files from other runs (i.e. `use_previous_directory`)
+    - submit other workflows (e.g. via `run_cloud`)
+    - need credentials that only the server has
+
+    For now, this also rules out `use_database=True` workflows because `run`
+    registers and saves results through the database on the worker.
+
+    When set to True, runs submitted with `run_cloud` are marked so that the
+    server will hand them to API workers. Otherwise, only regular workers will
+    pick them up.
     """
 
     _parameter_methods: list[str] = ["run_config", "run"]
@@ -75,7 +102,8 @@ class Workflow:
     """
     List of filenames that should be deleted when compressing the output files
     to a zip file (i.e. when compress_output=True). Any file name is searched
-    for recursively in all subdirectories and removed.
+    for recursively in all subdirectories and removed. Note, these files are
+    removed from the original directory too (not just the zip file).
     
     For example, VASP calculations remove all POTCAR files from archives.
     """
@@ -154,6 +182,8 @@ class Workflow:
         run_id: str = None,
         directory: Path | str = None,
         compress_output: bool = False,
+        upload_output: bool = False,
+        delete_output: bool = False,
         source: dict = None,
         submitted_by_id: int = None,
         **kwargs,
@@ -177,15 +207,25 @@ class Workflow:
             is used. We recommend leaving this at default.
 
          - `directory`:
-             The directory to run everything in. This is passed to the ulitities
-             function simmate.ulitities.get_directory, which generates a
-             unique foldername if not provided. This will be converted into
-             a `pathlib.Path` object.
+             The directory to run everything in. If not provided, a folder
+             named after the `run_id` is made inside `settings.scratch_dir`.
+             This will be converted into a `pathlib.Path` object.
 
         - `compress_output`:
             Whether to compress the directory to a zip file at the end of the
-            task run. After compression, it will also delete the directory.
+            task run. The original directory is kept (see `delete_output`).
             The default is False.
+
+        - `upload_output`:
+            Whether to upload the results to the S3 bucket set in
+            `settings.s3` at the end of the task run. The zip file is uploaded
+            if `compress_output=True`, otherwise the full directory is. Results
+            are stored under `workflow_runs/<workflow-name>/<run_id>`.
+            The default is False.
+
+        - `delete_output`:
+            Whether to delete the directory at the end of the task run. If a
+            zip file was made, it is kept. The default is False.
 
         - `source`: (EXPERIMENTAL FEATURE)
             The source is JSON-like information that indicates where the
@@ -195,11 +235,23 @@ class Workflow:
 
         """
 
+        # check for a bucket up front, so we don't find out after the run
+        if upload_output:
+            from simmate.database.external_connectors.s3 import SimmateS3Bucket
+
+            if not SimmateS3Bucket.bucket:
+                raise Exception(
+                    "You set `upload_output=True`, but no S3 bucket is "
+                    "configured. Make sure `settings.s3.bucket` is set."
+                )
+
         logger.info(f"Starting '{cls.name_full}'")
         kwargs_cleaned, database_entry = cls._load_input_and_register(
             run_id=run_id,
             directory=directory,
             compress_output=compress_output,
+            upload_output=upload_output,
+            delete_output=delete_output,
             source=source,
             started_at=timezone.now(),
             status="Running",
@@ -239,14 +291,28 @@ class Workflow:
                 run_id=kwargs_cleaned["run_id"],
             )
 
-        # if requested, compresses the directory to a zip file and then removes
-        # the directory.
+        directory = kwargs_cleaned["directory"]
+
         if compress_output:
             logger.info("Compressing result to a ZIP file.")
-            make_archive(
-                directory=kwargs_cleaned["directory"],
+            archive_file = make_archive(
+                directory=directory,
                 files_to_exclude=cls.exclude_from_archives,
+                delete_directory=False,
             )
+
+        # uploads the zip file if one was made, otherwise the full directory
+        if upload_output:
+            s3_key = f"workflow_runs/{cls.name_full}/{kwargs_cleaned['run_id']}"
+            logger.info(f"Uploading result to s3://{SimmateS3Bucket.bucket}/{s3_key}")
+            if compress_output:
+                SimmateS3Bucket.upload_file(archive_file, f"{s3_key}.zip")
+            else:
+                SimmateS3Bucket.upload_directory(directory, s3_prefix=s3_key)
+
+        if delete_output:
+            logger.info("Deleting the workflow directory.")
+            shutil.rmtree(directory)
 
         # If we made it this far, we successfully completed the workflow run
         logger.info(f"Completed '{cls.name_full}'")
@@ -306,6 +372,7 @@ class Workflow:
             cls.run,
             tags=tags,
             name=cls.name_full,
+            is_api_worker_safe=cls.is_api_worker_safe,
             **parameters_serialized,
         )
 
@@ -447,8 +514,8 @@ class Workflow:
 
         raise NotImplementedError(
             "Unable to detect proper database table. Are you sure your workflow "
-            "should be using a table? If not, set `use_database=False` on your "
-            "workflow as shown in the 'basic' example workflow from the guides."
+            "should be using a table? If not, set `use_database=False` (the "
+            "default) on your workflow."
         )
 
     @classproperty
@@ -702,6 +769,7 @@ class Workflow:
         """
         return dict(
             use_database=cls.use_database,
+            is_api_worker_safe=cls.is_api_worker_safe,
             name_full=cls.name_full,
             parameter_names=cls.parameter_names,
             parameter_names_required=cls.parameter_names_required,
@@ -839,14 +907,25 @@ class Workflow:
 
         # ---------------------------------------------------------------------
 
-        # STEP 3: Load the directory (and copy over from an old directory if necessary)
+        # STEP 3: Set the run_id
+
+        parameters_cleaned["run_id"] = (
+            parameters_cleaned.get("run_id", None) or cls._get_new_run_id()
+        )
+
+        # ---------------------------------------------------------------------
+
+        # STEP 4: Load the directory (and copy over from an old directory if necessary)
 
         if setup_directory:
             # Start by creating a new directory or grabbing the one given. We create
             # this directory immediately (rather than just passing the name to the
-            # S3Task). We do this because NestedWorkflows often use a parent directory
-            # to organize results.
-            directory = parameters.get("directory", None)
+            # ShellWorkflow). We do this because NestedWorkflows often use a parent directory
+            # to organize results. If no directory was given, the folder is named
+            # after the run_id so it matches the database entry and S3 key.
+            directory = parameters.get("directory", None) or (
+                Path(settings.scratch_dir) / str(parameters_cleaned["run_id"])
+            )
             directory_cleaned = get_directory(directory)
 
             # if this workflow requires input files from a previous directory
@@ -857,20 +936,35 @@ class Workflow:
 
                 # alternatively, the past directory should be stored on the
                 # primary input object. This is the preferred method, but the
-                # previous_directory input parameter takes priority
+                # previous_directory input parameter takes priority.
+                # Note: getattr is used because the primary input may be missing
+                # or a type without a database_object (e.g. Molecule)
+                database_object = getattr(primary_input, "database_object", None)
                 if (
                     not previous_directory
-                    and primary_input.database_object
-                    and hasattr(primary_input.database_object, "directory")
+                    and database_object
+                    and hasattr(database_object, "directory")
                 ):
-                    previous_directory = Path(primary_input.database_object.directory)
+                    previous_directory = Path(database_object.directory)
 
                 # at least one of two inputs above needs to be set
                 if not previous_directory:
-                    raise Exception(
-                        "This workflow requires either an input from a past calculation "
-                        "or a previous_directory set to run but neither was given."
+                    message = (
+                        f"The '{cls.name_full}' workflow needs input files from a "
+                        "previous calculation, but no previous directory was found. "
+                        "Either (1) give a primary input (e.g. a structure) that "
+                        "was loaded from a past calculation in the database, or "
+                        "(2) set the `previous_directory` parameter to the folder "
+                        "that holds those files. Note that `directory` is where "
+                        "the new run is written, not where input files are read from."
                     )
+                    if cls.parent_workflows:
+                        message += (
+                            " This workflow is usually run as part of a parent "
+                            "workflow, so you may want one of these instead: "
+                            f"{', '.join(cls.parent_workflows)}"
+                        )
+                    raise Exception(message)
 
                 # If "True" was given, then we copy over all files except
                 # simmate ones (we have no need for the summaries or error archives)
@@ -903,12 +997,8 @@ class Workflow:
 
         # ---------------------------------------------------------------------
 
-        # STEP 4: Register the calculation so the user can follow along in the UI
+        # STEP 5: Register the calculation so the user can follow along in the UI
         # and also see which structures/runs have been submitted aready.
-
-        parameters_cleaned["run_id"] = (
-            parameters_cleaned.get("run_id", None) or cls._get_new_run_id()
-        )
 
         calculation = (
             cls._register_calculation(status=status, **parameters_cleaned)
@@ -918,7 +1008,7 @@ class Workflow:
 
         # ---------------------------------------------------------------------
 
-        # STEP 5: Write metadata file for user reference
+        # STEP 6: Write metadata file for user reference
 
         if write_metadata:
             # convert back to json format. We convert back rather than use the original
@@ -1356,6 +1446,7 @@ def workflow(
     app_name: str = "Basic",
     type_name: str = "Toolkit",
     use_database: bool = False,
+    is_api_worker_safe: bool = False,
 ):
     """
     A decorator that converts a function into a workflow class.
@@ -1386,6 +1477,7 @@ def workflow(
                 {
                     "run_config": staticmethod(original_function),
                     "use_database": use_database,
+                    "is_api_worker_safe": is_api_worker_safe,
                 },
             )
 

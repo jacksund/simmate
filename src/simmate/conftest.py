@@ -24,7 +24,7 @@ from simmate.database.mixins import Spacegroup
 from simmate.toolkit import Composition, Structure, base_data_types
 from simmate.utils import get_directory
 from simmate.website.test_app.models import TestStructure
-from simmate.workflows.common import S3Workflow
+from simmate.workflows.common import ShellWorkflow
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -32,7 +32,7 @@ def setup_scratch_directory(tmp_path_factory):
     """
     Sets the scratch_dir setting to a temporary directory for the duration of
     the test session. This ensures that any workflow runs or tasks that create
-    "simmate-task-*" folders do so in a temporary location rather than the
+    run or "simmate-tmp-*" folders do so in a temporary location rather than the
     current working directory.
     """
     scratch_dir = tmp_path_factory.mktemp("simmate_scratch")
@@ -327,7 +327,7 @@ class SimmateMockHelper:
         # We also don't want to run any commands -- for any task. We skip these
         # by having the base S3task.execute just return an empty list (meaning
         # no corrections were made).
-        mocker.patch.object(S3Workflow, "execute", return_value=[])
+        mocker.patch.object(ShellWorkflow, "execute", return_value=[])
 
         # Don't check for proper input files because POTCARs will be missing
-        mocker.patch.object(S3Workflow, "_check_input_files", return_value=None)
+        mocker.patch.object(ShellWorkflow, "_check_input_files", return_value=None)

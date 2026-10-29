@@ -6,7 +6,7 @@ from django.utils.functional import classproperty
 from simmate.apps.vasp.inputs import Incar, Kpoints, Poscar, Potcar
 from simmate.config import settings
 from simmate.toolkit import Structure
-from simmate.workflows.common import S3Workflow, StructureWorkflow
+from simmate.workflows.common import ShellWorkflow, StructureWorkflow
 
 
 def get_default_parallel_settings():
@@ -28,10 +28,12 @@ def get_default_parallel_settings():
         return {}
 
 
-class VaspWorkflow(S3Workflow, StructureWorkflow):
+class VaspWorkflow(ShellWorkflow, StructureWorkflow):
     _parameter_methods = (
-        S3Workflow._parameter_methods + StructureWorkflow._parameter_methods
+        ShellWorkflow._parameter_methods + StructureWorkflow._parameter_methods
     )
+
+    use_database = True
 
     required_files = ["INCAR", "POTCAR", "POSCAR"]
     exclude_from_archives = ["POTCAR"]

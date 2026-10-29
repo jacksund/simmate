@@ -15,8 +15,8 @@ def get_directory(directory: Path | str = None) -> Path:
     formats. This includes... None, a string, or a TemporaryDirectory instance.
     Based on the input, this function does the following:
       - `None`:
-          returns the full path to a new folder inside python's
-          current working directory named "simmate-task-<randomID>"
+          returns the full path to a new temporary folder inside
+          `settings.scratch_dir` named "simmate-tmp-<randomID>"
       - `str` or `pathlib.Path`:
           makes the directory if it doesnt exist and then returns the full path
 
@@ -31,17 +31,13 @@ def get_directory(directory: Path | str = None) -> Path:
         The full path to the initialized directory as a `pathlib.Path` object
     """
 
-    # if no directory was provided, we create a new folder within the current
-    # working directory. All of these folders are named randomly.
-    # Note: we can't name these nicely (like simmate-task-001) because that will
-    # introduce race conditions when making these folders in production.
+    # if no directory was provided, we create a randomly-named folder within the
+    # scratch directory. Random names (rather than simmate-tmp-001, etc.) avoid
+    # race conditions between parallel callers. Note, mkdtemp never deletes it.
     if not directory:
-        # create a directory in the current working directory. Note, even though
-        # we are creating a "TemporaryDirectory" here, this directory is never
-        # actually deleted. Note, Path() gives the working directory
         from simmate.config import settings
 
-        directory_new = mkdtemp(prefix="simmate-task-", dir=settings.scratch_dir)
+        directory_new = mkdtemp(prefix="simmate-tmp-", dir=settings.scratch_dir)
         directory_cleaned = Path(directory_new)
 
     # otherwise make sure the directory the user provided exists and if it does
@@ -224,15 +220,30 @@ def copy_directory(
     return directory_new_cleaned
 
 
-def make_archive(directory: Path, files_to_exclude: list[str] = []):
+def make_archive(
+    directory: Path,
+    files_to_exclude: list[str] = [],
+    delete_directory: bool = True,
+) -> Path:
     """
     Compresses the directory to a zip file of the same name. After compressing,
-    it then deletes the original directory.
+    it then deletes the original directory (unless `delete_directory=False`).
 
     #### Parameters
 
     - `directory`:
         Path to the folder that should be archived
+    - `files_to_exclude`:
+        File names to remove from the directory before archiving. These are
+        searched for recursively.
+    - `delete_directory`:
+        Whether to delete the original directory after archiving. The
+        default is True.
+
+    #### Returns
+
+    - `archive_file`:
+        Path to the new zip file.
     """
 
     directory_full = directory.absolute()
@@ -247,7 +258,7 @@ def make_archive(directory: Path, files_to_exclude: list[str] = []):
     # it writes the archive in the working directory, but we update it to use the
     # the same directory as the folder being archived. The format is also set
     # to zip.
-    shutil.make_archive(
+    archive_file = shutil.make_archive(
         # By default I choose within the current directory and save
         # it as the same name of the directory (+ zip ending)
         base_name=directory_full,
@@ -259,7 +270,10 @@ def make_archive(directory: Path, files_to_exclude: list[str] = []):
         base_dir=directory_full.name,
     )
     # now remove the directory we just archived
-    shutil.rmtree(directory)
+    if delete_directory:
+        shutil.rmtree(directory)
+
+    return Path(archive_file)
 
 
 def empty_directory(directory: Path, files_to_keep: list[Path] = []):

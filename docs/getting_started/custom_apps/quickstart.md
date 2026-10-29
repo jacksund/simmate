@@ -52,6 +52,7 @@ from simmate.workflows import Workflow
 from example_app.models import MyResultTable
 
 class My__Custom__Workflow(Workflow):
+    use_database = True
     database_table = MyResultTable
     
     @staticmethod

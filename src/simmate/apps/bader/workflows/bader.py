@@ -1,10 +1,9 @@
 from simmate.apps.bader.toolkit import Grid
-from simmate.workflows.common import S3Workflow
+from simmate.workflows.common import ShellWorkflow
 
 
-class PopulationAnalysis__Bader__Bader(S3Workflow):
+class PopulationAnalysis__Bader__Bader(ShellWorkflow):
     required_files = ["AECCAR0", "AECCAR2", "CHGCAR", "POTCAR"]
-    use_database = False
     use_previous_directory = ["AECCAR0", "AECCAR2", "CHGCAR", "POTCAR"]
     parent_workflows = ["population-analysis.vasp-bader.bader-matproj"]
 

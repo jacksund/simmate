@@ -39,15 +39,13 @@ input_parameters:
 from simmate.utils import logger
 
 from ..core import Workflow
-from .s3 import S3Workflow
+from .shell import ShellWorkflow
 
 
 class Customized__Toolkit__UserConfig(Workflow):
     """
     "VASP calculation with updated INCAR/POTCAR settings
     """
-
-    use_database = False
 
     is_hidden = True
 
@@ -65,10 +63,10 @@ class Customized__Toolkit__UserConfig(Workflow):
             "Read through the tutorials for more information."
         )
 
-        # ensure this workflow has a S3Task class attribute
-        if not issubclass(workflow_base, S3Workflow):
+        # ensure this workflow is a ShellWorkflow
+        if not issubclass(workflow_base, ShellWorkflow):
             raise TypeError(
-                "Dynamically updating settings is only supported for S3Workflows"
+                "Dynamically updating settings is only supported for ShellWorkflows"
             )
 
         # we can't just copy the workflow and update attributes, as this will update
@@ -77,7 +75,7 @@ class Customized__Toolkit__UserConfig(Workflow):
         # to copy and update relevant attributes before subclassing at the end.
         #   see https://stackoverflow.com/questions/9541025/
 
-        # we start with the original s3workflow class and keep track of
+        # we start with the original ShellWorkflow class and keep track of
         # attributes we need to update.
         final_attributes = {}
 
@@ -104,7 +102,7 @@ class Customized__Toolkit__UserConfig(Workflow):
 
             final_attributes[update_attribute] = new_config
 
-        # Dynamically create a subclass of the original s3task
+        # Dynamically create a subclass of the original ShellWorkflow
         NewWorkflow = type(
             f"{workflow_base.__name__}Custom", (workflow_base,), final_attributes
         )

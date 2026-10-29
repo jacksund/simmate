@@ -39,6 +39,7 @@ simmate workflows explore
     subworkflow_kwargs:  # (1)
         command: mpirun -n 8 vasp_std > vasp.out  # (2)
         compress_output: true  # (3)
+        delete_output: true
         # see 'simmate workflows explore' on `relaxation.vasp.staged`
         # for other optional subworkflow_kwargs
     
@@ -50,7 +51,7 @@ simmate workflows explore
 
     1. The default input parameter `subworkflow: relaxation.vasp.staged` is used to analyze each structure. You can modify this workflow's behavior with the `subworkflow_kwargs` setting.
     2. This is the command each relaxation step will use.
-    3. Since you probably won't be reviewing the output files of each calculation, and these results can consume a lot of disk space, this setting will convert completed calculations to `zip` files to save space.
+    3. Since you probably won't be reviewing the output files of each calculation, and these results can consume a lot of disk space, these settings will convert completed calculations to `zip` files and delete the original folders to save space.
     4. The status of individual structures and the writing of output files are checked in cycles. If your average relaxation takes 30 minutes, you don't need to check/update every 60 seconds (the default). Longer sleep steps help reduce database load.
     5. By default, `nsteadystate` is set to 40, meaning the search will maintain 40 total calculations in the queue at all times, regardless of the number of available workers. **The number of workers (not `nsteadystate`) controls the number of parallel calculations.** Only change this value if you want more than 40 calculations to run in parallel, which requires >40 running workers. Therefore, you can increase this value if needed, but **do NOT decrease `nsteadystate`**.
 

@@ -215,5 +215,7 @@ INPUT_MAPPINGS = {
     "boolean": [
         "is_restart",
         "compress_output",
+        "upload_output",
+        "delete_output",
     ],
 }

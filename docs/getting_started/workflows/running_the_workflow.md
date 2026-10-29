@@ -40,7 +40,7 @@ Make sure both your `POSCAR` file AND `example.yaml` files are in the same folde
 simmate workflows run example.yaml
 ```
 
-When running the workflow, it creates a new folder (e.g., `simmate-task-abcd1234`), writes the inputs, runs the calculation, and saves the results to your database.
+When running the workflow, it creates a new folder named after the run's id (e.g., `3a1bd23f-705c-4947-96fa-3740865ed12d`), writes the inputs, runs the calculation, and saves the results to your database.
 
 !!! tip
     Depending on your laptop specs, this calculation can take >1 minute to finish.
@@ -49,7 +49,7 @@ When running the workflow, it creates a new folder (e.g., `simmate-task-abcd1234
 
 ### 4. View results
 
-Once you're workflow finishes, you will find additional files in your output folder (e.g., `simmate-task-abcd1234`). One such file is `simmate_summary.yaml`, which provides a brief summary of your results:
+Once you're workflow finishes, you will find additional files in your output folder (e.g., `3a1bd23f-705c-4947-96fa-3740865ed12d`). One such file is `simmate_summary.yaml`, which provides a brief summary of your results:
 
 ``` yaml
 _DATABASE_TABLE_: StaticEnergy
@@ -63,7 +63,7 @@ corrections: []
 created_at: 2022-09-10 14:32:35.857088+00:00
 density: 2.1053060843576104
 density_atomic: 0.04338757298280908
-directory: /home/jacksund/Documents/spyder_wd/simmate-task-e9tddsyw
+directory: /home/jacksund/Documents/spyder_wd/3a1bd23f-705c-4947-96fa-3740865ed12d
 energy: -27.25515165
 energy_fermi: -0.63610593
 energy_per_atom: -3.40689395625

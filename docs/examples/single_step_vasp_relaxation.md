@@ -53,7 +53,7 @@ structure = Structure.from_file("NaCl.cif")
 relax_workflow = get_workflow("relaxation.vasp.matproj")
 
 # 4. Run the relaxation
-# This will create a directory named 'simmate-task-XXXX' with the results.
+# This will create a directory named after the run_id with the results.
 state = relax_workflow.run(
     structure=structure,
     command="mpirun -n 4 vasp_std > vasp.out",
