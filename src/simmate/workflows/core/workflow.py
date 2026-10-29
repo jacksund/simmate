@@ -66,8 +66,30 @@ class Workflow:
     submitted/started but haven't finished yet.
     
     `_update_database_with_results` saves the output of the `workup` method
-    to the database entry -- and this the same entry that was created by 
+    to the database entry -- and this the same entry that was created by
     `_register_calculation`.
+    """
+
+    is_api_worker_safe: bool = False
+    """
+    Whether this workflow can be ran by API workers. Defaults to False.
+
+    API workers pull jobs through the Simmate REST API, so they have no
+    database connection and no shared filesystem. A workflow is only safe for
+    them when its run needs nothing but its input parameters and simply returns
+    its results. This rules out workflows that...
+
+    - query or write to the database during the run
+    - need files from other runs (i.e. `use_previous_directory`)
+    - submit other workflows (e.g. via `run_cloud`)
+    - need credentials that only the server has
+
+    For now, this also rules out `use_database=True` workflows because `run`
+    registers and saves results through the database on the worker.
+
+    When set to True, runs submitted with `run_cloud` are marked so that the
+    server will hand them to API workers. Otherwise, only regular workers will
+    pick them up.
     """
 
     _parameter_methods: list[str] = ["run_config", "run"]
@@ -185,10 +207,9 @@ class Workflow:
             is used. We recommend leaving this at default.
 
          - `directory`:
-             The directory to run everything in. This is passed to the ulitities
-             function simmate.ulitities.get_directory, which generates a
-             unique foldername if not provided. This will be converted into
-             a `pathlib.Path` object.
+             The directory to run everything in. If not provided, a folder
+             named after the `run_id` is made inside `settings.scratch_dir`.
+             This will be converted into a `pathlib.Path` object.
 
         - `compress_output`:
             Whether to compress the directory to a zip file at the end of the
@@ -351,6 +372,7 @@ class Workflow:
             cls.run,
             tags=tags,
             name=cls.name_full,
+            is_api_worker_safe=cls.is_api_worker_safe,
             **parameters_serialized,
         )
 
@@ -747,6 +769,7 @@ class Workflow:
         """
         return dict(
             use_database=cls.use_database,
+            is_api_worker_safe=cls.is_api_worker_safe,
             name_full=cls.name_full,
             parameter_names=cls.parameter_names,
             parameter_names_required=cls.parameter_names_required,
@@ -884,14 +907,25 @@ class Workflow:
 
         # ---------------------------------------------------------------------
 
-        # STEP 3: Load the directory (and copy over from an old directory if necessary)
+        # STEP 3: Set the run_id
+
+        parameters_cleaned["run_id"] = (
+            parameters_cleaned.get("run_id", None) or cls._get_new_run_id()
+        )
+
+        # ---------------------------------------------------------------------
+
+        # STEP 4: Load the directory (and copy over from an old directory if necessary)
 
         if setup_directory:
             # Start by creating a new directory or grabbing the one given. We create
             # this directory immediately (rather than just passing the name to the
             # ShellWorkflow). We do this because NestedWorkflows often use a parent directory
-            # to organize results.
-            directory = parameters.get("directory", None)
+            # to organize results. If no directory was given, the folder is named
+            # after the run_id so it matches the database entry and S3 key.
+            directory = parameters.get("directory", None) or (
+                Path(settings.scratch_dir) / str(parameters_cleaned["run_id"])
+            )
             directory_cleaned = get_directory(directory)
 
             # if this workflow requires input files from a previous directory
@@ -963,12 +997,8 @@ class Workflow:
 
         # ---------------------------------------------------------------------
 
-        # STEP 4: Register the calculation so the user can follow along in the UI
+        # STEP 5: Register the calculation so the user can follow along in the UI
         # and also see which structures/runs have been submitted aready.
-
-        parameters_cleaned["run_id"] = (
-            parameters_cleaned.get("run_id", None) or cls._get_new_run_id()
-        )
 
         calculation = (
             cls._register_calculation(status=status, **parameters_cleaned)
@@ -978,7 +1008,7 @@ class Workflow:
 
         # ---------------------------------------------------------------------
 
-        # STEP 5: Write metadata file for user reference
+        # STEP 6: Write metadata file for user reference
 
         if write_metadata:
             # convert back to json format. We convert back rather than use the original
@@ -1416,6 +1446,7 @@ def workflow(
     app_name: str = "Basic",
     type_name: str = "Toolkit",
     use_database: bool = False,
+    is_api_worker_safe: bool = False,
 ):
     """
     A decorator that converts a function into a workflow class.
@@ -1446,6 +1477,7 @@ def workflow(
                 {
                     "run_config": staticmethod(original_function),
                     "use_database": use_database,
+                    "is_api_worker_safe": is_api_worker_safe,
                 },
             )
 

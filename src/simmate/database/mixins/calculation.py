@@ -103,7 +103,8 @@ class Calculation(DatabaseTable):
     )
     """
     This is the folder that the workflow was ran in. It will be something
-    like... "/path/to/simmate-task-abc123"
+    like... "/path/to/d8a785e1-e344-463a-bede-0e7b3da7bab6", where the
+    folder name is the run_id (unless a custom directory was given)
     """
 
     run_id = table_column.UUIDField(blank=True, null=True, unique=True)

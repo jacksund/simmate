@@ -2,6 +2,7 @@ from pathlib import Path
 
 import yaml
 
+from simmate.config import settings
 from simmate.utils import copy_directory
 from simmate.workflows.utils import get_workflow
 
@@ -28,8 +29,13 @@ class Restart__Toolkit__Automatic(Workflow):
 
     @classmethod
     def run_config(cls, directory_old: Path, directory_new: Path = None, **kwargs):
-        # First copy over the directory
-        directory_new_cleaned = copy_directory(directory_old, directory_new)
+        # First copy over the directory. Like any other run, the new folder is
+        # named after the restarted run's id unless one was given.
+        run_id = cls._get_new_run_id()
+        directory_new_cleaned = copy_directory(
+            directory_old,
+            directory_new or Path(settings.scratch_dir) / run_id,
+        )
 
         # grab the metadata file in the new dir
         metadata_filename = directory_new_cleaned / "simmate_metadata_01.yaml"
@@ -61,6 +67,7 @@ class Restart__Toolkit__Automatic(Workflow):
 
         # now instead of calling the workflow's run method, we use its run_restart
         result = workflow.run(
+            run_id=run_id,
             directory=directory_new_cleaned,
             is_restart=True,
             **input_parameters,

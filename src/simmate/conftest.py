@@ -32,7 +32,7 @@ def setup_scratch_directory(tmp_path_factory):
     """
     Sets the scratch_dir setting to a temporary directory for the duration of
     the test session. This ensures that any workflow runs or tasks that create
-    "simmate-task-*" folders do so in a temporary location rather than the
+    run or "simmate-tmp-*" folders do so in a temporary location rather than the
     current working directory.
     """
     scratch_dir = tmp_path_factory.mktemp("simmate_scratch")

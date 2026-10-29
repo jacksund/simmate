@@ -7,7 +7,7 @@ from simmate.utils.files import empty_directory, get_directory
 def test_get_directory(tmp_path):
     # create and delete a new directory
     new_directory = get_directory()
-    assert "simmate-task-" in new_directory.name
+    assert "simmate-tmp-" in new_directory.name
     shutil.rmtree(new_directory)
 
     # get directory by name

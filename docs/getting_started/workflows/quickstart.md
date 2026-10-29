@@ -77,8 +77,8 @@ simmate workflows run example.yaml
 ```
 
 ### 9. Review Results
-Check the newly created folder (e.g., `simmate-task-abcd1234`) for a summary of the results:
+Check the newly created folder for a summary of the results. The folder is named after the workflow's run id (e.g., `3a1bd23f-705c-4947-96fa-3740865ed12d`):
 ```bash
 # View the summary file
-cat simmate-task-*/simmate_summary.yaml
+cat */simmate_summary.yaml
 ```

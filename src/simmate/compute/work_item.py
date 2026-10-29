@@ -70,6 +70,13 @@ class WorkItem(DatabaseTable):
     the status/state of the workitem
     """
 
+    is_api_worker_safe = table_column.BooleanField(default=False)
+    """
+    Whether API workers (which have no database connection) are allowed to
+    pick up this item. Only these items are handed out through the REST API.
+    For workflows, this is set from `Workflow.is_api_worker_safe`.
+    """
+
     # -------------------------------------------------------------------------
 
     # For serialization, I just use the pickle module, but in the future, I may

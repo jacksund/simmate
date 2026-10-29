@@ -297,6 +297,7 @@ def test_load_results_from_directories(tmp_path):
 
 
 def test_archive_old_runs(tmp_path):
+    import uuid
     from pathlib import Path
 
     from simmate.workflows.utils import archive_old_runs
@@ -307,9 +308,14 @@ def test_archive_old_runs(tmp_path):
         test_folder="to_archive",
     )
 
+    # runs are named by their run_id (the simmate-task-* fixtures are legacy)
+    run_id = str(uuid.uuid4())
+    (tmp_path / run_id).mkdir()
+
     archive_old_runs(tmp_path, time_cutoff=0)
     assert (tmp_path / "simmate-task-1.zip").exists()
     assert (tmp_path / "simmate-task-2.zip").exists()
+    assert (tmp_path / f"{run_id}.zip").exists()
 
 
 def test_make_error_archive(tmp_path):

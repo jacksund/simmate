@@ -8,6 +8,7 @@ import importlib
 import shutil
 import sys
 import time
+import uuid
 from inspect import getmembers, isclass
 from pathlib import Path
 
@@ -301,12 +302,26 @@ def get_unique_parameters() -> list[str]:
     return unique_parameters
 
 
+def _is_run_folder(path: Path) -> bool:
+    """
+    Checks whether a folder or zip archive is from a workflow run. These are
+    named by their run_id (older runs used "simmate-task-<randomID>").
+    """
+    if path.name.startswith("simmate-task-"):
+        return True
+    try:
+        uuid.UUID(path.stem)  # stem drops ".zip"
+        return True
+    except ValueError:
+        return False
+
+
 def load_results_from_directories(base_directory: Path | str = "."):
     """
-    Goes through a given directory and finds all "simmate-task-" folders and zip
-    archives present. The simmate_metadata.yaml file is used in each of these
-    to load results into the database. All folders will be converted to archives
-    once they've been loaded.
+    Goes through a given directory and finds all workflow run folders (named
+    by their run_id) and zip archives present. The simmate_metadata.yaml file
+    is used in each of these to load results into the database. All folders
+    will be converted to archives once they've been loaded.
 
     #### Parameters
 
@@ -317,14 +332,8 @@ def load_results_from_directories(base_directory: Path | str = "."):
     # load the full path to the desired directory
     directory = get_directory(base_directory)
 
-    # grab all files/folders in this directory and then limit this list to those
-    # that are...
-    #   1. folders
-    #   2. start with "simmate-task-"
-    #   3. haven't been modified for at least time_cutoff
-    foldernames = [
-        directory / f for f in directory.iterdir() if "simmate-task-" in f.name
-    ]
+    # grab all files/folders in this directory that are workflow runs
+    foldernames = [f for f in directory.iterdir() if _is_run_folder(f)]
 
     # Now go through this list and archive the folders that met the criteria
     # and load the data from each.
@@ -491,9 +500,10 @@ def archive_old_runs(
     time_cutoff: float = 3 * 7 * 24 * 60 * 60,  # equal to 3 weeks
 ):
     """
-    Goes through a given directory and finds all "simmate-task-" folders that
-    are older than a given time cutoff. Each of these folders is then compressed
-    to a zip file and then the original folder is removed.
+    Goes through a given directory and finds all workflow run folders (named
+    by their run_id) that are older than a given time cutoff. Each of these
+    folders is then compressed to a zip file and then the original folder is
+    removed.
 
     #### Parameters
 
@@ -512,20 +522,15 @@ def archive_old_runs(
     # load the full path to the desired directory
     directory = get_directory(directory)
 
-    # grab all files/folders in this directory and then limit this list to those
-    # that are...
-    #   1. folders
-    #   2. start with "simmate-task-"
-    #   3. haven't been modified for at least time_cutoff
-    foldernames = []
-    for foldername in directory.iterdir():
-        foldername_full = directory / foldername
-        if (
-            foldername_full.is_dir()
-            and "simmate-task-" in foldername.name
-            and time.time() - foldername_full.lstat().st_mtime > time_cutoff
-        ):
-            foldernames.append(foldername_full)
+    # grab all workflow run folders that haven't been modified for at least
+    # time_cutoff (the name check goes first since it needs no disk access)
+    foldernames = [
+        f
+        for f in directory.iterdir()
+        if _is_run_folder(f)
+        and f.is_dir()
+        and time.time() - f.lstat().st_mtime > time_cutoff
+    ]
 
     # now go through this list and archive the folders that met the criteria
     [make_archive(f) for f in foldernames]

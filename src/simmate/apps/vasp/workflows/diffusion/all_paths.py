@@ -27,7 +27,7 @@ class NebAllPathsWorkflow(Workflow):
 
     ```
     # note, folder names will match the workflow used
-    simmate-task-12345
+    d8a785e1-e344-463a-bede-0e7b3da7bab6  # the run_id
         ├── bulk relaxation
         ├── bulk static-energy
         ├── migration hop 00

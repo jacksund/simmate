@@ -29,6 +29,7 @@ The `@workflow` decorator also accepts several optional parameters to help with 
 - `app_name`: The name of the app this workflow belongs to (defaults to "Basic")
 - `type_name`: The type of analysis (defaults to "Toolkit")
 - `use_database`: Whether to save results to a database table (defaults to `False`)
+- `is_api_worker_safe`: Whether API workers can run this workflow (defaults to `False`). See [Running on API Workers](#running-on-api-workers).
 
 ``` python
 @workflow(
@@ -244,6 +245,30 @@ from my_project.models import MyCustomTable
 class Example__Python__MyFavoriteSettings(Workflow):
     use_database = True
     database_table = MyCustomTable
+```
+
+------------------------------------------------------------
+
+## Running on API Workers
+
+API workers pick up jobs through the Simmate REST API (`simmate compute worker start --api`), so they have no database connection and no shared filesystem. Only workflows that opt in with `is_api_worker_safe = True` are given to API workers. All other workflows are left for regular workers.
+
+A workflow is safe for API workers when its run needs nothing but its input parameters and simply returns its results. Leave this setting off if your workflow:
+
+- queries or writes to the database during the run
+- needs files from other runs (i.e. `use_previous_directory`)
+- submits other workflows (e.g. via `run_cloud`)
+- needs credentials that only the server has
+
+For now, this also excludes workflows with `use_database = True`.
+
+``` python
+class Example__Python__MyFavoriteSettings(Workflow):
+    is_api_worker_safe = True
+
+    @staticmethod
+    def run_config(x, y, **kwargs):
+        return x + y
 ```
 
 ------------------------------------------------------------

@@ -60,10 +60,11 @@ def get_next_work_item(request):
         )
 
     with transaction.atomic():
-        # Query for PENDING WorkItems, lock it for editing, and update status
+        # Query for PENDING WorkItems, lock it for editing, and update status.
+        # API workers only get items that were marked safe for them.
         workitem = (
             WorkItem.objects.select_for_update(skip_locked=True)
-            .filter(status="Pending")
+            .filter(status="Pending", is_api_worker_safe=True)
             .filter_by_tags(tags)
             .order_by("created_at")
             .first()

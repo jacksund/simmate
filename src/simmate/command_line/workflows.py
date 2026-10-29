@@ -362,7 +362,7 @@ def archive_old_runs(
     ),
 ):
     """
-    Compresses old simulation folders (matching `simmate-task-*`) into ZIP archives.
+    Compresses old workflow run folders (named by their run_id) into ZIP archives.
 
     This helps keep your project directory clean while preserving data from
     older runs.

@@ -15,8 +15,8 @@ def get_directory(directory: Path | str = None) -> Path:
     formats. This includes... None, a string, or a TemporaryDirectory instance.
     Based on the input, this function does the following:
       - `None`:
-          returns the full path to a new folder inside python's
-          current working directory named "simmate-task-<randomID>"
+          returns the full path to a new temporary folder inside
+          `settings.scratch_dir` named "simmate-tmp-<randomID>"
       - `str` or `pathlib.Path`:
           makes the directory if it doesnt exist and then returns the full path
 
@@ -31,17 +31,13 @@ def get_directory(directory: Path | str = None) -> Path:
         The full path to the initialized directory as a `pathlib.Path` object
     """
 
-    # if no directory was provided, we create a new folder within the current
-    # working directory. All of these folders are named randomly.
-    # Note: we can't name these nicely (like simmate-task-001) because that will
-    # introduce race conditions when making these folders in production.
+    # if no directory was provided, we create a randomly-named folder within the
+    # scratch directory. Random names (rather than simmate-tmp-001, etc.) avoid
+    # race conditions between parallel callers. Note, mkdtemp never deletes it.
     if not directory:
-        # create a directory in the current working directory. Note, even though
-        # we are creating a "TemporaryDirectory" here, this directory is never
-        # actually deleted. Note, Path() gives the working directory
         from simmate.config import settings
 
-        directory_new = mkdtemp(prefix="simmate-task-", dir=settings.scratch_dir)
+        directory_new = mkdtemp(prefix="simmate-tmp-", dir=settings.scratch_dir)
         directory_cleaned = Path(directory_new)
 
     # otherwise make sure the directory the user provided exists and if it does
