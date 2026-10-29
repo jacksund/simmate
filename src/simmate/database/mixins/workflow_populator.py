@@ -113,6 +113,7 @@ class WorkflowPopulator:
                     results = workflow.run(
                         molecules=objs_to_update.to_toolkit(),
                         compress_output=True,
+                        delete_output=True,
                     )
                     logger.info("Saving results to db")
                     if columns_mapping:

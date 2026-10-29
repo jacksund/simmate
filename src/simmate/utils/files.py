@@ -224,15 +224,30 @@ def copy_directory(
     return directory_new_cleaned
 
 
-def make_archive(directory: Path, files_to_exclude: list[str] = []):
+def make_archive(
+    directory: Path,
+    files_to_exclude: list[str] = [],
+    delete_directory: bool = True,
+) -> Path:
     """
     Compresses the directory to a zip file of the same name. After compressing,
-    it then deletes the original directory.
+    it then deletes the original directory (unless `delete_directory=False`).
 
     #### Parameters
 
     - `directory`:
         Path to the folder that should be archived
+    - `files_to_exclude`:
+        File names to remove from the directory before archiving. These are
+        searched for recursively.
+    - `delete_directory`:
+        Whether to delete the original directory after archiving. The
+        default is True.
+
+    #### Returns
+
+    - `archive_file`:
+        Path to the new zip file.
     """
 
     directory_full = directory.absolute()
@@ -247,7 +262,7 @@ def make_archive(directory: Path, files_to_exclude: list[str] = []):
     # it writes the archive in the working directory, but we update it to use the
     # the same directory as the folder being archived. The format is also set
     # to zip.
-    shutil.make_archive(
+    archive_file = shutil.make_archive(
         # By default I choose within the current directory and save
         # it as the same name of the directory (+ zip ending)
         base_name=directory_full,
@@ -259,7 +274,10 @@ def make_archive(directory: Path, files_to_exclude: list[str] = []):
         base_dir=directory_full.name,
     )
     # now remove the directory we just archived
-    shutil.rmtree(directory)
+    if delete_directory:
+        shutil.rmtree(directory)
+
+    return Path(archive_file)
 
 
 def empty_directory(directory: Path, files_to_keep: list[Path] = []):

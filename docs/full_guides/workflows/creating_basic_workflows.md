@@ -100,6 +100,8 @@ Simmate automatically passes default parameters to your `run_config` or decorate
 - `run_id`: A unique ID for tracking the run (e.g., in the database).
 - `directory`: The `pathlib.Path` where the calculation takes place.
 - `compress_output`: Whether to zip the directory when finished.
+- `upload_output`: Whether to upload the results to S3 when finished.
+- `delete_output`: Whether to delete the directory when finished.
 - `source`: Information about where the inputs came from (experimental).
 
 You should include `**kwargs` in your function signature to accept these parameters, even if you don't use them.

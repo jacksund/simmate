@@ -77,6 +77,8 @@ OPTIONAL PARAMETERS (+ their defaults):
 - directory: null
 - run_id: null
 - compress_output: false
+- upload_output: false
+- delete_output: false
 
 *** 'null' indicates the parameter is set with advanced logic
 

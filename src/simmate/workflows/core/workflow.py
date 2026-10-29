@@ -3,6 +3,7 @@ import inspect
 import json
 import platform
 import re
+import shutil
 import uuid
 from functools import wraps
 from pathlib import Path
@@ -79,7 +80,8 @@ class Workflow:
     """
     List of filenames that should be deleted when compressing the output files
     to a zip file (i.e. when compress_output=True). Any file name is searched
-    for recursively in all subdirectories and removed.
+    for recursively in all subdirectories and removed. Note, these files are
+    removed from the original directory too (not just the zip file).
     
     For example, VASP calculations remove all POTCAR files from archives.
     """
@@ -158,6 +160,8 @@ class Workflow:
         run_id: str = None,
         directory: Path | str = None,
         compress_output: bool = False,
+        upload_output: bool = False,
+        delete_output: bool = False,
         source: dict = None,
         submitted_by_id: int = None,
         **kwargs,
@@ -188,8 +192,19 @@ class Workflow:
 
         - `compress_output`:
             Whether to compress the directory to a zip file at the end of the
-            task run. After compression, it will also delete the directory.
+            task run. The original directory is kept (see `delete_output`).
             The default is False.
+
+        - `upload_output`:
+            Whether to upload the results to the S3 bucket set in
+            `settings.s3` at the end of the task run. The zip file is uploaded
+            if `compress_output=True`, otherwise the full directory is. Results
+            are stored under `workflow_runs/<workflow-name>/<run_id>`.
+            The default is False.
+
+        - `delete_output`:
+            Whether to delete the directory at the end of the task run. If a
+            zip file was made, it is kept. The default is False.
 
         - `source`: (EXPERIMENTAL FEATURE)
             The source is JSON-like information that indicates where the
@@ -199,11 +214,23 @@ class Workflow:
 
         """
 
+        # check for a bucket up front, so we don't find out after the run
+        if upload_output:
+            from simmate.database.external_connectors.s3 import SimmateS3Bucket
+
+            if not SimmateS3Bucket.bucket:
+                raise Exception(
+                    "You set `upload_output=True`, but no S3 bucket is "
+                    "configured. Make sure `settings.s3.bucket` is set."
+                )
+
         logger.info(f"Starting '{cls.name_full}'")
         kwargs_cleaned, database_entry = cls._load_input_and_register(
             run_id=run_id,
             directory=directory,
             compress_output=compress_output,
+            upload_output=upload_output,
+            delete_output=delete_output,
             source=source,
             started_at=timezone.now(),
             status="Running",
@@ -243,14 +270,28 @@ class Workflow:
                 run_id=kwargs_cleaned["run_id"],
             )
 
-        # if requested, compresses the directory to a zip file and then removes
-        # the directory.
+        directory = kwargs_cleaned["directory"]
+
         if compress_output:
             logger.info("Compressing result to a ZIP file.")
-            make_archive(
-                directory=kwargs_cleaned["directory"],
+            archive_file = make_archive(
+                directory=directory,
                 files_to_exclude=cls.exclude_from_archives,
+                delete_directory=False,
             )
+
+        # uploads the zip file if one was made, otherwise the full directory
+        if upload_output:
+            s3_key = f"workflow_runs/{cls.name_full}/{kwargs_cleaned['run_id']}"
+            logger.info(f"Uploading result to s3://{SimmateS3Bucket.bucket}/{s3_key}")
+            if compress_output:
+                SimmateS3Bucket.upload_file(archive_file, f"{s3_key}.zip")
+            else:
+                SimmateS3Bucket.upload_directory(directory, s3_prefix=s3_key)
+
+        if delete_output:
+            logger.info("Deleting the workflow directory.")
+            shutil.rmtree(directory)
 
         # If we made it this far, we successfully completed the workflow run
         logger.info(f"Completed '{cls.name_full}'")

@@ -41,11 +41,13 @@ def test_workflow(tmp_path):
     assert DummyFlow.description_doc.strip() == "Minimal example of a workflow"
     assert DummyFlow.parameter_names == [
         "compress_output",
+        "delete_output",
         "directory",
         "run_id",
         "source",
         "structure",
         "submitted_by_id",
+        "upload_output",
     ]
     assert DummyFlow._parameters_to_register == [
         "directory",
@@ -60,18 +62,39 @@ def test_workflow(tmp_path):
 
     DummyFlow.show_config()  # a print statment w. nothing else to check
 
-    # test file compression
+    # test file compression (which keeps the original directory)
     new_dir = tmp_path / "new_folder"
     result = DummyFlow.run(directory=new_dir, compress_output=True)
-
-    # make sure that a "simmate-task-*.zip" archive was created
     assert new_dir.with_suffix(".zip").exists()
+    assert new_dir.exists()
 
-    # make sure that a "simmate-task-*" directory was removed
+    # test deleting the directory (which keeps the archive)
+    result = DummyFlow.run(directory=new_dir, delete_output=True)
+    assert new_dir.with_suffix(".zip").exists()
     assert not new_dir.exists()
 
     # and delete the archive
     new_dir.with_suffix(".zip").unlink()
+
+
+@pytest.mark.django_db
+def test_workflow_upload_output(tmp_path, mocker):
+    from simmate.database.external_connectors.s3 import SimmateS3Bucket
+
+    mocker.patch.object(SimmateS3Bucket, "bucket", "dummy-bucket")
+    mock_upload = mocker.patch.object(SimmateS3Bucket, "upload_file")
+
+    new_dir = tmp_path / "new_folder"
+    DummyFlow.run(
+        directory=new_dir,
+        run_id="abc123",
+        compress_output=True,
+        upload_output=True,
+    )
+    mock_upload.assert_called_once_with(
+        new_dir.with_suffix(".zip"),
+        f"workflow_runs/{DummyFlow.name_full}/abc123.zip",
+    )
 
 
 def test_serialize_parameters():

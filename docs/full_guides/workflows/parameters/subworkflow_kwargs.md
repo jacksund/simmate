@@ -6,17 +6,20 @@ This parameter is a dictionary of parameters to pass to each subworkflow run. Fo
     subworkflow_kwargs:
         command: mpirun -n 4 vasp_std > vasp.out
         compress_output: true
+        delete_output: true
     ```
 === "toml"
     ``` toml
     [subworkflow_kwargs]
     command = "mpirun -n 4 vasp_std > vasp.out"
     compress_output = true
+    delete_output = true
     ```
 === "python"
     ``` python
     subworkflow_kwargs=dict(
         command="mpirun -n 4 vasp_std > vasp.out",
         compress_output=True,
+        delete_output=True,
     )
     ```
