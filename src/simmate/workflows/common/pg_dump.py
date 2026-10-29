@@ -3,10 +3,10 @@ from pathlib import Path
 
 from simmate.config import settings
 
-from .s3 import S3Workflow
+from .shell import ShellWorkflow
 
 
-class Maintenance__Postgres__PgDump(S3Workflow):
+class Maintenance__Postgres__PgDump(ShellWorkflow):
     monitor = False
 
     is_hidden = True

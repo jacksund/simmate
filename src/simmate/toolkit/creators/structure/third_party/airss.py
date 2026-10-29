@@ -80,7 +80,7 @@ class AirssStructure(StructureCreator):
             file.write("#MINSEP=1.0" + "\n")
 
     def create_structure(self) -> Structure:
-        # TODO: Maybe make an AIRSS app / S3 workflow
+        # TODO: Maybe make an AIRSS app / shell workflow
         output = subprocess.run(
             f"buildcell < {self.cell_filename} | cabal cell cif > AIRSS_output.cif",
             shell=True,

@@ -194,7 +194,7 @@ def test_workflows_run_yaml(command_line_runner, structure, mocker, tmp_path):
 
     # TODO: other yaml files to test with I would like to test these but the
     # current issues is that they are reliant on a vasp command. Maybe I need
-    # to mock a lower level method like S3Task.run...?
+    # to mock a lower level method like ShellWorkflow.run...?
 
     # A customized workflow
     """

@@ -8,7 +8,7 @@ from simmate.apps.biovia_cosmo.models import LogPow as LogPowTable
 from simmate.config import settings
 from simmate.toolkit import Molecule
 from simmate.workflows import Workflow
-from simmate.workflows.common import S3Workflow
+from simmate.workflows.common import ShellWorkflow
 
 __all__ = [
     "ConformerGeneration__CosmoConf__BpSvpAm1",
@@ -27,7 +27,7 @@ __all__ = [
 # We have multiple subworkflows to help organize different settings in the database
 
 
-class CosmoConf(S3Workflow):
+class CosmoConf(ShellWorkflow):
     command = "cosmoconf.pl -l input.txt -m {ctd_preset} > cosmoconf.out"  # -np 20
     required_files = ["input.txt", "molecule.sdf"]
     monitor = False
@@ -82,7 +82,7 @@ class ConformerGeneration__CosmoConf__TzvpFine(CosmoConf):
 # STEP 2: CosmoTherm LogPow prediction using step 1 output
 
 
-class Solubility__CosmoTherm__LogPowFromCtdPreset(S3Workflow):
+class Solubility__CosmoTherm__LogPowFromCtdPreset(ShellWorkflow):
     command = "cosmotherm cosmotherm.inp"
     required_files = ["cosmotherm.inp"]
     monitor = False

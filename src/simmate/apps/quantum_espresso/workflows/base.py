@@ -4,7 +4,7 @@ from django.utils.functional import classproperty
 
 from simmate.config import settings
 from simmate.toolkit import Structure
-from simmate.workflows.common import S3Workflow, StructureWorkflow
+from simmate.workflows.common import ShellWorkflow, StructureWorkflow
 
 from ..error_handlers import Bfgs, MaxSteps
 from ..inputs import (
@@ -16,9 +16,9 @@ from ..inputs import (
 
 
 # TODO: add StructureInputWorkflow mixin which can be made from VaspWorkflow class
-class PwscfWorkflow(S3Workflow, StructureWorkflow):
+class PwscfWorkflow(ShellWorkflow, StructureWorkflow):
     _parameter_methods = (
-        S3Workflow._parameter_methods + StructureWorkflow._parameter_methods
+        ShellWorkflow._parameter_methods + StructureWorkflow._parameter_methods
     )
 
     use_database = True

@@ -131,7 +131,7 @@ The web interface is built with Django and HTMX.
     - `Workflow`: Base class for any automated task.
     - `ErrorHandler`: Interface for fixing simulation failures.
 - **`src/simmate/workflows/common/`**:
-    - `S3Workflow`: Handles file-based codes (VASP/QE) with automated I/O.
+    - `ShellWorkflow`: Handles file-based codes (VASP/QE) with automated I/O.
     - `StagedWorkflow`: Manages multi-stage/chained runs.
 - **`src/simmate/compute/`**: Backend for job submission and worker management (Executor, Worker, and Scheduler). Its models are registered under `website/compute_management/`.
 - **Naming:** Workflow classes are named `Type__App__Preset` (e.g. `StaticEnergy__Vasp__MatProj` is `static-energy.vasp.matproj`). See `docs/full_guides/workflows/naming_conventions.md`.

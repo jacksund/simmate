@@ -134,7 +134,7 @@ class Calculation(DatabaseTable):
 
     corrections = table_column.JSONField(blank=True, null=True)
     """
-    S3 workflows often have ErrorHandlers that fix any issues while the
+    Shell workflows often have ErrorHandlers that fix any issues while the
     calaculation ran. This often involves changing settings, so we store
     any of those changes here.
     """

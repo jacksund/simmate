@@ -2,7 +2,7 @@ from .customized import Customized__Toolkit__UserConfig
 from .pg_backup import Maintenance__Postgres__BackupToS3
 from .pg_dump import Maintenance__Postgres__PgDump
 from .restart import Restart__Toolkit__Automatic
-from .s3 import S3Workflow
+from .shell import ShellWorkflow
 from .staged import StagedWorkflow
 from .staged_relax_static import StagedRelaxStatic
 from .structure_input import StructureWorkflow

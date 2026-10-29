@@ -53,7 +53,7 @@ class Walltime(ErrorHandler):
             This is important because this error handler is only called
             periodically (e.g. once every 5 min). Therefore, if less than this
             buffer time remains, the error might not be caught because there
-            won't be another check. When setting this, the S3Task's
+            won't be another check. When setting this, the ShellWorkflow's
             monitor_freq, polling_timestep, and time it takes to run all the
             other error handlers.
 

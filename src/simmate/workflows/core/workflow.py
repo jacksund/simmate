@@ -848,7 +848,7 @@ class Workflow:
         if setup_directory:
             # Start by creating a new directory or grabbing the one given. We create
             # this directory immediately (rather than just passing the name to the
-            # S3Task). We do this because NestedWorkflows often use a parent directory
+            # ShellWorkflow). We do this because NestedWorkflows often use a parent directory
             # to organize results.
             directory = parameters.get("directory", None)
             directory_cleaned = get_directory(directory)

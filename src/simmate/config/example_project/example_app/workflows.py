@@ -11,7 +11,7 @@ require several calculations, other python logic, and parallelization, make
 sure you read through the documentation for
 [the Workflow class](https://jacksund.github.io/simmate/full_guides/workflows/overview/)
 as well as relevent subclasses like the
-[S3Workflow](https://jacksund.github.io/simmate/full_guides/workflows/s3_workflows/)
+[ShellWorkflow](https://jacksund.github.io/simmate/full_guides/workflows/s3_workflows/)
 or
 [VaspWorkflow](https://jacksund.github.io/simmate/full_guides/workflows/third_party_software/vasp/overview/)
 """

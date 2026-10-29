@@ -3,10 +3,10 @@ from pathlib import Path
 from simmate.apps.openeye_omega.inputs import OmegaParm
 from simmate.toolkit import Molecule
 from simmate.toolkit.file_converters import SmilesAdapter
-from simmate.workflows.common import S3Workflow
+from simmate.workflows.common import ShellWorkflow
 
 
-class OmegaWorkflow(S3Workflow):
+class OmegaWorkflow(ShellWorkflow):
     required_files = ["parameters.txt", "input.smi"]
     monitor = False
 

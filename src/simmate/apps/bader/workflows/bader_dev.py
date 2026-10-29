@@ -3,10 +3,10 @@ from pathlib import Path
 from simmate.apps.bader.toolkit import Grid
 from simmate.config import settings
 from simmate.toolkit import Structure
-from simmate.workflows.common import S3Workflow
+from simmate.workflows.common import ShellWorkflow
 
 
-class PopulationAnalysis__Bader__BaderDev(S3Workflow):
+class PopulationAnalysis__Bader__BaderDev(ShellWorkflow):
     parent_workflows = ["population-analysis.vasp-bader.bader-matproj"]
     command = "bader {charge_file}"
 

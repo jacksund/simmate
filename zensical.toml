@@ -184,7 +184,7 @@ nav = [
             ]},
             { "Creating basic workflows" = "full_guides/workflows/creating_basic_workflows.md" },
             { "Creating nested workflows" = "full_guides/workflows/creating_nested_workflows.md" },
-            { "Creating \"S3\" workflows" = "full_guides/workflows/creating_s3_workflows.md" },
+            { "Creating shell workflows" = "full_guides/workflows/creating_shell_workflows.md" },
         ]},
         { "Compute" = [
             { "Basic Use" = "full_guides/compute/basic_use.md" },

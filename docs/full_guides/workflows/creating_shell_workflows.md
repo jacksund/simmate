@@ -1,17 +1,14 @@
-# Overview of Supervised-Staged-Shell Workflow
+# Overview of Shell Workflows
 
-### What is an `S3Workflow`?
+### What is a `ShellWorkflow`?
 
-An `S3Workflow` involves writing input files, calling an external program, and reading the output files. The term "S3" stands for **Supervised**, **Staged**, and **Shell** call. Here's what each term means:
+A `ShellWorkflow` runs an external program through a shell command. It involves writing input files, calling the program, and reading the output files. Each run has three stages (each is a class method):
 
-- `Staged`: The calculation consists of three stages (each is a class method)
-    1. `setup` = write input files
-    2. `execute` = run & monitor the program
-    3. `workup` = read the output files
-- `Shell`: The program is called through the command-line (the actual `execute` call)
-- `Supervised`: Simmate monitors the shell command for errors in the background (occurs during the `execute` call)
+1. `setup` = write input files
+2. `execute` = run the program's shell command and monitor it for errors in the background
+3. `workup` = read the output files
 
-Together, the `run` method of an `S3Workflow` carries out the following:
+Together, the `run` method of a `ShellWorkflow` carries out the following:
 
 ``` mermaid
 graph LR
@@ -26,27 +23,27 @@ graph LR
 !!! warning
     The diagram is slightly misleading as the "Has Errors?" check also occurs **while the execute step is still running**. This allows for early error detection before the program completes its run.
 
-## Creating S3Workflows
+## Creating ShellWorkflows
 
-For commonly used material science programs, refer to their guides in the "Third-party Software" section. If your program is listed there, a subclass of `S3Workflow` is likely already available. For instance, VASP users can use `VaspWorkflow` to build workflows.
+For commonly used material science programs, refer to their guides in the "Third-party Software" section. If your program is listed there, a subclass of `ShellWorkflow` is likely already available. For instance, VASP users can use `VaspWorkflow` to build workflows.
 
-## Building a Custom S3Workflow
+## Building a Custom ShellWorkflow
 
 !!! tip
-    Before creating a custom `S3Workflow`, ensure you've read the section on S3Workflows for common programs like VASP and the guides on building a custom `Workflow`.
+    Before creating a custom `ShellWorkflow`, ensure you've read the section on ShellWorkflows for common programs like VASP and the guides on building a custom `Workflow`.
 
 ### Simple Command Call
 
-The simplest example of an S3Workflow is a single command call without any additional actions (no input files, no error handling, etc.). 
+The simplest example of a ShellWorkflow is a single command call without any additional actions (no input files, no error handling, etc.). 
 
-Unlike custom `Workflows` where we define a `run_config` method, `S3Workflows` have a pre-built `run_config` method that handles the different stages and monitoring of a workflow. 
+Unlike custom `Workflows` where we define a `run_config` method, `ShellWorkflows` have a pre-built `run_config` method that handles the different stages and monitoring of a workflow. 
 
 For instance, let's use the `echo` command to print something:
 
 ``` python
-from simmate.workflows.common import S3Workflow
+from simmate.workflows.common import ShellWorkflow
 
-class Example__Echo__SayHello(S3Workflow):
+class Example__Echo__SayHello(ShellWorkflow):
     monitor = False  # no error handling yet
     command = "echo Hello"
 
@@ -62,9 +59,9 @@ result = Example__Echo__SayHello.run()
 If you need to write input files or read output files, you'll need to update your `setup` and `workup` methods:
 
 ``` python
-from simmate.workflows.common import S3Workflow
+from simmate.workflows.common import ShellWorkflow
 
-class Example__Echo__SayHello(S3Workflow):
+class Example__Echo__SayHello(ShellWorkflow):
     
     monitor = False  # no error handling yet
 
@@ -105,13 +102,13 @@ Note:
     - Custom `workup` methods require the `directory` input parameter.
 2. Setting/overwriting attributes is optional. You can also add new ones.
 
-S3Workflows for commonly used programs (like `VaspWorkflow` for VASP) often have custom `setup` and `workup` methods already defined. You can modify these as needed.
+ShellWorkflows for commonly used programs (like `VaspWorkflow` for VASP) often have custom `setup` and `workup` methods already defined. You can modify these as needed.
 
 For a comprehensive example of a subclass, refer to `simmate.apps.vasp.workflows.base.VaspWorkflow` and the tasks that use it like `simmate.apps.materials_project.workflows.relaxation.matproj`.
 
 ### Custom Error Handling
 
-`S3Workflows` can automatically detect and fix errors that occur during the `execute` stage. This is done using `ErrorHandler` objects.
+`ShellWorkflows` can automatically detect and fix errors that occur during the `execute` stage. This is done using `ErrorHandler` objects.
 
 To add error handling to your workflow:
 
@@ -167,6 +164,6 @@ When a monitor handler detects an error, Simmate will terminate the running proc
 !!! tip
     Monitoring is extremely useful for catching non-converging calculations or other issues that would otherwise waste hours of CPU time.
 
-## Alternatives to S3Workflow
+## Alternatives to ShellWorkflow
 
-For advanced users, the S3Workflow class combines the functionality of Prefect's ShellTask, a Custodian Job, and Custodian monitoring. When subclassing this, we can also incorporate functionality from `pymatgen.io.vasp.sets`. By merging these into one class, we simplify the process for users and task creation.
+For advanced users, the ShellWorkflow class combines the functionality of Prefect's ShellTask, a Custodian Job, and Custodian monitoring. When subclassing this, we can also incorporate functionality from `pymatgen.io.vasp.sets`. By merging these into one class, we simplify the process for users and task creation.

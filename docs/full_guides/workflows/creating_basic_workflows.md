@@ -64,7 +64,7 @@ result = Math__Basic__Add.run(x=1, y=2)
 ```
 
 !!! tip
-    Stick to `@workflow` for simple utilities. Class-based workflows are more important for sharing advanced features. For example, this is how we build reusable classes such as `VaspWorkflow` or `S3Workflow`, which are cover elsewhere in our guides.
+    Stick to `@workflow` for simple utilities. Class-based workflows are more important for sharing advanced features. For example, this is how we build reusable classes such as `VaspWorkflow` or `ShellWorkflow`, which are cover elsewhere in our guides.
 
 !!! example
 
@@ -248,7 +248,7 @@ class Example__Python__MyFavoriteSettings(Workflow):
 
 ## Workflows that Call a Command
 
-In many cases, you may have a workflow that runs a command or some external program and then reads the results from output files. An example of this would be an energy calculation using VASP. If your workflow involves calling another program, you should read about the "S3" workflow (`S3Workflow`) which helps with writing input files, calling other programs, and handling errors.
+In many cases, you may have a workflow that runs a command or some external program and then reads the results from output files. An example of this would be an energy calculation using VASP. If your workflow involves calling another program, you should read about the shell workflow (`ShellWorkflow`) which helps with writing input files, calling other programs, and handling errors.
 
 ------------------------------------------------------------
 
