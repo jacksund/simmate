@@ -861,20 +861,35 @@ class Workflow:
 
                 # alternatively, the past directory should be stored on the
                 # primary input object. This is the preferred method, but the
-                # previous_directory input parameter takes priority
+                # previous_directory input parameter takes priority.
+                # Note: getattr is used because the primary input may be missing
+                # or a type without a database_object (e.g. Molecule)
+                database_object = getattr(primary_input, "database_object", None)
                 if (
                     not previous_directory
-                    and primary_input.database_object
-                    and hasattr(primary_input.database_object, "directory")
+                    and database_object
+                    and hasattr(database_object, "directory")
                 ):
-                    previous_directory = Path(primary_input.database_object.directory)
+                    previous_directory = Path(database_object.directory)
 
                 # at least one of two inputs above needs to be set
                 if not previous_directory:
-                    raise Exception(
-                        "This workflow requires either an input from a past calculation "
-                        "or a previous_directory set to run but neither was given."
+                    message = (
+                        f"The '{cls.name_full}' workflow needs input files from a "
+                        "previous calculation, but no previous directory was found. "
+                        "Either (1) give a primary input (e.g. a structure) that "
+                        "was loaded from a past calculation in the database, or "
+                        "(2) set the `previous_directory` parameter to the folder "
+                        "that holds those files. Note that `directory` is where "
+                        "the new run is written, not where input files are read from."
                     )
+                    if cls.parent_workflows:
+                        message += (
+                            " This workflow is usually run as part of a parent "
+                            "workflow, so you may want one of these instead: "
+                            f"{', '.join(cls.parent_workflows)}"
+                        )
+                    raise Exception(message)
 
                 # If "True" was given, then we copy over all files except
                 # simmate ones (we have no need for the summaries or error archives)
