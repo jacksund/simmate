@@ -27,7 +27,7 @@ simmate/
 │   ├── examples/           # Worked examples and recipes
 │   ├── getting_started/    # Tutorial series for new users
 │   └── change_log/         # Change log for tracking updates
-├── envs/                   # Docker, Helm, and nginx/postgres configs
+├── envs/                   # Docker, Helm, nginx/postgres configs, and one-line installers (served via simmate.org/install.sh)
 ├── src/
 │   └── simmate/
 │       ├── apps/           # Specialized modules (VASP, Materials Project, etc.)

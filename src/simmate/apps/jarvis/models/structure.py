@@ -80,13 +80,14 @@ class JarvisStructure(ThirdPartyData, Structure):
         [their database json files](https://jarvis-materials-design.github.io/dbdocs/thedownloads/). We specifically look at the "3D-materials curated data".
         """
 
-        # Jarvis is not a dependency of simmate, so make sure you install it
-        # before using this method
+        # Jarvis is an optional dependency of simmate, so make sure you install
+        # it before using this method
         try:
             from jarvis.db.figshare import data as jarvis_helper
-        except Exception:
+        except ModuleNotFoundError:
             raise ModuleNotFoundError(
-                "You must install jarvis with `conda install -c conda-forge jarvis-tools`"
+                "This method requires `jarvis-tools`. Install it with "
+                '`uv pip install "simmate[jarvis]"`'
             )
 
         # Load all of the 3D data from JARVIS. This gives a list of dictionaries

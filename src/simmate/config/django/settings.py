@@ -350,6 +350,7 @@ LOGIN_REQUIRED_URLS_EXCEPTIONS = (
     r"^/about/?$",
     r"^/faqs/?$",
     r"^/contact/?$",
+    r"^/install\.(sh|ps1)$",
     r"/accounts(.*)$",
     r"/admin(.*)$",
     r"/static(.*)$",

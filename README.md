@@ -5,21 +5,11 @@
    </a>
 </p>
 
-<p align="center">
-    <!-- Link to API documentation -->
-    <a href="https://jacksund.github.io/simmate/home/">
-        <img src="https://img.shields.io/badge/-Tutorials & Docs-/?logo=microsoft-academic&color=00666b&logoColor=white">
-    </a>
-    <!-- Link to Website -->
-    <a href="https://simmate.org/">
-        <img src="https://img.shields.io/badge/-Website-/?logo=iCloud&color=00666b&logoColor=white">
-    </a>
-    <!-- link to JOSS paper -->
-    <a href="https://doi.org/10.21105/joss.04364">
-        <img src="https://img.shields.io/badge/-DOI:10.21105/joss.04364-00666b">
-    </a>
-</p>
+## Links
 
+- Tutorials & Docs: [jacksund.github.io/simmate](https://jacksund.github.io/simmate/home/)
+- Website: [simmate.org](https://simmate.org/)
+- Paper: [doi.org/10.21105/joss.04364](https://doi.org/10.21105/joss.04364)
 
 ## About
 
@@ -29,7 +19,17 @@ Simmate is a full-stack framework and ecosystem for chemistry research. It stand
 
 ## Installation
 
-You can install Simmate using either [uv](https://docs.astral.sh/uv/getting-started/installation/) or [conda](https://conda-forge.org/download/):
+The quickest way to install is with our one-line installer, which sets up [uv](https://docs.astral.sh/uv/) and the `simmate` command (including all optional app dependencies):
+```bash
+# macOS & Linux
+curl -LsSf https://simmate.org/install.sh | sh
+```
+```powershell
+# Windows
+powershell -ExecutionPolicy ByPass -c "irm https://simmate.org/install.ps1 | iex"
+```
+
+To import Simmate in your own Python scripts, install it into an environment using either [uv](https://docs.astral.sh/uv/getting-started/installation/) or [conda](https://conda-forge.org/download/) instead:
 ```bash
 uv pip install simmate
 ```

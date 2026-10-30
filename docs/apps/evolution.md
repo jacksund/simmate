@@ -1,7 +1,4 @@
 !!! danger
-    This app is currently in early testing. It is not advised to use it outside of the Warren Lab.
-
-!!! danger
     :warning::warning: **Ensure you are using a cloud database if your workers are operating on separate machines or an HPC cluster.** :warning::warning:
     
     The default database backend (sqlite) is not designed for parallel connections from different computers. Your calculations will be **slower** and **more prone to errors** with sqlite.

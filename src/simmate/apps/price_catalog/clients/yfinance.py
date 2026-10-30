@@ -2,12 +2,10 @@ from rich.progress import track
 
 try:
     import yfinance
-except Exception:
-    raise Exception(
-        "Missing app-specific dependencies. Make sure to read our installation guide."
-        "The `price_catalog` app requires an additional dependency: `yfinance`."
-        "Install this with `pip install yfinance` (conda install is broken)"
-        # conda install -c conda-forge yfinance
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        "This client requires `yfinance`. Install it with "
+        '`uv pip install "simmate[price_catalog]"`'
     )
 
 

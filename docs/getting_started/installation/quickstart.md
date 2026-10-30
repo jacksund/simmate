@@ -1,5 +1,24 @@
 # Installation
 
+## One-line Install
+
+Run the command for your operating system:
+
+=== "macOS & Linux"
+    ``` bash
+    curl -LsSf https://simmate.org/install.sh | sh
+    ```
+
+=== "Windows"
+    ``` powershell
+    powershell -ExecutionPolicy ByPass -c "irm https://simmate.org/install.ps1 | iex"
+    ```
+
+Then restart your terminal and verify the installation with `simmate --help`.
+
+!!! note
+    This installs [uv](https://docs.astral.sh/uv/) and the `simmate` command, including all optional app dependencies. To import Simmate in your own Python scripts or Spyder, follow the Quickstart below instead.
+
 ## Quickstart
 
 1. Download and install your preferred package manager:
