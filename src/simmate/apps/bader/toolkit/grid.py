@@ -450,10 +450,10 @@ class Grid(VolumetricData):
         # make sure the pybader package is present
         try:
             from pybader.interface import Bader
-        except Exception:
-            raise Exception(
-                "This method requires the pybader module."
-                "Install this with `conda install -c conda-forge pybader`"
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "This method requires `pybader`. Install it with "
+                "`uv pip install pybader`"
             )
         atoms = self.structure.cart_coords
         lattice = self.matrix

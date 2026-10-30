@@ -29,7 +29,7 @@ class PyXtalStructure(StructureCreator):
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
                 "You must have PyXtal installed to use PyXtalStructure. "
-                "Install it with 'pip install pyxtal'"
+                "Install it with `uv pip install pyxtal`"
             )
 
         # save the module for reference below

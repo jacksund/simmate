@@ -24,13 +24,7 @@ def get_llm(**kwargs) -> BaseChatModel:
     llm_config.pop("sql_uri")  # not needed
 
     if provider == "OpenAI":
-        try:
-            from langchain_openai import AzureChatOpenAI
-        except Exception:
-            raise Exception(
-                "To use the chatbot with OpenAi, you must first run... "
-                "`conda install -c conda-forge langchain-openai`"
-            )
+        from langchain_openai import AzureChatOpenAI
 
         return AzureChatOpenAI(
             **llm_config,
@@ -45,13 +39,7 @@ def get_llm(**kwargs) -> BaseChatModel:
         )
 
     elif provider == "Google-GenAI":
-        try:
-            from langchain_google_genai import ChatGoogleGenerativeAI
-        except Exception:
-            raise Exception(
-                "To use the chatbot with Google-GenAI, you must first run... "
-                "`conda install -c conda-forge langchain-google-genai`"
-            )
+        from langchain_google_genai import ChatGoogleGenerativeAI
 
         return ChatGoogleGenerativeAI(
             **llm_config,

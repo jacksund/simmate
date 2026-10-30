@@ -13,14 +13,7 @@ spacegroup 166, I can see:
 
 import pandas as pd
 from rich.progress import track
-
-try:
-    from selenium import webdriver
-except Exception:
-    raise Exception(
-        "To use this method, Selenium is required. Please install it "
-        "with `conda install -c conda-forge selenium"
-    )
+from selenium import webdriver
 
 # launch the webbrowser
 driver = webdriver.Chrome(

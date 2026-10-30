@@ -155,15 +155,15 @@ class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
             raise ValueError(
                 "You must provide an api_key or set it in your Simmate settings.\n"
                 "To get an API key, visit: https://next-gen.materialsproject.org/api\n"
-                "Then set it by running: `simmate config add materials_project.api_key YOUR_KEY_HERE`"
+                'Then set it by running: `simmate config update "materials_project.api_key=YOUR_KEY_HERE"`'
             )
 
         try:
             from mp_api.client import MPRester
-        except Exception:
-            raise Exception(
-                "To use this method, MP-API is required. Please install it "
-                "with `uv pip install mp-api"
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "This method requires `mp-api`. Install it with "
+                '`uv pip install "simmate[materials_project]"`'
             )
 
         # Connect to their database with personal API key

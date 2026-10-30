@@ -3,14 +3,29 @@ This defines commands for managing your Simmate configuration settings. All comm
 accessible through the "simmate config" command.
 """
 
+import importlib
 from pathlib import Path
 
 import typer
 
 from simmate.command_line.utilities import AlphabeticalGroup
-from simmate.utils import logger
+from simmate.utils import get_app_submodule, logger
 
 config_app = typer.Typer(rich_markup_mode="markdown", cls=AlphabeticalGroup)
+
+
+def _get_app_configs() -> dict[str, str]:
+    """
+    Maps each built-in app's short name to its config path
+    (e.g. `{"chembl": "simmate.apps.configs.ChemblConfig", ...}`).
+    """
+    from simmate.apps import configs
+
+    return {
+        config.name.split(".")[-1]: f"simmate.apps.configs.{config.__name__}"
+        for config in vars(configs).values()
+        if isinstance(config, type) and config.__module__ == configs.__name__
+    }
 
 
 @config_app.callback(no_args_is_help=True)
@@ -69,123 +84,29 @@ def add(
 
     from simmate.config import settings
 
-    if app_name == "aflow":
-        settings.add_apps_and_update(
-            [
-                "simmate.apps.configs.AflowConfig",
-            ]
-        )
-    elif app_name == "bader":
-        settings.add_apps_and_update(
-            [
-                "simmate.apps.configs.BaderConfig",
-            ]
-        )
-    elif app_name == "baderkit":
-        settings.add_apps_and_update(
-            [
-                "simmate.apps.configs.BaderkitConfig",
-            ]
-        )
-    elif app_name == "clease":
-        settings.add_apps_and_update(
-            [
-                "simmate.apps.configs.CleaseConfig",
-            ]
-        )
-    elif app_name == "cod":
-        settings.add_apps_and_update(
-            [
-                "simmate.apps.configs.CodConfig",
-            ]
-        )
-    elif app_name == "deepmd":
-        settings.add_apps_and_update(
-            [
-                "simmate.apps.configs.DeepmdConfig",
-            ]
-        )
-    elif app_name == "dev_tools":
-        settings.add_apps_and_update(
-            [
-                "simmate.apps.configs.DevToolsConfig",
-            ]
-        )
-    elif app_name == "evolution":
-        settings.add_apps_and_update(
-            [
-                "simmate.apps.configs.VaspConfig",  # TODO: deprec app dependency
-                "simmate.apps.configs.EvolutionConfig",
-            ]
-        )
-    elif app_name == "jarvis":
-        settings.add_apps_and_update(
-            [
-                "simmate.apps.configs.JarvisConfig",
-            ]
-        )
-    elif app_name == "materials_project":
-        settings.add_apps_and_update(
-            [
-                "simmate.apps.configs.VaspConfig",
-                "simmate.apps.configs.BaderConfig",
-                "simmate.apps.configs.MaterialsProjectConfig",
-            ]
-        )
-    elif app_name == "oqmd":
-        settings.add_apps_and_update(
-            [
-                "simmate.apps.configs.OqmdConfig",
-            ]
-        )
-    elif app_name == "quantum_espresso":
-        settings.add_apps_and_update(
-            [
-                "simmate.apps.configs.QuantumEspressoConfig",
-            ]
-        )
-    elif app_name == "vasp":
-        settings.add_apps_and_update(
-            [
-                "simmate.apps.configs.VaspConfig",
-            ]
-        )
-    elif app_name == "warren_lab":
-        settings.add_apps_and_update(
-            [
-                "simmate.apps.configs.VaspConfig",
-                "simmate.apps.configs.BaderkitConfig",
-                "simmate.apps.configs.WarrenLabConfig",
-            ]
-        )
-    elif app_name in [
-        "rdkit",
-        "bcpc",
-        "cas_registry",
-        "chembl",
-        "chemspace",
-        "cod",
-        "emolecules",
-        "enamine",
-        "eppo_gd",
-        "pdb",
-    ]:
-        logger.critical(
-            "Molecular apps are not available yet! These will be available in the next simmate release (Summer 2025)"
+    if custom:
+        settings.add_apps_and_update([app_name])
+        return
+
+    app_configs = _get_app_configs()
+    if app_name not in app_configs:
+        # The user may have mistyped. We don't want to add a line to the
+        # settings file only for them to have to figure out how to delete it
+        logger.warning(
+            f"'{app_name}' is an unknown app. If you are using a custom app, "
+            "please add the tag '--custom'. If this message is unexpected, "
+            "check your command and app name for typos."
         )
         return
-    else:
-        if not custom:
-            # The user may have mistyped. We don't want to add a line to the
-            # settings file only for them to have to figure out how to delete it
-            logger.warning(
-                f"'{app_name}' is an unknown app. If you are using a custom app, "
-                "please add the tag '--custom'. If this message is unexpected, "
-                "check your command and app name for typos."
-            )
-        else:
-            # user is giving a custom app
-            settings.add_apps_and_update([app_name])
+
+    # some apps need others installed alongside them
+    app_dependencies = {
+        "evolution": ["vasp"],  # TODO: deprec app dependency
+        "materials_project": ["vasp", "bader"],
+        "warren_lab": ["vasp", "baderkit"],
+    }
+    app_names = [*app_dependencies.get(app_name, []), app_name]
+    settings.add_apps_and_update([app_configs[name] for name in app_names])
 
 
 @config_app.command()
@@ -219,41 +140,18 @@ def test(
     software like VASP).
     """
 
-    # OPTIMIZE: this code can be refactored and condensed. but it works for now
-
-    if app_name == "bader":
-        from simmate.apps.bader.config import test_config
-
-        passed = test_config()
-
-    elif app_name == "baderkit":
-        from simmate.apps.baderkit.config import test_config
-
-        passed = test_config()
-
-    elif app_name == "materials_project":
-        from simmate.apps.materials_project.config import test_config
-
-        passed = test_config()
-
-    elif app_name == "quantum_espresso":
-        from simmate.apps.quantum_espresso.config import test_config
-
-        passed = test_config()
-
-    elif app_name == "vasp":
-        from simmate.apps.vasp.config import test_config
-
-        passed = test_config()
-
-    elif app_name == "warren_lab":
-        from simmate.apps.warren_lab.config import test_config
-
-        passed = test_config()
-
-    else:
+    # apps opt into this command by adding a `config.py` with a `test_config` fxn
+    app_configs = _get_app_configs()
+    config_module = (
+        get_app_submodule(app_configs[app_name], "config")
+        if app_name in app_configs
+        else None
+    )
+    if not config_module:
         logger.warning(f"Unknown app (or no tests exist): {app_name}")
-        passed = False
+        raise typer.Exit(code=1)
+
+    passed = importlib.import_module(config_module).test_config()
 
     if not passed:
         raise typer.Exit(code=1)

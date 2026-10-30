@@ -24,7 +24,10 @@ In addition to the parameters presented by simmates documentation, any parameter
 simmate config add baderkit
 ```
 
-2. Make sure you have the `baderkit` package installed in the same environment as Simmate. For help, see the the [BaderKit Docs](https://sweav02.github.io/baderkit/)
+2. Install the `baderkit` package in the same environment as Simmate:
+``` bash
+uv pip install "simmate[baderkit]"
+```
 
 3. Update your database to include custom tables from the app:
 ``` shell

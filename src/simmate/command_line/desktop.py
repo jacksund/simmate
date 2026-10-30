@@ -24,7 +24,7 @@ def start():
     """
     Launches the desktop app and blocks until its window is closed.
 
-    Requires the `desktop` extra dependencies (e.g. `pip install simmate[desktop]`).
+    Requires the `desktop` extra dependencies (e.g. `uv pip install "simmate[desktop]"`).
     """
     from simmate.desktop import main
 
