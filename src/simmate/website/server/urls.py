@@ -53,6 +53,20 @@ urlpatterns = [
         ),
     ),
     #
+    # One-line installers (see envs/install/)
+    path(
+        route="install.sh",
+        view=RedirectView.as_view(
+            url="https://raw.githubusercontent.com/jacksund/simmate/main/envs/install/install.sh"
+        ),
+    ),
+    path(
+        route="install.ps1",
+        view=RedirectView.as_view(
+            url="https://raw.githubusercontent.com/jacksund/simmate/main/envs/install/install.ps1"
+        ),
+    ),
+    #
     # Disabled urls (such as the account signup form), must come first. The only
     # page that can't be disabled is the home page.
     *get_disabled_urls(),

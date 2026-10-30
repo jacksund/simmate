@@ -19,7 +19,17 @@ Simmate is a full-stack framework and ecosystem for chemistry research. It stand
 
 ## Installation
 
-You can install Simmate using either [uv](https://docs.astral.sh/uv/getting-started/installation/) or [conda](https://conda-forge.org/download/):
+The quickest way to install is with our one-line installer, which sets up [uv](https://docs.astral.sh/uv/) and the `simmate` command (including all optional app dependencies):
+```bash
+# macOS & Linux
+curl -LsSf https://simmate.org/install.sh | sh
+```
+```powershell
+# Windows
+powershell -ExecutionPolicy ByPass -c "irm https://simmate.org/install.ps1 | iex"
+```
+
+To import Simmate in your own Python scripts, install it into an environment using either [uv](https://docs.astral.sh/uv/getting-started/installation/) or [conda](https://conda-forge.org/download/) instead:
 ```bash
 uv pip install simmate
 ```

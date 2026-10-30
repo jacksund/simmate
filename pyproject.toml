@@ -117,6 +117,11 @@ materials_project = [
 price_catalog = [
     "yfinance>=1.2.0,<2.0.0",
 ]
+# Every app extra except dev and clease (clease has no macOS/ARM wheels).
+# Installed by envs/install/install.sh and install.ps1.
+all = [
+    "simmate[desktop,baderkit,chatbot,jarvis,lab_automation,materials_project,price_catalog]",
+]
 
 [project.urls]
 homepage = "https://simmate.org/"
