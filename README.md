@@ -5,21 +5,11 @@
    </a>
 </p>
 
-<p align="center">
-    <!-- Link to API documentation -->
-    <a href="https://jacksund.github.io/simmate/home/">
-        <img src="https://img.shields.io/badge/-Tutorials & Docs-/?logo=microsoft-academic&color=00666b&logoColor=white">
-    </a>
-    <!-- Link to Website -->
-    <a href="https://simmate.org/">
-        <img src="https://img.shields.io/badge/-Website-/?logo=iCloud&color=00666b&logoColor=white">
-    </a>
-    <!-- link to JOSS paper -->
-    <a href="https://doi.org/10.21105/joss.04364">
-        <img src="https://img.shields.io/badge/-DOI:10.21105/joss.04364-00666b">
-    </a>
-</p>
+## Links
 
+- Tutorials & Docs: [jacksund.github.io/simmate](https://jacksund.github.io/simmate/home/)
+- Website: [simmate.org](https://simmate.org/)
+- Paper: [doi.org/10.21105/joss.04364](https://doi.org/10.21105/joss.04364)
 
 ## About
 

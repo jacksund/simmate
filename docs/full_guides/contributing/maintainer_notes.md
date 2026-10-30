@@ -4,28 +4,27 @@
 
 To generate a new release:
 
-1. Modify the Simmate version number in `pyproject.toml` ([link](https://github.com/jacksund/simmate/blob/main/pyproject.toml))
+1. Bump the version number in [`pyproject.toml`](https://github.com/jacksund/simmate/blob/main/pyproject.toml).
 
-2. Update the changelog with the new release and its release date.
+2. Add the new release and its date to the changelog.
 
-3. Confirm all tests pass using the pre-built database. If they don't, generate a new one using the commands below (`prebuild` saves a date-stamped zip, e.g. `prebuild-2022-07-05.zip`, to `~/simmate/sqlite-prebuilds/`), upload it to the Simmate CDN, and modify the `archive_filename` in `simmate.database.utils.load_default_sqlite3_build`.
-``` bash
-simmate database reset --confirm-delete --no-use-prebuilt
-simmate database load <app_name>   # repeat for each app
-simmate database prebuild
-```
+3. Confirm all tests pass using the pre-built database. If they don't, generate a new one using the commands below (`prebuild` saves a date-stamped zip, e.g. `prebuild-2022-07-05.zip`, to `~/simmate/sqlite-prebuilds/`), upload it to the Simmate CDN, and update `archive_filename` in `simmate.database.utils.load_default_sqlite3_build`.
+    ``` bash
+    simmate database reset --confirm-delete --no-use-prebuilt
+    simmate database load <app_name>   # repeat for each app
+    simmate database prebuild
+    ```
 
-4. Generate a [release](https://github.com/jacksund/simmate/releases/new) on Github, which will automatically release to pypi.
+4. Create a [release](https://github.com/jacksund/simmate/releases/new) on GitHub, which automatically publishes to PyPI.
 
-5. For the conda release, wait for the autotick bot to initiate a pull request for the [simmate feedstock](https://github.com/conda-forge/simmate-feedstock). Check the status [here](https://conda-forge.org/status/#version_updates) (under "Queued").
+5. For the conda release, wait for the autotick bot to open a pull request on the [simmate feedstock](https://github.com/conda-forge/simmate-feedstock). Check its status [here](https://conda-forge.org/status/#version_updates) (under "Queued").
 
 6. Review the autotick bot's changes before merging. Changes to dependencies will likely require manual updates.
 
-7. After merging, wait for the conda-forge channels to update their indexes (about 30 minutes). Then, test the conda install with:
-``` bash
-# for a normal release
-conda create -n my_env -c conda-forge simmate -y
-```
+7. After merging, wait for the conda-forge channels to update their indexes (about 30 minutes). Then, test the conda install:
+    ``` bash
+    conda create -n my_env -c conda-forge simmate -y
+    ```
 
 ## Desktop App Builds
 
@@ -50,45 +49,35 @@ The builds are not code-signed, so Windows shows a SmartScreen warning ("More in
 
 ## Full Test Suite
 
-Unit tests that require third-party programs (like VASP) are disabled by default. However, it's advisable to run a full test before new releases. To execute all unit tests that call programs like VASP:
+Tests that require third-party programs (like VASP) are skipped by default, but the full suite should be run before each release:
 
-1. Ensure you have the following prerequisites:
-    - A Linux environment with VASP & Bader installed
-    - Dev version of Simmate installed (`uv sync --all-extras`)
-    - The `main` branch of the official repo checked out
-    - Virtual environment is active (`source .venv/bin/activate`)
-    - The base Simmate directory as the current working directory
-    - Clear any custom `~/simmate` configs (i.e., ensure default settings)
+1. Prerequisites:
+    - Linux with VASP and Bader installed
+    - A [dev install](first_time_setup.md) with `main` checked out
+    - Default settings (clear any custom `~/simmate` configs)
 
-2. Confirm the default test suite works:
-``` bash
-pytest
-```
+2. Confirm the default test suite passes:
+    ``` bash
+    simmate dev test
+    ```
 
-3. Reset your database, switch to the pre-built, and update it. This simulates the database of a new user:
-```bash
-simmate database reset --confirm-delete --use-prebuilt
-simmate database update
-```
+3. Reset to the pre-built database and update it. This simulates a new user's database:
+    ``` bash
+    simmate database reset --confirm-delete --use-prebuilt
+    simmate database update
+    ```
 
-4. Open `pyproject.toml` and modify the following line to run the VASP tests:
-``` toml
-# original line
-addopts = "--no-migrations --durations=15 -m 'not blender and not vasp'"
+4. (Optional) VASP tests run with `mpirun -n 14 vasp_std > vasp.out` by default. Change this in `src/simmate/workflows/test/test_all_workflow_runs.py` if needed.
 
-# updated line
-addopts = "--no-migrations --durations=15 -m 'not blender'"
-```
+5. Run the full suite, which adds the VASP tests:
+    ``` bash
+    simmate dev test --full
+    ```
 
-5. (Optional) By default, all VASP tests run using `mpirun -n 12 vasp_std > vasp.out`. Modify this in `src/simmate/workflows/tests/test_all_workflow_runs.py` if needed.
+    !!! tip
+        To watch the VASP runs, run only the workflow tests with logging enabled:
+        ``` bash
+        pytest src/simmate/workflows/test/test_all_workflow_runs.py -s -m "not blender"
+        ```
 
-6. Run `pytest` again to pick up these tests. It's advisable to run specific tests and enable logging (`-s`) for monitoring:
-``` bash
-# option 1
-pytest
-
-# option 2(recommended)
-pytest src/simmate/workflows/test/test_all_workflow_runs.py -s
-```
-
-7. If all tests pass, proceed with the new release. Discard your changes afterwards.
+6. If all tests pass, continue with the release. Discard any edits from step 4.
