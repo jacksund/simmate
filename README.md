@@ -20,8 +20,7 @@ Install with our one-line installer (it also sets up [uv](https://docs.astral.sh
 ```bash
 # macOS & Linux
 curl -LsSf https://simmate.org/install.sh | sh
-```
-```powershell
+
 # Windows
 powershell -ExecutionPolicy ByPass -c "irm https://simmate.org/install.ps1 | iex"
 ```
@@ -29,8 +28,9 @@ powershell -ExecutionPolicy ByPass -c "irm https://simmate.org/install.ps1 | iex
 To import Simmate in your own Python scripts, install it into an environment using either [uv](https://docs.astral.sh/uv/getting-started/installation/) or [conda](https://conda-forge.org/download/) instead:
 ```bash
 uv pip install simmate
-```
-```bash
+
+# or
+
 conda install -c conda-forge simmate
 ```
 
@@ -48,6 +48,8 @@ simmate desktop start
 simmate database reset
 simmate website start
 ```
+
+To learn more, continue with [our tutorials](https://jacksund.github.io/simmate/getting_started/introduction/).
 
 ## Need help?
 
