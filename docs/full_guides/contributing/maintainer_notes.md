@@ -6,7 +6,7 @@ To generate a new release:
 
 1. Bump the version number in [`pyproject.toml`](https://github.com/jacksund/simmate/blob/main/pyproject.toml).
 
-2. Add the new release and its date to the changelog.
+2. Write the release notes from the commits since the last release (e.g. `git log v0.20.0..HEAD`) in a new `docs/change_log/vX.Y.Z.md`, and add it with its date to the nav in `zensical.toml`.
 
 3. Confirm all tests pass using the pre-built database. If they don't, generate a new one (`prebuild` saves a date-stamped zip, e.g. `prebuild-2022-07-05.zip`, to `~/simmate/sqlite-prebuilds/`). If only migrations have changed, start from the current prebuild:
     ``` bash

@@ -8,6 +8,11 @@ simmate version
 ```
 
 
+## Unreleased Changes
+
+Release notes are written when a new version is published. To see changes since the latest release, view the [commits on `main`](https://github.com/jacksund/simmate/commits/main) or our [active pull-requests](https://github.com/jacksund/simmate/pulls) on GitHub.
+
+
 ## Upgrading to the Latest Version
 
 We strongly advise installing Simmate in a fresh environment instead of updating it within your current one. 
