@@ -17,7 +17,16 @@
 
 ## About
 
-Simmate is a full-stack framework and ecosystem for chemistry research. It standardizes how researchers interact with dozens of popular tools and databases by providing a robust ORM, workflow library, and a web UI out of the box. For both molecular and crystalline systems, Simmate also provides a comprehensive toolbox to build your own custom chemistry applications.
+Simmate is a full-stack framework and ecosystem for chemistry research, covering both molecular and crystalline systems. It brings dozens of popular programs and databases together under one consistent interface, and gives you the building blocks to make your own chemistry applications. Out of the box, Simmate provides:
+
+- **Chemical toolkit**: Pythonic `Molecule` and `Structure` objects built on RDKit and pymatgen, plus featurizers, similarity metrics, clustering, and predictive models.
+- **Desktop app**: a cross-platform app for exploring and filtering datasets and managing workers.
+- **Database & ORM**: Django-based tables with standard chemistry columns, which you can query from Python, SQL, the web UI, or a REST API (SQLite locally, PostgreSQL in production).
+- **Datastores**: parquet-backed storage for datasets with millions of rows, with fast filtering and vector-indexed similarity search.
+- **Website**: a Django + htmx web UI for browsing data, submitting workflows, and viewing results.
+- **Compute orchestration**: run jobs anywhere from a laptop to SLURM clusters or Kubernetes, with workers that pull jobs from a shared database.
+- **Workflow library**: ready-to-use workflows for VASP, Quantum ESPRESSO, Bader analysis, evolutionary structure prediction, and more.
+- **Built-in datasets**: ready-to-load data from Materials Project, COD, JARVIS, OQMD, AFLOW, ChEMBL, Enamine, and more.
 
 ## Installation
 
@@ -33,9 +42,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://simmate.org/install.ps1 | iex
 To import Simmate in your own Python scripts, install it into an environment using either [uv](https://docs.astral.sh/uv/getting-started/installation/) or [conda](https://conda-forge.org/download/) instead:
 ```bash
 uv pip install simmate
-
 # or
-
 conda install -c conda-forge simmate
 ```
 
