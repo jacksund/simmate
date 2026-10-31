@@ -5,21 +5,18 @@
    </a>
 </p>
 
-## Links
-
-- Tutorials & Docs: [jacksund.github.io/simmate](https://jacksund.github.io/simmate/home/)
-- Website: [simmate.org](https://simmate.org/)
-- Paper: [doi.org/10.21105/joss.04364](https://doi.org/10.21105/joss.04364)
+<!-- Links -->
+<p align="center">
+   Website: <a href="https://simmate.org/">simmate.org</a> | Tutorials &amp; Docs: <a href="https://jacksund.github.io/simmate/home/">jacksund.github.io/simmate</a> | Paper: <a href="https://doi.org/10.21105/joss.04364">doi.org/10.21105/joss.04364</a>
+</p>
 
 ## About
 
 Simmate is a full-stack framework and ecosystem for chemistry research. It standardizes how researchers interact with dozens of popular tools and databases by providing a robust ORM, workflow library, and a web UI out of the box. For both molecular and crystalline systems, Simmate also provides a comprehensive toolbox to build your own custom chemistry applications.
 
-[A preview of features is available on our documentation homepage.](https://jacksund.github.io/simmate/home/)
-
 ## Installation
 
-The quickest way to install is with our one-line installer, which sets up [uv](https://docs.astral.sh/uv/) and the `simmate` command (including all optional app dependencies):
+Install with our one-line installer (it also sets up [uv](https://docs.astral.sh/uv/) if needed):
 ```bash
 # macOS & Linux
 curl -LsSf https://simmate.org/install.sh | sh
@@ -35,6 +32,21 @@ uv pip install simmate
 ```
 ```bash
 conda install -c conda-forge simmate
+```
+
+## Quickstart
+
+Once installed, try out these commands:
+```bash
+# view all available commands
+simmate --help
+
+# launch the desktop app
+simmate desktop start
+
+# set up your database, then launch the web UI (at http://localhost:8000/)
+simmate database reset
+simmate website start
 ```
 
 ## Need help?
