@@ -19,14 +19,14 @@
 
 Simmate is a full-stack framework and ecosystem for chemistry research, covering both molecular and crystalline systems. It brings dozens of popular programs and databases together under one consistent interface, and gives you the building blocks to make your own chemistry applications. Out of the box, Simmate provides:
 
-- **Chemical toolkit**: Pythonic `Molecule` and `Structure` objects built on RDKit and pymatgen, plus featurizers, similarity metrics, clustering, and predictive models.
-- **Desktop app**: a cross-platform app for exploring and filtering datasets and managing workers.
-- **Database & ORM**: Django-based tables with standard chemistry columns, which you can query from Python, SQL, the web UI, or a REST API (SQLite locally, PostgreSQL in production).
-- **Datastores**: parquet-backed storage for datasets with millions of rows, with fast filtering and vector-indexed similarity search.
-- **Website**: a Django + htmx web UI for browsing data, submitting workflows, and viewing results.
-- **Compute orchestration**: run jobs anywhere from a laptop to SLURM clusters or Kubernetes, with workers that pull jobs from a shared database.
-- **Workflow library**: ready-to-use workflows for VASP, Quantum ESPRESSO, Bader analysis, evolutionary structure prediction, and more.
-- **Built-in datasets**: ready-to-load data from Materials Project, COD, JARVIS, OQMD, AFLOW, ChEMBL, Enamine, and more.
+- **Chemical toolkit**: Pythonic objects for molecules and crystals
+- **Desktop app**: explore datasets and manage compute workers
+- **Database & ORM**: chemistry-ready tables, queryable via Python, SQL, or REST API
+- **Datastores**: fast filtering and similarity search over billions of rows
+- **Website**: web UI to browse data, submit workflows, and view results
+- **Compute orchestration**: scale from a laptop to SLURM clusters or Kubernetes
+- **Workflow library**: ready-to-use workflows for VASP, Quantum ESPRESSO, and more
+- **Built-in datasets**: Materials Project, COD, JARVIS, ChEMBL, Enamine, and more
 
 ## Installation
 
