@@ -536,7 +536,9 @@ def load_default_sqlite3_build():
 
     # check if the archive has been downloaded before. If not, download!
     if not archive_filename_full.exists():
-        remote_archive_link = f"https://assets.simmate.org/{archive_filename}"
+        remote_archive_link = (
+            f"https://assets.simmate.org/sqlite-prebuilds/{archive_filename}"
+        )
         # Download the archive zip file from the URL to the current working dir
         logger.info("Downloading database file...")
         urllib.request.urlretrieve(remote_archive_link, archive_filename_full)
@@ -660,6 +662,38 @@ def create_prebuild():
         zip_file.write(db_filename, arcname=f"{prebuild_name}.sqlite3")
 
     logger.info(f"Success! Prebuild created: {zip_filename.name}")
+
+
+def upload_prebuild(filename: str = None):
+    """
+    Uploads a prebuild zip from the `<config dir>/sqlite-prebuilds/` directory
+    to the `sqlite-prebuilds/` folder of the configured S3 bucket (`settings.s3`).
+    For the Simmate CDN, it is then served at
+    `https://assets.simmate.org/sqlite-prebuilds/<filename>`.
+
+    Args:
+        filename: Name of the zip to upload (e.g. "prebuild-2026-10-30.zip").
+            Defaults to the newest prebuild.
+    """
+    from simmate.database.external_connectors.s3 import SimmateS3Bucket
+
+    if not SimmateS3Bucket.bucket:
+        raise Exception("No S3 bucket is configured. Set `settings.s3` first.")
+
+    archive_dir = get_directory(settings.config_directory / "sqlite-prebuilds")
+    if filename:
+        zip_filename = archive_dir / filename
+    else:
+        # names are date-stamped, so the last one when sorted is the newest
+        zip_filenames = sorted(archive_dir.glob("prebuild-*.zip"))
+        if not zip_filenames:
+            raise FileNotFoundError(f"No prebuilds found in {archive_dir}")
+        zip_filename = zip_filenames[-1]
+
+    s3_key = f"sqlite-prebuilds/{zip_filename.name}"
+    logger.info(f"Uploading {zip_filename.name} to S3...")
+    SimmateS3Bucket.upload_file(zip_filename, s3_key)
+    logger.info(f"Success! Uploaded to s3://{SimmateS3Bucket.bucket}/{s3_key}")
 
 
 def get_fake_data_path(app_label: str) -> Path:

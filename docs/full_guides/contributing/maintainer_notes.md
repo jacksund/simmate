@@ -8,11 +8,20 @@ To generate a new release:
 
 2. Add the new release and its date to the changelog.
 
-3. Confirm all tests pass using the pre-built database. If they don't, generate a new one using the commands below (`prebuild` saves a date-stamped zip, e.g. `prebuild-2022-07-05.zip`, to `~/simmate/sqlite-prebuilds/`), upload it to the Simmate CDN, and update `archive_filename` in `simmate.database.utils.load_default_sqlite3_build`.
+3. Confirm all tests pass using the pre-built database. If they don't, generate a new one (`prebuild` saves a date-stamped zip, e.g. `prebuild-2022-07-05.zip`, to `~/simmate/sqlite-prebuilds/`). If only migrations have changed, start from the current prebuild:
+    ``` bash
+    simmate database reset --confirm-delete --use-prebuilt  # also applies new migrations
+    simmate database prebuild
+    ```
+    To reload all third-party data instead:
     ``` bash
     simmate database reset --confirm-delete --no-use-prebuilt
     simmate database load <app_name>   # repeat for each app
     simmate database prebuild
+    ```
+    Then upload the newest zip to `sqlite-prebuilds/` on the Simmate CDN (requires `settings.s3` with write access) and update `archive_filename` in `simmate.database.utils.load_default_sqlite3_build`:
+    ``` bash
+    simmate database upload-prebuild
     ```
 
 4. Create a [release](https://github.com/jacksund/simmate/releases/new) on GitHub, which automatically publishes to PyPI.
