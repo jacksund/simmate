@@ -1,18 +1,18 @@
 <!-- Simmate Logo -->
 <p align="center">
    <a href="https://simmate.org">
-      <img src="https://raw.githubusercontent.com/jacksund/simmate/refs/heads/main/src/simmate/website/core/static/images/simmate-logo.svg" width="700" style="max-width: 700px;">
+      <img src="https://raw.githubusercontent.com/jacksund/simmate/refs/heads/main/src/simmate/website/core/static/images/simmate-logo.svg" width="550" style="max-width: 550px;">
    </a>
-</p>
-
-<!-- Desktop App Screenshot -->
-<p align="center">
-   <img src="https://raw.githubusercontent.com/jacksund/simmate/refs/heads/main/src/simmate/website/core/static/images/desktop-toolkit.png" alt="Simmate Desktop's Toolkit tab filtering a compound dataset by substructure" width="900">
 </p>
 
 <!-- Links -->
 <p align="center">
    Website: <a href="https://simmate.org/">simmate.org</a> | Tutorials &amp; Docs: <a href="https://jacksund.github.io/simmate/home/">jacksund.github.io/simmate</a> | Paper: <a href="https://doi.org/10.21105/joss.04364">doi.org/10.21105/joss.04364</a>
+</p>
+
+<!-- Desktop App Screenshot -->
+<p align="center">
+   <img src="https://raw.githubusercontent.com/jacksund/simmate/refs/heads/main/src/simmate/website/core/static/images/desktop-toolkit.png" alt="Simmate Desktop's Toolkit tab filtering a compound dataset by substructure" width="900">
 </p>
 
 ## About
