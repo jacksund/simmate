@@ -8,13 +8,18 @@ simmate version
 ```
 
 
+## Unreleased Changes
+
+Release notes are written when a new version is published. To see changes since the latest release, view the [commits on `main`](https://github.com/jacksund/simmate/commits/main) or our [active pull-requests](https://github.com/jacksund/simmate/pulls) on GitHub.
+
+
 ## Upgrading to the Latest Version
 
 We strongly advise installing Simmate in a fresh environment instead of updating it within your current one. 
 
 For **conda** users:
 ``` shell
-conda create -n my_env -c conda-forge python=3.11 simmate
+conda create -n my_env -c conda-forge python=3.13 simmate
 ```
 
 For **uv** users:
@@ -37,11 +42,12 @@ simmate database update
 !!! danger "Database Compatibility"
     Simmate's API is currently in development (`v0.*.*`), and database migrations are only supported within specific version ranges. The `simmate database update` command is effective for:
 
-    - **v0.19.0 to Latest**: Fully compatible
+    - **v0.20.0 to Latest**: Fully compatible
+    - **v0.19.0**: Compatible with itself only
     - **v0.15.0 to v0.18.0**: Compatible within this range only
     - **v0.0.0 to v0.14.0**: Incompatible (the update command did not exist)
 
-    Upgrading between these groups (e.g., from v0.18.0 to v0.19.0) requires `simmate database reset`. If you need assistance migrating data across incompatible versions, please reach out to our team.
+    Upgrading between these groups (e.g., from v0.19.0 to v0.20.0) requires `simmate database reset`. If you need assistance migrating data across incompatible versions, please reach out to our team.
 
 
 ## Understanding Version Numbers

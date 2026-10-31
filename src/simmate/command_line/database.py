@@ -194,3 +194,19 @@ def prebuild():
     from simmate.database.utils import create_prebuild
 
     create_prebuild()
+
+
+@database_app.command()
+def upload_prebuild(
+    filename: str = typer.Argument(
+        None,
+        help="The prebuild zip to upload (e.g. 'prebuild-2026-10-30.zip'). Defaults to the newest one.",
+    ),
+):
+    """
+    Uploads a prebuild zip from `~/simmate/sqlite-prebuilds/` to the
+    `sqlite-prebuilds/` folder of the configured S3 bucket (`settings.s3`).
+    """
+    from simmate.database.utils import upload_prebuild
+
+    upload_prebuild(filename)

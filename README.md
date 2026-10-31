@@ -1,30 +1,40 @@
 <!-- Simmate Logo -->
 <p align="center">
    <a href="https://simmate.org">
-      <img src="https://raw.githubusercontent.com/jacksund/simmate/refs/heads/main/src/simmate/website/core/static/images/simmate-logo.svg" width="700" style="max-width: 700px;">
+      <img src="https://raw.githubusercontent.com/jacksund/simmate/refs/heads/main/src/simmate/website/core/static/images/simmate-logo.svg" width="550" style="max-width: 550px;">
    </a>
 </p>
 
-## Links
+<!-- Links -->
+<p align="center">
+   Website: <a href="https://simmate.org/">simmate.org</a> | Tutorials &amp; Docs: <a href="https://jacksund.github.io/simmate/home/">jacksund.github.io/simmate</a> | Paper: <a href="https://doi.org/10.21105/joss.04364">doi.org/10.21105/joss.04364</a>
+</p>
 
-- Tutorials & Docs: [jacksund.github.io/simmate](https://jacksund.github.io/simmate/home/)
-- Website: [simmate.org](https://simmate.org/)
-- Paper: [doi.org/10.21105/joss.04364](https://doi.org/10.21105/joss.04364)
+<!-- Desktop App Screenshot -->
+<p align="center">
+   <img src="https://raw.githubusercontent.com/jacksund/simmate/refs/heads/main/src/simmate/website/core/static/images/desktop-toolkit.png" alt="Simmate Desktop's Toolkit tab filtering a compound dataset by substructure" width="900">
+</p>
 
 ## About
 
-Simmate is a full-stack framework and ecosystem for chemistry research. It standardizes how researchers interact with dozens of popular tools and databases by providing a robust ORM, workflow library, and a web UI out of the box. For both molecular and crystalline systems, Simmate also provides a comprehensive toolbox to build your own custom chemistry applications.
+Simmate is a full-stack framework and ecosystem for chemistry research, covering both molecular and crystalline systems. It brings dozens of popular programs and databases together under one consistent interface, and gives you the building blocks to make your own chemistry applications. Out of the box, Simmate provides:
 
-[A preview of features is available on our documentation homepage.](https://jacksund.github.io/simmate/home/)
+- **Chemical toolkit**: Pythonic objects for molecules and crystals
+- **Desktop app**: explore datasets and manage compute workers
+- **Database & ORM**: chemistry-ready tables, queryable via Python, SQL, or REST API
+- **Datastores**: fast filtering and similarity search over billions of rows
+- **Website**: web UI to browse data, submit workflows, and view results
+- **Compute orchestration**: scale from a laptop to SLURM clusters or Kubernetes
+- **Workflow library**: ready-to-use workflows for VASP, Quantum ESPRESSO, and more
+- **Built-in datasets**: Materials Project, COD, JARVIS, ChEMBL, Enamine, and more
 
 ## Installation
 
-The quickest way to install is with our one-line installer, which sets up [uv](https://docs.astral.sh/uv/) and the `simmate` command (including all optional app dependencies):
+Install with our one-line installer (it also sets up [uv](https://docs.astral.sh/uv/) if needed):
 ```bash
 # macOS & Linux
 curl -LsSf https://simmate.org/install.sh | sh
-```
-```powershell
+
 # Windows
 powershell -ExecutionPolicy ByPass -c "irm https://simmate.org/install.ps1 | iex"
 ```
@@ -32,10 +42,26 @@ powershell -ExecutionPolicy ByPass -c "irm https://simmate.org/install.ps1 | iex
 To import Simmate in your own Python scripts, install it into an environment using either [uv](https://docs.astral.sh/uv/getting-started/installation/) or [conda](https://conda-forge.org/download/) instead:
 ```bash
 uv pip install simmate
-```
-```bash
+# or
 conda install -c conda-forge simmate
 ```
+
+## Quickstart
+
+Once installed, try out these commands:
+```bash
+# view all available commands
+simmate --help
+
+# launch the desktop app
+simmate desktop start
+
+# set up your database, then launch the web UI (at http://localhost:8000/)
+simmate database reset
+simmate website start
+```
+
+To learn more, continue with [our tutorials](https://jacksund.github.io/simmate/getting_started/introduction/).
 
 ## Need help?
 
