@@ -14,7 +14,7 @@ We strongly advise installing Simmate in a fresh environment instead of updating
 
 For **conda** users:
 ``` shell
-conda create -n my_env -c conda-forge python=3.11 simmate
+conda create -n my_env -c conda-forge python=3.13 simmate
 ```
 
 For **uv** users:
