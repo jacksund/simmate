@@ -50,13 +50,21 @@ spec:
       containers:
       - name: worker
         image: your-registry/simmate-worker:latest
+        command: ["simmate", "compute", "worker", "start"]
+        args: ["--computer-system", "$(NODE_NAME)"]
         env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
         - name: SIMMATE_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
               name: db-secrets
               key: password
 ```
+
+The `NODE_NAME` variable passes the node each pod runs on to `--computer-system`, so the compute dashboard groups workers by node rather than showing each pod as its own host. CPU cores and RAM are read from the pod's resource limits, so set `resources.limits` if you want them reported accurately (see [Reporting Worker Resources](advanced_config.md#reporting-worker-resources)).
 
 ### Helm Charts
 For more complex deployments (including the Web UI, Database, and Workers), Simmate provides Helm charts in `envs/helm/`. These charts help manage:

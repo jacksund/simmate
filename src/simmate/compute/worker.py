@@ -1,8 +1,10 @@
+import platform
 import threading
 import time
 import traceback
 from contextlib import ContextDecorator
 from datetime import timedelta
+from pathlib import Path
 
 import cloudpickle
 from django.contrib.auth.models import User
@@ -13,7 +15,7 @@ from rich import print
 from simmate.database.core import DatabaseTable, table_column
 from simmate.utils import get_class, logger
 
-from .utils import handle_sigterm
+from .utils import get_available_resources, handle_sigterm
 from .work_item import WorkerInterruptedError, WorkItem
 
 # This string is just something fancy to display in the console when a worker
@@ -222,6 +224,14 @@ class SimmateWorker(DatabaseTable):
         if not self.tags:
             self.tags = ["simmate"]
 
+        # fill in whatever wasn't given so the dashboard can show where this
+        # worker runs and what it has available
+        ncores, ram = get_available_resources()
+        self.ncores = self.ncores or ncores
+        self.ram = self.ram or ram
+        self.computer_system = self.computer_system or platform.node()
+        self.directory = self.directory or str(Path.cwd())
+
         # save worker entry to database
         self.status = "Setting Up"
         self.save()  # creates initial object
@@ -229,7 +239,10 @@ class SimmateWorker(DatabaseTable):
         # print the header in the console to let the user know the worker started
         print("[bold dark_cyan]" + HEADER_ART)
 
-        logger.info(f"Starting worker with tags {list(self.tags)}")
+        logger.info(
+            f"Starting worker with tags {list(self.tags)} on {self.computer_system} "
+            f"({self.ncores:g} cores, {self.ram:g} GB RAM)"
+        )
 
         if self.startup_method:
             logger.info(f"Running startup method: '{self.startup_method}'")
