@@ -1,0 +1,14 @@
+{# Shared WorkItem status badge -- expects `status` #}
+{% if status == "Pending" %}
+    {% status_bar "Pending" "secondary" %}
+{% elif status == "Running" %}
+    {% status_bar "Running" "primary" %}
+{% elif status == "Cancelled" %}
+    {% status_bar "Cancelled" "warning" %}
+{% elif status == "Failed" %}
+    {% status_bar "Failed" "danger" %}
+{% elif status == "Interrupted" %}
+    {% status_bar "Interrupted" "warning" %}
+{% elif status == "Completed" %}
+    {% status_bar "Completed" "success" %}
+{% endif %}

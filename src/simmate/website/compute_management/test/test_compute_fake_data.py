@@ -1,8 +1,9 @@
 from django.utils import timezone
 
 from simmate.compute import SimmateExecutor, SimmateWorker, WorkItem
-from simmate.website.compute_management.components.dashboard import (
+from simmate.website.compute_management.components import (
     ComputeDashboardComponent,
+    WorkItemComponent,
 )
 
 
@@ -12,7 +13,7 @@ def test_compute_fake_data(fake_data, client):
 
     # binary columns are kept
     item = WorkItem.objects.filter(status="Failed").first()
-    assert "Error" in ComputeDashboardComponent.get_error_messages([item.id])[item.id]
+    assert "Error" in WorkItemComponent.get_error_messages([item.id])[item.id]
 
     # dates are shifted so that workers have fresh (or stale) heartbeats
     assert SimmateWorker.get_active().count() == 4
@@ -35,3 +36,13 @@ def test_compute_fake_data(fake_data, client):
     response = client.get("/apps/compute/")
     assert response.status_code == 200
     assert "Worker processes that poll queues" in response.content.decode()
+
+    # entry pages
+    failed_item = WorkItem.objects.filter(status="Failed").first()
+    response = client.get(f"/data/WorkItem/{failed_item.id}/")
+    assert response.status_code == 200
+    assert "Error" in response.content.decode()
+    worker = SimmateWorker.objects.filter(work_items__isnull=False).first()
+    response = client.get(f"/data/SimmateWorker/{worker.id}/")
+    assert response.status_code == 200
+    assert "Work Items (" in response.content.decode()
