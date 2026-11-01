@@ -490,6 +490,28 @@ class SimmateWorker(DatabaseTable):
 
         return {"stale": nstale, "crashed": ncrashed, "interrupted": ninterrupted}
 
+    @classmethod
+    def delete_inactive(cls, days: float = 30) -> int:
+        """
+        Deletes workers that are no longer active (Stopped, Crashed, etc.) and
+        haven't checked in for the given number of days.
+
+        Any remaining WorkItems that point to a deleted worker keep their data
+        but lose the link to it.
+
+        Args:
+            days: Only delete workers last updated more than this many days ago.
+
+        Returns:
+            The number of workers deleted.
+        """
+        ndeleted, _ = (
+            cls.objects.exclude(status__in=cls.active_statuses)
+            .filter(updated_at__lt=timezone.now() - timedelta(days=days))
+            .delete()
+        )
+        return ndeleted
+
 
 class WorkerHeartbeat(ContextDecorator):
     """

@@ -89,6 +89,21 @@ WorkItem.requeue_interrupted()
 
 Over time, the `WorkItem` table can grow very large, which may eventually slow down database queries. It's a good practice to periodically delete old or unnecessary entries.
 
+### Automatic Cleanup
+When the scheduler is running (`simmate compute scheduler start`, see [Schedules](schedules.md)), a nightly task deletes entries that haven't been updated in over 30 days:
+
+- `WorkItem`s that are finished (`Completed`, `Failed`, `Cancelled`, or `Interrupted`). This includes interrupted items that were never requeued.
+- Workers that are no longer active (`Stopped`, `Crashed`, etc.).
+
+`Pending` and `Running` items, and active workers, are never removed. You can also run the cleanup yourself with a different cutoff:
+
+```python
+from simmate.compute import SimmateWorker, WorkItem
+
+WorkItem.delete_inactive(days=7)
+SimmateWorker.delete_inactive(days=7)
+```
+
 !!! warning
     The `workitems delete` command requires the `--confirm` flag to execute.
 
