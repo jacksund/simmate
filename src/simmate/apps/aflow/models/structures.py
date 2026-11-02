@@ -14,6 +14,7 @@ class AflowStructure(ThirdPartyData, Structure, Thermodynamics):
 
     class Meta:
         db_table = "aflow__structures"
+        verbose_name = "AFLOW Structure"
 
     external_website = "http://www.aflowlib.org/"
     source_doi = "https://doi.org/10.1016/j.commatsci.2012.02.005"

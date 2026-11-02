@@ -137,6 +137,7 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
     class Meta:
         app_label = "workflow_explorer"
         db_table = "workflows_bandstructurecalc"
+        verbose_name = "Band Structure Calculation"
 
     @classmethod
     def from_vasp_run(cls, vasprun: Vasprun, as_dict: bool = False):

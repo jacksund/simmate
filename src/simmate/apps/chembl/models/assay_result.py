@@ -27,6 +27,7 @@ class ChemblAssayResult(DatabaseTable):
 
     class Meta:
         db_table = "chembl__assay_results"
+        verbose_name = "ChEMBL Assay Result"
 
     chembl_document = table_column.ForeignKey(
         ChemblDocument,

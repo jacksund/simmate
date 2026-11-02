@@ -14,6 +14,7 @@ class ChemblDocument(DatabaseTable):
 
     class Meta:
         db_table = "chembl__documents"
+        verbose_name = "ChEMBL Document"
 
     published_at = table_column.IntegerField(blank=True, null=True)
     """

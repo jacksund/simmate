@@ -121,6 +121,18 @@ class DatabaseTable(models.Model, ArchiveMixin):
         return cls.__name__
 
     @classproperty
+    def table_label(cls) -> str:
+        """
+        Returns a human-readable name for this table, e.g. "Work Item" for
+        `WorkItem`. Set `Meta.verbose_name` (in Title Case) to override this.
+        It is shown exactly as written, so acronyms survive (e.g. "COD Structure").
+        """
+        if "verbose_name" in cls._meta.original_attrs:
+            return cls._meta.verbose_name
+        # Django's default is the lowercased class name (e.g. "work item")
+        return cls._meta.verbose_name.title()
+
+    @classproperty
     def columns(cls):
         return cls._meta.get_fields()
 

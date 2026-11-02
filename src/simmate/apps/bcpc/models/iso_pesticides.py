@@ -27,6 +27,7 @@ class BcpcIsoPesticide(ThirdPartyData, Molecule):
 
     class Meta:
         db_table = "bcpc__iso_pesticides__molecules"
+        verbose_name = "BCPC ISO Pesticide"
 
     is_redistribution_allowed = False
 

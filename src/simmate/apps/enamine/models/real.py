@@ -18,6 +18,7 @@ class EnamineRealMolecule(ThirdPartyData, Molecule):
 
     class Meta:
         db_table = "enamine__real__molecules"
+        verbose_name = "Enamine REAL Molecule"
 
     is_redistribution_allowed = False
 

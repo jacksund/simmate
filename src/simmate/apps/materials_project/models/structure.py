@@ -24,6 +24,7 @@ class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
 
     class Meta:
         db_table = "materials_project__structures"
+        verbose_name = "Materials Project Structure"
 
     # -------------------------------------------------------------------------
 

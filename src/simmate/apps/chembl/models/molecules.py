@@ -32,6 +32,7 @@ class ChemblMolecule(ThirdPartyData, Molecule):
 
     class Meta:
         db_table = "chembl__molecules"
+        verbose_name = "ChEMBL Molecule"
 
     external_website = "https://www.ebi.ac.uk/chembl/beta/"
     source_doi = "https://doi.org/10.1093/nar/gky1075"

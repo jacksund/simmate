@@ -27,6 +27,7 @@ class PdbLigand(ThirdPartyData, Molecule):
 
     class Meta:
         db_table = "pdb__ligands"
+        verbose_name = "PDB Ligand"
 
     external_website = "https://www.wwpdb.org/"
     source_doi = "https://www.wwpdb.org/data/ccd"

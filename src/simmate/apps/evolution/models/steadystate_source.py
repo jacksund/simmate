@@ -13,6 +13,7 @@ class SteadystateSource(DatabaseTable):
     class Meta:
         app_label = "workflow_explorer"
         db_table = "workflows_steadystatesource"
+        verbose_name = "Steady-State Source"
 
     name = table_column.CharField(max_length=50)
     kwargs = table_column.JSONField(default=dict)

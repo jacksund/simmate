@@ -21,6 +21,7 @@ class AflowPrototype(ThirdPartyData, Structure):
 
     class Meta:
         db_table = "aflow__prototypes"
+        verbose_name = "AFLOW Prototype"
 
     # -------------------------------------------------------------------------
 

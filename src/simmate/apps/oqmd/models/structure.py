@@ -25,6 +25,7 @@ class OqmdStructure(ThirdPartyData, Structure):
 
     class Meta:
         db_table = "oqmd__structures"
+        verbose_name = "OQMD Structure"
 
     # -------------------------------------------------------------------------
 
