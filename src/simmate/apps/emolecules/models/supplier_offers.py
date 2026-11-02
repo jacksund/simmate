@@ -18,6 +18,7 @@ class EmoleculesSupplierOffer(ThirdPartyData, DatabaseTable):
 
     class Meta:
         db_table = "emolecules__supplier_offers"
+        verbose_name = "eMolecules Supplier Offer"
 
     external_website = "https://www.emolecules.com/"
     source_doi = "https://www.emolecules.com/data-downloads"

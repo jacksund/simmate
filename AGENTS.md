@@ -112,7 +112,7 @@ For datasets too large for ORM queries (millions of rows, e.g. ChEMBL or Chemspa
     - `DatabaseTable`: Base model with `from_toolkit()` support, plus `ArchiveMixin` for loading and exporting data archives. (`to_toolkit()` lives on `SearchResults` and on mixins like `Structure`.)
     - `Calculation`: Extends `DatabaseTable` with job metadata (`run_id`, `status`).
     - `Structure` (mixin): Adds `to_toolkit()` and stores core structure data (lattice, sites).
-- **Model Conventions:** Declare fields with `table_column` (`from simmate.database.core import DatabaseTable, table_column`), e.g. `table_column.CharField(...)` instead of `models.CharField`. Put a docstring directly under each field; `get_column_docs()` and `show_table_docs()` read these as column descriptions.
+- **Model Conventions:** Declare fields with `table_column` (`from simmate.database.core import DatabaseTable, table_column`), e.g. `table_column.CharField(...)` instead of `models.CharField`. Put a docstring directly under each field; `get_column_docs()` and `show_table_docs()` read these as column descriptions. `DatabaseTable.table_label` title-cases the class name for display (e.g. "Work Item"); when that reads poorly (acronyms, abbreviations, awkward wording), set `Meta.verbose_name` in Title Case (e.g. `"COD Structure"`), which is shown as written.
 
 ## Website Architecture (`src/simmate/website/`)
 

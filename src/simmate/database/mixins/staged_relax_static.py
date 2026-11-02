@@ -8,3 +8,4 @@ class StagedRelaxStatic(StagedWorkflow, Structure, Thermodynamics, Forces):
     class Meta:
         app_label = "workflow_explorer"
         db_table = "workflows_stagedrelaxstatic"
+        verbose_name = "Staged Relax & Static"

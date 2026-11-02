@@ -24,6 +24,7 @@ class PpdbMolecule(ThirdPartyData, Molecule):
 
     class Meta:
         db_table = "ppdb__molecules"
+        verbose_name = "PPDB Molecule"
 
     external_website = "https://sitem.herts.ac.uk/aeru/ppdb/en/index.htm"
     source_doi = "https://sitem.herts.ac.uk/aeru/ppdb/en/atoz.htm"

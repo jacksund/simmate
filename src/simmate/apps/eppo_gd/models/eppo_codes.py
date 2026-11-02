@@ -29,6 +29,7 @@ class EppoCode(ThirdPartyData, DatabaseTable):
 
     class Meta:
         db_table = "eppo_gd__eppo_codes"
+        verbose_name = "EPPO Code"
 
     is_redistribution_allowed = True
 

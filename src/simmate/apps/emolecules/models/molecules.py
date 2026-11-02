@@ -23,6 +23,7 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
 
     class Meta:
         db_table = "emolecules__molecules"
+        verbose_name = "eMolecules Molecule"
 
     external_website = "https://www.emolecules.com/"
     source_doi = "https://www.emolecules.com/data-downloads"

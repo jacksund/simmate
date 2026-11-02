@@ -12,6 +12,7 @@ class ChemSpaceFreedomSpaceMolecule(ThirdPartyData, Molecule):
 
     class Meta:
         db_table = "chemspace__freedom_space__molecules"
+        verbose_name = "ChemSpace Freedom Space Molecule"
 
     # TODO: Freedom space is now 5bil molecules... The "Screening Compound Catalog"
 

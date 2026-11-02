@@ -16,6 +16,7 @@ class JarvisStructure(ThirdPartyData, Structure):
 
     class Meta:
         db_table = "jarvis__structures"
+        verbose_name = "JARVIS Structure"
 
     # -------------------------------------------------------------------------
 

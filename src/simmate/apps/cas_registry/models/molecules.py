@@ -26,6 +26,7 @@ class CasRegistryMolecule(ThirdPartyData, Molecule):
 
     class Meta:
         db_table = "cas_registry__molecules"
+        verbose_name = "CAS Registry Molecule"
 
     external_website = "https://www.cas.org/about-us"
     is_redistribution_allowed = False

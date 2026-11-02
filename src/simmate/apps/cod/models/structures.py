@@ -24,6 +24,7 @@ class CodStructure(ThirdPartyData, Structure):
 
     class Meta:
         db_table = "cod__structures"
+        verbose_name = "COD Structure"
 
     # -------------------------------------------------------------------------
 
