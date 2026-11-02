@@ -39,11 +39,9 @@ curl -LsSf https://simmate.org/install.sh | sh
 powershell -ExecutionPolicy ByPass -c "irm https://simmate.org/install.ps1 | iex"
 ```
 
-To import Simmate in your own Python scripts, install it into an environment using either [uv](https://docs.astral.sh/uv/getting-started/installation/) or [conda](https://conda-forge.org/download/) instead:
+To import Simmate in your own Python scripts, install it into an environment using [uv](https://docs.astral.sh/uv/getting-started/installation/) instead:
 ```bash
-uv pip install simmate
-# or
-conda install -c conda-forge simmate
+uv pip install "simmate[all]"
 ```
 
 ## Quickstart
