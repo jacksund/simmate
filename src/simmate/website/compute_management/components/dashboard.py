@@ -2,7 +2,6 @@ import json
 from collections import defaultdict
 from datetime import datetime, timedelta
 
-import cloudpickle
 import pandas
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
@@ -425,41 +424,13 @@ class ComputeDashboardComponent(HtmxComponent):
             work_items = work_items.filter(status=status)
         work_items = list(work_items.order_by("-updated_at")[:limit])
 
-        errors = cls.get_error_messages(
+        errors = WorkItemComponent.get_error_messages(
             [item.id for item in work_items if item.status == "Failed"]
         )
 
         for item in work_items:
             item.error_message = errors.get(item.id)
         return work_items
-
-    @staticmethod
-    def get_error_messages(ids: list, max_length: int = 150) -> dict:
-        """
-        Unpickles the results of errored WorkItems into short error messages.
-
-        Args:
-            ids: The ids of errored WorkItems.
-            max_length: Messages are truncated to this many characters.
-
-        Returns:
-            A dictionary mapping WorkItem id to its error message.
-        """
-        if not ids:
-            return {}
-
-        errors = {}
-        results = WorkItem.objects.filter(id__in=ids).values_list("id", "result_binary")
-        for item_id, result_binary in results:
-            try:
-                error = cloudpickle.loads(result_binary)
-                message = f"{type(error).__name__}: {error}"
-            except Exception:
-                message = "(error could not be loaded)"
-            if len(message) > max_length:
-                message = message[: max_length - 1] + "…"
-            errors[item_id] = message
-        return errors
 
     @staticmethod
     def get_worker_hosts(active_workers: list[SimmateWorker]) -> list[dict]:

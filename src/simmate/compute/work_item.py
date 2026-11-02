@@ -1,5 +1,6 @@
 import time
 import uuid
+from datetime import timedelta
 
 import cloudpickle
 from django.db import transaction
@@ -150,6 +151,25 @@ class WorkItem(DatabaseTable):
             result_binary=None,
             updated_at=timezone.now(),
         )
+
+    @classmethod
+    def delete_inactive(cls, days: float = 30) -> int:
+        """
+        Deletes finished WorkItems (Completed, Failed, Cancelled, or
+        Interrupted) that haven't been updated in the given number of days.
+
+        Args:
+            days: Only delete items last updated more than this many days ago.
+
+        Returns:
+            The number of WorkItems deleted.
+        """
+        ndeleted, _ = (
+            cls.objects.exclude(status__in=cls.active_statuses)
+            .filter(updated_at__lt=timezone.now() - timedelta(days=days))
+            .delete()
+        )
+        return ndeleted
 
     # -------------------------------------------------------------------------
     # The methods below turn this into a future-like object

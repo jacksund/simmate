@@ -74,6 +74,38 @@ simmate compute worker start --waittime-on-empty-queue 60
 
 ---
 
+## Reporting Worker Resources
+
+When a worker starts, it records the hostname, directory, CPU cores, and RAM it has available. These are shown in the compute dashboard, where the cores and RAM of all workers on the same host are added up.
+
+CPU cores and RAM are detected automatically, accounting for:
+
+- **CPU pinning**, such as cores assigned by SLURM or `taskset`
+- **cgroup v2 limits**, such as Kubernetes pod limits, `docker run --cpus 2 --memory 8g`, or SLURM jobs on newer clusters
+
+When no limits are set, a worker reports the full machine. You can set the values yourself in these cases:
+
+- Several workers share one machine without limits (each would otherwise report the full machine)
+- Older HPC clusters that use cgroup v1, where memory limits aren't detected
+- Kubernetes pods that set resource requests but no limits
+
+```bash
+simmate compute worker start --ncores 4 --ram 16
+```
+
+For example, on a cgroup v1 SLURM cluster, a `submit.sh` that requests memory with `#SBATCH --mem=32G` can report it with the line below. (CPU cores don't need a flag here, because SLURM's core pinning is detected.)
+
+```bash
+simmate compute worker start --ram $((SLURM_MEM_PER_NODE / 1024))
+```
+
+These values are for display only and do not limit what the worker can use. You can also set the reported hostname with `--computer-system`, which is useful when the hostname isn't meaningful (e.g. Kubernetes pod names).
+
+!!! note
+    API workers (`--api`) do not report their resources yet.
+
+---
+
 ## Running in the Background
 
 On most Linux systems, you can run a worker in the background using `nohup` or a terminal multiplexer like `tmux` or `screen`.

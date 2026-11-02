@@ -102,6 +102,18 @@ def start_worker(
         "--api",
         help="If provided, an API worker will be started using the URL specified in your simmate settings.",
     ),
+    ncores: float = typer.Option(
+        None,
+        help="The number of CPU cores to report for this worker. This is for display only and does not limit the worker. Detected automatically if not given. Not used by API workers yet.",
+    ),
+    ram: float = typer.Option(
+        None,
+        help="The RAM (in GB) to report for this worker. This is for display only and does not limit the worker. Detected automatically if not given. Not used by API workers yet.",
+    ),
+    computer_system: str = typer.Option(
+        None,
+        help="The name of the computer to report this worker as running on. Defaults to this computer's hostname. Not used by API workers yet.",
+    ),
 ):
     """
     Starts a Simmate Worker to execute jobs from the queue.
@@ -133,6 +145,9 @@ def start_worker(
             waittime_on_empty_queue=waittime_on_empty_queue,
             tags=tag,  # this is actually "tags" --> a list of strings
             startup_method=startup_method,
+            ncores=ncores,
+            ram=ram,
+            computer_system=computer_system,
         )
 
     worker.start()

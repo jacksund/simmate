@@ -1,0 +1,159 @@
+{% extends "data_explorer/entry.html" %}
+{% block entrycontent %}
+    <div class="row pt-3">
+        <div class="col-lg-6">
+            <table class="table table-simmate mb-4">
+                <thead>
+                    <tr>
+                        <th style="width: 45%">Work Item Details</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Name</td>
+                        <td>
+                            <code>{{ table_entry.name|default:"--" }}</code>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td>{% include "compute_management/work_items/status.html" with status=table_entry.status %}</td>
+                    </tr>
+                    <tr>
+                        <td>Tags</td>
+                        <td>
+                            {% for tag in table_entry.tags %}
+                                <span class="badge rounded-pill text-bg-primary align-middle">{{ tag }}</span>
+                            {% empty %}
+                                --
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Worker</td>
+                        <td>
+                            {% if table_entry.worker and table_entry.worker.computer_system %}
+                                {% foreign_key_link table_entry.worker "computer_system" %}
+                            {% elif table_entry.worker %}
+                                {% foreign_key_link table_entry.worker %}
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>API Worker Safe</td>
+                        <td>{{ table_entry.is_api_worker_safe|yesno:"Yes,No" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-lg-6">
+            <table class="table table-simmate mb-4">
+                <thead>
+                    <tr>
+                        <th style="width: 45%">Timings</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Submitted</td>
+                        <td>{{ table_entry.created_at|date:"M. jS Y @ P T" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Started</td>
+                        <td>{{ table_entry.started_at|date:"M. jS Y @ P T"|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Finished</td>
+                        <td>
+                            {% if table_entry.status == "Pending" or table_entry.status == "Running" %}
+                                --
+                            {% else %}
+                                {{ table_entry.updated_at|date:"M. jS Y @ P T" }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Queue Wait</td>
+                        <td>
+                            {% if table_entry.started_at %}
+                                {{ table_entry.created_at|timesince:table_entry.started_at }}
+                            {% elif table_entry.status == "Pending" %}
+                                queued {{ table_entry.created_at|timesince }}
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Run Time</td>
+                        <td>
+                            {% if not table_entry.started_at %}
+                                --
+                            {% elif table_entry.status == "Running" %}
+                                {{ table_entry.started_at|timesince }} (still running)
+                            {% else %}
+                                {{ table_entry.started_at|timesince:table_entry.updated_at }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if error_message %}
+        <div class="row">
+            <div class="col-12">
+                <table class="table table-simmate mb-4">
+                    <thead>
+                        <tr>
+                            <th>Error</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <pre class="text-danger text-wrap mb-0">{{ error_message }}</pre>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-simmate mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 22.5%">Inputs</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if inputs is None %}
+                        <tr>
+                            <td colspan="2" class="text-muted">Inputs could not be loaded.</td>
+                        </tr>
+                    {% else %}
+                        {% for key, value in inputs.items %}
+                            <tr>
+                                <td>{{ key }}</td>
+                                <td>
+                                    <code class="text-break">{{ value|truncatechars:500 }}</code>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-muted">No inputs.</td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

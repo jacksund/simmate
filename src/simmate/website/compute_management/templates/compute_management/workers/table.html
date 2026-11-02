@@ -11,21 +11,7 @@
 {% endblock %}
 {% block table_rows %}
     <td>{% foreign_key_link entry "id" %}</td>
-    <td>
-        {% if entry.status == "Running" %}
-            {% status_bar "Running" "success" %}
-        {% elif entry.status == "Idle" %}
-            {% status_bar "Idle" "primary" %}
-        {% elif entry.status == "Stopped" %}
-            {% status_bar "Stopped" "secondary" %}
-        {% elif entry.status == "Crashed" %}
-            {% status_bar "Crashed" "danger" %}
-        {% elif entry.status == "Stale Heartbeat" %}
-            {% status_bar "Stale" "warning" %}
-        {% else %}
-            {% status_bar entry.status|default:"Unknown" "dark" %}
-        {% endif %}
-    </td>
+    <td>{% include "compute_management/workers/status.html" with status=entry.status %}</td>
     <td>
         {% if entry.owner %}
             {{ entry.owner.username }}

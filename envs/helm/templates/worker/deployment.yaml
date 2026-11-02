@@ -21,7 +21,14 @@ spec:
           image: docker.io/jacksund/simmate-worker:{{ .Values.version }}
           imagePullPolicy: Always
           command: ["simmate", "compute", "worker", "start"]
+          # report the k8s node (rather than the pod name) as the worker's host
+          # so the compute dashboard groups pods by the node they run on
+          args: ["--computer-system", "$(NODE_NAME)"]
           env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
             {{- include "simmate.env_config" . | indent 12 }}
           volumeMounts:
             - mountPath: /simmate_workers

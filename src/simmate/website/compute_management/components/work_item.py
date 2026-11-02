@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import cloudpickle
 import pandas
 import plotly.express as plotly_express
 import plotly.graph_objects as plotly_go
@@ -32,6 +33,7 @@ class WorkItemComponent(TableComponent):
     )
     template_names = {
         "entries": "compute_management/work_items/table.html",
+        "entry": "compute_management/work_items/view.html",
     }
 
     enable_report = True
@@ -51,6 +53,61 @@ class WorkItemComponent(TableComponent):
     ]
 
     report_views = ["activity", "queue_depth", "jobs", "durations"]
+
+    # -------------------------------------------------------------------------
+    # Entry page
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_extra_entry_context(cls, request, table_entry: WorkItem) -> dict:
+
+        error_message = None
+        if table_entry.status in ["Failed", "Interrupted"]:
+            error_message = cls.get_error_messages(
+                [table_entry.id], max_length=5_000
+            ).get(table_entry.id)
+
+        # inputs are pickled, so they can fail to load if the web server can't
+        # import the objects within them (e.g. from a user's custom script)
+        try:
+            args = cloudpickle.loads(table_entry.args)
+            kwargs = cloudpickle.loads(table_entry.kwargs)
+            inputs = {f"arg {i}": arg for i, arg in enumerate(args)} | kwargs
+        except Exception:
+            inputs = None
+
+        return {
+            "error_message": error_message,
+            "inputs": inputs,
+        }
+
+    @staticmethod
+    def get_error_messages(ids: list, max_length: int = 150) -> dict:
+        """
+        Unpickles the results of errored WorkItems into short error messages.
+
+        Args:
+            ids: The ids of errored WorkItems.
+            max_length: Messages are truncated to this many characters.
+
+        Returns:
+            A dictionary mapping WorkItem id to its error message.
+        """
+        if not ids:
+            return {}
+
+        errors = {}
+        results = WorkItem.objects.filter(id__in=ids).values_list("id", "result_binary")
+        for item_id, result_binary in results:
+            try:
+                error = cloudpickle.loads(result_binary)
+                message = f"{type(error).__name__}: {error}"
+            except Exception:
+                message = "(error could not be loaded)"
+            if len(message) > max_length:
+                message = message[: max_length - 1] + "…"
+            errors[item_id] = message
+        return errors
 
     # -------------------------------------------------------------------------
     # Report (shared by the data explorer and the compute dashboard)

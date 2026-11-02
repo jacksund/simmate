@@ -181,6 +181,8 @@ def table_entry(request, table_name, table_entry_id):
     if view_format == "html":
         context = {
             "table_entry": table_entry,
+            # e.g. "work item" for WorkItem. Override with `Meta.verbose_name`
+            "table_entry_label": table_entry._meta.verbose_name,
             "page_title": "Table Entry",
             "breadcrumbs": [
                 "Data",

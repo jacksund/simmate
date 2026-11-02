@@ -1,0 +1,190 @@
+{% extends "data_explorer/entry.html" %}
+{% block entrycontent %}
+    <div>
+        <ul class="nav nav-tabs nav-bordered mb-3">
+            <li class="nav-item">
+                <a href="#overview-section"
+                   data-bs-toggle="tab"
+                   aria-expanded="true"
+                   class="nav-link active">
+                    <i class="bi bi-house-door d-md-none d-block"></i>
+                    <span class="d-none d-md-block">Overview</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#work-items-section"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link">
+                    <i class="bi bi-list-task d-md-none d-block"></i>
+                    <span class="d-none d-md-block">Work Items ({{ work_items__count }})</span>
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane show active" id="overview-section">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <table class="table table-simmate mb-4">
+                            <thead>
+                                <tr>
+                                    <th style="width: 45%">Worker Details</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Status</td>
+                                    <td>{% include "compute_management/workers/status.html" with status=table_entry.status %}</td>
+                                </tr>
+                                <tr>
+                                    <td>Owner</td>
+                                    <td>{{ table_entry.owner.username|default:"--" }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Computer System</td>
+                                    <td>{{ table_entry.computer_system|default:"--" }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Directory</td>
+                                    <td>
+                                        <small class="text-break">{{ table_entry.directory|default:"--" }}</small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Cores</td>
+                                    <td>{{ table_entry.ncores|floatformat|default:"--" }}</td>
+                                </tr>
+                                <tr>
+                                    <td>RAM</td>
+                                    <td>
+                                        {% if table_entry.ram %}
+                                            {{ table_entry.ram|floatformat }} GB
+                                        {% else %}
+                                            --
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Last Heartbeat</td>
+                                    <td>
+                                        {{ table_entry.updated_at|date:"M. jS Y @ P T" }}
+                                        <small class="text-muted">({{ table_entry.updated_at|timesince }} ago)</small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Uptime</td>
+                                    <td>{{ table_entry.created_at|timesince:table_entry.updated_at }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Shutdown Requested</td>
+                                    <td>{{ table_entry.shutdown_flag|yesno:"Yes,No" }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-lg-6">
+                        <table class="table table-simmate mb-4">
+                            <thead>
+                                <tr>
+                                    <th style="width: 45%">Settings</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Tags</td>
+                                    <td>
+                                        {% for tag in table_entry.tags %}
+                                            <span class="badge rounded-pill text-bg-primary align-middle">{{ tag }}</span>
+                                        {% empty %}
+                                            <span class="text-muted">none (only untagged items)</span>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Items Completed</td>
+                                    <td>{{ table_entry.nitems_completed|default:0 }} / {{ table_entry.nitems_max|default:"∞" }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Timeout</td>
+                                    <td>
+                                        {% if table_entry.timeout %}
+                                            {{ table_entry.timeout|floatformat }} seconds
+                                        {% else %}
+                                            none
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Close on Empty Queue</td>
+                                    <td>{{ table_entry.close_on_empty_queue|yesno:"Yes,No" }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Wait Time on Empty Queue</td>
+                                    <td>{{ table_entry.waittime_on_empty_queue|floatformat }} seconds</td>
+                                </tr>
+                                <tr>
+                                    <td>Startup Method</td>
+                                    <td>
+                                        {% if table_entry.startup_method %}
+                                            <code>{{ table_entry.startup_method }}</code>
+                                        {% else %}
+                                            --
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="work-items-section">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                            <div>
+                                {% for status, count in work_item_counts.items %}
+                                    <span class="badge text-bg-light border">{{ status }}: {{ count }}</span>
+                                {% endfor %}
+                            </div>
+                            <a href="{% url 'data_explorer:table' 'WorkItem' %}?worker_id={{ table_entry.id }}&order_by=-updated_at"
+                               class="btn btn-outline-secondary btn-sm">
+                                View All <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                        {# same columns & styling as the compute dashboard's work item table #}
+                        <div class="table-responsive">
+                            <table class="table table-striped align-middle mb-0">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Workflow</th>
+                                        <th style="min-width:110px">Status</th>
+                                        <th>Elapsed</th>
+                                        <th>Worker</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for entry in work_items %}
+                                        <tr>{% include "compute_management/work_items/row_cells.html" %}</tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="5"
+                                                class="text-center text-muted py-4">This worker hasn't run any work items.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if work_items__count > work_items__limit %}
+                            <div class="text-center text-muted small mt-2">
+                                <em>Only the {{ work_items__limit }} most recent work items are shown.</em>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
