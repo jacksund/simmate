@@ -1,16 +1,16 @@
 {% extends "data_explorer/entries.html" %}
 {# Set `hide_location` when every container is in the same location (e.g. on a location's page) #}
 {% block table_headers %}
-    {% table_header "id" "ID" min_width=60 %}
-    {% table_header "batch__id" "Batch" min_width=80 %}
-    <th style="min-width:150px">Item</th>
+    {% table_header "id" "ID" min_width=90 %}
+    {% table_header "batch__id" "Batch" min_width=95 %}
+    <th style="min-width:220px">Item</th>
     {% table_header "container_type" "Type" min_width=100 %}
-    {% table_header "barcode" min_width=100 %}
-    {% table_header "current_amount" "Amount Left" min_width=125 %}
+    {% table_header "barcode" min_width=120 %}
+    {% table_header "current_amount" "Amount Left" min_width=155 %}
     {% if not hide_location %}
-        {% table_header "location__name" "Location" min_width=150 %}
+        {% table_header "location__name" "Location" min_width=220 %}
     {% endif %}
-    {% table_header "is_depleted" "Depleted" min_width=90 %}
+    {% table_header "is_depleted" "Depleted" min_width=125 %}
     <th style="min-width:50px">Edit</th>
 {% endblock %}
 {% block table_rows %}
