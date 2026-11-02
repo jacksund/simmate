@@ -27,8 +27,14 @@ def test_format_compact():
 def test_dashboard(client):
     now = timezone.now()
     user = User.objects.create(username="chemist")
+    building = StorageLocation.objects.create(
+        name="Building 1", storage_type="building"
+    )
     freezer = StorageLocation.objects.create(
-        name="Freezer 1", storage_type="freezer", temperature_celsius=-20
+        name="Freezer 1",
+        storage_type="freezer",
+        temperature_celsius=-20,
+        parent_location=building,
     )
     substance = Substance.objects.create(id="BCD-012-3456", common_name="DMSO")
 
@@ -90,8 +96,12 @@ def test_dashboard(client):
         response = client.get(alert["url"])
         assert response.status_code == 200, alert["url"]
 
-    locations = InventoryDashboardComponent.get_storage_locations()
-    assert locations[0].ncontainers == 2 and locations[0].is_cold
+    top_level = InventoryDashboardComponent.get_sub_locations(parent_id=None)
+    assert [location.name for location in top_level] == ["Building 1"]
+    assert top_level[0].nsublocations == 1 and top_level[0].ncontainers == 0
+
+    in_building = InventoryDashboardComponent.get_sub_locations(parent_id=building.id)
+    assert in_building[0].ncontainers == 2 and in_building[0].is_cold
 
     expiring_batches = InventoryDashboardComponent.get_expiring_batches(now)
     assert [b.id for b in expiring_batches] == [expired.id, expiring.id]
@@ -104,3 +114,4 @@ def test_dashboard(client):
     assert "Storage Locations" in content
     assert "BCD-012-3456" in content
     assert "Freezer 1" in content
+    assert "Building 1" in content

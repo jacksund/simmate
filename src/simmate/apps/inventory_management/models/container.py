@@ -142,3 +142,14 @@ class Container(DatabaseTable):
     """
 
     # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_web_queryset(cls):
+        # loads what the container table shows in one query (not one per row)
+        return cls.objects.select_related(
+            "batch__substance",
+            "batch__mixture",
+            "location",
+        )
+
+    # -------------------------------------------------------------------------

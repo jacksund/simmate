@@ -1,0 +1,104 @@
+{# Folder-like browser for storage locations. Expects `component` (the InventoryDashboardComponent) and `sub_locations` (a Page of the open location's sub-locations). #}
+{# hx-target/swap are inherited by every hx-post button below #}
+{% url 'htmx:component_method' component.component_id 'open_location' as open_url %}
+<div id="location-browser-{{ component.component_id }}"
+     class="card shadow-sm border-light-subtle h-100"
+     hx-target="#location-browser-{{ component.component_id }}"
+     hx-swap="outerHTML">
+    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center py-3 px-3">
+        <h5 class="card-title mb-0 fw-semibold">Storage Locations</h5>
+        <a href="{% url 'data_explorer:table' 'StorageLocation' %}"
+           class="btn btn-outline-secondary btn-sm">
+            View All <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+    {# Breadcrumb (styled like the site's breadcrumbs in core/basic_elements/breadcrumbs.html) #}
+    <div class="d-flex justify-content-between align-items-center gap-2 bg-body-tertiary border-top border-bottom py-2 px-3">
+        <ol class="breadcrumb m-0">
+            <li class="breadcrumb-item">
+                <a href="#" hx-post="{{ open_url }}"><i class="bi bi-house"></i></a>
+            </li>
+            {% for location in component.location_path %}
+                {% if forloop.last %}
+                    <li class="breadcrumb-item active">{{ location.name|default:location.id }}</li>
+                {% else %}
+                    <li class="breadcrumb-item">
+                        <a href="#"
+                           hx-post="{{ open_url }}?location_id={{ location.id }}">{{ location.name|default:location.id }}</a>
+                    </li>
+                {% endif %}
+            {% empty %}
+                <li class="breadcrumb-item active">All Locations</li>
+            {% endfor %}
+        </ol>
+        {% if component.current_location_id %}
+            <a href="{% url 'data_explorer:table-entry' 'StorageLocation' component.current_location_id %}"
+               class="btn btn-outline-secondary btn-sm py-0 text-nowrap">
+                Details <i class="bi bi-box-arrow-up-right"></i>
+            </a>
+        {% endif %}
+    </div>
+    {# Sub-locations #}
+    <div class="card-body p-0" style="max-height: 30rem; overflow-y: auto">
+        <div class="list-group list-group-flush">
+            {% for location in sub_locations %}
+                <div class="list-group-item d-flex justify-content-between align-items-center gap-2 px-3">
+                    <div class="text-truncate">
+                        {% if location.nsublocations %}
+                            <button type="button"
+                                    class="btn btn-link p-0 fw-semibold text-body text-decoration-none text-start"
+                                    hx-post="{{ open_url }}?location_id={{ location.id }}">
+                                <i class="bi bi-folder text-warning me-1"></i>{{ location.name|default:location.id }}
+                                <i class="bi bi-chevron-right small text-muted"></i>
+                            </button>
+                        {% else %}
+                            <a href="{% url 'data_explorer:table-entry' 'StorageLocation' location.id %}"
+                               class="fw-semibold text-body text-decoration-none">
+                                <i class="bi bi-geo-alt text-success me-1"></i>{{ location.name|default:location.id }}
+                            </a>
+                        {% endif %}
+                        <div class="small text-muted">
+                            {{ location.storage_type|default:"--"|capfirst }}
+                            {% if location.nsublocations %}
+                                · {{ location.nsublocations }} sub-location{{ location.nsublocations|pluralize }}
+                            {% endif %}
+                            {% if location.temperature_celsius is not None %}
+                                ·
+                                {% if location.is_cold %}<i class="bi bi-snow text-info"></i>{% endif %}
+                                {{ location.temperature_celsius }} °C
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if location.ncontainers %}
+                        <a href="{% url 'data_explorer:table' 'Container' %}?location_id={{ location.id }}&is_depleted=false"
+                           class="badge bg-primary-subtle text-primary text-decoration-none small text-nowrap">
+                            {{ location.ncontainers }} container{{ location.ncontainers|pluralize }}
+                        </a>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <div class="text-center text-muted small py-4">
+                    {% if component.location_path %}
+                        No sub-locations here.
+                    {% else %}
+                        No storage locations have been added yet.
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {# Pagination #}
+    {% if sub_locations.paginator.num_pages > 1 %}
+        <div class="card-footer bg-transparent d-flex justify-content-between align-items-center px-3">
+            <small class="text-muted">{{ sub_locations.start_index }}–{{ sub_locations.end_index }} of {{ sub_locations.paginator.count }}</small>
+            <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-outline-secondary" {% if sub_locations.has_previous %}hx-post="{{ open_url }}?page={{ sub_locations.previous_page_number }}{% if component.current_location_id %}&location_id={{ component.current_location_id }}{% endif %}"{% else %}disabled{% endif %}>
+                    <i class="bi bi-chevron-left"></i> Prev
+                </button>
+                <button type="button" class="btn btn-outline-secondary" {% if sub_locations.has_next %}hx-post="{{ open_url }}?page={{ sub_locations.next_page_number }}{% if component.current_location_id %}&location_id={{ component.current_location_id }}{% endif %}"{% else %}disabled{% endif %}>
+                    Next <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    {% endif %}
+</div>

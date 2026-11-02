@@ -1,6 +1,8 @@
+from django.db.models import F
+
 from simmate.website.data_explorer.components import TableComponent
 
-from ..models import StorageLocation
+from ..models import Container, StorageLocation
 
 
 class StorageLocationComponent(TableComponent):
@@ -43,3 +45,21 @@ class StorageLocationComponent(TableComponent):
         self.update_form("temperature_celsius", 20)
 
     # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_extra_entry_context(cls, request, table_entry: StorageLocation) -> dict:
+
+        containers__limit = 25
+        containers__count = table_entry.containers.count()
+        containers = (
+            Container.get_web_queryset()
+            .filter(location=table_entry)
+            # in-stock containers first (`is_depleted` is nullable)
+            .order_by(F("is_depleted").asc(nulls_first=True), "-id")[:containers__limit]
+        )
+
+        return {
+            "containers": containers,
+            "containers__count": containers__count,
+            "containers__truncated": containers__count > containers__limit,
+        }

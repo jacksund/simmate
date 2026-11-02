@@ -1,7 +1,10 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-from django.db.models import Count, F, Q
+from django.core.paginator import Page, Paginator
+from django.db.models import Count, F, OuterRef, Q, Subquery
+from django.db.models.functions import Coalesce
+from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
 
@@ -36,6 +39,11 @@ are flagged as low stock.
 COLD_STORAGE_MAX = 4
 """
 Locations at or below this temperature (in Celsius) are labeled cold storage.
+"""
+
+LOCATIONS_PER_PAGE = 50
+"""
+How many storage locations are shown at once in the location browser.
 """
 
 IN_STOCK = ~Q(is_depleted=True)
@@ -91,6 +99,10 @@ class InventoryDashboardComponent(HtmxComponent):
     (expired batches, low-stock containers, etc.), recent usage, and where
     containers are stored.
 
+    The storage location browser works like a file explorer. The folder (and
+    page) a viewer has open is kept on their instance of this component, and
+    browsing only re-renders that card (see `open_location`).
+
     NOTE: The `Substance` table can grow to trillions of rows, so it is never
     counted, filtered, or aggregated here. Substances are only loaded through
     joins from the (much smaller) batch, container, and usage log tables.
@@ -105,6 +117,28 @@ class InventoryDashboardComponent(HtmxComponent):
     _slow_stats: dict = None
     _slow_context: dict = None
     _slow_context_time: datetime = None
+
+    location_path: list[StorageLocation] = None
+    """
+    The locations opened in the location browser, from the top level down
+    (i.e. the breadcrumb). Empty when viewing the top-level locations.
+    """
+
+    location_page: int = 1
+    """
+    The page of the open location's sub-locations being shown.
+    """
+
+    def mount(self):
+        self.location_path = []
+
+    @property
+    def current_location_id(self) -> int | None:
+        """
+        The id of the location open in the location browser, or None when
+        viewing the top-level locations.
+        """
+        return self.location_path[-1].id if self.location_path else None
 
     # -------------------------------------------------------------------------
     # Rendering
@@ -121,6 +155,10 @@ class InventoryDashboardComponent(HtmxComponent):
             alerts=self.get_alerts(now, stats),
             recent_usage=self.get_recent_usage(),
             expiring_days=EXPIRING_WITHIN.days,
+            # depends on this viewer's open location, so it is not in `slow_context`
+            sub_locations=self.get_sub_locations(
+                self.current_location_id, self.location_page
+            ),
             **slow_context,
         )
         return ctx
@@ -149,7 +187,6 @@ class InventoryDashboardComponent(HtmxComponent):
             }
             cls._slow_stats = stats
             cls._slow_context = dict(
-                storage_locations=cls.get_storage_locations(),
                 expiring_batches=cls.get_expiring_batches(now),
                 catalogs=[
                     dict(
@@ -340,35 +377,99 @@ class InventoryDashboardComponent(HtmxComponent):
         return batches
 
     @staticmethod
-    def get_storage_locations(limit: int = 8) -> list[StorageLocation]:
+    def get_sub_locations(parent_id: int | None, page: int = 1) -> Page:
         """
-        Grabs the storage locations holding the most in-stock containers. Each
-        location gets `ncontainers` and `is_cold` attributes.
+        Grabs one page of the storage locations directly inside of a location,
+        sorted by name. Each location gets `nsublocations`, `ncontainers` (in
+        stock), and `is_cold` attributes.
+
+        Args:
+            parent_id: The id of the location to look inside of. Use None for
+                the top-level locations.
+            page: The page number to grab. Out-of-range pages give the last
+                page instead.
         """
-        # IN_STOCK, but through the reverse relation
-        in_stock = Q(containers__is_depleted=False) | Q(
-            containers__is_depleted__isnull=True
+        # Counts are correlated subqueries rather than joins, as two reverse
+        # joins would multiply rows (sub-locations x containers) and these
+        # only need to run for the locations on this page
+        nsublocations = (
+            StorageLocation.objects.filter(parent_location=OuterRef("pk"))
+            .order_by()
+            .values("parent_location")
+            .annotate(count=Count("id"))
+            .values("count")
         )
-        locations = list(
-            StorageLocation.objects.annotate(
-                ncontainers=Count("containers", filter=in_stock)
-            )
-            .filter(ncontainers__gt=0)
-            .select_related("parent_location")
-            .only(
-                "name",
-                "storage_type",
-                "temperature_celsius",
-                "parent_location__name",
-            )
-            .order_by("-ncontainers")[:limit]
+        ncontainers = (
+            Container.objects.filter(IN_STOCK, location=OuterRef("pk"))
+            .order_by()
+            .values("location")
+            .annotate(count=Count("id"))
+            .values("count")
         )
-        for location in locations:
+        locations = (
+            StorageLocation.objects.filter(parent_location_id=parent_id)
+            .only("name", "storage_type", "temperature_celsius")
+            .annotate(
+                nsublocations=Coalesce(Subquery(nsublocations), 0),
+                ncontainers=Coalesce(Subquery(ncontainers), 0),
+            )
+            .order_by("name", "id")
+        )
+        page = Paginator(locations, LOCATIONS_PER_PAGE).get_page(page)
+        for location in page:
             location.is_cold = (
                 location.temperature_celsius is not None
                 and location.temperature_celsius <= COLD_STORAGE_MAX
             )
-        return locations
+        return page
+
+    # -------------------------------------------------------------------------
+    # Actions
+    # -------------------------------------------------------------------------
+
+    def open_location(self, location_id: int = None, page: int = 1):
+        """
+        Opens a location in the storage location browser and re-renders only
+        that card.
+
+        Args:
+            location_id: The location to open. This can be a sub-location of
+                the open location, a location in the breadcrumb, or None for
+                the top-level locations.
+            page: The page of sub-locations to show.
+        """
+        path_ids = [location.id for location in self.location_path]
+        if location_id is None:
+            self.location_path = []
+        elif location_id in path_ids:
+            # a breadcrumb, or another page of the open location
+            self.location_path = self.location_path[: path_ids.index(location_id) + 1]
+        else:
+            # Only sub-locations of the open location can be opened. This keeps
+            # the breadcrumb valid without looking up each parent, and ignores
+            # stale clicks (e.g. a double-click on a row)
+            location = (
+                StorageLocation.objects.filter(
+                    id=location_id,
+                    parent_location_id=self.current_location_id,
+                )
+                .only("name")
+                .first()
+            )
+            if location:
+                self.location_path.append(location)
+        self.location_page = page
+
+        return render(
+            self.request,
+            "inventory_management/dashboard_locations.html",
+            {
+                "component": self,
+                "sub_locations": self.get_sub_locations(
+                    self.current_location_id, self.location_page
+                ),
+            },
+        )
 
 
 def format_compact(value: int) -> str:
