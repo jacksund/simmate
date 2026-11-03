@@ -137,28 +137,51 @@
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-simmate mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Formula</th>
-                                            <th>Spacegroup</th>
-                                            {% if data.has_ehull %}<th>E above Hull (eV/atom)</th>{% endif %}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for entry in data.entries %}
+                                    {% if data.is_substance %}
+                                        <thead>
                                             <tr>
-                                                <td>{% foreign_key_link entry %}</td>
-                                                <td>{{ entry.formula_reduced|chemical_formula }}</td>
-                                                <td>{% foreign_key_link entry.spacegroup "symbol" %}</td>
-                                                {% if data.has_ehull %}<td>{{ entry.energy_above_hull|floatformat:3 }}</td>{% endif %}
+                                                <th>ID</th>
+                                                <th>Type</th>
+                                                <th>Name</th>
+                                                <th>Formula</th>
+                                                <th>SMILES</th>
                                             </tr>
-                                        {% endfor %}
-                                    </tbody>
+                                        </thead>
+                                        <tbody>
+                                            {% for entry in data.entries %}
+                                                <tr>
+                                                    <td>{% foreign_key_link entry %}</td>
+                                                    <td>{{ entry.substance_type|default:"--" }}</td>
+                                                    <td>{{ entry.common_name|default:"--" }}</td>
+                                                    <td>{{ entry.structure.formula_reduced|chemical_formula|default:"--" }}</td>
+                                                    <td>{{ entry.molecule.smiles|default:"--" }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    {% else %}
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Formula</th>
+                                                <th>Spacegroup</th>
+                                                {% if data.has_ehull %}<th>E above Hull (eV/atom)</th>{% endif %}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for entry in data.entries %}
+                                                <tr>
+                                                    <td>{% foreign_key_link entry %}</td>
+                                                    <td>{{ entry.formula_reduced|chemical_formula }}</td>
+                                                    <td>{% foreign_key_link entry.spacegroup "symbol" %}</td>
+                                                    {% if data.has_ehull %}<td>{{ entry.energy_above_hull|floatformat:3 }}</td>{% endif %}
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    {% endif %}
                                 </table>
                             </div>
                             <div class="card-footer bg-white text-center">
-                                <a href="/data/{{ data.url_name }}/?{% if '-' in component.search_query %}chemical_system{% else %}formula_reduced{% endif %}={{ data.url_query }}"
+                                <a href="/data/{{ data.url_name }}/?{{ data.url_filter }}={{ data.url_query|urlencode }}"
                                    class="text-decoration-none fw-bold">
                                     See all {{ data.total_count }} results in {{ data.display_name }} <i class="bi bi-arrow-right"></i>
                                 </a>
