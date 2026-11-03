@@ -100,7 +100,7 @@
                 <p class="text-muted">
                     (optional) For batches made in-house, list the containers of reagents used to make it. The amount used is removed from each container, and the reagents' batches are linked as parents of the new batch.
                 </p>
-                {% for index, container, amount in component.reagent_rows %}
+                {% for container, amount in component.reagent_rows %}
                     <div class="row align-items-end">
                         <div class="col-md-5 my-2">
                             <label class="form-label">Container ID or Barcode</label>
@@ -108,7 +108,7 @@
                                    type="text"
                                    name="reagent_containers"
                                    value="{{ container }}"
-                                   placeholder="scan or type, e.g. 1234">
+                                   placeholder="scan or type, e.g. C-1234">
                         </div>
                         <div class="col-md-5 my-2">
                             <label class="form-label">Amount Used (in the container's units)</label>
@@ -120,7 +120,7 @@
                                    placeholder="0.123">
                         </div>
                         <div class="col-md-2">
-                            {% htmx_button method_name="remove_reagent" label="Remove" icon="trash" theme="outline-danger" small=True index=index %}
+                            {% htmx_button method_name="remove_reagent" label="Remove" icon="trash" theme="outline-danger" small=True index=forloop.counter0 %}
                         </div>
                     </div>
                 {% endfor %}

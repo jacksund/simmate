@@ -85,6 +85,7 @@ class ContainerComponent(TableComponent, MoleculeInput, StructureInput):
         "reagent_amounts": list[str],
         # can otherwise be parsed to an int (e.g. a single line "123")
         "mixture__components": str,
+        "mixture_id": str,
     }
 
     def mount_for_create(self):
@@ -101,15 +102,22 @@ class ContainerComponent(TableComponent, MoleculeInput, StructureInput):
     @property
     def reagent_rows(self) -> list[tuple]:
         """
-        The (index, container, amount) of each reagent row in the form.
+        The (container, amount) of each reagent row in the form.
         """
-        rows = zip(
-            self.form_data.get("reagent_containers", []),
-            self.form_data.get("reagent_amounts", []),
+        return list(
+            zip(
+                self.form_data["reagent_containers"],
+                self.form_data["reagent_amounts"],
+            )
         )
-        return [
-            (index, container, amount) for index, (container, amount) in enumerate(rows)
-        ]
+
+    @property
+    def mixture_components(self) -> list[str]:
+        """
+        The substance IDs or SMILES of a new mixture, given one per line.
+        """
+        lines = (self.form_data.get("mixture__components") or "").splitlines()
+        return [line.strip() for line in lines if line.strip()]
 
     def add_reagent(self):
         self.form_data["reagent_containers"].append("")
@@ -160,20 +168,14 @@ class ContainerComponent(TableComponent, MoleculeInput, StructureInput):
         else:
             mixture_id = self.form_data.get("mixture_id")
             mixture_type = self.form_data.get("mixture__mixture_type")
-            components = [
-                line.strip()
-                for line in (
-                    self.form_data.get("mixture__components") or ""
-                ).splitlines()
-                if line.strip()
-            ]
+            components = self.mixture_components
             if mixture_id and (mixture_type or components):
                 self.form_errors.append(
                     "Give either an existing mixture ID or a new mixture (not both)."
                 )
             elif mixture_id:
                 try:
-                    Mixture.get_by_display_id(str(mixture_id))
+                    Mixture.get_by_display_id(mixture_id)
                 except Mixture.DoesNotExist as error:
                     self.form_errors.append(str(error))
             elif not (mixture_type and components):
@@ -196,10 +198,7 @@ class ContainerComponent(TableComponent, MoleculeInput, StructureInput):
                                 f"Mixture component '{line}' is not a substance ID or valid SMILES."
                             )
 
-        for container, amount in zip(
-            self.form_data["reagent_containers"],
-            self.form_data["reagent_amounts"],
-        ):
+        for container, amount in self.reagent_rows:
             if not container and not amount:
                 continue  # blank rows are skipped
             try:
@@ -222,7 +221,6 @@ class ContainerComponent(TableComponent, MoleculeInput, StructureInput):
         user_id = self.request.user.id
 
         with transaction.atomic():
-            batch = None
             if self.form_data["batch_mode"] == "new":
                 is_mixture = self.form_data["contents_type"] == "mixture"
                 substance_id = None
@@ -241,9 +239,7 @@ class ContainerComponent(TableComponent, MoleculeInput, StructureInput):
                         registered_by_id=user_id,
                     )
                 elif self.form_data.get("mixture_id"):
-                    mixture = Mixture.get_by_display_id(
-                        str(self.form_data["mixture_id"])
-                    )
+                    mixture = Mixture.get_by_display_id(self.form_data["mixture_id"])
                 else:
                     mixture = Mixture.objects.create(
                         id_prefix=Mixture.generate_id_prefix(),
@@ -253,21 +249,15 @@ class ContainerComponent(TableComponent, MoleculeInput, StructureInput):
                     )
                     # components are substance IDs or SMILES (which are
                     # registered all at once if needed)
-                    components = [
-                        line.strip()
-                        for line in self.form_data["mixture__components"].splitlines()
-                        if line.strip()
-                    ]
-                    component_ids = [
-                        Substance.get_by_id(line).id
-                        for line in components
-                        if Substance.validate_id(line)
-                    ]
-                    new_components = [
-                        dict(molecule=line, registered_by_id=user_id)
-                        for line in components
-                        if not Substance.validate_id(line)
-                    ]
+                    component_ids = []
+                    new_components = []
+                    for line in self.mixture_components:
+                        if Substance.validate_id(line):
+                            component_ids.append(Substance.get_by_id(line).id)
+                        else:
+                            new_components.append(
+                                dict(molecule=line, registered_by_id=user_id)
+                            )
                     if new_components:
                         component_ids += SubstanceDatastore.get_or_create_ids(
                             new_components
@@ -289,7 +279,6 @@ class ContainerComponent(TableComponent, MoleculeInput, StructureInput):
                     mixture=mixture,
                     supplied_by_id=user_id,
                     amount_units=self.form_data["amount_units"],
-                    is_depleted=False,
                     **batch_columns,
                 )
                 # Batch numbers count the batches of each substance (or
@@ -303,17 +292,11 @@ class ContainerComponent(TableComponent, MoleculeInput, StructureInput):
                 batch.save(update_fields=["batch_number"])
                 self.table_entry.batch = batch
 
-            super().save_to_db_for_create()  # saves the container
-
-            # The reagents used to make the new batch. Each one is logged as
-            # material taken from its container, and its batch is linked as
-            # a parent of the new batch
-            if batch:
+                # The reagents used to make the new batch. Each one is logged
+                # as material taken from its container, and its batch is
+                # linked as a parent of the new batch
                 parent_batch_ids = set()
-                for container, amount in zip(
-                    self.form_data["reagent_containers"],
-                    self.form_data["reagent_amounts"],
-                ):
+                for container, amount in self.reagent_rows:
                     if not container and not amount:
                         continue  # blank rows are skipped
                     source_container = Container.get_by_barcode_or_id(container)
@@ -328,6 +311,7 @@ class ContainerComponent(TableComponent, MoleculeInput, StructureInput):
                         parent_batch_ids.add(source_container.batch_id)
                 batch.parent_batches.add(*parent_batch_ids)
 
+            super().save_to_db_for_create()  # saves the container
             Batch.update_cached_columns([self.table_entry.batch_id])
 
     # -------------------------------------------------------------------------

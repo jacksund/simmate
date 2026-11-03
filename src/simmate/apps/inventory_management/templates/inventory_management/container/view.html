@@ -27,7 +27,7 @@
                 <tbody>
                     <tr>
                         <td>ID</td>
-                        <td>{{ table_entry.id }}</td>
+                        <td>{{ table_entry.display_id }}</td>
                     </tr>
                     <tr>
                         <td>Batch</td>
@@ -35,7 +35,7 @@
                             {% if table_entry.batch %}
                                 <a role="button"
                                    class="btn btn-light btn-sm border"
-                                   href="{% url 'data_explorer:table-entry' 'Batch' table_entry.batch.id %}">{{ table_entry.batch.id }}</a>
+                                   href="{% url 'data_explorer:table-entry' 'Batch' table_entry.batch.id %}">{{ table_entry.batch.display_id }}</a>
                             {% else %}
                                 --
                             {% endif %}

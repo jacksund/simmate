@@ -20,11 +20,11 @@
             </li>
             {% for location in component.location_path %}
                 {% if forloop.last %}
-                    <li class="breadcrumb-item active">{{ location.name|default:location.id }}</li>
+                    <li class="breadcrumb-item active">{{ location.name|default:location.display_id }}</li>
                 {% else %}
                     <li class="breadcrumb-item">
                         <a href="#"
-                           hx-post="{{ open_url }}?location_id={{ location.id }}">{{ location.name|default:location.id }}</a>
+                           hx-post="{{ open_url }}?location_id={{ location.id }}">{{ location.name|default:location.display_id }}</a>
                     </li>
                 {% endif %}
             {% empty %}
@@ -48,13 +48,13 @@
                             <button type="button"
                                     class="btn btn-link p-0 fw-semibold text-body text-decoration-none text-start"
                                     hx-post="{{ open_url }}?location_id={{ location.id }}">
-                                <i class="bi bi-folder text-warning me-1"></i>{{ location.name|default:location.id }}
+                                <i class="bi bi-folder text-warning me-1"></i>{{ location.name|default:location.display_id }}
                                 <i class="bi bi-chevron-right small text-muted"></i>
                             </button>
                         {% else %}
                             <a href="{% url 'data_explorer:table-entry' 'StorageLocation' location.id %}"
                                class="fw-semibold text-body text-decoration-none">
-                                <i class="bi bi-geo-alt text-success me-1"></i>{{ location.name|default:location.id }}
+                                <i class="bi bi-geo-alt text-success me-1"></i>{{ location.name|default:location.display_id }}
                             </a>
                         {% endif %}
                         <div class="small text-muted">

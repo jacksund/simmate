@@ -10,11 +10,17 @@ class Container(DatabaseTable):
 
     A single batch can have multiple containers because batches might need to
     be split up and/or have different storage locations. Material removed from
-    a container is recorded with a `UsageLog`.
+    a container is recorded with a `UsageLog`. Containers are identified by
+    their `display_id` (e.g. "C-123").
     """
 
     class Meta:
         db_table = "inventory_management__containers"
+
+    id_prefix = "C"
+    """
+    The static prefix of every container's `display_id` (e.g. "C-123").
+    """
 
     # -------------------------------------------------------------------------
 
@@ -158,6 +164,8 @@ class Container(DatabaseTable):
         Loads a container from a scanned barcode or a typed ID (along with its
         batch, substance or mixture, and location). Barcodes are checked
         first, as they are what scanners give and they can be all digits.
+        Typed IDs can be given with or without the prefix (e.g. "C-123" or
+        "123").
 
         Raises:
             Container.DoesNotExist: if no container matches.
@@ -165,8 +173,9 @@ class Container(DatabaseTable):
         value = str(value or "").strip()
         containers = cls.get_web_queryset()
         container = containers.filter(barcode=value).first() if value else None
-        if not container and value.isdigit():
-            container = containers.filter(id=int(value)).first()
+        number = value.upper().removeprefix(f"{cls.id_prefix}-")
+        if not container and number.isdigit():
+            container = containers.filter(id=int(number)).first()
         if not container:
             raise cls.DoesNotExist(f"No container found with barcode or ID: '{value}'")
         return container

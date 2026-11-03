@@ -12,11 +12,17 @@ from .container import Container
 class UsageLog(DatabaseTable):
     """
     A record of material being removed from a container, such as a user
-    taking some material for an experiment or synthesis.
+    taking some material for an experiment or synthesis. Usage logs are
+    identified by their `display_id` (e.g. "U-123").
     """
 
     class Meta:
         db_table = "inventory_management__usage_logs"
+
+    id_prefix = "U"
+    """
+    The static prefix of every usage log's `display_id` (e.g. "U-123").
+    """
 
     # -------------------------------------------------------------------------
 

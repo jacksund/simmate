@@ -14,7 +14,7 @@
 {% block table_rows %}
     <td>{% foreign_key_link entry %}</td>
     <td>{{ entry.is_mixture|yesno:"Yes,No,--" }}</td>
-    <td>{% foreign_key_link entry.mixture display_column="display_id" %}</td>
+    <td>{% foreign_key_link entry.mixture %}</td>
     <td>{% foreign_key_link entry.substance %}</td>
     <td>
         {% if entry.purity is not None %}

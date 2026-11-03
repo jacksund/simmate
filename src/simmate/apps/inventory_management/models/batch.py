@@ -17,11 +17,17 @@ class Batch(DatabaseTable):
 
     A batch can be split across one or more containers (see `Container`), and
     batches can be linked to one another to track their lineage (see
-    `parent_batches`).
+    `parent_batches`). Batches are identified by their `display_id` (e.g.
+    "B-123").
     """
 
     class Meta:
         db_table = "inventory_management__batches"
+
+    id_prefix = "B"
+    """
+    The static prefix of every batch's `display_id` (e.g. "B-123").
+    """
 
     # -------------------------------------------------------------------------
 

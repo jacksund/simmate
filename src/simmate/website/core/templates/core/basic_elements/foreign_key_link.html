@@ -5,7 +5,7 @@
         {% if display_column %}
             {{ entry|getattribute:display_column|truncatechars:truncate_chars }}
         {% else %}
-            {{ entry.id|truncatechars:truncate_chars }}
+            {{ entry.display_id|truncatechars:truncate_chars }}
         {% endif %}
         <small><i class="bi bi-box-arrow-up-right"></i></small>
     </a>

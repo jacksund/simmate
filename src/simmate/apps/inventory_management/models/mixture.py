@@ -43,27 +43,10 @@ class Mixture(DatabaseTable):
     )
     """
     Random 4-letter prefix shown with the integer `id` as the `display_id`
-    (e.g. "BCDF-123"). This makes the ID recognizable and acts as a typo check.
+    (e.g. "BCDF-123"). This makes the ID recognizable and acts as a typo check
+    when IDs are typed in (see `get_by_display_id`). Unlike other tables, this
+    is set per row rather than being a static prefix for the whole table.
     """
-
-    @property
-    def display_id(self) -> str:
-        """
-        The human-readable ID to show in user interfaces and exports.
-        """
-        return f"{self.id_prefix}-{self.id}"
-
-    @classmethod
-    def get_by_display_id(cls, display_id: str):
-        """
-        Loads a mixture using its display ID (e.g. "BCDF-123"). Raises
-        `Mixture.DoesNotExist` if the ID is malformed, if no mixture has that
-        number, or if the prefix does not match the number.
-        """
-        prefix, _, number = display_id.strip().upper().partition("-")
-        if not number.isdigit():
-            raise cls.DoesNotExist(f"Invalid mixture ID: '{display_id}'")
-        return cls.objects.get(id=int(number), id_prefix=prefix)
 
     # -------------------------------------------------------------------------
 

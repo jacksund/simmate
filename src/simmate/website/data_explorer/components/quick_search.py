@@ -54,9 +54,7 @@ class QuickSearchComponent(
         # to be valid formulas (e.g. "CCO") fall through to a molecule search.
         # Short queries that are both (e.g. "CO") are treated as formulas.
         # Anything else is treated as a name (e.g. "DMSO").
-        if substance_component and substance_component.table.get_id_level(
-            query.upper()
-        ):
+        if substance_component and substance_component.table.validate_id(query):
             search_field = "id"
         elif re.fullmatch(r"[A-Z][a-z]?(-[A-Z][a-z]?)+", query):
             search_field = "chemical_system"
@@ -66,17 +64,18 @@ class QuickSearchComponent(
                 is_formula = Composition(query).reduced_formula == query
             except Exception:
                 is_formula = False
-            try:
-                inchi_key = ToolkitMolecule.from_smiles(query).to_inchi_key()
-            except Exception:
-                inchi_key = None
-            if inchi_key and not is_formula:
-                search_field = "inchi_key"
-                query = inchi_key
-            elif is_formula:
+            if is_formula:
                 search_field = "formula_reduced"
             else:
-                search_field = "name"
+                try:
+                    inchi_key = ToolkitMolecule.from_smiles(query).to_inchi_key()
+                except Exception:
+                    inchi_key = None
+                if inchi_key:
+                    search_field = "inchi_key"
+                    query = inchi_key
+                else:
+                    search_field = "name"
 
         results = {}
 
@@ -117,9 +116,6 @@ class QuickSearchComponent(
             if is_substance:
                 qs = qs.select_related("molecule", "structure")
 
-            if not qs.exists():
-                continue
-
             try:
                 table._meta.get_field("energy_above_hull")
                 qs = qs.order_by("energy_above_hull", "id")
@@ -127,6 +123,8 @@ class QuickSearchComponent(
                 qs = qs.order_by("id")
 
             top_results = list(qs[:5])
+            if not top_results:
+                continue
 
             results[name] = {
                 "display_name": component.display_name,

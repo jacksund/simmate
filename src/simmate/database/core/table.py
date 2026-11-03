@@ -132,6 +132,42 @@ class DatabaseTable(models.Model, ArchiveMixin):
         # Django's default is the lowercased class name (e.g. "work item")
         return cls._meta.verbose_name.title()
 
+    id_prefix: str = None
+    """
+    A static prefix for the human-readable `display_id` of tables with integer
+    IDs (e.g. "L" gives "L-123"). Leave as None to show the plain `id`.
+    Avoid prefixes of 3-4 consonants, which look like substance or mixture
+    IDs. Single letters are reserved for the inventory management app, so
+    other apps should use longer prefixes. Tables that need a per-row prefix
+    can override this with a column of the same name (e.g. `Mixture`).
+    """
+
+    @property
+    def display_id(self) -> str:
+        """
+        The human-readable ID to show in user interfaces and exports (e.g.
+        "L-123"). This is just the `id` if the table has no `id_prefix`.
+        """
+        return f"{self.id_prefix}-{self.id}" if self.id_prefix else str(self.id)
+
+    @classmethod
+    def get_by_display_id(cls, display_id: str):
+        """
+        Loads a row using its `display_id` (e.g. "L-123"). Only for tables
+        with integer IDs.
+
+        Raises:
+            DoesNotExist: if the ID is malformed, if no row has that number,
+                or if the prefix does not match the row's `id_prefix`.
+        """
+        prefix, _, number = display_id.strip().upper().rpartition("-")
+        row = cls.objects.filter(id=int(number)).first() if number.isdigit() else None
+        if not row or (row.id_prefix or "") != prefix:
+            raise cls.DoesNotExist(
+                f"No {cls.table_label} found with ID: '{display_id}'"
+            )
+        return row
+
     @classproperty
     def columns(cls):
         return cls._meta.get_fields()

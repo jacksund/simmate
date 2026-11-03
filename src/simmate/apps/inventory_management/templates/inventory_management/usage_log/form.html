@@ -8,7 +8,7 @@
         {% if component.component_type == "create" %}
             <div class="row">
                 <div class="col-md-6">
-                    {% htmx_text_input name="container_lookup" label="Container ID or Barcode" placeholder="scan or type, e.g. 1234" defer=False %}
+                    {% htmx_text_input name="container_lookup" label="Container ID or Barcode" placeholder="scan or type, e.g. C-1234" defer=False %}
                 </div>
             </div>
             {% with container=component.source_container %}
