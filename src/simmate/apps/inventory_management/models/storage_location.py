@@ -7,11 +7,17 @@ class StorageLocation(DatabaseTable):
 
     Locations are hierarchical: each one can sit inside a `parent_location`
     (e.g. site > building > room > cabinet > shelf), which allows a container's
-    full location to be traced.
+    full location to be traced. Locations are identified by their `display_id`
+    (e.g. "L-123").
     """
 
     class Meta:
         db_table = "inventory_management__storage_locations"
+
+    id_prefix = "L"
+    """
+    The static prefix of every location's `display_id` (e.g. "L-123").
+    """
 
     # -------------------------------------------------------------------------
 

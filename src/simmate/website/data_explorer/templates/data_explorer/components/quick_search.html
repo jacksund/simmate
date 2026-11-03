@@ -21,7 +21,7 @@
                    class="form-control border-0 px-3 px-md-4"
                    name="search_query"
                    id="quick-search-input"
-                   placeholder="Search by description, formula, or SMILES..."
+                   placeholder="{% if component.substances_only %}Search by substance ID, name, formula, or SMILES...{% else %}Search by description, formula, or SMILES...{% endif %}"
                    value="{{ component.search_query }}"
                    {% htmx_post indicator="#loading-spinner-corner" %}>
             {% if component.search_query %}
@@ -75,26 +75,47 @@
             {% elif component.active_panel == "sketcher" %}
                 {% htmx_molecule_input name="molecule" label="Draw Molecule" %}
             {% elif component.active_panel == "examples" %}
-                <div class="mb-4">
-                    <h6 class="fw-bold text-dark">
-                        <i class="bi bi-chat-text me-2 text-primary"></i>Natural Language
-                    </h6>
-                    <p class="text-muted small mb-2">
-                        Search using plain english descriptions to find materials with specific properties.
-                    </p>
-                    <button type="button"
-                            class="btn btn-outline-primary btn-sm rounded-pill px-3"
-                            hx-vals='{"query": "Find all band gaps greater than 2 eV"}'
-                            {% htmx_post method_name="set_example" trigger="click" indicator="#loading-spinner-corner" %}>
-                        Find all band gaps > 2 eV
-                    </button>
-                    <button type="button"
-                            class="btn btn-outline-primary btn-sm rounded-pill px-3"
-                            hx-vals='{"query": "Density less than 5 g/cm3"}'
-                            {% htmx_post method_name="set_example" trigger="click" indicator="#loading-spinner-corner" %}>
-                        Density less than 5 g/cm³
-                    </button>
-                </div>
+                {% if component.substances_only %}
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-dark">
+                            <i class="bi bi-upc me-2 text-primary"></i>IDs & Names
+                        </h6>
+                        <p class="text-muted small mb-2">Search for a substance by its ID or by part of its common name.</p>
+                        <button type="button"
+                                class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                                hx-vals='{"query": "BCD-012-3456"}'
+                                {% htmx_post method_name="set_example" trigger="click" indicator="#loading-spinner-corner" %}>
+                            BCD-012-3456
+                        </button>
+                        <button type="button"
+                                class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                                hx-vals='{"query": "DMSO"}'
+                                {% htmx_post method_name="set_example" trigger="click" indicator="#loading-spinner-corner" %}>
+                            DMSO
+                        </button>
+                    </div>
+                {% else %}
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-dark">
+                            <i class="bi bi-chat-text me-2 text-primary"></i>Natural Language
+                        </h6>
+                        <p class="text-muted small mb-2">
+                            Search using plain english descriptions to find materials with specific properties.
+                        </p>
+                        <button type="button"
+                                class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                                hx-vals='{"query": "Find all band gaps greater than 2 eV"}'
+                                {% htmx_post method_name="set_example" trigger="click" indicator="#loading-spinner-corner" %}>
+                            Find all band gaps > 2 eV
+                        </button>
+                        <button type="button"
+                                class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                                hx-vals='{"query": "Density less than 5 g/cm3"}'
+                                {% htmx_post method_name="set_example" trigger="click" indicator="#loading-spinner-corner" %}>
+                            Density less than 5 g/cm³
+                        </button>
+                    </div>
+                {% endif %}
                 <div class="mb-4">
                     <h6 class="fw-bold text-dark">
                         <i class="bi bi-funnel me-2 text-primary"></i>Formulas & Systems
@@ -137,28 +158,51 @@
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-simmate mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Formula</th>
-                                            <th>Spacegroup</th>
-                                            {% if data.has_ehull %}<th>E above Hull (eV/atom)</th>{% endif %}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for entry in data.entries %}
+                                    {% if data.is_substance %}
+                                        <thead>
                                             <tr>
-                                                <td>{% foreign_key_link entry %}</td>
-                                                <td>{{ entry.formula_reduced|chemical_formula }}</td>
-                                                <td>{% foreign_key_link entry.spacegroup "symbol" %}</td>
-                                                {% if data.has_ehull %}<td>{{ entry.energy_above_hull|floatformat:3 }}</td>{% endif %}
+                                                <th>ID</th>
+                                                <th>Type</th>
+                                                <th>Name</th>
+                                                <th>Formula</th>
+                                                <th>SMILES</th>
                                             </tr>
-                                        {% endfor %}
-                                    </tbody>
+                                        </thead>
+                                        <tbody>
+                                            {% for entry in data.entries %}
+                                                <tr>
+                                                    <td>{% foreign_key_link entry %}</td>
+                                                    <td>{{ entry.substance_type|default:"--" }}</td>
+                                                    <td>{{ entry.common_name|default:"--" }}</td>
+                                                    <td>{{ entry.structure.formula_reduced|chemical_formula|default:"--" }}</td>
+                                                    <td>{{ entry.molecule.smiles|default:"--" }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    {% else %}
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Formula</th>
+                                                <th>Spacegroup</th>
+                                                {% if data.has_ehull %}<th>E above Hull (eV/atom)</th>{% endif %}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for entry in data.entries %}
+                                                <tr>
+                                                    <td>{% foreign_key_link entry %}</td>
+                                                    <td>{{ entry.formula_reduced|chemical_formula }}</td>
+                                                    <td>{% foreign_key_link entry.spacegroup "symbol" %}</td>
+                                                    {% if data.has_ehull %}<td>{{ entry.energy_above_hull|floatformat:3 }}</td>{% endif %}
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    {% endif %}
                                 </table>
                             </div>
                             <div class="card-footer bg-white text-center">
-                                <a href="/data/{{ data.url_name }}/?{% if '-' in component.search_query %}chemical_system{% else %}formula_reduced{% endif %}={{ data.url_query }}"
+                                <a href="/data/{{ data.url_name }}/?{{ data.url_filter }}={{ data.url_query|urlencode }}"
                                    class="text-decoration-none fw-bold">
                                     See all {{ data.total_count }} results in {{ data.display_name }} <i class="bi bi-arrow-right"></i>
                                 </a>

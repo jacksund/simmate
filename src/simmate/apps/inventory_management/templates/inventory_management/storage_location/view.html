@@ -1,57 +1,92 @@
 {% extends "data_explorer/entry.html" %}
 {% block entrycontent %}
-    <div class="row py-2">
-        <div class="col-12">
-            <div class="page-title-box">
-                <div class="page-title-right m-0">
+    <div class="pt-3">
+        {# Tabs #}
+        <ul class="nav nav-tabs nav-bordered mb-3">
+            <li class="nav-item">
+                <a href="#overview-section"
+                   data-bs-toggle="tab"
+                   aria-expanded="true"
+                   class="nav-link active">
+                    <i class="bi bi-house-door d-md-none d-block"></i>
+                    <span class="d-none d-md-block">Overview</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#containers-section"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link">
+                    <i class="bi bi-box-seam d-md-none d-block"></i>
+                    <span class="d-none d-md-block">Containers <small>({{ containers__count|intcomma }})</small></span>
+                </a>
+            </li>
+            <li class="nav-item ms-auto align-self-center">
+                <a role="button"
+                   class="btn btn-outline-primary btn-sm"
+                   href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Update <i class="bi bi-pencil"></i></a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            {# Overview #}
+            <div class="tab-pane show active" id="overview-section">
+                <table class="table table-simmate mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 45%">Base Info</th>
+                            <th class="text-center"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ID</td>
+                            <td>{{ table_entry.display_id }}</td>
+                        </tr>
+                        <tr>
+                            <td>Name</td>
+                            <td>{{ table_entry.name|default:"--" }}</td>
+                        </tr>
+                        <tr>
+                            <td>Storage Type</td>
+                            <td>{{ table_entry.storage_type|default:"--"|capfirst }}</td>
+                        </tr>
+                        <tr>
+                            <td>Parent Location</td>
+                            <td>
+                                {% if table_entry.parent_location %}
+                                    <a role="button"
+                                       class="btn btn-light btn-sm border"
+                                       href="{% url 'data_explorer:table-entry' 'StorageLocation' table_entry.parent_location.id %}">{{ table_entry.parent_location.name }}</a>
+                                {% else %}
+                                    --
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Temperature (°C)</td>
+                            <td>{{ table_entry.temperature_celsius|default_if_none:"--" }}</td>
+                        </tr>
+                        <tr>
+                            <td>Description</td>
+                            <td>{{ table_entry.description|default:"--" }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            {# Containers #}
+            <div class="tab-pane" id="containers-section">
+                {% if containers__count %}
+                    {% include "inventory_management/container/table.html" with entries=containers truncated=containers__truncated hide_location=True %}
+                {% else %}
+                    <small>No containers are stored in this location.</small>
+                {% endif %}
+                <div class="text-center py-2">
                     <a role="button"
                        class="btn btn-outline-primary btn-sm"
-                       href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Update <i class="bi bi-pencil"></i></a>
+                       target="_blank"
+                       href="{% url 'data_explorer:table' 'Container' %}?location_id={{ table_entry.id }}">View All <i class="bi bi-box-arrow-up-right"></i></a>
                 </div>
-                <h3 class="m-0">Overview</h3>
             </div>
-        </div>
-    </div>
-    <div class="row py-2">
-        <div class="col-12">
-            <table class="table table-simmate mb-0">
-                <thead>
-                    <tr>
-                        <th style="width: 45%">Base Info</th>
-                        <th class="text-center"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>ID</td>
-                        <td>{{ table_entry.id }}</td>
-                    </tr>
-                    <tr>
-                        <td>Name</td>
-                        <td>{{ table_entry.name|default:"--" }}</td>
-                    </tr>
-                    <tr>
-                        <td>Parent Location</td>
-                        <td>
-                            {% if table_entry.parent_location %}
-                                <a role="button"
-                                   class="btn btn-light btn-sm border"
-                                   href="{% url 'data_explorer:table-entry' 'StorageLocation' table_entry.parent_location.id %}">{{ table_entry.parent_location.name }}</a>
-                            {% else %}
-                                --
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Temperature (°C)</td>
-                        <td>{{ table_entry.temperature_celsius|default:"--" }}</td>
-                    </tr>
-                    <tr>
-                        <td>Description</td>
-                        <td>{{ table_entry.description|default:"--" }}</td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
     </div>
 {% endblock %}

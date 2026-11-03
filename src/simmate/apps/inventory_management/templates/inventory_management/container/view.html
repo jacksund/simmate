@@ -6,6 +6,9 @@
                 <div class="page-title-right m-0">
                     <a role="button"
                        class="btn btn-outline-primary btn-sm"
+                       href="{% url 'data_explorer:table-entry-new' 'UsageLog' %}?source_container_id={{ table_entry.id }}">Log Usage <i class="bi bi-upc-scan"></i></a>
+                    <a role="button"
+                       class="btn btn-outline-primary btn-sm"
                        href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Update <i class="bi bi-pencil"></i></a>
                 </div>
                 <h3 class="m-0">Overview</h3>
@@ -24,7 +27,7 @@
                 <tbody>
                     <tr>
                         <td>ID</td>
-                        <td>{{ table_entry.id }}</td>
+                        <td>{{ table_entry.display_id }}</td>
                     </tr>
                     <tr>
                         <td>Batch</td>
@@ -32,7 +35,7 @@
                             {% if table_entry.batch %}
                                 <a role="button"
                                    class="btn btn-light btn-sm border"
-                                   href="{% url 'data_explorer:table-entry' 'Batch' table_entry.batch.id %}">{{ table_entry.batch.id }}</a>
+                                   href="{% url 'data_explorer:table-entry' 'Batch' table_entry.batch.id %}">{{ table_entry.batch.display_id }}</a>
                             {% else %}
                                 --
                             {% endif %}

@@ -1,12 +1,12 @@
 {% extends "data_explorer/entries.html" %}
 {% block table_headers %}
-    {% table_header "id" "ID" min_width=60 %}
+    {% table_header "id" "ID" min_width=155 %}
     <th style="min-width:100px">Flags</th>
-    {% table_header "substance_type" min_width=125 %}
-    {% table_header "registered_by" min_width=125 %}
-    {% table_header "common_name" min_width=100 %}
-    {% table_header "iupac_name" min_width=100 %}
-    <th style="min-width:50px">Synonyms</th>
+    {% table_header "substance_type" min_width=185 %}
+    {% table_header "registered_by" min_width=170 %}
+    {% table_header "common_name" min_width=235 %}
+    {% table_header "iupac_name" min_width=235 %}
+    <th style="min-width:165px">Synonyms</th>
     {% table_header "description" min_width=200 %}
     <th style="min-width:50px">Edit</th>
 {% endblock %}

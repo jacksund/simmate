@@ -1,15 +1,36 @@
 {% extends "data_explorer/entries.html" %}
+{# Set `hide_location` when every container is in the same location (e.g. on a location's page) #}
 {% block table_headers %}
-    {% table_header "id" "ID" min_width=60 %}
-    {% table_header "name" "Name" min_width=100 %}
-    {% table_header "parent_location__name" "Parent Location" min_width=250 %}
-    {% table_header "description" min_width=300 %}
+    {% table_header "id" "ID" min_width=90 %}
+    {% table_header "batch__id" "Batch" min_width=95 %}
+    <th style="min-width:220px">Item</th>
+    {% table_header "container_type" "Type" min_width=100 %}
+    {% table_header "barcode" min_width=120 %}
+    {% table_header "current_amount" "Amount Left" min_width=155 %}
+    {% if not hide_location %}
+        {% table_header "location__name" "Location" min_width=220 %}
+    {% endif %}
+    {% table_header "is_depleted" "Depleted" min_width=125 %}
     <th style="min-width:50px">Edit</th>
 {% endblock %}
 {% block table_rows %}
     <td>{% foreign_key_link entry %}</td>
-    <td>{{ entry.name }}</td>
-    <td>{% foreign_key_link entry.parent_location "name" %}</td>
-    <td>{{ entry.description|truncatechars:100 }}</td>
+    <td>{% foreign_key_link entry.batch %}</td>
+    <td>{% include "inventory_management/dashboard_item.html" with batch=entry.batch %}</td>
+    <td>{{ entry.container_type|default:"--"|capfirst }}</td>
+    <td>{{ entry.barcode|default:"--" }}</td>
+    <td class="text-nowrap">
+        {% if entry.current_amount is not None %}
+            {{ entry.current_amount|floatformat:"-3" }}
+            {% if entry.initial_amount is not None %}/ {{ entry.initial_amount|floatformat:"-3" }}{% endif %}
+            {{ entry.amount_units|default:"" }}
+        {% else %}
+            --
+        {% endif %}
+    </td>
+    {% if not hide_location %}
+        <td>{% foreign_key_link entry.location "name" %}</td>
+    {% endif %}
+    <td>{{ entry.is_depleted|yesno:"Yes,No,--" }}</td>
     {% update_entry_link entry %}
 {% endblock %}
