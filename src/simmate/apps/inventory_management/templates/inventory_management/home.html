@@ -2,4 +2,43 @@
 {% block tabtitle %}Inventory Management - Simmate{% endblock %}
 {% block body %}
     {% htmx_component "inventory-dashboard-component" %}
+    {# Popout panels for the quick actions of the dashboard #}
+    {# This id and component_key are what selectboxes use to open their dropdowns inside of a popout (see `htmx_selectbox`) #}
+    <div class="offcanvas offcanvas-end w-75"
+         id="offcanvasAddEntry"
+         tabindex="-1">
+        <div class="offcanvas-header bg-dark text-light">
+            <h5>Register Container</h5>
+            <button type="button"
+                    class="btn-close btn-close-white"
+                    data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            {% htmx_component "container-component" component_key="createpopout" component_type="create" %}
+        </div>
+    </div>
+    <div class="offcanvas offcanvas-end w-75"
+         id="offcanvasLogUsage"
+         tabindex="-1">
+        <div class="offcanvas-header bg-dark text-light">
+            <h5>Log Usage</h5>
+            <button type="button"
+                    class="btn-close btn-close-white"
+                    data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            {% htmx_component "usage-log-component" component_type="create" redirect_mode="refresh" %}
+        </div>
+    </div>
+    <div class="offcanvas offcanvas-end w-75"
+         id="offcanvasSubstanceSearch"
+         tabindex="-1">
+        <div class="offcanvas-header bg-dark text-light">
+            <h5>Find Substance</h5>
+            <button type="button"
+                    class="btn-close btn-close-white"
+                    data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">{% htmx_component "quick-search-component" substances_only=True %}</div>
+    </div>
 {% endblock %}

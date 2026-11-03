@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.db.models import Count, OuterRef, Subquery
+from django.db.models import Case, Count, Exists, OuterRef, Subquery, Sum, When
 from django.db.models.functions import Coalesce
 
 from simmate.database.core import DatabaseTable, table_column
@@ -134,7 +134,7 @@ class Batch(DatabaseTable):
     num_available_containers = table_column.IntegerField(blank=True, null=True)
     """
     The number of containers of this batch that are not empty (i.e. not
-    depleted). See `update_num_available_containers`.
+    depleted). See `update_cached_columns`.
     """
 
     total_initial_amount = table_column.DecimalField(
@@ -203,29 +203,47 @@ class Batch(DatabaseTable):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def update_num_available_containers(cls, batch_ids: list[int]):
+    def update_cached_columns(cls, batch_ids: list[int]):
         """
-        Recalculates the cached `num_available_containers` column for the
-        given batches. Use this after their containers are added, removed, or
-        depleted (e.g. after bulk loads).
+        Recalculates the columns that are cached from linked containers
+        (`num_available_containers`, `total_initial_amount`,
+        `total_current_amount`, and `is_depleted`) for the given batches. Use
+        this after their containers are added, removed, used, or depleted
+        (e.g. after bulk loads).
+
+        A batch is only marked as depleted if it has containers and none of
+        them are in stock. Batches without any containers are left as not
+        depleted, as their material still needs to be put somewhere.
         """
         from .container import Container  # local import to avoid circular dep
 
-        num_available = Coalesce(
-            Subquery(
-                Container.objects.filter(batch=OuterRef("pk"))
-                .exclude(is_depleted=True)
-                .order_by()
-                .values("batch")
-                .annotate(count=Count("id"))
-                .values("count")
-            ),
-            0,
-        )
+        containers = Container.objects.filter(batch=OuterRef("pk")).order_by()
+        in_stock = containers.exclude(is_depleted=True)
         # done in chunks to stay under the database's limit on query params
         for chunk in chunk_list(list(batch_ids), chunk_size=10_000):
             cls.objects.filter(id__in=chunk).update(
-                num_available_containers=num_available
+                num_available_containers=Coalesce(
+                    Subquery(
+                        in_stock.values("batch")
+                        .annotate(count=Count("id"))
+                        .values("count")
+                    ),
+                    0,
+                ),
+                total_initial_amount=Subquery(
+                    containers.values("batch")
+                    .annotate(total=Sum("initial_amount"))
+                    .values("total")
+                ),
+                total_current_amount=Subquery(
+                    containers.values("batch")
+                    .annotate(total=Sum("current_amount"))
+                    .values("total")
+                ),
+                is_depleted=Case(
+                    When(Exists(containers) & ~Exists(in_stock), then=True),
+                    default=False,
+                ),
             )
 
     # -------------------------------------------------------------------------

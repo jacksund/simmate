@@ -152,4 +152,23 @@ class Container(DatabaseTable):
             "location",
         )
 
+    @classmethod
+    def get_by_barcode_or_id(cls, value: str | int) -> "Container":
+        """
+        Loads a container from a scanned barcode or a typed ID (along with its
+        batch, substance or mixture, and location). Barcodes are checked
+        first, as they are what scanners give and they can be all digits.
+
+        Raises:
+            Container.DoesNotExist: if no container matches.
+        """
+        value = str(value or "").strip()
+        containers = cls.get_web_queryset()
+        container = containers.filter(barcode=value).first() if value else None
+        if not container and value.isdigit():
+            container = containers.filter(id=int(value)).first()
+        if not container:
+            raise cls.DoesNotExist(f"No container found with barcode or ID: '{value}'")
+        return container
+
     # -------------------------------------------------------------------------

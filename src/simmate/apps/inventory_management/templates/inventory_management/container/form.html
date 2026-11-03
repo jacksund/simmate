@@ -2,14 +2,153 @@
 {% block form %}
     {% include "data_explorer/general_search_options.html" %}
     {% if component.component_type == "create" %}
-        {% alert theme="warning" message="This form is only useful when you are moving an existing batch to a new container. If you have a new batch of something, it is easier to create your container(s) within the Batch creation form." %}
+        {# Batch: new or existing #}
+        <div class="container mt-4 border border-3 border-secondary rounded py-2">
+            <h3>
+                <span class="badge bg-secondary">1. Batch</span>
+            </h3>
+            <p class="text-muted mb-0">
+                Is this container for a new batch (e.g. a new synthesis or a new purchase) or for more of an existing batch?
+            </p>
+            {% htmx_button_select name="batch_mode" show_label=False defer=False %}
+            {% if component.form_data.batch_mode == "existing" %}
+                <div class="row">
+                    <div class="col-md-4">{% htmx_number_input name="batch_id" label="Batch ID" placeholder="1234" is_int=True %}</div>
+                </div>
+            {% endif %}
+        </div>
+        {% if component.form_data.batch_mode == "new" %}
+            {# Contents: substance or mixture #}
+            <div class="container mt-4 border border-3 border-secondary rounded py-2">
+                <h3>
+                    <span class="badge bg-secondary">2. Contents</span>
+                </h3>
+                {% htmx_button_select name="contents_type" show_label=False defer=False %}
+                {% if component.form_data.contents_type == "substance" %}
+                    <p class="text-muted">
+                        Give the ID of the substance, or give its molecule and/or crystal structure. Substances that are already registered keep their existing ID, and new ones are registered automatically. Give both a molecule and a crystal structure for a specific phase of a compound.
+                    </p>
+                    <div class="row">
+                        <div class="col-md-4">
+                            {% htmx_text_input name="substance_id" label="Substance ID" placeholder="e.g. BCD-012-3456" %}
+                        </div>
+                    </div>
+                    <h6 class="text-muted mt-3">or</h6>
+                    <div class="row">
+                        <div class="col-12">{% htmx_molecule_input name="molecule" label="Molecule" allow_text_input=True %}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">{% htmx_structure_input name="structure" label="Crystal Structure" %}</div>
+                    </div>
+                {% else %}
+                    <p class="text-muted">
+                        Give the ID of an existing mixture, or describe a new one. For new mixtures, list the components one per line as either a substance ID or a SMILES (new SMILES are registered automatically). Details such as concentrations or ratios go in the description.
+                    </p>
+                    <div class="row">
+                        <div class="col-md-4">{% htmx_text_input name="mixture_id" label="Mixture ID" placeholder="e.g. BCDF-123" %}</div>
+                    </div>
+                    <h6 class="text-muted mt-3">or create a new mixture</h6>
+                    <div class="row">
+                        <div class="col-md-6">{% htmx_selectbox name="mixture__mixture_type" label="Mixture Type" %}</div>
+                        <div class="col-md-6">
+                            {% htmx_text_input name="mixture__common_name" label="Common Name" placeholder="e.g. 0.1M NaCl Solution" %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% htmx_text_area name="mixture__components" label="Components" placeholder="one substance ID or SMILES per line" %}
+                        </div>
+                        <div class="col-md-6">
+                            {% htmx_text_area name="mixture__description" label="Description" placeholder="e.g. 0.1 M solution of NaCl in water" %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            {# Batch details #}
+            <div class="container mt-4 border border-3 border-secondary rounded py-2">
+                <h3>
+                    <span class="badge bg-secondary">3. Batch Info</span>
+                </h3>
+                <div class="row">
+                    <div class="col-md-4">
+                        {% htmx_text_input name="batch__supplier" label="Supplier" placeholder="(optional) leave blank for in-house" %}
+                    </div>
+                    <div class="col-md-4">
+                        {% htmx_text_input name="batch__supplier_catalog_number" label="Supplier Product #" placeholder="(optional) e.g. 50-177-2891" %}
+                    </div>
+                    <div class="col-md-4">
+                        {% htmx_number_input name="batch__purity" label="% Purity" placeholder="0-100%; leave blank if unknown" %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">{% htmx_date_input name="batch__expiration_date" label="Expiration Date" %}</div>
+                    <div class="col-md-8">
+                        {% htmx_text_input name="batch__appearance" label="Appearance" placeholder="(optional) e.g. white crystalline powder" %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        {% htmx_text_area name="batch__comments" label="Batch Comments" placeholder="(optional) Enter any extra notes about the batch" %}
+                    </div>
+                </div>
+            </div>
+            {# Reagents #}
+            <div class="container mt-4 border border-3 border-secondary rounded py-2">
+                <h3>
+                    <span class="badge bg-secondary">4. Reagents Used</span>
+                </h3>
+                <p class="text-muted">
+                    (optional) For batches made in-house, list the containers of reagents used to make it. The amount used is removed from each container, and the reagents' batches are linked as parents of the new batch.
+                </p>
+                {% for index, container, amount in component.reagent_rows %}
+                    <div class="row align-items-end">
+                        <div class="col-md-5 my-2">
+                            <label class="form-label">Container ID or Barcode</label>
+                            <input class="form-control"
+                                   type="text"
+                                   name="reagent_containers"
+                                   value="{{ container }}"
+                                   placeholder="scan or type, e.g. 1234">
+                        </div>
+                        <div class="col-md-5 my-2">
+                            <label class="form-label">Amount Used (in the container's units)</label>
+                            <input class="form-control"
+                                   type="number"
+                                   step="any"
+                                   name="reagent_amounts"
+                                   value="{{ amount }}"
+                                   placeholder="0.123">
+                        </div>
+                        <div class="col-md-2">
+                            {% htmx_button method_name="remove_reagent" label="Remove" icon="trash" theme="outline-danger" small=True index=index %}
+                        </div>
+                    </div>
+                {% endfor %}
+                {% htmx_button method_name="add_reagent" label="Add Reagent" icon="plus-circle" theme="outline-primary" small=True %}
+            </div>
+        {% endif %}
     {% endif %}
+    {# Container #}
     <div class="container mt-4 border border-3 border-secondary rounded py-2">
         <h3>
-            <span class="badge bg-secondary">1. Container Info</span>
+            <span class="badge bg-secondary">
+                {% if component.component_type != "create" %}
+                    1.
+                {% elif component.form_data.batch_mode == "new" %}
+                    5.
+                {% else %}
+                    2.
+                {% endif %}
+                Container Info
+            </span>
         </h3>
         <div class="row">
-            <div class="col-md-4">{% htmx_number_input name="batch_id" label="Batch ID" placeholder="1234" %}</div>
+            {% if component.component_type != "create" %}
+                <div class="col-md-4">{% htmx_number_input name="batch_id" label="Batch ID" placeholder="1234" %}</div>
+            {% endif %}
+            <div class="col-md-4">
+                {% htmx_selectbox name="container_type" label="Container Type" options=component.table.container_type_options %}
+            </div>
             <div class="col-md-4">
                 {% htmx_selectbox name="location_id" label="Storage Location" options=component.location_options %}
             </div>

@@ -767,6 +767,27 @@ class Substance(DatabaseTable):
         return (row and row["replaced_by_id"]) or substance_id
 
     @classmethod
+    def get_by_id(cls, substance_id: str) -> "Substance":
+        """
+        Loads a substance from an ID typed by a user (e.g. " bcd-012-3456").
+        Merged or promoted IDs give their current substance, and substances
+        that are only in the `SubstanceDatastore` are copied into this table
+        first (so they can be viewed and linked to).
+
+        Raises:
+            Substance.DoesNotExist: if the ID is malformed or not found.
+        """
+        substance_id = substance_id.strip().upper()
+        if not cls.validate_id(substance_id):
+            raise cls.DoesNotExist(f"Invalid substance ID: '{substance_id}'")
+        substance_id = cls.resolve_id(substance_id)
+        try:
+            cls._hydrate([substance_id])
+        except ValueError:
+            raise cls.DoesNotExist(f"Substance not found: '{substance_id}'")
+        return cls.objects.get(id=substance_id)
+
+    @classmethod
     def _repoint_references(cls, old_ids: list[str], new_id: str):
         """
         Moves everything that links to the old substances over to the new

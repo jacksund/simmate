@@ -26,6 +26,12 @@ class QuickSearchComponent(
     search_query: str = ""
     search_results: dict = None
 
+    substances_only: bool = False
+    """
+    Whether to only search the `Substance` table (e.g. for the inventory
+    dashboard).
+    """
+
     def run_search(self, **kwargs):
         self.active_panel = "search_results"
         query = self.form_data.get("search_query", "").strip()
@@ -35,13 +41,24 @@ class QuickSearchComponent(
             self.search_results = None
             return
 
+        from simmate.website.data_explorer.views import _SAFE_COMPONENTS
+
+        # The substance table is found through the searchable components
+        # (rather than imported) because its app is optional
+        substance_component = _SAFE_COMPONENTS.get("Substance")
+
         # Figure out what kind of query this is, which sets the column we
         # search on (and the normalized value to search for). Formulas only
         # match if they are already written as a reduced formula (e.g. "Fe2O3"),
         # since that is how they are stored. This also lets SMILES that happen
         # to be valid formulas (e.g. "CCO") fall through to a molecule search.
         # Short queries that are both (e.g. "CO") are treated as formulas.
-        if re.fullmatch(r"[A-Z][a-z]?(-[A-Z][a-z]?)+", query):
+        # Anything else is treated as a name (e.g. "DMSO").
+        if substance_component and substance_component.table.get_id_level(
+            query.upper()
+        ):
+            search_field = "id"
+        elif re.fullmatch(r"[A-Z][a-z]?(-[A-Z][a-z]?)+", query):
             search_field = "chemical_system"
             query = "-".join(sorted(query.split("-")))
         else:
@@ -56,29 +73,42 @@ class QuickSearchComponent(
             if inchi_key and not is_formula:
                 search_field = "inchi_key"
                 query = inchi_key
-            else:
-                # if neither parses, we still try a formula search
+            elif is_formula:
                 search_field = "formula_reduced"
+            else:
+                search_field = "name"
 
         results = {}
-
-        from simmate.website.data_explorer.views import _SAFE_COMPONENTS
 
         for name, component in _SAFE_COMPONENTS.items():
             table = component.table
 
             is_structure = issubclass(table, Structure)
-            is_substance = table.__name__ == "Substance"
+            is_substance = component is substance_component
 
-            # Substances are searched via their linked molecule or crystal
-            # structure, depending on the query type
+            if self.substances_only and not is_substance:
+                continue
+
+            # Substances are searched via their ID, name, or linked molecule
+            # or crystal structure, depending on the query type
             if is_substance:
                 url_filter = {
+                    "id": "id",
+                    "name": "common_name__icontains",
                     "chemical_system": "structure__chemical_system",
                     "formula_reduced": "structure__formula_reduced",
                     "inchi_key": "molecule__inchi_key",
                 }[search_field]
-            elif is_structure and search_field != "inchi_key":
+                if search_field == "id":
+                    # follows merged IDs and loads datastore-only substances
+                    try:
+                        query = table.get_by_id(query).id
+                    except table.DoesNotExist:
+                        continue
+            elif is_structure and search_field in (
+                "chemical_system",
+                "formula_reduced",
+            ):
                 url_filter = search_field
             else:
                 continue

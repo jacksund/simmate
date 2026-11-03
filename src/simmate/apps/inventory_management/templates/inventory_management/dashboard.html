@@ -7,6 +7,27 @@
         </h1>
         <small class="text-muted">Updated {{ last_updated|time:"H:i:s" }} · refreshes every {{ component.refresh_interval }}</small>
     </div>
+    {# Quick actions. Each opens a popout panel from home.html, which is outside of this auto-refreshing component so that the forms and search results aren't wiped on refresh #}
+    <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+        <button type="button"
+                class="btn btn-sm btn-light border"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasAddEntry">
+            <i class="bi bi-plus-square me-1"></i> Register Container
+        </button>
+        <button type="button"
+                class="btn btn-sm btn-light border"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasLogUsage">
+            <i class="bi bi-upc-scan me-1"></i> Log Usage
+        </button>
+        <button type="button"
+                class="btn btn-sm btn-light border"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasSubstanceSearch">
+            <i class="bi bi-search me-1"></i> Find Substance
+        </button>
+    </div>
     {# Catalogs #}
     {% include "core/basic_elements/catalogs_card.html" %}
     {# Needs Attention #}

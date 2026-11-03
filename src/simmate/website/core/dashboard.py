@@ -78,7 +78,7 @@ def get_quick_actions() -> list[dict]:
         {
             "label": "Log Reagent Usage",
             "icon": "bi-upc-scan",
-            "url": "/apps/inventory_management/",
+            "url": "/data/UsageLog/new/",
         },
         {
             "label": "New Project",
