@@ -264,32 +264,41 @@ class Workflow:
             # any python object if "use_database=False"
             results = cls.run_config(**kwargs_cleaned)
 
+            # save the result to the database. This is inside the `try` so that
+            # a failed save (e.g. a value the database rejects) marks the run as
+            # "Failed" too -- rather than leaving it looking finished without
+            # its results.
+            if cls.use_database:
+                # make sure the workflow is returning a dictionary that be used
+                # to update the database columns. None is also allowed as it
+                # represents an empty dictionary
+                if results is None:
+                    results = {}
+                if not isinstance(results, dict):
+                    raise Exception(
+                        "When using a database table, your `run_config` method must "
+                        "return a dictionary object. The dictionary is used to "
+                        "update columns in your table entry and is therefore a "
+                        "required format. If you do not want to save to the database "
+                        "(and avoid this message), set `use_database=False`"
+                    )
+                logger.info("Saving to database and writing outputs")
+
+                database_entry = cls._update_database_with_results(
+                    results=results,
+                    directory=kwargs_cleaned["directory"],
+                    run_id=kwargs_cleaned["run_id"],
+                )
+
         except Exception:
             if cls.use_database:
-                database_entry.status = "Failed"
-                database_entry.save()
-            raise
-
-        # save the result to the database
-        if cls.use_database:
-            # make sure the workflow is returning a dictionary that be used
-            # to update the database columns. None is also allowed as it
-            # represents an empty dictionary
-            if not isinstance(results, dict) and results != None:
-                raise Exception(
-                    "When using a database table, your `run_config` method must "
-                    "return a dictionary object. The dictionary is used to "
-                    "update columns in your table entry and is therefore a "
-                    "required format. If you do not want to save to the database "
-                    "(and avoid this message), set `use_database=False`"
+                # reload the entry rather than saving `database_entry`, which is
+                # stale if results were partially saved through another instance
+                cls.database_table.from_run_context(
+                    run_id=kwargs_cleaned["run_id"],
+                    status="Failed",
                 )
-            logger.info("Saving to database and writing outputs")
-
-            database_entry = cls._update_database_with_results(
-                results=results if results != None else {},
-                directory=kwargs_cleaned["directory"],
-                run_id=kwargs_cleaned["run_id"],
-            )
+            raise
 
         directory = kwargs_cleaned["directory"]
 
@@ -547,7 +556,6 @@ class Workflow:
             workflow_name=cls.name_full,
             workflow_version=cls.version,
             finished_at=timezone.now(),
-            status="Completed",
         )
 
         # Now update the calculation entry with our results. Typically, all of this
@@ -571,6 +579,11 @@ class Workflow:
                 results=results,
                 directory=directory,
             )
+
+        # set only after results are saved (and before the summary, so it shows
+        # the final status)
+        calculation.status = "Completed"
+        calculation.save(update_fields=["status", "updated_at"])
 
         # write the output summary to file
         calculation.write_output_summary(directory)
