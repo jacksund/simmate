@@ -1,72 +1,14 @@
 {% extends "data_explorer/entry.html" %}
 {% block entrycontent %}
-    <div class="row py-2">
-        <div class="col-12">
-            <div class="page-title-box">
-                <div class="page-title-right m-0">
-                    <a role="button"
-                       class="btn btn-outline-primary btn-sm"
-                       href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Update <i class="bi bi-pencil"></i></a>
-                </div>
-                <h3 class="m-0">Overview</h3>
-            </div>
-        </div>
-    </div>
-    <div class="row py-2">
-        <div class="col-12">
-            <table class="table table-simmate mb-0">
-                <thead>
-                    <tr>
-                        <th style="width: 45%">Base Info</th>
-                        <th class="text-center"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>ID</td>
-                        <td>{{ table_entry.display_id }}</td>
-                    </tr>
-                    <tr>
-                        <td>Mixture Type</td>
-                        <td>{{ table_entry.mixture_type|default:"--" }}</td>
-                    </tr>
-                    <tr>
-                        <td>Common Name</td>
-                        <td>{{ table_entry.common_name|default:"--" }}</td>
-                    </tr>
-                    <tr>
-                        <td>Description</td>
-                        <td>{{ table_entry.description|default:"--" }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="row py-2 mt-3">
-        <div class="col-12">
-            <h4>Substances in Mixture ({{ substances__count }})</h4>
-            <div class="row">
-                {% for substance in substances %}
-                    <div class="col-md-3">
-                        <a role="button"
-                           class="btn btn-light btn-sm col-12 text-center border mb-2"
-                           href="{% url 'data_explorer:table-entry' 'Substance' substance.id %}">
-                            {{ substance.id }}
-                            {% if substance.common_name %}
-                                <br>
-                                <small class="text-muted">{{ substance.common_name }}</small>
-                            {% endif %}
-                        </a>
-                    </div>
-                {% empty %}
-                    <p>No substances linked to this mixture.</p>
-                {% endfor %}
-                {% if substances__truncated %}
-                    <div class="col-12 text-center text-muted mt-2">
-                        <em>Only the first 10 substances are shown.</em>
-                    </div>
-                {% endif %}
-            </div>
+    <div>
+        <ul class="nav nav-tabs nav-bordered mb-3">
+            {% include "inventory_management/for_view/tab_link.html" with target="overview-section" icon="house-door" label="Overview" active=True %}
+            {% include "inventory_management/for_view/tab_link.html" with target="inventory-section" icon="box-seam" label="Inventory" count=batches__count %}
+            <li class="nav-item ms-auto align-self-center">{% include "inventory_management/for_view/update_button.html" %}</li>
+        </ul>
+        <div class="tab-content">
+            {% include "inventory_management/mixture/for_view/overview_tab.html" %}
+            {% include "inventory_management/mixture/for_view/inventory_tab.html" %}
         </div>
     </div>
 {% endblock %}

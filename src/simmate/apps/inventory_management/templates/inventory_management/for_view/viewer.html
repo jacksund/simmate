@@ -1,4 +1,4 @@
-{# The drawing of a substance: its molecule (2D), crystal structure (3D), both (with a toggle), or a placeholder #}
+{# The drawing of a substance (given as `table_entry`): its molecule (2D), crystal structure (3D), both (with a toggle), or a placeholder. Expects `viewer_default` ("2d" or "3d") #}
 {% with molecule=table_entry.molecule structure=table_entry.structure %}
     <div class="row m-2">
         {% if molecule and structure %}
@@ -27,19 +27,15 @@
             <div class="col-12 tab-content">
                 <div class="tab-pane fade {% if viewer_default == '2d' %}show active{% endif %}"
                      id="viewer-2d-pane"
-                     role="tabpanel">
-                    {% include "inventory_management/substance/for_view/viewer_2d.html" %}
-                </div>
+                     role="tabpanel">{% include "inventory_management/for_view/viewer_2d.html" %}</div>
                 <div class="tab-pane fade {% if viewer_default == '3d' %}show active{% endif %}"
                      id="viewer-3d-pane"
-                     role="tabpanel">
-                    {% include "inventory_management/substance/for_view/viewer_3d.html" %}
-                </div>
+                     role="tabpanel">{% include "inventory_management/for_view/viewer_3d.html" %}</div>
             </div>
         {% elif molecule %}
-            <div class="col-12">{% include "inventory_management/substance/for_view/viewer_2d.html" %}</div>
+            <div class="col-12">{% include "inventory_management/for_view/viewer_2d.html" %}</div>
         {% elif structure %}
-            <div class="col-12">{% include "inventory_management/substance/for_view/viewer_3d.html" %}</div>
+            <div class="col-12">{% include "inventory_management/for_view/viewer_3d.html" %}</div>
         {% else %}
             <div class="col-12 molecule-panel d-flex justify-content-center align-items-center border rounded-3 border-5 bg-white">
                 <div class="text-center text-muted">

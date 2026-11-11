@@ -1,0 +1,54 @@
+<div class="tab-pane" id="lineage-section">
+    {# Sub-tabs, ordered from what this batch was made from to what was made from it #}
+    <ul class="nav nav-pills mb-3" role="tablist">
+        {% include "inventory_management/for_view/subtab_button.html" with target="lineage-made-from-pane" icon="journal-arrow-down" label="Made From" count=source_usage_logs__count active=True %}
+        {% include "inventory_management/for_view/subtab_button.html" with target="lineage-parents-pane" icon="arrow-up" label="Parent Batches" count=parent_batches__count %}
+        {% include "inventory_management/for_view/subtab_button.html" with target="lineage-children-pane" icon="arrow-down" label="Child Batches" count=child_batches__count %}
+    </ul>
+    <div class="tab-content">
+        {# Made From: the material taken from containers to make this batch #}
+        <div class="tab-pane fade show active"
+             id="lineage-made-from-pane"
+             role="tabpanel">
+            {% if source_usage_logs__count %}
+                {% include "inventory_management/usage_log/table.html" with entries=source_usage_logs truncated=source_usage_logs__truncated %}
+                <div class="text-center py-2">
+                    <a role="button"
+                       class="btn btn-outline-primary btn-sm"
+                       target="_blank"
+                       href="{% url 'data_explorer:table' 'UsageLog' %}?destination_batch_id={{ table_entry.id }}">View All <i class="bi bi-box-arrow-up-right"></i></a>
+                </div>
+            {% else %}
+                <small>No usage logs list this batch as their destination.</small>
+            {% endif %}
+        </div>
+        {# Parent Batches #}
+        <div class="tab-pane fade" id="lineage-parents-pane" role="tabpanel">
+            {% if parent_batches__count %}
+                {% include "inventory_management/batch/table.html" with entries=parent_batches truncated=parent_batches__truncated %}
+                <div class="text-center py-2">
+                    <a role="button"
+                       class="btn btn-outline-primary btn-sm"
+                       target="_blank"
+                       href="{% url 'data_explorer:table' 'Batch' %}?child_batches__id={{ table_entry.id }}">View All <i class="bi bi-box-arrow-up-right"></i></a>
+                </div>
+            {% else %}
+                <small>This batch was not made from other batches.</small>
+            {% endif %}
+        </div>
+        {# Child Batches #}
+        <div class="tab-pane fade" id="lineage-children-pane" role="tabpanel">
+            {% if child_batches__count %}
+                {% include "inventory_management/batch/table.html" with entries=child_batches truncated=child_batches__truncated %}
+                <div class="text-center py-2">
+                    <a role="button"
+                       class="btn btn-outline-primary btn-sm"
+                       target="_blank"
+                       href="{% url 'data_explorer:table' 'Batch' %}?parent_batches__id={{ table_entry.id }}">View All <i class="bi bi-box-arrow-up-right"></i></a>
+                </div>
+            {% else %}
+                <small>No other batches were made from this batch.</small>
+            {% endif %}
+        </div>
+    </div>
+</div>

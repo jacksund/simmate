@@ -27,6 +27,7 @@ from ..models import (
     Substance,
     UsageLog,
 )
+from .batch import BatchComponent
 
 
 class ContainerComponent(
@@ -827,6 +828,29 @@ class ContainerComponent(
         # The default repeats `save_to_db_for_create`, which also registers
         # new batches here. Updates only save the container.
         super().save_to_db_for_create()
+
+    # -------------------------------------------------------------------------
+
+    # ENTRY VIEW
+
+    @classmethod
+    def get_extra_entry_context(cls, request, table_entry: Container) -> dict:
+        limit = 25
+
+        usage_logs = table_entry.usage_logs.select_related(
+            "source_container", "user", "destination_batch"
+        )
+        usage_logs__count = usage_logs.count()
+
+        return {
+            **BatchComponent.get_item_context(table_entry.batch),
+            "location_path": (
+                table_entry.location.get_path() if table_entry.location else []
+            ),
+            "usage_logs": usage_logs.order_by("-created_at", "-id")[:limit],
+            "usage_logs__count": usage_logs__count,
+            "usage_logs__truncated": usage_logs__count > limit,
+        }
 
     # -------------------------------------------------------------------------
 

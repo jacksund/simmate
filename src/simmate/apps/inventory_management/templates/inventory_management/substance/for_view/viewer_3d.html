@@ -1,8 +1,0 @@
-{# The 3D viewer of `structure`, along with its downloads #}
-<div class="structure-panel">{% draw_structure structure %}</div>
-<div class="mt-2 text-center">
-    {% if structure.structure %}
-        {% button_link label="CIF" link="?format=cif" theme="outline-secondary" icon="download" small=True %}
-        {% button_link label="POSCAR" link="?format=poscar" theme="outline-secondary" icon="download" small=True %}
-    {% endif %}
-</div>

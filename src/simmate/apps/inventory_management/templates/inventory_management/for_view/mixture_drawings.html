@@ -1,0 +1,28 @@
+{# Small drawings of the substances in a mixture, given its `mixture_components` (with `substance__molecule` loaded) #}
+<div class="row g-2 m-2">
+    {% for part in mixture_components %}
+        <div class="col-6">
+            <div class="border rounded-3 bg-white text-center p-2 h-100">
+                {% if part.substance.molecule %}
+                    {% draw_molecule part.substance.molecule width=160 height=160 %}
+                {% else %}
+                    <div class="d-flex justify-content-center align-items-center text-muted"
+                         style="height: 160px">
+                        <i class="bi bi-hexagon fs-1"></i>
+                    </div>
+                {% endif %}
+                <div class="small text-truncate">{% foreign_key_link part.substance %}</div>
+                {% if part.role %}
+                    <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ part.role|replace:"_, " }}</span>
+                {% endif %}
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12 molecule-panel d-flex justify-content-center align-items-center border rounded-3 border-5 bg-white">
+            <div class="text-center text-muted">
+                <i class="bi bi-droplet-half fs-1"></i>
+                <div>No components listed</div>
+            </div>
+        </div>
+    {% endfor %}
+</div>

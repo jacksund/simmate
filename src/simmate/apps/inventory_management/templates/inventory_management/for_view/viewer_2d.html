@@ -1,0 +1,14 @@
+{# The 2D drawing of `molecule`, along with its downloads #}
+{# Downloads link to the substance's own page, so this also works when it is shown on e.g. a batch's page #}
+{% url 'data_explorer:table-entry' 'Substance' table_entry.id as download_url %}
+<div class="molecule-panel d-flex justify-content-center align-items-center border rounded-3 border-5 bg-white">
+    {% draw_molecule molecule width=450 height=450 %}
+</div>
+<div class="mt-2 text-center">
+    {% if molecule.molecule %}
+        {% button_link label="SDF" link=download_url|add:"?format=sdf" theme="outline-secondary" icon="download" small=True %}
+    {% endif %}
+    {% if molecule.smiles %}
+        {% button_link label="SMILES" link=download_url|add:"?format=smiles" theme="outline-secondary" icon="download" small=True %}
+    {% endif %}
+</div>

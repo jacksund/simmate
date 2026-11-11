@@ -1,3 +1,5 @@
+from itertools import pairwise
+
 from django.db.models import Count, F, Prefetch
 
 from simmate.toolkit import Molecule as ToolkitMolecule
@@ -56,16 +58,6 @@ class SubstanceComponent(TableComponent, MoleculeInput, StructureInput):
     @classmethod
     def get_extra_entry_context(cls, request, table_entry: Substance) -> dict:
         limit = 25
-
-        # Crystal types are drawn in 3D by default, and everything else in 2D
-        # (see `Substance.substance_type`). This only matters when the
-        # substance has both a molecule and a structure.
-        is_crystal = (table_entry.substance_type or "").endswith("_crystal")
-        viewer_default = (
-            "3d"
-            if table_entry.structure_id and (is_crystal or not table_entry.molecule_id)
-            else "2d"
-        )
 
         # entries in third-party datasets (only those from installed apps)
         linked_datasets = []
@@ -140,7 +132,7 @@ class SubstanceComponent(TableComponent, MoleculeInput, StructureInput):
         projects = table_entry.projects.order_by("name")
 
         return {
-            "viewer_default": viewer_default,
+            "viewer_default": cls.get_viewer_default(table_entry),
             "linked_datasets": linked_datasets,
             "linked_datasets__count": sum(d["count"] for d in linked_datasets),
             "batches": batches.order_by(*in_stock_first)[:limit],
@@ -174,6 +166,22 @@ class SubstanceComponent(TableComponent, MoleculeInput, StructureInput):
             "projects__count": projects.count(),
             "id_changes": list(table_entry.id_changes),
         }
+
+    @staticmethod
+    def get_viewer_default(substance: Substance | None) -> str:
+        """
+        Gives which drawing of a substance is shown first ("2d" or "3d") in
+        `for_view/viewer.html`. Crystal types are drawn in 3D by default, and
+        everything else in 2D (see `Substance.substance_type`). This only
+        matters when the substance has both a molecule and a structure.
+        """
+        if not substance:
+            return "2d"
+        is_crystal = (substance.substance_type or "").endswith("_crystal")
+        has_structure = bool(substance.structure_id)
+        if has_structure and (is_crystal or not substance.molecule_id):
+            return "3d"
+        return "2d"
 
     @staticmethod
     def get_family_tree(
@@ -222,7 +230,7 @@ class SubstanceComponent(TableComponent, MoleculeInput, StructureInput):
         for node in path:
             node.tree_children = []
             node.is_current = node is substance
-        for parent, child in zip(path, path[1:]):
+        for parent, child in pairwise(path):
             parent.tree_children = [child]
         nodes = {node.id: node for node in path}
 

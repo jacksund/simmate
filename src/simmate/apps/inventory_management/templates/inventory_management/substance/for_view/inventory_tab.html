@@ -1,9 +1,9 @@
 <div class="tab-pane" id="inventory-section">
     {# Sub-tabs, ordered from the batches down to the containers in them and what was taken from those #}
     <ul class="nav nav-pills mb-3" role="tablist">
-        {% include "inventory_management/substance/for_view/subtab_button.html" with target="inventory-batches-pane" icon="stack" label="Batches" count=batches__count active=True %}
-        {% include "inventory_management/substance/for_view/subtab_button.html" with target="inventory-containers-pane" icon="box-seam" label="Containers" count=containers__count %}
-        {% include "inventory_management/substance/for_view/subtab_button.html" with target="inventory-usage-logs-pane" icon="journal-text" label="Usage Logs" count=usage_logs__count %}
+        {% include "inventory_management/for_view/subtab_button.html" with target="inventory-batches-pane" icon="stack" label="Batches" count=batches__count active=True %}
+        {% include "inventory_management/for_view/subtab_button.html" with target="inventory-containers-pane" icon="box-seam" label="Containers" count=containers__count %}
+        {% include "inventory_management/for_view/subtab_button.html" with target="inventory-usage-logs-pane" icon="journal-text" label="Usage Logs" count=usage_logs__count %}
     </ul>
     <div class="tab-content">
         {# Batches #}

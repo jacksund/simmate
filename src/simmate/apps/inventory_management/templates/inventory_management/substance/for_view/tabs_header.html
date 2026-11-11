@@ -77,9 +77,5 @@
             <span class="d-none d-md-block">Linked Datasets <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis">{{ linked_datasets__count|intcomma }}</span></span>
         </a>
     </li>
-    <li class="nav-item ms-auto align-self-center">
-        <a role="button"
-           class="btn btn-outline-primary btn-sm"
-           href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Update <i class="bi bi-pencil"></i></a>
-    </li>
+    <li class="nav-item ms-auto align-self-center">{% include "inventory_management/for_view/update_button.html" %}</li>
 </ul>

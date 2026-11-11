@@ -1,0 +1,54 @@
+<div class="tab-pane" id="inventory-section">
+    {# Sub-tabs, ordered from the batches down to the containers in them and what was taken from those #}
+    <ul class="nav nav-pills mb-3" role="tablist">
+        {% include "inventory_management/for_view/subtab_button.html" with target="inventory-batches-pane" icon="stack" label="Batches" count=batches__count active=True %}
+        {% include "inventory_management/for_view/subtab_button.html" with target="inventory-containers-pane" icon="box-seam" label="Containers" count=containers__count %}
+        {% include "inventory_management/for_view/subtab_button.html" with target="inventory-usage-logs-pane" icon="journal-text" label="Usage Logs" count=usage_logs__count %}
+    </ul>
+    <div class="tab-content">
+        {# Batches #}
+        <div class="tab-pane fade show active"
+             id="inventory-batches-pane"
+             role="tabpanel">
+            {% if batches__count %}
+                {% include "inventory_management/batch/table.html" with entries=batches truncated=batches__truncated hide_item=True %}
+                <div class="text-center py-2">
+                    <a role="button"
+                       class="btn btn-outline-primary btn-sm"
+                       target="_blank"
+                       href="{% url 'data_explorer:table' 'Batch' %}?mixture_id={{ table_entry.id }}">View All <i class="bi bi-box-arrow-up-right"></i></a>
+                </div>
+            {% else %}
+                <small>There are no batches of this mixture.</small>
+            {% endif %}
+        </div>
+        {# Containers #}
+        <div class="tab-pane fade" id="inventory-containers-pane" role="tabpanel">
+            {% if containers__count %}
+                {% include "inventory_management/container/table.html" with entries=containers truncated=containers__truncated hide_item=True %}
+                <div class="text-center py-2">
+                    <a role="button"
+                       class="btn btn-outline-primary btn-sm"
+                       target="_blank"
+                       href="{% url 'data_explorer:table' 'Container' %}?batch__mixture_id={{ table_entry.id }}">View All <i class="bi bi-box-arrow-up-right"></i></a>
+                </div>
+            {% else %}
+                <small>There are no containers of this mixture.</small>
+            {% endif %}
+        </div>
+        {# Usage Logs #}
+        <div class="tab-pane fade" id="inventory-usage-logs-pane" role="tabpanel">
+            {% if usage_logs__count %}
+                {% include "inventory_management/usage_log/table.html" with entries=usage_logs truncated=usage_logs__truncated %}
+                <div class="text-center py-2">
+                    <a role="button"
+                       class="btn btn-outline-primary btn-sm"
+                       target="_blank"
+                       href="{% url 'data_explorer:table' 'UsageLog' %}?source_container__batch__mixture_id={{ table_entry.id }}">View All <i class="bi bi-box-arrow-up-right"></i></a>
+                </div>
+            {% else %}
+                <small>No material has been taken from containers of this mixture.</small>
+            {% endif %}
+        </div>
+    </div>
+</div>

@@ -1,7 +1,7 @@
 <div class="tab-pane" id="related-section">
     <ul class="nav nav-pills mb-3" role="tablist">
-        {% include "inventory_management/substance/for_view/subtab_button.html" with target="related-substances-pane" icon="diagram-3" label="Substances" count=related_substances__count active=True %}
-        {% include "inventory_management/substance/for_view/subtab_button.html" with target="related-mixtures-pane" icon="droplet-half" label="Mixtures" count=mixtures__count %}
+        {% include "inventory_management/for_view/subtab_button.html" with target="related-substances-pane" icon="diagram-3" label="Substances" count=related_substances__count active=True %}
+        {% include "inventory_management/for_view/subtab_button.html" with target="related-mixtures-pane" icon="droplet-half" label="Mixtures" count=mixtures__count %}
     </ul>
     <div class="tab-content">
         {# Substances: the tree of parent/child links, plus the substances it is made with (or used in) #}
