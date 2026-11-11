@@ -77,7 +77,7 @@
                     </tr>
                     <tr>
                         <td>Stereochem Type</td>
-                        <td>{{ table_entry.get_stereochem_type_display|default:"--" }}</td>
+                        <td>{{ table_entry.stereochem_type|join:", "|default:"--" }}</td>
                     </tr>
                     <tr>
                         <td>Description</td>

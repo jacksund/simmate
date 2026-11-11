@@ -10,8 +10,9 @@ class Mixture(DatabaseTable):
     A defined combination of substances, such as a stock solution or a
     solvent blend.
 
-    Components are listed loosely via `substances`, and any details on how they
-    are combined (e.g. concentrations or ratios) go in the `description`.
+    Components are listed via `substances`, and each can optionally be given
+    a role and amount (see `components` and the `MixtureComponent` table).
+    Any other details (e.g. how it was prepared) go in the `description`.
     Mixtures are identified by their `display_id` (e.g. "BCDF-123").
     """
 
@@ -51,10 +52,16 @@ class Mixture(DatabaseTable):
     # -------------------------------------------------------------------------
 
     mixture_type_options = [
-        "solution",  # solid in liquid mix
-        "liquid mix",
-        "gas mix",
-        "solid mix",
+        "solution",
+        "suspension",
+        "emulsion",
+        "liquid_mix",
+        "gas_mix",
+        "solid_mix",
+        "isomer_mix",
+        "reaction_mix",
+        "formulation",
+        "extract",
         "other",
     ]
     mixture_type = table_column.CharField(
@@ -64,6 +71,21 @@ class Mixture(DatabaseTable):
     )
     """
     The kind of mixture this is. Must be one of `mixture_type_options`.
+
+    When more than one applies, pick the most specific (e.g. a formulation
+    that is also a suspension is a `formulation`). For example:
+        - `solution`: solutes (solids, liquids, or gases) dissolved in a
+          solvent, typically at a set concentration (e.g. 1 M HCl in water)
+        - `suspension`: undissolved solids in a liquid, including slurries
+          and colloids (e.g. Pd/C in methanol or nanoparticle dispersions)
+        - `emulsion`: droplets of one liquid in another that it does not
+          mix with
+        - `liquid_mix`: miscible liquids combined by ratio (e.g. solvent
+          blends and eluents)
+        - `isomer_mix`: isomers of a substance in any non-racemic ratio (e.g.
+          xylenes or E/Z mixtures). Racemates are registered as a `Substance`
+          instead.
+        - `reaction_mix`: crude or in-progress reaction contents
     """
 
     description = table_column.TextField(blank=True, null=True)
@@ -98,44 +120,20 @@ class Mixture(DatabaseTable):
     substances = table_column.ManyToManyField(
         Substance,
         blank=True,
-        db_table="inventory_management__mixture_components",
+        through="MixtureComponent",
         related_name="mixtures",
     )
     """
-    The substances that make up this mixture.
+    The substances that make up this mixture. The role and amount of each
+    are stored on its `MixtureComponent` (available via `components`).
     """
 
-    # I could get more detailed with the components of a mixture, but as things
-    # get more complex, it in some ways get more rigid (e.g. a unique mixture
-    # can't be represented), and it also gets more cumbersome for users inputing
-    # stuff. I currently opt for users to just list what is in the mixture
-    # and then add a description of any extra details they need like...
+    # Component details are kept optional, because requiring them would make
+    # the table more rigid (not every mixture fits a fixed set of columns) and
+    # more cumbersome to fill in. Users can just list what is in the mixture,
+    # add roles and amounts where they are known, and describe anything else
+    # in the `description`, such as...
     #
     #   '0.1 M solution of ___ in 3:1 solvent mix of methanol:water with 1 mg catalyst'
-    #
-    # Rather than trying to fit every possible description into components like...
-    #
-    #   class MixtureComponent:
-    #     mixture
-    #     substance
-    #     percentage
-    #     concentration
-    #     relative_ratio
-    #     component_type_options =[
-    #         "solvent",
-    #         "co-solvent",
-    #         "solute",
-    #         # if it is a reaction/reagent
-    #         "starting_material",
-    #         "product",
-    #         "by-product",
-    #         "impurity",
-    #         "catalyst",
-    #         "coupling_agent",
-    #         "ligand",
-    #         "phase_transfer_agent",
-    #         #
-    #         "other",
-    #     ]
 
     # -------------------------------------------------------------------------

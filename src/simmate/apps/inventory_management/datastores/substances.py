@@ -395,9 +395,11 @@ class SubstanceDatastore(MoleculeDatastore):
                     id=substance_id,
                     check_digit=Substance.calculate_check_digit(substance_id),
                     substance_type=(
-                        "molecule"
+                        "molecular_crystal"
+                        if info["has_molecule"] and info["has_structure"]
+                        else "molecule"
                         if info["has_molecule"]
-                        else "material"
+                        else "inorganic_crystal"
                         if info["has_structure"]
                         else None
                     ),

@@ -42,6 +42,11 @@ class SubstanceComponent(TableComponent, MoleculeInput, StructureInput):
 
     tabtitle_label_col = "id"
 
+    post_data_mappings = {
+        # a multiselect, so a single selected type must still give a list
+        "stereochem_type": list[str],
+    }
+
     # -------------------------------------------------------------------------
 
     def mount_for_update(self):
