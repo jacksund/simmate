@@ -134,50 +134,56 @@
                                     </div>
                                 {% endif %}
                             {% endif %}
+                        {% elif contents_mode == "existing_substance" or contents_mode == "existing_mixture" %}
+                            {# The selected chemical, in a compact card that is only as wide as it needs to be #}
+                            {% with entry=component.selected_entry %}
+                                <div class="card mx-auto text-center"
+                                     style="width: fit-content;
+                                            max-width: 100%;
+                                            min-width: min(20rem, 100%)">
+                                    <div class="card-body">
+                                        <span class="badge bg-secondary">Existing {% if contents_mode == "existing_substance" %}substance{% else %}mixture{% endif %}</span>
+                                        <h5 class="mt-2 mb-1">
+                                            {% foreign_key_link entry open_in_new=True %}
+                                            {% if entry.common_name %}<span class="text-muted">· {{ entry.common_name }}</span>{% endif %}
+                                        </h5>
+                                        {% if contents_mode == "existing_substance" %}
+                                            <div class="small text-muted">
+                                                {{ entry.substance_type|default:"--" }}
+                                                {% if entry.structure %}· {{ entry.structure.formula_reduced|chemical_formula }}{% endif %}
+                                                {% if entry.molecule %}· <span class="text-break">{{ entry.molecule.smiles }}</span>{% endif %}
+                                            </div>
+                                        {% else %}
+                                            <div class="small text-muted mb-1">{{ entry.mixture_type|default:"--" }}</div>
+                                            <ul class="list-unstyled small mb-0">
+                                                {% for part in entry.components.all %}
+                                                    <li>
+                                                        {% foreign_key_link part.substance open_in_new=True %}
+                                                        {% if part.role %}({{ part.role }}){% endif %}
+                                                        {% if part.amount is not None %}{{ part.amount }} {{ part.amount_units|default:"" }}{% endif %}
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                        <div class="mt-3">
+                                            {% htmx_button method_name="clear_contents" label="Change" icon="arrow-left" theme="outline-secondary" small=True grouped=True %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endwith %}
                         {% else %}
-                            {# The selected (or new) chemical #}
+                            {# A new chemical, which needs the full width for its form #}
                             <div class="card">
                                 <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            {% if contents_mode == "existing_substance" %}
-                                                <span class="badge bg-success">Existing substance</span>
-                                            {% elif contents_mode == "existing_mixture" %}
-                                                <span class="badge bg-success">Existing mixture</span>
-                                            {% elif contents_mode == "new_substance" %}
-                                                <span class="badge bg-info">New substance</span>
-                                            {% else %}
-                                                <span class="badge bg-info">New mixture</span>
-                                            {% endif %}
-                                        </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        {% if contents_mode == "new_substance" %}
+                                            <span class="badge bg-secondary">New substance</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">New mixture</span>
+                                        {% endif %}
                                         {% htmx_button method_name="clear_contents" label="Change" icon="arrow-left" theme="outline-secondary" small=True grouped=True %}
                                     </div>
-                                    {% if contents_mode == "existing_substance" or contents_mode == "existing_mixture" %}
-                                        {% with entry=component.selected_entry %}
-                                            <h5 class="mb-1">
-                                                {% foreign_key_link entry open_in_new=True %}
-                                                {% if entry.common_name %}<span class="text-muted">· {{ entry.common_name }}</span>{% endif %}
-                                            </h5>
-                                            {% if contents_mode == "existing_substance" %}
-                                                <div class="small text-muted">
-                                                    {{ entry.substance_type|default:"--" }}
-                                                    {% if entry.structure %}· {{ entry.structure.formula_reduced|chemical_formula }}{% endif %}
-                                                    {% if entry.molecule %}· <span class="text-break">{{ entry.molecule.smiles }}</span>{% endif %}
-                                                </div>
-                                            {% else %}
-                                                <div class="small text-muted mb-1">{{ entry.mixture_type|default:"--" }}</div>
-                                                <ul class="small mb-0">
-                                                    {% for part in entry.components.all %}
-                                                        <li>
-                                                            {% foreign_key_link part.substance open_in_new=True %}
-                                                            {% if part.role %}({{ part.role }}){% endif %}
-                                                            {% if part.amount is not None %}{{ part.amount }} {{ part.amount_units|default:"" }}{% endif %}
-                                                        </li>
-                                                    {% endfor %}
-                                                </ul>
-                                            {% endif %}
-                                        {% endwith %}
-                                    {% elif contents_mode == "new_substance" %}
+                                    {% if contents_mode == "new_substance" %}
                                         <p class="text-muted mb-2">
                                             No registered substance has this molecule, so it will be registered as new when you save (unless a more thorough check finds a match). For a specific phase of the compound, also give its crystal structure.
                                         </p>
@@ -339,107 +345,108 @@
                                                         </td>
                                                     </tr>
                                                 {% endfor %}
-                                                {# a new batch (e.g. a new synthesis or a new purchase) #}
-                                                <tr>
-                                                    <td colspan="8" class="fst-italic">
-                                                        <i class="bi bi-plus-circle me-1"></i>New batch (e.g. a new synthesis or a new purchase)
-                                                    </td>
-                                                    <td class="text-end">
-                                                        {% htmx_button method_name="select_batch" label="Create new batch" theme="outline-primary" small=True grouped=True %}
-                                                    </td>
-                                                </tr>
                                             </tbody>
                                         </table>
                                     </div>
+                                    {# or a new batch (e.g. a new synthesis or a new purchase) #}
+                                    <div class="text-center mt-3">
+                                        {% htmx_button method_name="select_batch" label="Create New Batch" icon="plus-circle" theme="outline-primary" small=True grouped=True %}
+                                    </div>
+                                {% elif batch_mode == "existing" %}
+                                    {# The selected batch, in a compact card that is only as wide as it needs to be #}
+                                    {% for batch in batches %}
+                                        {% if batch.id == component.form_data.batch_id %}
+                                            <div class="card mx-auto text-center"
+                                                 style="width: fit-content;
+                                                        max-width: 100%;
+                                                        min-width: min(20rem, 100%)">
+                                                <div class="card-body">
+                                                    <span class="badge bg-secondary">Existing batch</span>
+                                                    <h5 class="mt-2 mb-1">
+                                                        {% foreign_key_link batch open_in_new=True %}
+                                                        {% if batch.batch_number %}<span class="text-muted">· #{{ batch.batch_number }}</span>{% endif %}
+                                                    </h5>
+                                                    <div class="small text-muted">
+                                                        {{ batch.batch_type|default:"--" }}
+                                                        {% if batch.supplier %}· {{ batch.supplier }}{% endif %}
+                                                        {% if batch.purity is not None %}· {{ batch.purity }}% pure{% endif %}
+                                                    </div>
+                                                    <div class="small text-muted">
+                                                        {{ batch.num_available_containers|default:"0" }} available containers
+                                                        {% if batch.total_current_amount is not None %}· {{ batch.total_current_amount|floatformat:"-3" }} {{ batch.amount_units|default:"" }} remaining{% endif %}
+                                                        · created {{ batch.created_at|date:"Y-m-d" }}
+                                                    </div>
+                                                    <div class="mt-3">
+                                                        {% htmx_button method_name="clear_batch" label="Change" icon="arrow-left" theme="outline-secondary" small=True grouped=True %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
                                 {% else %}
-                                    {# The selected (or new) batch #}
+                                    {# A new batch, which needs the full width for its form #}
                                     <div class="card">
                                         <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <div>
-                                                    {% if batch_mode == "existing" %}
-                                                        <span class="badge bg-success">Existing batch</span>
-                                                    {% else %}
-                                                        <span class="badge bg-info">New batch</span>
-                                                    {% endif %}
-                                                </div>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="badge bg-secondary">New batch</span>
                                                 {# there is only a choice to change when the chemical has batches #}
                                                 {% if batches %}
                                                     {% htmx_button method_name="clear_batch" label="Change" icon="arrow-left" theme="outline-secondary" small=True grouped=True %}
                                                 {% endif %}
                                             </div>
-                                            {% if batch_mode == "existing" %}
-                                                {% for batch in batches %}
-                                                    {% if batch.id == component.form_data.batch_id %}
-                                                        <h5 class="mb-1">
-                                                            {% foreign_key_link batch open_in_new=True %}
-                                                            {% if batch.batch_number %}<span class="text-muted">· #{{ batch.batch_number }}</span>{% endif %}
-                                                        </h5>
-                                                        <div class="small text-muted">
-                                                            {{ batch.batch_type|default:"--" }}
-                                                            {% if batch.supplier %}· {{ batch.supplier }}{% endif %}
-                                                            {% if batch.purity is not None %}· {{ batch.purity }}% pure{% endif %}
-                                                            · {{ batch.num_available_containers|default:"0" }} available containers
-                                                            {% if batch.total_current_amount is not None %}· {{ batch.total_current_amount|floatformat:"-3" }} {{ batch.amount_units|default:"" }} remaining{% endif %}
-                                                            · created {{ batch.created_at|date:"Y-m-d" }}
-                                                        </div>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            {% else %}
-                                                <div class="row">
-                                                    <div class="col-md-4">{% htmx_selectbox name="batch__batch_type" label="Batch Type" defer=False %}</div>
-                                                    <div class="col-md-4">
-                                                        {% htmx_text_input name="batch__supplier" label="Supplier" placeholder="(optional) leave blank for in-house" %}
+                                            <div class="row">
+                                                <div class="col-md-4">{% htmx_selectbox name="batch__batch_type" label="Batch Type" defer=False %}</div>
+                                                <div class="col-md-4">
+                                                    {% htmx_text_input name="batch__supplier" label="Supplier" placeholder="(optional) leave blank for in-house" %}
+                                                </div>
+                                                <div class="col-md-4">
+                                                    {% htmx_text_input name="batch__supplier_catalog_number" label="Supplier Product #" placeholder="(optional) e.g. 50-177-2891" %}
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    {% htmx_text_input name="batch__appearance" label="Appearance" placeholder="(optional) e.g. white crystalline powder" %}
+                                                </div>
+                                                <div class="col-md-4">
+                                                    {% htmx_number_input name="batch__purity" label="% Purity" placeholder="0-100%; leave blank if unknown" %}
+                                                </div>
+                                                <div class="col-md-4">{% htmx_date_input name="batch__expiration_date" label="Expiration Date" %}</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    {% htmx_text_area name="batch__comments" label="Batch Comments" placeholder="(optional) Enter any extra notes about the batch" %}
+                                                </div>
+                                            </div>
+                                            {# The batches used to make the new batch, given by the containers they were taken from #}
+                                            <h6 class="mt-4 mb-1">Parent Batches</h6>
+                                            <p class="text-muted small mb-2">
+                                                (optional) For batches made in-house, give the containers used to make it. The amount used is removed from each container, and each container's batch is linked as a parent batch.
+                                            </p>
+                                            {% for container, amount in component.reagent_rows %}
+                                                <div class="row align-items-end">
+                                                    <div class="col-md-5 my-2">
+                                                        <label class="form-label">Container ID or Barcode</label>
+                                                        <input class="form-control"
+                                                               type="text"
+                                                               name="reagent_containers"
+                                                               value="{{ container }}"
+                                                               placeholder="scan or type, e.g. C-1234">
                                                     </div>
-                                                    <div class="col-md-4">
-                                                        {% htmx_text_input name="batch__supplier_catalog_number" label="Supplier Product #" placeholder="(optional) e.g. 50-177-2891" %}
+                                                    <div class="col-md-5 my-2">
+                                                        <label class="form-label">Amount Used (in the container's units)</label>
+                                                        <input class="form-control"
+                                                               type="number"
+                                                               step="any"
+                                                               name="reagent_amounts"
+                                                               value="{{ amount }}"
+                                                               placeholder="0.123">
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        {% htmx_button method_name="remove_reagent" label="Remove" icon="trash" theme="outline-danger" small=True index=forloop.counter0 %}
                                                     </div>
                                                 </div>
-                                                <div class="row">
-                                                    <div class="col-md-4">
-                                                        {% htmx_number_input name="batch__purity" label="% Purity" placeholder="0-100%; leave blank if unknown" %}
-                                                    </div>
-                                                    <div class="col-md-4">{% htmx_date_input name="batch__expiration_date" label="Expiration Date" %}</div>
-                                                    <div class="col-md-4">
-                                                        {% htmx_text_input name="batch__appearance" label="Appearance" placeholder="(optional) e.g. white crystalline powder" %}
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-12">
-                                                        {% htmx_text_area name="batch__comments" label="Batch Comments" placeholder="(optional) Enter any extra notes about the batch" %}
-                                                    </div>
-                                                </div>
-                                                {# Reagents used to make the new batch #}
-                                                <h6 class="mt-4 mb-1">Reagents Used</h6>
-                                                <p class="text-muted small mb-2">
-                                                    (optional) For batches made in-house, list the containers of reagents used to make it. The amount used is removed from each container, and the reagents' batches are linked as parents of the new batch.
-                                                </p>
-                                                {% for container, amount in component.reagent_rows %}
-                                                    <div class="row align-items-end">
-                                                        <div class="col-md-5 my-2">
-                                                            <label class="form-label">Container ID or Barcode</label>
-                                                            <input class="form-control"
-                                                                   type="text"
-                                                                   name="reagent_containers"
-                                                                   value="{{ container }}"
-                                                                   placeholder="scan or type, e.g. C-1234">
-                                                        </div>
-                                                        <div class="col-md-5 my-2">
-                                                            <label class="form-label">Amount Used (in the container's units)</label>
-                                                            <input class="form-control"
-                                                                   type="number"
-                                                                   step="any"
-                                                                   name="reagent_amounts"
-                                                                   value="{{ amount }}"
-                                                                   placeholder="0.123">
-                                                        </div>
-                                                        <div class="col-md-2">
-                                                            {% htmx_button method_name="remove_reagent" label="Remove" icon="trash" theme="outline-danger" small=True index=forloop.counter0 %}
-                                                        </div>
-                                                    </div>
-                                                {% endfor %}
-                                                {% htmx_button method_name="add_reagent" label="Add Reagent" icon="plus-circle" theme="outline-primary" small=True %}
-                                            {% endif %}
+                                            {% endfor %}
+                                            {% htmx_button method_name="add_reagent" label="Add Parent Batch" icon="plus-circle" theme="outline-primary" small=True %}
                                         </div>
                                     </div>
                                 {% endif %}
@@ -479,9 +486,6 @@
                         </div>
                         <div class="col-md-4">
                             {% htmx_selectbox name="amount_units" options=component.table.amount_units_options defer=False %}
-                            {% if component.component_type == "create" and component.form_data.batch_mode == "existing" %}
-                                <div class="form-text">Must match the units of the selected batch.</div>
-                            {% endif %}
                         </div>
                     </div>
                     <div class="row">

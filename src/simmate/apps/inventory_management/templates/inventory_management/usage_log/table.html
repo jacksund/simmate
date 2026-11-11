@@ -1,6 +1,7 @@
 {% extends "data_explorer/entries.html" %}
 {% block table_headers %}
     {% table_header "id" "ID" min_width=90 %}
+    {% table_header "created_at" "Date" min_width=120 %}
     {% table_header "source_container__id" "Source Container" min_width=200 %}
     {% table_header "user__username" "User" min_width=125 %}
     {% table_header "amount_removed" min_width=200 %}
@@ -9,9 +10,10 @@
 {% endblock %}
 {% block table_rows %}
     <td>{% foreign_key_link entry %}</td>
+    <td class="text-nowrap">{{ entry.created_at|date:"Y-m-d" }}</td>
     <td>{% foreign_key_link entry.source_container %}</td>
     <td>{{ entry.user.username|default:"--" }}</td>
-    <td>{{ entry.amount_removed }}</td>
+    <td class="text-nowrap">{{ entry.amount_removed }} {{ entry.source_container.amount_units|default:"" }}</td>
     <td>{{ entry.comments|truncatechars:100|default:"--" }}</td>
     {% update_entry_link entry %}
 {% endblock %}

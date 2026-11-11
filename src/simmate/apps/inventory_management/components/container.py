@@ -671,7 +671,8 @@ class ContainerComponent(
                         raise InvalidOperation()
                 except (InvalidOperation, TypeError):
                     self.form_errors.append(
-                        f"Reagent amounts must be greater than 0 (got '{amount}')."
+                        "The amount used from each parent batch's container must be "
+                        f"greater than 0 (got '{amount}')."
                     )
         elif self.form_data.get("contents_mode"):
             self.form_errors.append(

@@ -1,9 +1,9 @@
 {# The title of a container form section, colored by its `state` ("done", "active", or "waiting") #}
 <h3 class="mb-3">
     {% if state == "done" %}
-        <span class="badge text-bg-success"><i class="bi bi-check-circle-fill me-1"></i>{{ title }}</span>
+        <span class="badge text-bg-success"><i class="bi bi-check-circle-fill me-2"></i>{{ title }}</span>
     {% elif state == "active" %}
-        <span class="badge text-bg-primary"><i class="bi bi-arrow-right-circle-fill me-1"></i>{{ title }}</span>
+        <span class="badge text-bg-primary"><i class="bi bi-arrow-right-circle-fill me-2"></i>{{ title }}</span>
     {% elif state == "waiting" %}
         <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ title }}</span>
     {% else %}

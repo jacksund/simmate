@@ -1,0 +1,26 @@
+<div class="tab-pane" id="projects-section">
+    {% if projects__count %}
+        <div class="table-responsive">
+            <table class="table table-simmate mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 35%">Project</th>
+                        <th>Status</th>
+                        <th>Discipline</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for project in projects %}
+                        <tr>
+                            <td>{% foreign_key_link project "name" %}</td>
+                            <td>{{ project.status|default:"--"|capfirst }}</td>
+                            <td>{{ project.discipline|default:"--"|capfirst }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <small>This substance is not linked to any projects.</small>
+    {% endif %}
+</div>

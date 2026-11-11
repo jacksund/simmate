@@ -1,0 +1,33 @@
+<div class="tab-pane" id="linked-datasets-section">
+    {% if linked_datasets %}
+        <table class="table table-simmate mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 35%">Dataset</th>
+                    <th>Entries</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dataset in linked_datasets %}
+                    <tr>
+                        <td>{{ dataset.label }}</td>
+                        <td>
+                            {% for entry in dataset.entries %}
+                                {% foreign_key_link entry mode="pill" %}
+                            {% empty %}
+                                --
+                            {% endfor %}
+                            {% if dataset.truncated %}
+                                <a class="small ms-1"
+                                   target="_blank"
+                                   href="{% url 'data_explorer:table' dataset.table_name %}?substance_id={{ table_entry.id }}">View all {{ dataset.count|intcomma }} <i class="bi bi-box-arrow-up-right"></i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <small>No third-party datasets are installed.</small>
+    {% endif %}
+</div>

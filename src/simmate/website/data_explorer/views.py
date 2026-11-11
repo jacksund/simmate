@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, render
 
 from simmate.apps.rdkit.models import Molecule
@@ -177,6 +177,12 @@ def table_entry(request, table_name, table_entry_id):
 
     # move to proper view function based on requested format
     view_format = request.GET.get("format", "html")  # default is html
+
+    # file downloads can come from a linked object (e.g. a substance's molecule)
+    if view_format not in ("html", "json"):
+        table_entry = component_class.get_download_entry(table_entry, view_format)
+        if table_entry is None:
+            raise Http404(f"No '{view_format}' download is available for this entry.")
 
     if view_format == "html":
         context = {

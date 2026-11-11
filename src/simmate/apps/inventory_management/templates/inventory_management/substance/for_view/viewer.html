@@ -1,0 +1,60 @@
+{# The drawing of a substance: its molecule (2D), crystal structure (3D), both (with a toggle), or a placeholder #}
+{% with molecule=table_entry.molecule structure=table_entry.structure %}
+    <div class="row m-2">
+        {% if molecule and structure %}
+            <div class="col-12 d-flex justify-content-center mb-2">
+                <ul class="nav nav-pills flex-nowrap p-1 rounded-pill" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button type="button"
+                                class="nav-link rounded-pill px-4 {% if viewer_default == '2d' %}active{% endif %}"
+                                data-bs-toggle="pill"
+                                data-bs-target="#viewer-2d-pane"
+                                role="tab">
+                            <i class="bi bi-hexagon me-1"></i> 2D
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button type="button"
+                                class="nav-link rounded-pill px-4 {% if viewer_default == '3d' %}active{% endif %}"
+                                data-bs-toggle="pill"
+                                data-bs-target="#viewer-3d-pane"
+                                role="tab">
+                            <i class="bi bi-box me-1"></i> 3D
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-12 tab-content">
+                <div class="tab-pane fade {% if viewer_default == '2d' %}show active{% endif %}"
+                     id="viewer-2d-pane"
+                     role="tabpanel">
+                    {% include "inventory_management/substance/for_view/viewer_2d.html" %}
+                </div>
+                <div class="tab-pane fade {% if viewer_default == '3d' %}show active{% endif %}"
+                     id="viewer-3d-pane"
+                     role="tabpanel">
+                    {% include "inventory_management/substance/for_view/viewer_3d.html" %}
+                </div>
+            </div>
+        {% elif molecule %}
+            <div class="col-12">{% include "inventory_management/substance/for_view/viewer_2d.html" %}</div>
+        {% elif structure %}
+            <div class="col-12">{% include "inventory_management/substance/for_view/viewer_3d.html" %}</div>
+        {% else %}
+            <div class="col-12 molecule-panel d-flex justify-content-center align-items-center border rounded-3 border-5 bg-white">
+                <div class="text-center text-muted">
+                    {% if table_entry.is_private %}
+                        <i class="bi bi-lock fs-1"></i>
+                        <div>Structure kept private</div>
+                    {% elif table_entry.is_unknown %}
+                        <i class="bi bi-question-circle fs-1"></i>
+                        <div>Structure unknown</div>
+                    {% else %}
+                        <i class="bi bi-hexagon fs-1"></i>
+                        <div>No molecule or crystal structure registered</div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endwith %}

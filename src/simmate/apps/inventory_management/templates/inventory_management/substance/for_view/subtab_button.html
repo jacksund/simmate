@@ -1,0 +1,10 @@
+{# A pill button for the sub-tabs within a tab, given the `target` pane's id, an `icon`, a `label`, a `count`, and whether it starts `active` #}
+<li class="nav-item" role="presentation">
+    <button type="button"
+            class="nav-link rounded-pill px-3 {% if active %}active{% endif %}"
+            data-bs-toggle="pill"
+            data-bs-target="#{{ target }}"
+            role="tab">
+        <i class="bi bi-{{ icon }} me-1"></i> {{ label }} <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis">{{ count|intcomma }}</span>
+    </button>
+</li>

@@ -1,0 +1,101 @@
+<div class="tab-pane" id="related-section">
+    <ul class="nav nav-pills mb-3" role="tablist">
+        {% include "inventory_management/substance/for_view/subtab_button.html" with target="related-substances-pane" icon="diagram-3" label="Substances" count=related_substances__count active=True %}
+        {% include "inventory_management/substance/for_view/subtab_button.html" with target="related-mixtures-pane" icon="droplet-half" label="Mixtures" count=mixtures__count %}
+    </ul>
+    <div class="tab-content">
+        {# Substances: the tree of parent/child links, plus the substances it is made with (or used in) #}
+        <div class="tab-pane fade show active"
+             id="related-substances-pane"
+             role="tabpanel">
+            <div class="row g-3">
+                <div class="{% if show_component_cards %}col-lg-7{% else %}col-12{% endif %}">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">
+                                <span data-bs-toggle="tooltip"
+                                      data-bs-title="Each substance can have a parent that is the more general form of it (e.g. the flat structure of a stereoisomer, or the molecule of a salt, solvate, or crystal phase)">Family Tree</span>
+                            </div>
+                            {% if family_tree.tree_children %}
+                                <ul class="tree-view">
+                                    {% include "inventory_management/substance/for_view/tree_node.html" with node=family_tree %}
+                                </ul>
+                            {% else %}
+                                <small>This substance has no parent or child substances.</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% if show_component_cards %}
+                    <div class="col-lg-5">
+                        {% if table_entry.counterion_id %}
+                            {% include "inventory_management/substance/for_view/component_card.html" with title="Counterion" substance=table_entry.counterion %}
+                        {% endif %}
+                        {% if table_entry.solvent_id %}
+                            {% include "inventory_management/substance/for_view/component_card.html" with title="Solvent" substance=table_entry.solvent %}
+                        {% endif %}
+                        {% if salts__count %}
+                            {% include "inventory_management/substance/for_view/usage_card.html" with title="Counterion in" substances=salts count=salts__count truncated=salts__truncated filter_column="counterion_id" %}
+                        {% endif %}
+                        {% if solvates__count %}
+                            {% include "inventory_management/substance/for_view/usage_card.html" with title="Solvent in" substances=solvates count=solvates__count truncated=solvates__truncated filter_column="solvent_id" %}
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {# Mixtures #}
+        <div class="tab-pane fade" id="related-mixtures-pane" role="tabpanel">
+            {% if mixtures__count %}
+                <div class="table-responsive">
+                    <table class="table table-simmate mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Role</th>
+                                <th>Amount</th>
+                                <th>Other Components</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for part in mixture_components %}
+                                <tr>
+                                    <td>{% foreign_key_link part.mixture %}</td>
+                                    <td>{{ part.mixture.common_name|default:"--" }}</td>
+                                    <td>{{ part.mixture.mixture_type|default:"--"|replace:"_, "|capfirst }}</td>
+                                    <td>{{ part.role|default:"--"|replace:"_, "|capfirst }}</td>
+                                    <td class="text-nowrap">
+                                        {% if part.amount is not None %}
+                                            {{ part.amount }} {{ part.amount_units|default:"" }}
+                                        {% else %}
+                                            --
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% for other in part.other_components %}
+                                            {% foreign_key_link other.substance mode="pill" %}
+                                        {% empty %}
+                                            --
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if mixtures__truncated %}
+                    <div class="text-center py-2">
+                        <a role="button"
+                           class="btn btn-outline-primary btn-sm"
+                           target="_blank"
+                           href="{% url 'data_explorer:table' 'Mixture' %}?substances__id={{ table_entry.id }}">View All <i class="bi bi-box-arrow-up-right"></i></a>
+                    </div>
+                {% endif %}
+            {% else %}
+                <small>This substance is not in any mixtures.</small>
+            {% endif %}
+        </div>
+    </div>
+</div>
