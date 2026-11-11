@@ -4,6 +4,7 @@
     {% table_header "is_mixture" min_width=135 %}
     {% table_header "mixture_id" "Mixture ID" min_width=140 %}
     {% table_header "substance_id" "Substance ID" min_width=165 %}
+    {% table_header "batch_type" min_width=160 %}
     {% table_header "purity" min_width=100 %}
     {% table_header "expiration_date" "Expiration Date" min_width=185 %}
     {% table_header "supplier" min_width=170 %}
@@ -16,6 +17,7 @@
     <td>{{ entry.is_mixture|yesno:"Yes,No,--" }}</td>
     <td>{% foreign_key_link entry.mixture %}</td>
     <td>{% foreign_key_link entry.substance %}</td>
+    <td>{{ entry.batch_type|default:"--" }}</td>
     <td>
         {% if entry.purity is not None %}
             {{ entry.purity }}%

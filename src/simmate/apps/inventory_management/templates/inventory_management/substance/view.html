@@ -75,6 +75,22 @@
                             {% endif %}
                         </td>
                     </tr>
+                    {% if table_entry.counterion %}
+                        <tr>
+                            <td>Counterion</td>
+                            <td>
+                                <a href="{% url 'data_explorer:table-entry' 'inventory_management__substances' table_entry.counterion_id %}">{{ table_entry.counterion_id }}</a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {% if table_entry.solvent %}
+                        <tr>
+                            <td>Solvent</td>
+                            <td>
+                                <a href="{% url 'data_explorer:table-entry' 'inventory_management__substances' table_entry.solvent_id %}">{{ table_entry.solvent_id }}</a>
+                            </td>
+                        </tr>
+                    {% endif %}
                     <tr>
                         <td>Stereochem Type</td>
                         <td>{{ table_entry.stereochem_type|join:", "|default:"--" }}</td>

@@ -78,6 +78,8 @@ class ContainerComponent(TableComponent, MoleculeInput, StructureInput):
 
     mixture__mixture_type_options = Mixture.mixture_type_options
 
+    batch__batch_type_options = Batch.batch_type_options
+
     post_data_mappings = {
         # each reagent row gives one entry to these lists. They stay as str
         # so that blank rows can be parsed

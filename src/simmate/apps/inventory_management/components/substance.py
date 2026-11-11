@@ -167,6 +167,8 @@ class SubstanceComponent(TableComponent, MoleculeInput, StructureInput):
         "structure",
         "is_primary",
         "parent",
+        "counterion",
+        "solvent",
         "is_metastable",
         "stereochem_type",
         "extra_metadata",

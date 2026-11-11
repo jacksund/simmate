@@ -86,6 +86,8 @@ class SubstanceDatastore(MoleculeDatastore):
         "stereochem_type",
         "stereochem_key",
         "parent_id",
+        "counterion_id",
+        "solvent_id",
         # Molecule (flattened)
         "molecule__smiles",
         "molecule__inchi_key",
@@ -267,6 +269,8 @@ class SubstanceDatastore(MoleculeDatastore):
                     "to_smiles": {},
                     "to_inchi_key": {},
                     "get_flattened.to_smiles": {},
+                    "get_salt_parts": {},
+                    "get_ion_type": {},
                 },
                 parallel=len(entries) >= 10_000,
             )
@@ -286,8 +290,8 @@ class SubstanceDatastore(MoleculeDatastore):
             for features, structure, fingerprint in zip(
                 molecule_features, structures, fingerprints
             ):
-                smiles, inchi_key, flat_smiles = (
-                    features if features is not None else (None, None, None)
+                smiles, inchi_key, flat_smiles, salt_parts, ion_type = (
+                    features if features is not None else (None, None, None, {}, None)
                 )
                 infos.append(
                     dict(
@@ -297,6 +301,8 @@ class SubstanceDatastore(MoleculeDatastore):
                         inchi_key=inchi_key or None,  # None when InChI fails
                         # None when the molecule has no stereochemistry
                         flat_smiles=flat_smiles if flat_smiles != smiles else None,
+                        salt_parts=salt_parts,
+                        ion_type=ion_type,
                         structure=structure,
                         formula=(
                             structure.composition.reduced_formula
@@ -307,36 +313,43 @@ class SubstanceDatastore(MoleculeDatastore):
                     )
                 )
 
-            # 2. PARENTS. Each entry has at most one parent:
+            # 2. PARENTS. Each entry has at most one parent, plus a counterion
+            # or solvent for salts and solvates. Only the first that applies:
             #   - a phase of a compound (molecule + structure) --> the molecule
             #     (e.g. an aspirin crystal --> aspirin)
             #   - a stereoisomer --> its flat version (stereochem removed)
             #     (e.g. (R)-ibuprofen --> ibuprofen)
-            # Parents are registered through this same method, so a crystal of
-            # a stereoisomer recurses twice (crystal --> stereoisomer --> flat).
+            #   - a solvate --> the molecule without the solvent, plus the
+            #     solvent (e.g. aspirin hydrate --> aspirin + water)
+            #   - a salt --> its largest fragment, plus the counterion
+            #     (e.g. sodium acetate --> acetate + Na+)
+            # See `Molecule.get_salt_parts` for the salt and solvate rules.
+            # These are registered through this same method, so combined
+            # cases are a chain (e.g. crystal --> stereoisomer --> flat, or
+            # salt hydrate --> salt --> largest fragment).
             #
-            # TODO: molecular salts --> the salt-free molecule (e.g. with
-            # `Molecule.largest_component`)
             # TODO: crystal structures --> the primary (e.g. most stable) phase
             # of the same composition
-            parent_entries = {}  # entry index --> parent entry
+            link_entries = []  # (entry index, column, entry to register)
             for index, info in enumerate(infos):
                 if info["has_molecule"] and info["has_structure"]:
-                    parent_entries[index] = dict(molecule=entries[index]["molecule"])
+                    molecule = entries[index]["molecule"]
+                    link_entries.append((index, "parent_id", dict(molecule=molecule)))
                 elif info["flat_smiles"]:
-                    parent_entries[index] = dict(molecule=info["flat_smiles"])
-            parent_ids = {}  # entry index --> parent substance id
-            if parent_entries:
-                parent_ids = dict(
-                    zip(
-                        parent_entries,
-                        cls.get_or_create_ids(
-                            list(parent_entries.values()),
-                            level=level,
-                            write_to=write_to,
-                        ),
-                    )
+                    molecule = info["flat_smiles"]
+                    link_entries.append((index, "parent_id", dict(molecule=molecule)))
+                else:
+                    for key, smiles in info["salt_parts"].items():
+                        link_entries.append((index, f"{key}_id", dict(molecule=smiles)))
+            link_ids = {}  # entry index --> {column: substance id}
+            if link_entries:
+                linked = cls.get_or_create_ids(
+                    [entry for _, _, entry in link_entries],
+                    level=level,
+                    write_to=write_to,
                 )
+                for (index, column, _), substance_id in zip(link_entries, linked):
+                    link_ids.setdefault(index, {})[column] = substance_id
 
             # 3. CANDIDATES. All registered substances that could match any
             # entry are loaded at once, as each lookup scans the full datastore.
@@ -397,15 +410,22 @@ class SubstanceDatastore(MoleculeDatastore):
                     substance_type=(
                         "molecular_crystal"
                         if info["has_molecule"] and info["has_structure"]
-                        else "molecule"
+                        else "molecular_solvate"
+                        if "solvent" in info["salt_parts"]
+                        else "molecular_salt"
+                        if "counterion" in info["salt_parts"]
+                        else info["ion_type"] or "molecule"
                         if info["has_molecule"]
                         else "inorganic_crystal"
                         if info["has_structure"]
                         else None
                     ),
                     is_unknown=not info["has_molecule"] and not info["has_structure"],
-                    parent_id=parent_ids.get(index),
+                    parent_id=None,
+                    counterion_id=None,
+                    solvent_id=None,
                 )
+                columns.update(link_ids.get(index, {}))
                 columns.update(
                     {
                         k: v

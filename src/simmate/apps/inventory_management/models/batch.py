@@ -68,6 +68,51 @@ class Batch(DatabaseTable):
     assigned after the batch is created to avoid race conditions.
     """
 
+    batch_type_options = [
+        "internal_synthesis",
+        "external_synthesis",
+        "purchased",
+        "isolated",
+        "prepared",
+        "reprocessed",
+        "aliquot",
+        "pooled",
+        "unknown",
+        "other",
+    ]
+    batch_type = table_column.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+    )
+    """
+    How this batch was obtained. Must be one of `batch_type_options`.
+
+    For example:
+        - `internal_synthesis`: made in-house by a chemical reaction, including
+          its workup and purification
+        - `external_synthesis`: custom-made by a contract lab or CRO
+        - `purchased`: bought from a supplier's catalog
+        - `isolated`: separated out of a natural source or a parent mixture
+          (e.g. an extract or a chromatography fraction). This is not the
+          purification step of a normal synthesis, which is still an
+          `internal_synthesis`.
+        - `prepared`: made by combining or diluting other batches without a
+          reaction (e.g. a stock solution or a formulation)
+        - `reprocessed`: an existing batch that was repurified, recrystallized,
+          dried, or milled
+        - `aliquot`: split off from a parent batch. Only use this when the
+          portion needs its own identity (e.g. separate QC or it is sent to
+          another group). Otherwise, add a container to the existing batch.
+        - `pooled`: several batches of the same substance or mixture combined
+          into one
+        - `unknown`: the origin is not known (e.g. legacy or bulk-imported
+          records)
+
+    For `prepared`, `reprocessed`, `aliquot`, and `pooled` batches, the source
+    batches should be set in `parent_batches`.
+    """
+
     comments = table_column.TextField(
         blank=True,
         null=True,

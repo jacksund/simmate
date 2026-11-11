@@ -70,19 +70,20 @@
                     <span class="badge bg-secondary">3. Batch Info</span>
                 </h3>
                 <div class="row">
+                    <div class="col-md-4">{% htmx_selectbox name="batch__batch_type" label="Batch Type" %}</div>
                     <div class="col-md-4">
                         {% htmx_text_input name="batch__supplier" label="Supplier" placeholder="(optional) leave blank for in-house" %}
                     </div>
                     <div class="col-md-4">
                         {% htmx_text_input name="batch__supplier_catalog_number" label="Supplier Product #" placeholder="(optional) e.g. 50-177-2891" %}
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-md-4">
                         {% htmx_number_input name="batch__purity" label="% Purity" placeholder="0-100%; leave blank if unknown" %}
                     </div>
-                </div>
-                <div class="row">
                     <div class="col-md-4">{% htmx_date_input name="batch__expiration_date" label="Expiration Date" %}</div>
-                    <div class="col-md-8">
+                    <div class="col-md-4">
                         {% htmx_text_input name="batch__appearance" label="Appearance" placeholder="(optional) e.g. white crystalline powder" %}
                     </div>
                 </div>
