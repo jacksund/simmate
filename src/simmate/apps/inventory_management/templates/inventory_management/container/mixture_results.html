@@ -1,0 +1,32 @@
+{# A table of mixtures to select from (used by the container form) #}
+<div class="table-responsive">
+    <table class="table table-sm table-hover align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Components</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in mixtures %}
+                <tr>
+                    <td>{% foreign_key_link entry open_in_new=True %}</td>
+                    <td>{{ entry.mixture_type|default:"--" }}</td>
+                    <td>{{ entry.common_name|default:"--" }}</td>
+                    <td class="small">
+                        {% for substance in entry.substances.all %}
+                            {{ substance.id }}
+                            {% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    </td>
+                    <td class="text-end">
+                        {% htmx_button method_name="select_mixture" label="Select" theme="outline-primary" small=True grouped=True mixture_id=entry.display_id %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
