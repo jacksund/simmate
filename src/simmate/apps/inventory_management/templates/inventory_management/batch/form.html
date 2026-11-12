@@ -16,12 +16,15 @@
         </h3>
         <div class="row">
             <div class="col-md-4">
+                {% htmx_selectbox name="batch_type" options=component.table.batch_type_options label="Batch Type" %}
+            </div>
+            <div class="col-md-4">
                 {% htmx_number_input name="purity" label=" % Purity" placeholder="0-100%; leave blank if unknown" %}
             </div>
             <div class="col-md-4">(to-do. expiration date)</div>
         </div>
         <div class="row">
-            <div>{% htmx_text_input name="supplier" placeholder="(optional) write 'internal' for in-house synthesis" %}</div>
+            <div>{% htmx_text_input name="supplier" placeholder="(optional) e.g. Sigma-Aldrich" %}</div>
             <div class="col-md-4">
                 {% htmx_text_input name="supplier_catalog_number" label="Supplier Product #" placeholder="(optional) e.g. 50-177-2891" %}
             </div>

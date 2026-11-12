@@ -1,0 +1,31 @@
+{# One `node` of a substance's family tree, along with its children (see `SubstanceComponent.get_family_tree`) #}
+<li>
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        {% if node.is_current %}
+            <span class="badge text-bg-primary">{{ node.id }}</span>
+        {% else %}
+            {% foreign_key_link node %}
+        {% endif %}
+        {% if node.common_name %}
+            <span class="{% if node.is_current %}fw-semibold{% else %}text-muted{% endif %}">{{ node.common_name }}</span>
+        {% endif %}
+        {% if node.substance_type %}
+            <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ node.substance_type|replace:"_, " }}</span>
+        {% endif %}
+        {% if node.is_delisted %}<span class="badge bg-danger-subtle text-danger-emphasis">Delisted</span>{% endif %}
+    </div>
+    {% if node.tree_children or node.tree_more > 0 %}
+        <ul>
+            {% for child in node.tree_children %}
+                {% include "inventory_management/substance/for_view/tree_node.html" with node=child %}
+            {% endfor %}
+            {% if node.tree_more > 0 %}
+                <li>
+                    <a class="small"
+                       target="_blank"
+                       href="{% url 'data_explorer:table' 'Substance' %}?parent_id={{ node.id }}">+{{ node.tree_more|intcomma }} more <i class="bi bi-box-arrow-up-right"></i></a>
+                </li>
+            {% endif %}
+        </ul>
+    {% endif %}
+</li>

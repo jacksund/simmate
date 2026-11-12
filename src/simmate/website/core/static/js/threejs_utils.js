@@ -83,11 +83,16 @@ function add_threejs_render(target_div_id, data) {
     }
     animate();
 
-    window.addEventListener('resize', () => {
-        camera.aspect = container.clientWidth / container.clientHeight;
+    // resize with the container (not just the window), so that viewers which
+    // start hidden (e.g. in an inactive tab) are sized once they are shown
+    new ResizeObserver(() => {
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        if (!width || !height) return;  // hidden
+        camera.aspect = width / height;
         camera.updateProjectionMatrix();
-        renderer.setSize(container.clientWidth, container.clientHeight);
-    });
+        renderer.setSize(width, height);
+    }).observe(container);
 };
 
 // since this is a module, we this to make it publically available

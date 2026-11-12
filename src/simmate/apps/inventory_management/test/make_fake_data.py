@@ -142,21 +142,22 @@ SUBSTANCES = [
     ("nbs", "N-Bromosuccinimide", "molecule", "O=C1CCC(=O)N1Br", "solid", "cold", ["NBS"]),
     ("ibuprofen", "Ibuprofen", "molecule", "CC(C)Cc1ccc(C(C)C(=O)O)cc1", "solid", "shelf", []),
     # stereoisomers
-    ("alanine", "Alanine", "molecule", "CC(N)C(=O)O", "solid", "freezer", ["DL-Alanine"]),
+    ("alanine", "Alanine", "molecule", "CC(N)C(=O)O", "solid", "freezer", []),
     ("l_alanine", "L-Alanine", "molecule", "C[C@H](N)C(=O)O", "solid", "freezer", []),
     ("d_alanine", "D-Alanine", "molecule", "C[C@@H](N)C(=O)O", "solid", "freezer", []),
+    ("dl_alanine", "DL-Alanine", "molecule", "CC(N)C(=O)O", "solid", "freezer", ["Racemic alanine"]),
     # elements and materials
     ("cu", "Copper", "element", None, "solid", "shelf", ["Copper powder"]),
     ("fe", "Iron", "element", None, "solid", "shelf", []),
     ("zn", "Zinc", "element", None, "solid", "shelf", ["Zinc dust"]),
-    ("nacl", "Sodium chloride", "material", None, "solid", "shelf", ["Table salt", "Halite"]),
-    ("rutile", "Titanium dioxide (rutile)", "material", None, "solid", "shelf", ["TiO2"]),
-    ("anatase", "Titanium dioxide (anatase)", "material", None, "solid", "shelf", []),
-    ("silica", "Silica gel", "material", None, "solid", "shelf", ["SiO2"]),
+    ("nacl", "Sodium chloride", "inorganic_crystal", None, "solid", "shelf", ["Table salt", "Halite"]),
+    ("rutile", "Titanium dioxide (rutile)", "inorganic_crystal", None, "solid", "shelf", ["TiO2"]),
+    ("anatase", "Titanium dioxide (anatase)", "inorganic_crystal", None, "solid", "shelf", []),
+    ("silica", "Silica gel", "amorphous_solid", None, "solid", "shelf", ["SiO2"]),
     # special cases
     ("target", "Target compound 7", "molecule", "COc1ccc(-c2ccc(C(F)(F)F)cc2)cc1", "solid", "shelf", []),
     ("etoh_dup", None, "molecule", None, "liquid", "flammable", []),
-    ("unknown", "Unknown precipitate", "other", None, "solid", "freezer", []),
+    ("unknown", "Unknown precipitate", None, None, "solid", "freezer", []),
 ]
 # fmt: on
 
@@ -220,7 +221,7 @@ def update_substance(key: str, **kwargs):
 update_substance(
     "alanine",
     has_stereochem=True,
-    stereochem_type=["constitutional"],
+    stereochem_type=["flat"],
 )
 for key in ("l_alanine", "d_alanine"):
     update_substance(
@@ -230,6 +231,13 @@ for key in ("l_alanine", "d_alanine"):
         has_stereochem=True,
         stereochem_type=["enantiomer"],
     )
+update_substance(
+    "dl_alanine",
+    is_primary=False,
+    parent_id=sub_id["alanine"],
+    has_stereochem=True,
+    stereochem_type=["racemate"],
+)
 update_substance(
     "anatase", is_primary=False, parent_id=sub_id["rutile"], is_metastable=True
 )
@@ -254,15 +262,15 @@ update_substance(
 
 # fmt: off
 # (common_name, mixture_type, components, description, phase, storage)
+# where components are (substance key, role, amount, amount_units)
 MIXTURES = [
-    ("1 M HCl (aq)", "solution", ["hcl", "water"], "1 M hydrochloric acid in water", "liquid", "corrosive"),
-    ("1 M NaOH (aq)", "solution", ["naoh", "water"], "1 M sodium hydroxide in water", "liquid", "corrosive"),
-    ("Brine", "solution", ["nacl", "water"], "Saturated NaCl in water", "liquid", "shelf"),
-    ("3:1 MeOH:H2O", "liquid mix", ["meoh", "water"], "3:1 (v/v) methanol:water", "liquid", "flammable"),
-    ("10% EtOAc/Hexanes", "liquid mix", ["etoac", "hexane"], "10% (v/v) ethyl acetate in hexanes, for TLC/columns", "liquid", "flammable"),
-    ("10 mM Caffeine in DMSO", "solution", ["caffeine", "dmso"], "10 mM caffeine stock solution in DMSO", "liquid", "freezer"),
-    ("TiO2 P25", "solid mix", ["anatase", "rutile"], "~80:20 anatase:rutile", "solid", "shelf"),
-    ("Racemic alanine", "solid mix", ["l_alanine", "d_alanine"], "1:1 L-alanine:D-alanine", "solid", "freezer"),
+    ("1 M HCl (aq)", "solution", [("hcl", "solute", 1, "M"), ("water", "solvent", None, None)], "1 M hydrochloric acid in water", "liquid", "corrosive"),
+    ("1 M NaOH (aq)", "solution", [("naoh", "solute", 1, "M"), ("water", "solvent", None, None)], "1 M sodium hydroxide in water", "liquid", "corrosive"),
+    ("Brine", "solution", [("nacl", "solute", None, None), ("water", "solvent", None, None)], "Saturated NaCl in water", "liquid", "shelf"),
+    ("3:1 MeOH:H2O", "liquid_mix", [("meoh", "solvent", 3, "parts"), ("water", "solvent", 1, "parts")], "3:1 (v/v) methanol:water", "liquid", "flammable"),
+    ("10% EtOAc/Hexanes", "liquid_mix", [("etoac", "solvent", 10, "vol%"), ("hexane", "solvent", 90, "vol%")], "10% (v/v) ethyl acetate in hexanes, for TLC/columns", "liquid", "flammable"),
+    ("10 mM Caffeine in DMSO", "solution", [("caffeine", "solute", 10, "mM"), ("dmso", "solvent", None, None)], "10 mM caffeine stock solution in DMSO", "liquid", "freezer"),
+    ("TiO2 P25", "solid_mix", [("anatase", None, 80, "wt%"), ("rutile", None, 20, "wt%")], "~80:20 anatase:rutile", "solid", "shelf"),
 ]
 # fmt: on
 
@@ -283,12 +291,17 @@ for i, (name, mtype, components, description, phase, storage) in enumerate(
             updated_at=OLD_DATE,
         )
     )
-    for key in components:
+    for key, role, amount, amount_units in components:
         mixture_components.append(
             dict(
                 id=len(mixture_components) + 1,
                 mixture_id=i,
                 substance_id=sub_id[key],
+                role=role,
+                amount=amount,
+                amount_units=amount_units,
+                created_at=OLD_DATE,
+                updated_at=OLD_DATE,
             )
         )
     PHASES[f"mixture-{i}"] = phase
@@ -362,6 +375,13 @@ def add_batch(
         is_mixture=is_mixture,
         substance_id=None if is_mixture else sub_id[key],
         mixture_id=int(key.split("-")[1]) if is_mixture else None,
+        batch_type=(
+            "purchased"
+            if not in_house
+            else "prepared"
+            if is_mixture
+            else "internal_synthesis"
+        ),
         comments=None,
         appearance=APPEARANCE_OVERRIDES.get(key, random.choice(APPEARANCE[phase])),
         purity=round(
@@ -486,14 +506,14 @@ for _ in range(5):
         "methoxybiphenyl", ["bromoanisole", "phb_oh2", "k2co3", "pph3", "dioxane"]
     )
 for _ in range(3):
-    add_in_house_batch("l_alanine", ["alanine"])
+    add_in_house_batch("l_alanine", ["dl_alanine"])  # chiral resolution
 unknown_batch = add_in_house_batch("unknown", ["bromoanisole", "phb_oh2"], ndays=20)
 unknown_batch["comments"] = "Crashed out of the reaction mixture overnight."
 
 # in-house mixtures (prepared from the component batches)
 for i, (_, _, components, *_) in enumerate(MIXTURES, start=1):
     for _ in range(random.randint(1, 3)):
-        add_in_house_batch(f"mixture-{i}", components, ndays=300)
+        add_in_house_batch(f"mixture-{i}", [key for key, *_ in components], ndays=300)
 
 # -----------------------------------------------------------------------------
 
@@ -567,7 +587,7 @@ write_fake_data(
         f"{LABEL}.Molecule": molecules,
         f"{LABEL}.Substance": substances,
         f"{LABEL}.Mixture": mixtures,
-        f"{LABEL}.Mixture_substances": mixture_components,
+        f"{LABEL}.MixtureComponent": mixture_components,
         f"{LABEL}.Batch": batches,
         f"{LABEL}.Batch_parent_batches": batch_lineage,
         f"{LABEL}.Container": containers,

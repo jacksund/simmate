@@ -1,0 +1,10 @@
+{# The 3D viewer of `structure`, along with its downloads #}
+{# Downloads link to the substance's own page, so this also works when it is shown on e.g. a batch's page #}
+{% url 'data_explorer:table-entry' 'Substance' table_entry.id as download_url %}
+<div class="structure-panel">{% draw_structure structure %}</div>
+<div class="mt-2 text-center">
+    {% if structure.structure %}
+        {% button_link label="CIF" link=download_url|add:"?format=cif" theme="outline-secondary" icon="download" small=True %}
+        {% button_link label="POSCAR" link=download_url|add:"?format=poscar" theme="outline-secondary" icon="download" small=True %}
+    {% endif %}
+</div>

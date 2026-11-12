@@ -97,16 +97,16 @@ class Substance(DatabaseTable):
     See `calculate_check_digit` for details.
     """
 
-    # the difference can get blurry here but I have this primarily to indicate
-    # the best defaults for rendering the compound (e.g. 2D flat vs 3D crystal)
-    # and writing its chemical formula (reduced vs full) in the overview. It
-    # can also help with workup via toolkit
     substance_type_options = [
         "element",
-        "molecule",  # aka compound
-        "molecular_salt",  # aka charged compound + counterion
-        "molecular_crystal",  # aka phase of a compound
-        "material",  # aka alloy, crystal, etc
+        "monatomic_ion",
+        "molecule",
+        "polyatomic_ion",
+        "molecular_salt",
+        "molecular_solvate",
+        "molecular_crystal",
+        "inorganic_crystal",
+        "amorphous_solid",
         "other",
         # out of scope:
         # "polymer",
@@ -114,13 +114,35 @@ class Substance(DatabaseTable):
         # "meta_material",
     ]
     substance_type = table_column.CharField(
-        max_length=15,
+        max_length=25,
         blank=True,
         null=True,
     )
     """
     The general category of the substance. Must be one of
     `substance_type_options`.
+
+    The type follows what is registered for the substance, which sets the
+    defaults for rendering it (2D molecule vs 3D crystal) and writing its
+    formula. Substances with a crystal `structure` use one of the `*_crystal`
+    types, while those registered only by a `molecule` (e.g. SMILES) use the
+    molecule, salt, solvate, or ion types. For example:
+        - `element`: an element with no specific form given (e.g. "Copper").
+          Specific allotropes are registered as crystals (e.g. diamond) or
+          molecules (e.g. O2, S8, and C60).
+        - `molecular_salt` / `molecular_solvate`: set when the molecule splits
+          into a `counterion` or `solvent` (see `Molecule.get_salt_parts`)
+        - `monatomic_ion` / `polyatomic_ion`: a single charged fragment (e.g.
+          Na+ or acetate)
+        - `molecular_crystal`: a phase (polymorph) of a molecule, salt, or
+          solvate, which is typically a child of that substance
+        - `inorganic_crystal`: metals, alloys (and other disordered crystals),
+          ceramics, and metal-organic frameworks
+        - `amorphous_solid`: solids without a crystal structure, such as
+          glasses and silica gel
+
+    Substances that are truly unknown are marked with `is_unknown` instead,
+    and can leave this empty (or give a best guess).
     """
 
     description = table_column.TextField(blank=True, null=True)
@@ -317,6 +339,41 @@ class Substance(DatabaseTable):
     The parent substance that this entry is derived from. For example, a 
     specific stereoisomer or metastable phase would point to the more general 
     "flat" or "stable" substance.
+
+    For salts, this is the largest fragment as written (e.g. acetate for
+    sodium acetate), and for solvates it is the molecule without the solvent.
+    See `Molecule.get_salt_parts` for the full rules.
+    """
+
+    counterion = table_column.ForeignKey(
+        "Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="salts",
+        blank=True,
+        null=True,
+    )
+    """
+    For salts, the ion (or neutral acid/base, e.g. HCl) that pairs with the
+    `parent` (e.g. Na+ for sodium acetate). Repeated ions (e.g. the two K+
+    of K2CO3) are one counterion.
+
+    Salts with more than one distinct counterion (e.g. potassium sodium
+    tartrate) only link their `parent`, and the rest stays in the molecule.
+    """
+
+    solvent = table_column.ForeignKey(
+        "Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="solvates",
+        blank=True,
+        null=True,
+    )
+    """
+    For solvates, the solvent that is included (e.g. water for a hydrate).
+
+    A solvate of a salt is a chain: the solvate's `parent` is the salt, which
+    then has its own `parent` and `counterion`. Mixed solvates (more than one
+    distinct solvent) only link their `parent`.
     """
 
     is_metastable = table_column.BooleanField(
@@ -337,10 +394,11 @@ class Substance(DatabaseTable):
     Whether the substance has stereochemistry.
     """
 
-    stereomchem_type_options = [
-        "constitutional",  # for the flat/parent structure
+    stereochem_type_options = [
+        "flat",  # the parent structure, with stereochem unspecified
         # configurational
         "enantiomer",
+        "racemate",
         "diastereomer",
         "geometric_isomer",
         "meso_compound",
@@ -357,11 +415,17 @@ class Substance(DatabaseTable):
     )
     """
     The specific stereochemical classification(s) of the substance. Values
-    should be from `stereomchem_type_options`.
+    should be from `stereochem_type_options`, and more than one can apply.
+    For example:
+        - `["diastereomer", "geometric_isomer"]` for an E/Z isomer
+        - `["diastereomer", "epimer"]` for an epimer
+        - `["enantiomer", "atropisomer"]` for an axially chiral biaryl
+        - `["diastereomer", "racemate"]` for a racemic cis compound
 
     Stereoisomer Classification (Same connectivity, different 3D arrangement)
         ├── Configurational (Bonds must break to interconvert)
         │   ├── Enantiomers (Non-superimposable mirror images)
+        │   │   └── Racemates (1:1 mixture of both enantiomers)
         │   └── Diastereomers (Non-mirror images)
         │       ├── Geometric Isomers (cyclic Cis/Trans or double bond E/Z)
         │       ├── Meso Compounds (Achiral due to internal symmetry)
@@ -370,12 +434,19 @@ class Substance(DatabaseTable):
         └── Conformational (Rotation/flexing without breaking bonds)
             ├── Rotamers (e.g., Staggered vs. Eclipsed)
             ├── Atropisomers (Restricted rotation due to steric bulk)
-            ├── Ring Conformers (Chair, Boat, Envelope)
             └── Invertomers (Rapid atomic inversion, e.g., Amines)
-    
+
+    Rotamers and invertomers usually interconvert at room temperature, so
+    these are mainly for theoretical substances, crystals, and the rare
+    stable cases (e.g. Tröger's base). Ring conformers (chair, boat,
+    envelope) are not tracked.
+
+    Racemates are registered as a single substance (a child of the flat
+    parent), rather than as a `Mixture` of the two enantiomers.
+
     Because this table also stores flat versions of stereoisomers, we include
-    `constitutional` as an extra type to label these ones that contain
-    unspecified stereochemistry
+    `flat` as an extra type to label these ones that contain unspecified
+    stereochemistry.
     """
     # is_prochiral # Prochiral (Can become chiral in a single step)
 
@@ -670,8 +741,8 @@ class Substance(DatabaseTable):
         table (along with their molecule and crystal structure), so that other
         tables can link to them. IDs that are already in this table are skipped.
 
-        Substances that these point to (via `parent` or `replaced_by`) are
-        copied too.
+        Substances that these point to (via `parent`, `counterion`, `solvent`,
+        or `replaced_by`) are copied too.
 
         Raises:
             ValueError: if any IDs are not found in either location.
@@ -705,7 +776,9 @@ class Substance(DatabaseTable):
 
         # the foreign keys need these to exist first
         linked_ids = {
-            row.get(c) for row in rows for c in ("parent_id", "replaced_by_id")
+            row.get(c)
+            for row in rows
+            for c in ("parent_id", "counterion_id", "solvent_id", "replaced_by_id")
         }
         cls._hydrate(list(linked_ids - missing - {None}))
 
@@ -806,39 +879,50 @@ class Substance(DatabaseTable):
                 updates["datastore_synced_at"] = None
             entries.update(**updates)
 
-        # the new substance can't be its own parent or replacement
-        cls.objects.filter(id=new_id, parent_id__in=old_ids).update(
-            parent=None,
-            datastore_synced_at=None,
-        )
+        # the new substance can't be its own parent, counterion, solvent, or
+        # replacement
+        for column in ("parent", "counterion", "solvent"):
+            cls.objects.filter(id=new_id, **{f"{column}_id__in": old_ids}).update(
+                **{column: None},
+                datastore_synced_at=None,
+            )
 
         # many-to-many links, both those defined on this table (e.g. projects)
-        # and those pointing to it (e.g. mixtures). We delete + recreate the
-        # links because the new substance may already have some of them.
+        # and those pointing to it (e.g. mixtures). Links are moved in place so
+        # that any extra columns (e.g. a mixture component's role) are kept.
+        # The new substance may already have some of these links, so those
+        # duplicates are dropped first (keeping the new substance's own row).
         for through, substance_column, other_column in cls._get_m2m_links():
-            links = through.objects.filter(**{f"{substance_column}__in": old_ids})
-            other_ids = set(links.values_list(other_column, flat=True))
-            links.delete()
-            through.objects.bulk_create(
-                [
-                    through(**{substance_column: new_id, other_column: other_id})
-                    for other_id in other_ids
-                ],
-                ignore_conflicts=True,
+            linked = set(
+                through.objects.filter(**{substance_column: new_id}).values_list(
+                    other_column, flat=True
+                )
             )
+            links = through.objects.filter(**{f"{substance_column}__in": old_ids})
+            duplicates = []
+            for link_id, other_id in links.values_list("id", other_column):
+                if other_id in linked:
+                    duplicates.append(link_id)
+                linked.add(other_id)
+            through.objects.filter(id__in=duplicates).delete()
+            links.update(**{substance_column: new_id})
 
     @classmethod
     def _get_fk_links(cls) -> list[tuple]:
         """
         Gives every foreign key to this table, from any installed app.
 
+        Link tables of many-to-many fields (e.g. `MixtureComponent`) are left
+        out, as these are covered by `_get_m2m_links` instead.
+
         Returns:
             A list of (model, substance id column), e.g. (Batch, "substance_id").
         """
+        m2m_tables = {through for through, _, _ in cls._get_m2m_links()}
         return [
             (relation.related_model, relation.field.attname)
             for relation in cls._meta.related_objects
-            if relation.one_to_many
+            if relation.one_to_many and relation.related_model not in m2m_tables
         ]
 
     @classmethod

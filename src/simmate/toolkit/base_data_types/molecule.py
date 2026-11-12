@@ -1044,7 +1044,7 @@ class Molecule:
 
     @property
     def num_components(self):
-        return len(self.num_components)
+        return len(self.components)
 
     @property
     def largest_component(self):  # -> Molecule
@@ -1069,6 +1069,95 @@ class Molecule:
         flat = self.copy()
         AllChem.RemoveStereochemistry(flat.rdkit_molecule)
         return flat
+
+    common_solvents = [
+        "O",  # water
+        "CO",  # methanol
+        "CCO",  # ethanol
+        "CC(C)O",  # isopropanol
+        "CC(C)=O",  # acetone
+        "CS(C)=O",  # DMSO
+        "CN(C)C=O",  # DMF
+        "CC#N",  # acetonitrile
+        "C1CCOC1",  # THF
+        "CCOC(C)=O",  # ethyl acetate
+        "ClCCl",  # dichloromethane
+        "ClC(Cl)Cl",  # chloroform
+        "Cc1ccccc1",  # toluene
+        "C1COCCO1",  # 1,4-dioxane
+    ]
+    """
+    Canonical SMILES of solvents that are recognized as the solvent of a
+    solvate (see `get_salt_parts`).
+    """
+
+    def get_salt_parts(self) -> dict:
+        """
+        Splits a salt or solvate into its parent, counterion, and solvent.
+
+        Only one level is split at a time, so combined cases are a chain. For
+        example, a salt hydrate gives the salt (without water) as its parent
+        and water as its solvent, and that salt then gives its largest
+        fragment as the parent and the other ion as its counterion.
+
+        The rules are:
+            - one distinct fragment, or a tie for the largest fragment (e.g.
+              `[Na+].[Cl-]`), gives nothing
+            - if exactly one of the smaller fragments is a `common_solvents`
+              entry, the parent is the molecule with all copies of it removed
+            - if all of the smaller fragments are the same, the parent is the
+              largest fragment (as written, not neutralized) and the smaller
+              one is the counterion
+            - anything else (e.g. several distinct counterions or mixed
+              solvates) gives only the largest fragment as the parent
+
+        Counterions can be charged or neutral (e.g. HCl drawn as `Cl`), so a
+        two-molecule co-crystal (e.g. caffeine and oxalic acid) is treated as
+        a salt, with the smaller molecule as its counterion.
+
+        Returns:
+            A dictionary with the SMILES of the `parent` and, when found, the
+            `counterion` or `solvent`. This is empty when the molecule does
+            not split.
+        """
+        fragments = {c.to_smiles(): c.num_atoms_heavy for c in self.components}
+        if len(fragments) < 2:
+            return {}
+        largest_size = max(fragments.values())
+        largest = [smiles for smiles, size in fragments.items() if size == largest_size]
+        if len(largest) > 1:
+            return {}
+        largest = largest[0]
+        smaller = [smiles for smiles in fragments if smiles != largest]
+
+        solvents = [smiles for smiles in smaller if smiles in self.common_solvents]
+        if len(solvents) == 1:
+            solvent = solvents[0]
+            parent = ".".join(
+                c.to_smiles() for c in self.components if c.to_smiles() != solvent
+            )
+            # rebuilt so the parent is canonical (e.g. fragment order)
+            parent = self.__class__.from_smiles(parent).to_smiles()
+            return dict(parent=parent, solvent=solvent)
+
+        if len(smaller) == 1:
+            return dict(parent=largest, counterion=smaller[0])
+
+        return dict(parent=largest)
+
+    def get_ion_type(self) -> str | None:
+        """
+        Gives "monatomic_ion" or "polyatomic_ion" for a single charged
+        fragment (e.g. `[Na+]` or `CC(=O)[O-]`), and None otherwise.
+        """
+        if (
+            self.num_components != 1
+            or AllChem.GetFormalCharge(self.rdkit_molecule) == 0
+        ):
+            return None
+        # hydrogens are counted, so that e.g. [NH4+] is polyatomic
+        num_atoms = self.rdkit_molecule.GetNumAtoms(onlyExplicit=False)
+        return "monatomic_ion" if num_atoms == 1 else "polyatomic_ion"
 
     # -------------------------------------------------------------------------
 

@@ -1,0 +1,12 @@
+{# The `location_path` of a storage location (from the top level down) as a breadcrumb, where each location links to its page #}
+<ol class="breadcrumb m-0">
+    {% for location in location_path %}
+        <li class="breadcrumb-item {% if forloop.last and not link_last %}active{% endif %}">
+            {% if forloop.last and not link_last %}
+                {{ location.name|default:location.display_id }}
+            {% else %}
+                <a href="{% url 'data_explorer:table-entry' 'StorageLocation' location.id %}">{{ location.name|default:location.display_id }}</a>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ol>

@@ -1,0 +1,23 @@
+{# The left-hand picture on a batch or container page: its uploaded `image` if there is one, or else a drawing of the `batch`'s substance or mixture. Expects `viewer_default` and `mixture_components` (see `BatchComponent.get_item_context`) #}
+{% if image %}
+    <div class="m-2 text-center">
+        <a href="{{ image.url }}" target="_blank">
+            <img src="{{ image.url }}"
+                 class="img-fluid border rounded-3"
+                 alt="Photo of {{ table_entry.display_id }}">
+        </a>
+    </div>
+{% elif batch.mixture_id %}
+    {% include "inventory_management/for_view/mixture_drawings.html" %}
+{% elif batch.substance_id %}
+    {% include "inventory_management/for_view/viewer.html" with table_entry=batch.substance %}
+{% else %}
+    <div class="row m-2">
+        <div class="col-12 molecule-panel d-flex justify-content-center align-items-center border rounded-3 border-5 bg-white">
+            <div class="text-center text-muted">
+                <i class="bi bi-question-circle fs-1"></i>
+                <div>No substance or mixture linked</div>
+            </div>
+        </div>
+    </div>
+{% endif %}

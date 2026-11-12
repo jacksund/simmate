@@ -373,4 +373,16 @@ class TableComponent(
     def get_extra_entry_context(cls, request, table_entry) -> dict:
         return {}  # default to nothing extra
 
+    @classmethod
+    def get_download_entry(cls, table_entry, view_format: str):
+        """
+        Gives the database object that file downloads of an entry (e.g.
+        `?format=sdf` or `?format=cif`) are written from.
+
+        By default, this is the entry itself. Tables that link to a molecule
+        or structure (rather than storing one) can give the linked object
+        instead, or None if there is nothing to download in that format.
+        """
+        return table_entry
+
     # -------------------------------------------------------------------------

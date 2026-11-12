@@ -1,0 +1,103 @@
+{% with batch=table_entry.batch %}
+    {% with item=batch.mixture|default:batch.substance %}
+        <div class="tab-pane show active" id="overview-section">
+            <div class="row">
+                <div class="col-12 col-lg-5">
+                    {% include "inventory_management/for_view/item_viewer.html" with image=table_entry.image %}
+                </div>
+                <div class="col-12 col-lg-7 pt-3">
+                    {% if table_entry.is_depleted %}
+                        <div class="alert alert-danger d-flex align-items-start" role="alert">
+                            <i class="bi bi-x-circle fs-4 me-2 lh-1"></i>
+                            <div>
+                                <strong>Depleted.</strong> This container is empty (or has too little left to be useful).
+                            </div>
+                        </div>
+                    {% endif %}
+                    <h3 class="fw-semibold text-break mb-1">
+                        {% if item %}
+                            {{ item.common_name|default:item.display_id }}
+                        {% else %}
+                            {{ table_entry.display_id }}
+                        {% endif %}
+                    </h3>
+                    {% if table_entry.barcode %}<div class="text-muted">Barcode {{ table_entry.barcode }}</div>{% endif %}
+                    <div class="mt-2 mb-4">
+                        {% if table_entry.container_type %}
+                            <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ table_entry.container_type|capfirst }}</span>
+                        {% endif %}
+                        {% if table_entry.is_depleted %}<span class="badge bg-danger-subtle text-danger-emphasis">Depleted</span>{% endif %}
+                    </div>
+                    <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Amount</div>
+                    <div class="mb-4">
+                        {% include "inventory_management/for_view/amount_bar.html" with current=table_entry.current_amount initial=table_entry.initial_amount units=table_entry.amount_units is_depleted=table_entry.is_depleted %}
+                    </div>
+                    <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Contents</div>
+                    <dl class="row mb-4">
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">
+                            {% if batch.is_mixture %}
+                                Mixture
+                            {% else %}
+                                Substance
+                            {% endif %}
+                        </dt>
+                        <dd class="col-6 col-sm-7">
+                            {% if item %}
+                                {% foreign_key_link item %}
+                                {% if item.common_name %}<span class="text-muted">· {{ item.common_name }}</span>{% endif %}
+                            {% else %}
+                                --
+                            {% endif %}
+                        </dd>
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">Batch</dt>
+                        <dd class="col-6 col-sm-7">
+                            {% if batch %}
+                                {% foreign_key_link batch %}
+                                {% if batch.batch_type %}<span class="text-muted">· {{ batch.batch_type|replace:"_, " }}</span>{% endif %}
+                            {% else %}
+                                --
+                            {% endif %}
+                        </dd>
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">Purity</dt>
+                        <dd class="col-6 col-sm-7">
+                            {% if batch.purity is not None %}
+                                {{ batch.purity }}%
+                            {% else %}
+                                --
+                            {% endif %}
+                        </dd>
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">Expiration date</dt>
+                        <dd class="col-6 col-sm-7 mb-0">
+                            {{ batch.expiration_date|date:"Y-m-d"|default:"--" }}
+                        </dd>
+                    </dl>
+                    <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Storage</div>
+                    <dl class="row mb-4">
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">Location</dt>
+                        <dd class="col-6 col-sm-7">
+                            {% if location_path %}
+                                {% include "inventory_management/for_view/location_breadcrumb.html" with link_last=True %}
+                            {% else %}
+                                <span class="text-warning-emphasis">No location set</span>
+                            {% endif %}
+                        </dd>
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">Temperature</dt>
+                        <dd class="col-6 col-sm-7">
+                            {% if table_entry.location.temperature_celsius is not None %}
+                                {{ table_entry.location.temperature_celsius }} °C
+                            {% else %}
+                                --
+                            {% endif %}
+                        </dd>
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">Barcode</dt>
+                        <dd class="col-6 col-sm-7 mb-0">
+                            {{ table_entry.barcode|default:"--" }}
+                        </dd>
+                    </dl>
+                    <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Comments</div>
+                    <p class="mb-4">{{ table_entry.comments|default:"--"|linebreaksbr }}</p>
+                </div>
+            </div>
+        </div>
+    {% endwith %}
+{% endwith %}

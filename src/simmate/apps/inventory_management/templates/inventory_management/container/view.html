@@ -1,80 +1,32 @@
 {% extends "data_explorer/entry.html" %}
 {% block entrycontent %}
-    <div class="row py-2">
-        <div class="col-12">
-            <div class="page-title-box">
-                <div class="page-title-right m-0">
-                    <a role="button"
-                       class="btn btn-outline-primary btn-sm"
-                       href="{% url 'data_explorer:table-entry-new' 'UsageLog' %}?source_container_id={{ table_entry.id }}">Log Usage <i class="bi bi-upc-scan"></i></a>
-                    <a role="button"
-                       class="btn btn-outline-primary btn-sm"
-                       href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Update <i class="bi bi-pencil"></i></a>
-                </div>
-                <h3 class="m-0">Overview</h3>
+    <div>
+        <ul class="nav nav-tabs nav-bordered mb-3">
+            {% include "inventory_management/for_view/tab_link.html" with target="overview-section" icon="house-door" label="Overview" active=True %}
+            {% include "inventory_management/for_view/tab_link.html" with target="usage-logs-section" icon="journal-text" label="Usage Logs" count=usage_logs__count %}
+            <li class="nav-item ms-auto align-self-center">
+                <a role="button"
+                   class="btn btn-outline-primary btn-sm"
+                   href="{% url 'data_explorer:table-entry-new' 'UsageLog' %}?source_container_id={{ table_entry.id }}">Log Usage <i class="bi bi-upc-scan"></i></a>
+                {% include "inventory_management/for_view/update_button.html" %}
+            </li>
+        </ul>
+        <div class="tab-content">
+            {% include "inventory_management/container/for_view/overview_tab.html" %}
+            {# Usage Logs #}
+            <div class="tab-pane" id="usage-logs-section">
+                {% if usage_logs__count %}
+                    {% include "inventory_management/usage_log/table.html" with entries=usage_logs truncated=usage_logs__truncated %}
+                    <div class="text-center py-2">
+                        <a role="button"
+                           class="btn btn-outline-primary btn-sm"
+                           target="_blank"
+                           href="{% url 'data_explorer:table' 'UsageLog' %}?source_container_id={{ table_entry.id }}">View All <i class="bi bi-box-arrow-up-right"></i></a>
+                    </div>
+                {% else %}
+                    <small>No material has been taken from this container.</small>
+                {% endif %}
             </div>
-        </div>
-    </div>
-    <div class="row py-2">
-        <div class="col-12">
-            <table class="table table-simmate mb-0">
-                <thead>
-                    <tr>
-                        <th style="width: 45%">Base Info</th>
-                        <th class="text-center"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>ID</td>
-                        <td>{{ table_entry.display_id }}</td>
-                    </tr>
-                    <tr>
-                        <td>Batch</td>
-                        <td>
-                            {% if table_entry.batch %}
-                                <a role="button"
-                                   class="btn btn-light btn-sm border"
-                                   href="{% url 'data_explorer:table-entry' 'Batch' table_entry.batch.id %}">{{ table_entry.batch.display_id }}</a>
-                            {% else %}
-                                --
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Location</td>
-                        <td>
-                            {% if table_entry.location %}
-                                <a role="button"
-                                   class="btn btn-light btn-sm border"
-                                   href="{% url 'data_explorer:table-entry' 'StorageLocation' table_entry.location.id %}">{{ table_entry.location.name }}</a>
-                            {% else %}
-                                --
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Barcode</td>
-                        <td>{{ table_entry.barcode|default:"--" }}</td>
-                    </tr>
-                    <tr>
-                        <td>Initial Amount</td>
-                        <td>{{ table_entry.initial_amount|default:"--" }} {{ table_entry.amount_units|default:"" }}</td>
-                    </tr>
-                    <tr>
-                        <td>Current Amount</td>
-                        <td>{{ table_entry.current_amount|default:"--" }} {{ table_entry.amount_units|default:"" }}</td>
-                    </tr>
-                    <tr>
-                        <td>Is Depleted</td>
-                        <td>{{ table_entry.is_depleted|yesno:"Yes,No" }}</td>
-                    </tr>
-                    <tr>
-                        <td>Comments</td>
-                        <td>{{ table_entry.comments|default:"--" }}</td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
     </div>
 {% endblock %}

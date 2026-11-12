@@ -1,9 +1,10 @@
 {% extends "data_explorer/entries.html" %}
 {# Set `hide_location` when every container is in the same location (e.g. on a location's page) #}
+{# Set `hide_item` when every container holds the same item (e.g. on a substance's page) #}
 {% block table_headers %}
     {% table_header "id" "ID" min_width=90 %}
     {% table_header "batch__id" "Batch" min_width=95 %}
-    <th style="min-width:220px">Item</th>
+    {% if not hide_item %}<th style="min-width:220px">Item</th>{% endif %}
     {% table_header "container_type" "Type" min_width=100 %}
     {% table_header "barcode" min_width=120 %}
     {% table_header "current_amount" "Amount Left" min_width=155 %}
@@ -16,7 +17,9 @@
 {% block table_rows %}
     <td>{% foreign_key_link entry %}</td>
     <td>{% foreign_key_link entry.batch %}</td>
-    <td>{% include "inventory_management/dashboard_item.html" with batch=entry.batch %}</td>
+    {% if not hide_item %}
+        <td>{% include "inventory_management/dashboard_item.html" with batch=entry.batch %}</td>
+    {% endif %}
     <td>{{ entry.container_type|default:"--"|capfirst }}</td>
     <td>{{ entry.barcode|default:"--" }}</td>
     <td class="text-nowrap">

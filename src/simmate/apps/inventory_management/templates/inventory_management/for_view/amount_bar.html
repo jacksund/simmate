@@ -1,0 +1,23 @@
+{# The `current` amount out of the `initial` amount (in `units`), with a bar showing how much is left #}
+{% if current is not None %}
+    <div>
+        <span class="fs-5 fw-semibold">{{ current|floatformat:"-3" }}</span>
+        {% if initial is not None %}<span class="text-muted">/ {{ initial|floatformat:"-3" }}</span>{% endif %}
+        {{ units|default:"" }}
+    </div>
+    {% if initial %}
+        {% widthratio current initial 100 as percent_left %}
+        <div class="progress mt-1"
+             role="progressbar"
+             style="height: 0.5rem"
+             aria-valuenow="{{ percent_left }}"
+             aria-valuemin="0"
+             aria-valuemax="100">
+            <div class="progress-bar {% if is_depleted %}bg-secondary{% elif percent_left|add:0 < 10 %}bg-danger{% elif percent_left|add:0 < 25 %}bg-warning{% else %}bg-success{% endif %}"
+                 style="width: {{ percent_left }}%"></div>
+        </div>
+        <div class="small text-muted mt-1">{{ percent_left }}% left</div>
+    {% endif %}
+{% else %}
+    --
+{% endif %}

@@ -1,0 +1,108 @@
+{% with item=table_entry.mixture|default:table_entry.substance %}
+    <div class="tab-pane show active" id="overview-section">
+        <div class="row">
+            <div class="col-12 col-lg-5">
+                {% include "inventory_management/for_view/item_viewer.html" with image=table_entry.image batch=table_entry %}
+            </div>
+            <div class="col-12 col-lg-7 pt-3">
+                {% if is_expired and not table_entry.is_depleted %}
+                    <div class="alert alert-warning d-flex align-items-start" role="alert">
+                        <i class="bi bi-calendar-x fs-4 me-2 lh-1"></i>
+                        <div>
+                            <strong>Expired.</strong> This batch passed its expiration date on {{ table_entry.expiration_date|date:"Y-m-d" }}.
+                        </div>
+                    </div>
+                {% endif %}
+                <h3 class="fw-semibold text-break mb-1">
+                    {% if item %}
+                        {{ item.common_name|default:item.display_id }}
+                    {% else %}
+                        {{ table_entry.display_id }}
+                    {% endif %}
+                </h3>
+                {% if table_entry.batch_number %}<div class="text-muted">Batch #{{ table_entry.batch_number }}</div>{% endif %}
+                <div class="mt-2 mb-4">
+                    {% if table_entry.batch_type %}
+                        <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ table_entry.batch_type|replace:"_, "|capfirst }}</span>
+                    {% endif %}
+                    {% if table_entry.is_depleted %}
+                        <span class="badge bg-danger-subtle text-danger-emphasis"
+                              data-bs-toggle="tooltip"
+                              data-bs-title="All containers of this batch are empty">Depleted</span>
+                    {% endif %}
+                    {% if is_expired %}
+                        <span class="badge bg-warning-subtle text-warning-emphasis">Expired</span>
+                    {% endif %}
+                </div>
+                <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Amount</div>
+                <div class="mb-2">
+                    {% include "inventory_management/for_view/amount_bar.html" with current=table_entry.total_current_amount initial=table_entry.total_initial_amount units=table_entry.amount_units is_depleted=table_entry.is_depleted %}
+                </div>
+                <dl class="row mb-4">
+                    <dt class="col-6 col-sm-5 fw-normal text-muted">Available containers</dt>
+                    <dd class="col-6 col-sm-7 mb-0">
+                        {{ table_entry.num_available_containers|default:0|intcomma }} of {{ containers__count|intcomma }}
+                    </dd>
+                </dl>
+                <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Contents</div>
+                <dl class="row mb-4">
+                    <dt class="col-6 col-sm-5 fw-normal text-muted">
+                        {% if table_entry.is_mixture %}
+                            Mixture
+                        {% else %}
+                            Substance
+                        {% endif %}
+                    </dt>
+                    <dd class="col-6 col-sm-7">
+                        {% if item %}
+                            {% foreign_key_link item %}
+                            {% if item.common_name %}<span class="text-muted">· {{ item.common_name }}</span>{% endif %}
+                        {% else %}
+                            --
+                        {% endif %}
+                    </dd>
+                    <dt class="col-6 col-sm-5 fw-normal text-muted">Purity</dt>
+                    <dd class="col-6 col-sm-7">
+                        {% if table_entry.purity is not None %}
+                            {{ table_entry.purity }}%
+                        {% else %}
+                            --
+                        {% endif %}
+                    </dd>
+                    <dt class="col-6 col-sm-5 fw-normal text-muted">Appearance</dt>
+                    <dd class="col-6 col-sm-7">
+                        {{ table_entry.appearance|default:"--" }}
+                    </dd>
+                    <dt class="col-6 col-sm-5 fw-normal text-muted">Expiration date</dt>
+                    <dd class="col-6 col-sm-7 mb-0">
+                        {{ table_entry.expiration_date|date:"Y-m-d"|default:"--" }}
+                    </dd>
+                </dl>
+                <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Origin</div>
+                <dl class="row mb-4">
+                    <dt class="col-6 col-sm-5 fw-normal text-muted">Batch type</dt>
+                    <dd class="col-6 col-sm-7">
+                        {{ table_entry.batch_type|default:"--"|replace:"_, "|capfirst }}
+                    </dd>
+                    <dt class="col-6 col-sm-5 fw-normal text-muted">
+                        <span data-bs-toggle="tooltip"
+                              data-bs-title="The user that made or provided this batch">Supplied by</span>
+                    </dt>
+                    <dd class="col-6 col-sm-7">
+                        {{ table_entry.supplied_by.username|default:"--" }}
+                    </dd>
+                    <dt class="col-6 col-sm-5 fw-normal text-muted">Supplier</dt>
+                    <dd class="col-6 col-sm-7">
+                        {{ table_entry.supplier|default:"--" }}
+                    </dd>
+                    <dt class="col-6 col-sm-5 fw-normal text-muted">Catalog number</dt>
+                    <dd class="col-6 col-sm-7 mb-0">
+                        {{ table_entry.supplier_catalog_number|default:"--" }}
+                    </dd>
+                </dl>
+                <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Comments</div>
+                <p class="mb-4">{{ table_entry.comments|default:"--"|linebreaksbr }}</p>
+            </div>
+        </div>
+    </div>
+{% endwith %}

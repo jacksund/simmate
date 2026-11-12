@@ -1,91 +1,40 @@
 {% extends "data_explorer/entry.html" %}
 {% block entrycontent %}
-    <div class="pt-3">
-        {# Tabs #}
+    <div>
         <ul class="nav nav-tabs nav-bordered mb-3">
-            <li class="nav-item">
-                <a href="#overview-section"
-                   data-bs-toggle="tab"
-                   aria-expanded="true"
-                   class="nav-link active">
-                    <i class="bi bi-house-door d-md-none d-block"></i>
-                    <span class="d-none d-md-block">Overview</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#containers-section"
-                   data-bs-toggle="tab"
-                   aria-expanded="false"
-                   class="nav-link">
-                    <i class="bi bi-box-seam d-md-none d-block"></i>
-                    <span class="d-none d-md-block">Containers <small>({{ containers__count|intcomma }})</small></span>
-                </a>
-            </li>
-            <li class="nav-item ms-auto align-self-center">
-                <a role="button"
-                   class="btn btn-outline-primary btn-sm"
-                   href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Update <i class="bi bi-pencil"></i></a>
-            </li>
+            {% include "inventory_management/for_view/tab_link.html" with target="overview-section" icon="house-door" label="Overview" active=True %}
+            {% include "inventory_management/for_view/tab_link.html" with target="sub-locations-section" icon="diagram-3" label="Sub-locations" count=sub_locations__count %}
+            {% include "inventory_management/for_view/tab_link.html" with target="containers-section" icon="box-seam" label="Containers" count=containers__count %}
+            <li class="nav-item ms-auto align-self-center">{% include "inventory_management/for_view/update_button.html" %}</li>
         </ul>
         <div class="tab-content">
-            {# Overview #}
-            <div class="tab-pane show active" id="overview-section">
-                <table class="table table-simmate mb-0">
-                    <thead>
-                        <tr>
-                            <th style="width: 45%">Base Info</th>
-                            <th class="text-center"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>ID</td>
-                            <td>{{ table_entry.display_id }}</td>
-                        </tr>
-                        <tr>
-                            <td>Name</td>
-                            <td>{{ table_entry.name|default:"--" }}</td>
-                        </tr>
-                        <tr>
-                            <td>Storage Type</td>
-                            <td>{{ table_entry.storage_type|default:"--"|capfirst }}</td>
-                        </tr>
-                        <tr>
-                            <td>Parent Location</td>
-                            <td>
-                                {% if table_entry.parent_location %}
-                                    <a role="button"
-                                       class="btn btn-light btn-sm border"
-                                       href="{% url 'data_explorer:table-entry' 'StorageLocation' table_entry.parent_location.id %}">{{ table_entry.parent_location.name }}</a>
-                                {% else %}
-                                    --
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Temperature (°C)</td>
-                            <td>{{ table_entry.temperature_celsius|default_if_none:"--" }}</td>
-                        </tr>
-                        <tr>
-                            <td>Description</td>
-                            <td>{{ table_entry.description|default:"--" }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+            {% include "inventory_management/storage_location/for_view/overview_tab.html" %}
+            {# Sub-locations #}
+            <div class="tab-pane" id="sub-locations-section">
+                {% if table_entry.tree_children %}
+                    <ul class="tree-view">
+                        {% include "inventory_management/storage_location/for_view/tree_node.html" with node=table_entry is_current=True %}
+                    </ul>
+                {% else %}
+                    <small>There are no locations inside this one.</small>
+                {% endif %}
             </div>
-            {# Containers #}
+            {# Containers in this location, or any location inside it #}
             <div class="tab-pane" id="containers-section">
                 {% if containers__count %}
-                    {% include "inventory_management/container/table.html" with entries=containers truncated=containers__truncated hide_location=True %}
+                    {% if sub_locations__count %}
+                        <p class="small text-muted">Includes the containers in all {{ sub_locations__count|intcomma }} locations inside this one.</p>
+                    {% endif %}
+                    {% include "inventory_management/container/table.html" with entries=containers truncated=containers__truncated %}
+                    <div class="text-center py-2">
+                        <a role="button"
+                           class="btn btn-outline-primary btn-sm"
+                           target="_blank"
+                           href="{% url 'data_explorer:table' 'Container' %}?location_id__in=[{{ location_ids|join:',' }}]">View All <i class="bi bi-box-arrow-up-right"></i></a>
+                    </div>
                 {% else %}
-                    <small>No containers are stored in this location.</small>
+                    <small>No containers are stored in this location (or any inside it).</small>
                 {% endif %}
-                <div class="text-center py-2">
-                    <a role="button"
-                       class="btn btn-outline-primary btn-sm"
-                       target="_blank"
-                       href="{% url 'data_explorer:table' 'Container' %}?location_id={{ table_entry.id }}">View All <i class="bi bi-box-arrow-up-right"></i></a>
-                </div>
             </div>
         </div>
     </div>

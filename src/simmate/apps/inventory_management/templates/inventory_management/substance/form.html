@@ -17,7 +17,15 @@
                 {% htmx_text_input name="parent" label="Parent Substance ID" placeholder="e.g. BCD-012-3456" %}
             </div>
             <div class="col-md-4">
-                {% htmx_selectbox name="stereochem_type" options=component.table.StereochemType.choices label="Stereochem Type" %}
+                {% htmx_text_input name="counterion" label="Counterion Substance ID" placeholder="e.g. BCD-012-3456" %}
+            </div>
+            <div class="col-md-4">
+                {% htmx_text_input name="solvent" label="Solvent Substance ID" placeholder="e.g. BCD-012-3456" %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                {% htmx_selectbox name="stereochem_type" options=component.table.stereochem_type_options multiselect=True label="Stereochem Type" %}
             </div>
         </div>
         <div class="row">

@@ -138,3 +138,24 @@ class StorageLocation(DatabaseTable):
                 cache[key] = location.id
             parent_id = cache[key]
         return parent_id
+
+    def get_path(self, max_depth: int = 10) -> list["StorageLocation"]:
+        """
+        Gives the locations from the top level down to (and including) this
+        one, such as for a breadcrumb (e.g. building > room > cabinet).
+
+        Args:
+            max_depth: The most parent locations to walk up through, which
+                also guards against accidental cycles.
+        """
+        path = [self]
+        while path[0].parent_location_id and len(path) <= max_depth:
+            if path[0].parent_location_id in {location.id for location in path}:
+                break  # a cycle
+            parent = StorageLocation.objects.filter(
+                id=path[0].parent_location_id
+            ).first()
+            if not parent:
+                break
+            path.insert(0, parent)
+        return path

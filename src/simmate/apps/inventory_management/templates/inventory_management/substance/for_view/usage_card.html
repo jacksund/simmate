@@ -1,0 +1,19 @@
+{# A card listing the `substances` that use this one as their counterion or solvent (given by `filter_column`), where `count` and `truncated` describe the full list #}
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">{{ title }} ({{ count|intcomma }})</div>
+        <ul class="list-unstyled mb-0">
+            {% for substance in substances %}
+                <li class="py-1">
+                    {% foreign_key_link substance %}
+                    {% if substance.common_name %}<span class="text-muted">· {{ substance.common_name }}</span>{% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+        {% if truncated %}
+            <a class="small"
+               target="_blank"
+               href="{% url 'data_explorer:table' 'Substance' %}?{{ filter_column }}={{ table_entry.id }}">View all {{ count|intcomma }} <i class="bi bi-box-arrow-up-right"></i></a>
+        {% endif %}
+    </div>
+</div>

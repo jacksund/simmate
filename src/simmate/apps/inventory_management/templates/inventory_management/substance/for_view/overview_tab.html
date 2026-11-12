@@ -1,0 +1,170 @@
+<div class="tab-pane show active" id="overview-section">
+    <div class="row">
+        <div class="col-12 col-lg-5">{% include "inventory_management/for_view/viewer.html" %}</div>
+        <div class="col-12 col-lg-7 pt-3">
+            {% if table_entry.replaced_by_id %}
+                <div class="alert alert-warning d-flex align-items-start" role="alert">
+                    <i class="bi bi-arrow-left-right fs-4 me-2 lh-1"></i>
+                    <div>
+                        This ID has been retired and replaced by
+                        <a href="{% url 'data_explorer:table-entry' 'Substance' table_entry.replaced_by_id %}">{{ table_entry.replaced_by_id }}</a>.
+                        {% if id_changes %}See the ID History tab for details.{% endif %}
+                    </div>
+                </div>
+            {% elif table_entry.is_delisted %}
+                <div class="alert alert-danger d-flex align-items-start" role="alert">
+                    <i class="bi bi-x-circle fs-4 me-2 lh-1"></i>
+                    <div>
+                        <strong>Delisted.</strong> This substance has been removed from the catalog. Its ID is kept so that it is never reused.
+                    </div>
+                </div>
+            {% endif %}
+            {# Name, falling back to the formula or ID when there is none #}
+            <h3 class="fw-semibold text-break mb-1">
+                {% if table_entry.common_name %}
+                    {{ table_entry.common_name }}
+                {% elif table_entry.iupac_name %}
+                    {{ table_entry.iupac_name }}
+                {% elif table_entry.structure %}
+                    {{ table_entry.structure.formula_reduced|chemical_formula|default:table_entry.id }}
+                {% else %}
+                    {{ table_entry.id }}
+                {% endif %}
+            </h3>
+            {% if table_entry.common_name and table_entry.iupac_name %}
+                <div class="text-muted text-break">{{ table_entry.iupac_name }}</div>
+            {% endif %}
+            {# the formula, unless it is already the title #}
+            {% if table_entry.structure %}
+                {% if table_entry.common_name or table_entry.iupac_name %}
+                    <div class="text-muted">{{ table_entry.structure.formula_reduced|chemical_formula }}</div>
+                {% endif %}
+            {% endif %}
+            <div class="mt-2 mb-4">
+                {% if table_entry.substance_type %}
+                    <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ table_entry.substance_type|replace:"_, "|capfirst }}</span>
+                {% endif %}
+                {% if table_entry.is_primary %}
+                    <span class="badge bg-success-subtle text-success-emphasis"
+                          data-bs-toggle="tooltip"
+                          data-bs-title="The primary reference for this compound (e.g. the parent or most stable phase)">Primary</span>
+                {% endif %}
+                {% if table_entry.is_theoretical %}
+                    <span class="badge border border-secondary text-secondary"
+                          data-bs-toggle="tooltip"
+                          data-bs-title="Not yet experimentally synthesized">Theoretical</span>
+                {% endif %}
+                {% if table_entry.is_metastable %}
+                    <span class="badge bg-info-subtle text-info-emphasis"
+                          data-bs-toggle="tooltip"
+                          data-bs-title="A metastable phase">Metastable</span>
+                {% endif %}
+                {% if table_entry.is_private %}
+                    <span class="badge bg-dark-subtle text-dark-emphasis"
+                          data-bs-toggle="tooltip"
+                          data-bs-title="The ID is registered, but the substance is intentionally kept secret">Private</span>
+                {% endif %}
+                {% if table_entry.is_unknown %}
+                    <span class="badge bg-warning-subtle text-warning-emphasis"
+                          data-bs-toggle="tooltip"
+                          data-bs-title="The substance is not yet known (e.g. it has assay data but no characterization)">Unknown</span>
+                {% endif %}
+                {% if table_entry.is_delisted %}
+                    <span class="badge bg-danger-subtle text-danger-emphasis"
+                          data-bs-toggle="tooltip"
+                          data-bs-title="Removed from the catalog">Delisted</span>
+                {% endif %}
+            </div>
+            <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Identity</div>
+            <dl class="row mb-4">
+                <dt class="col-6 col-sm-5 fw-normal text-muted">
+                    <span data-bs-toggle="tooltip"
+                          data-bs-title="The substance ID, followed by its check letter (used to catch typos)">ID</span>
+                </dt>
+                <dd class="col-6 col-sm-7">
+                    {{ table_entry.id }}
+                    {% if table_entry.check_digit %}<span class="text-muted">/ {{ table_entry.check_digit }}</span>{% endif %}
+                </dd>
+                <dt class="col-6 col-sm-5 fw-normal text-muted">Synonyms</dt>
+                <dd class="col-6 col-sm-7 text-break">
+                    {{ table_entry.synonyms|join:", "|default:"--" }}
+                </dd>
+                <dt class="col-6 col-sm-5 fw-normal text-muted">Stereochemistry</dt>
+                <dd class="col-6 col-sm-7">
+                    {% if table_entry.stereochem_type %}
+                        {{ table_entry.stereochem_type|join:", "|replace:"_, " }}
+                    {% else %}
+                        --
+                    {% endif %}
+                </dd>
+                <dt class="col-6 col-sm-5 fw-normal text-muted">Registered by</dt>
+                <dd class="col-6 col-sm-7">
+                    {{ table_entry.registered_by.username|default:"Simmate Team" }}
+                </dd>
+                <dt class="col-6 col-sm-5 fw-normal text-muted">Description</dt>
+                <dd class="col-6 col-sm-7 mb-0">
+                    {{ table_entry.description|default:"--" }}
+                </dd>
+            </dl>
+            {% if table_entry.parent_id or table_entry.counterion_id or table_entry.solvent_id %}
+                <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Parent & Components</div>
+                <dl class="row mb-4">
+                    {% if table_entry.parent_id %}
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">
+                            <span data-bs-toggle="tooltip"
+                                  data-bs-title="The more general substance this one is derived from (e.g. the flat structure of a stereoisomer, or the molecule of a salt or phase)">Parent</span>
+                        </dt>
+                        <dd class="col-6 col-sm-7">
+                            {% foreign_key_link table_entry.parent %}
+                            {% if table_entry.parent.common_name %}<span class="text-muted">· {{ table_entry.parent.common_name }}</span>{% endif %}
+                        </dd>
+                    {% endif %}
+                    {% if table_entry.counterion_id %}
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">Counterion</dt>
+                        <dd class="col-6 col-sm-7">
+                            {% foreign_key_link table_entry.counterion %}
+                            {% if table_entry.counterion.common_name %}<span class="text-muted">· {{ table_entry.counterion.common_name }}</span>{% endif %}
+                        </dd>
+                    {% endif %}
+                    {% if table_entry.solvent_id %}
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">Solvent</dt>
+                        <dd class="col-6 col-sm-7">
+                            {% foreign_key_link table_entry.solvent %}
+                            {% if table_entry.solvent.common_name %}<span class="text-muted">· {{ table_entry.solvent.common_name }}</span>{% endif %}
+                        </dd>
+                    {% endif %}
+                </dl>
+            {% endif %}
+            {% with molecule=table_entry.molecule %}
+                {% if molecule %}
+                    <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Molecule</div>
+                    <dl class="row mb-4">
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">SMILES</dt>
+                        <dd class="col-6 col-sm-7 text-break">
+                            {{ molecule.smiles|default:"--" }}
+                        </dd>
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">InChI Key</dt>
+                        <dd class="col-6 col-sm-7 text-break">
+                            {{ molecule.inchi_key|default:"--" }}
+                        </dd>
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">Molecular weight</dt>
+                        <dd class="col-6 col-sm-7">
+                            {% if molecule.molecular_weight is not None %}
+                                {{ molecule.molecular_weight|floatformat:3 }} g/mol
+                            {% else %}
+                                --
+                            {% endif %}
+                        </dd>
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">Atoms</dt>
+                        <dd class="col-6 col-sm-7 mb-0">
+                            {{ molecule.num_atoms|default_if_none:"--" }}
+                        </dd>
+                    </dl>
+                {% endif %}
+            {% endwith %}
+            {% if table_entry.structure %}
+                {% include "core/base_data_types/structure_summary.html" with table_entry=table_entry.structure %}
+            {% endif %}
+        </div>
+    </div>
+</div>

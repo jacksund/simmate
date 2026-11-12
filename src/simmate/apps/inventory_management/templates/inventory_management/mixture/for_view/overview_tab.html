@@ -1,0 +1,71 @@
+<div class="tab-pane show active" id="overview-section">
+    <div class="row">
+        <div class="col-12 col-lg-5">{% include "inventory_management/for_view/mixture_drawings.html" %}</div>
+        <div class="col-12 col-lg-7 pt-3">
+            <h3 class="fw-semibold text-break mb-1">{{ table_entry.common_name|default:table_entry.display_id }}</h3>
+            <div class="mt-2 mb-4">
+                {% if table_entry.mixture_type %}
+                    <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ table_entry.mixture_type|replace:"_, "|capfirst }}</span>
+                {% endif %}
+            </div>
+            <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">Identity</div>
+            <dl class="row mb-4">
+                <dt class="col-6 col-sm-5 fw-normal text-muted">ID</dt>
+                <dd class="col-6 col-sm-7">
+                    {{ table_entry.display_id }}
+                </dd>
+                <dt class="col-6 col-sm-5 fw-normal text-muted">Synonyms</dt>
+                <dd class="col-6 col-sm-7 text-break">
+                    {{ table_entry.synonyms|join:", "|default:"--" }}
+                </dd>
+                <dt class="col-6 col-sm-5 fw-normal text-muted">Description</dt>
+                <dd class="col-6 col-sm-7 mb-0">
+                    {{ table_entry.description|default:"--" }}
+                </dd>
+            </dl>
+            <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">
+                Components ({{ mixture_components__count|intcomma }})
+            </div>
+            {% if mixture_components__count %}
+                <div class="table-responsive">
+                    <table class="table table-simmate mb-0">
+                        <thead>
+                            <tr>
+                                <th>Substance</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for part in mixture_components %}
+                                <tr>
+                                    <td>{% foreign_key_link part.substance %}</td>
+                                    <td>{{ part.substance.common_name|default:"--" }}</td>
+                                    <td>{{ part.role|default:"--"|replace:"_, "|capfirst }}</td>
+                                    <td class="text-nowrap">
+                                        {% if part.amount is not None %}
+                                            {{ part.amount }} {{ part.amount_units|default:"" }}
+                                        {% else %}
+                                            --
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if mixture_components__truncated %}
+                    <div class="text-center py-2">
+                        <a role="button"
+                           class="btn btn-outline-primary btn-sm"
+                           target="_blank"
+                           href="{% url 'data_explorer:table' 'Substance' %}?mixtures__id={{ table_entry.id }}">View All <i class="bi bi-box-arrow-up-right"></i></a>
+                    </div>
+                {% endif %}
+            {% else %}
+                <small>No substances are listed for this mixture.</small>
+            {% endif %}
+        </div>
+    </div>
+</div>

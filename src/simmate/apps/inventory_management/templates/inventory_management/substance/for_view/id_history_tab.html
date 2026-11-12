@@ -1,0 +1,37 @@
+<div class="tab-pane" id="id-history-section">
+    <p class="text-muted small">
+        Substance IDs are never deleted or reused. Instead, retired IDs redirect to the substance that replaced them, and every change is logged here.
+    </p>
+    <div class="table-responsive">
+        <table class="table table-simmate mb-0">
+            <thead>
+                <tr>
+                    <th>Change</th>
+                    <th>Old ID</th>
+                    <th>New ID</th>
+                    <th>Reason</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for change in id_changes %}
+                    <tr>
+                        <td>{{ change.change_type|title }}</td>
+                        <td>
+                            <a href="{% url 'data_explorer:table-entry' 'Substance' change.old_id %}">{{ change.old_id }}</a>
+                        </td>
+                        <td>
+                            {% if change.new_id %}
+                                <a href="{% url 'data_explorer:table-entry' 'Substance' change.new_id %}">{{ change.new_id }}</a>
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                        <td>{{ change.reason|default:"--" }}</td>
+                        <td class="text-nowrap">{{ change.created_at|date:"Y-m-d" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

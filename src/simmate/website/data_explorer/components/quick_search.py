@@ -32,6 +32,56 @@ class QuickSearchComponent(
     dashboard).
     """
 
+    substance_filters = {
+        "id": "id",
+        "name": "common_name__icontains",
+        "chemical_system": "structure__chemical_system",
+        "formula_reduced": "structure__formula_reduced",
+        "inchi_key": "molecule__inchi_key",
+    }
+    """
+    The `Substance` table filter to use for each type of query (see
+    `parse_query`).
+    """
+
+    @staticmethod
+    def parse_query(query: str, substance_table=None) -> tuple[str, str]:
+        """
+        Figures out what kind of search query this is, which sets the column
+        to search on (and the normalized value to search for).
+
+        Formulas only match if they are already written as a reduced formula
+        (e.g. "Fe2O3"), since that is how they are stored. This also lets
+        SMILES that happen to be valid formulas (e.g. "CCO") fall through to a
+        molecule search. Short queries that are both (e.g. "CO") are treated as
+        formulas. Anything else is treated as a name (e.g. "DMSO").
+
+        Args:
+            query: The text that the user searched for.
+            substance_table: The `Substance` table, which is used to check for
+                substance IDs. IDs are not checked when this is not given
+                (e.g. when the inventory app is not installed).
+
+        Returns:
+            The query type (one of "id", "chemical_system", "formula_reduced",
+            "inchi_key", or "name") and the value to search for. For SMILES,
+            the value is converted to an InChIKey.
+        """
+        if substance_table and substance_table.validate_id(query):
+            return "id", query
+        if re.fullmatch(r"[A-Z][a-z]?(-[A-Z][a-z]?)+", query):
+            return "chemical_system", "-".join(sorted(query.split("-")))
+        try:
+            is_formula = Composition(query).reduced_formula == query
+        except Exception:
+            is_formula = False
+        if is_formula:
+            return "formula_reduced", query
+        try:
+            return "inchi_key", ToolkitMolecule.from_smiles(query).to_inchi_key()
+        except Exception:
+            return "name", query
+
     def run_search(self, **kwargs):
         self.active_panel = "search_results"
         query = self.form_data.get("search_query", "").strip()
@@ -47,35 +97,10 @@ class QuickSearchComponent(
         # (rather than imported) because its app is optional
         substance_component = _SAFE_COMPONENTS.get("Substance")
 
-        # Figure out what kind of query this is, which sets the column we
-        # search on (and the normalized value to search for). Formulas only
-        # match if they are already written as a reduced formula (e.g. "Fe2O3"),
-        # since that is how they are stored. This also lets SMILES that happen
-        # to be valid formulas (e.g. "CCO") fall through to a molecule search.
-        # Short queries that are both (e.g. "CO") are treated as formulas.
-        # Anything else is treated as a name (e.g. "DMSO").
-        if substance_component and substance_component.table.validate_id(query):
-            search_field = "id"
-        elif re.fullmatch(r"[A-Z][a-z]?(-[A-Z][a-z]?)+", query):
-            search_field = "chemical_system"
-            query = "-".join(sorted(query.split("-")))
-        else:
-            try:
-                is_formula = Composition(query).reduced_formula == query
-            except Exception:
-                is_formula = False
-            if is_formula:
-                search_field = "formula_reduced"
-            else:
-                try:
-                    inchi_key = ToolkitMolecule.from_smiles(query).to_inchi_key()
-                except Exception:
-                    inchi_key = None
-                if inchi_key:
-                    search_field = "inchi_key"
-                    query = inchi_key
-                else:
-                    search_field = "name"
+        search_field, query = self.parse_query(
+            query,
+            substance_table=substance_component.table if substance_component else None,
+        )
 
         results = {}
 
@@ -91,13 +116,7 @@ class QuickSearchComponent(
             # Substances are searched via their ID, name, or linked molecule
             # or crystal structure, depending on the query type
             if is_substance:
-                url_filter = {
-                    "id": "id",
-                    "name": "common_name__icontains",
-                    "chemical_system": "structure__chemical_system",
-                    "formula_reduced": "structure__formula_reduced",
-                    "inchi_key": "molecule__inchi_key",
-                }[search_field]
+                url_filter = self.substance_filters[search_field]
                 if search_field == "id":
                     # follows merged IDs and loads datastore-only substances
                     try:

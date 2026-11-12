@@ -1,0 +1,14 @@
+{# A top-level tab of an entry page, given the `target` pane's id, an `icon` (shown on small screens), a `label`, an optional `count`, and whether it starts `active` #}
+<li class="nav-item">
+    <a href="#{{ target }}"
+       data-bs-toggle="tab"
+       aria-expanded="{% if active %}true{% else %}false{% endif %}"
+       class="nav-link {% if active %}active{% endif %}">
+        <i class="bi bi-{{ icon }} d-md-none d-block"></i>
+        <span class="d-none d-md-block">{{ label }}
+            {% if count is not None %}
+                <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis">{{ count|intcomma }}</span>
+            {% endif %}
+        </span>
+    </a>
+</li>

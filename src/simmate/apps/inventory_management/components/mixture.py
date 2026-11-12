@@ -1,6 +1,8 @@
+from django.db.models import F
+
 from simmate.website.data_explorer.components import TableComponent
 
-from ..models import Mixture
+from ..models import Container, Mixture, UsageLog
 
 
 class MixtureComponent(TableComponent):
@@ -59,18 +61,44 @@ class MixtureComponent(TableComponent):
         "substances__ids",
     ]
 
+    # -------------------------------------------------------------------------
+
+    # ENTRY VIEW
+
     @classmethod
     def get_extra_entry_context(cls, request, table_entry: Mixture) -> dict:
+        limit = 25
+        # in-stock batches and containers first (`is_depleted` is nullable)
+        in_stock_first = (F("is_depleted").asc(nulls_first=True), "-id")
 
-        count_limit = 50_000
+        # the substances in the mixture, along with their role and amount
+        components = table_entry.components.select_related(
+            "substance__molecule"
+        ).order_by("id")
+        components__count = components.count()
+        components = list(components[:limit])
 
-        substances__limit = 10
-        substances__count = table_entry.substances.all()[:count_limit].count()
-        substances = table_entry.substances.order_by("-id").all()[:substances__limit]
-        substances__truncated = bool(len(substances) >= substances__limit)
+        # physical inventory of the mixture
+        batches = table_entry.batches.all()
+        batches__count = batches.count()
+        containers = Container.get_web_queryset().filter(batch__mixture=table_entry)
+        containers__count = containers.count()
+        usage_logs = UsageLog.objects.filter(
+            source_container__batch__mixture=table_entry
+        ).select_related("source_container", "user")
+        usage_logs__count = usage_logs.count()
 
         return {
-            "substances": substances,
-            "substances__count": substances__count,
-            "substances__truncated": substances__truncated,
+            "mixture_components": components,
+            "mixture_components__count": components__count,
+            "mixture_components__truncated": components__count > limit,
+            "batches": batches.order_by(*in_stock_first)[:limit],
+            "batches__count": batches__count,
+            "batches__truncated": batches__count > limit,
+            "containers": containers.order_by(*in_stock_first)[:limit],
+            "containers__count": containers__count,
+            "containers__truncated": containers__count > limit,
+            "usage_logs": usage_logs.order_by("-created_at", "-id")[:limit],
+            "usage_logs__count": usage_logs__count,
+            "usage_logs__truncated": usage_logs__count > limit,
         }

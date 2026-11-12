@@ -1,0 +1,81 @@
+<ul class="nav nav-tabs nav-bordered mb-3">
+    <li class="nav-item">
+        <a href="#overview-section"
+           data-bs-toggle="tab"
+           aria-expanded="true"
+           class="nav-link active">
+            <i class="bi bi-house-door d-md-none d-block"></i>
+            <span class="d-none d-md-block">Overview</span>
+        </a>
+    </li>
+    {% if table_entry.molecule %}
+        <li class="nav-item">
+            <a href="#molecule-details-section"
+               data-bs-toggle="tab"
+               aria-expanded="false"
+               class="nav-link">
+                <i class="bi bi-hexagon d-md-none d-block"></i>
+                <span class="d-none d-md-block">Molecule</span>
+            </a>
+        </li>
+    {% endif %}
+    {% if table_entry.structure %}
+        <li class="nav-item">
+            <a href="#structure-details-section"
+               data-bs-toggle="tab"
+               aria-expanded="false"
+               class="nav-link">
+                <i class="bi bi-box d-md-none d-block"></i>
+                <span class="d-none d-md-block">Structure</span>
+            </a>
+        </li>
+    {% endif %}
+    <li class="nav-item">
+        <a href="#inventory-section"
+           data-bs-toggle="tab"
+           aria-expanded="false"
+           class="nav-link">
+            <i class="bi bi-box-seam d-md-none d-block"></i>
+            <span class="d-none d-md-block">Inventory <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis">{{ batches__count|intcomma }}</span></span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#related-section"
+           data-bs-toggle="tab"
+           aria-expanded="false"
+           class="nav-link">
+            <i class="bi bi-diagram-3 d-md-none d-block"></i>
+            <span class="d-none d-md-block">Related <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis">{{ related__count|intcomma }}</span></span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#projects-section"
+           data-bs-toggle="tab"
+           aria-expanded="false"
+           class="nav-link">
+            <i class="bi bi-clipboard2-data d-md-none d-block"></i>
+            <span class="d-none d-md-block">Projects <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis">{{ projects__count|intcomma }}</span></span>
+        </a>
+    </li>
+    {% if id_changes %}
+        <li class="nav-item">
+            <a href="#id-history-section"
+               data-bs-toggle="tab"
+               aria-expanded="false"
+               class="nav-link">
+                <i class="bi bi-clock-history d-md-none d-block"></i>
+                <span class="d-none d-md-block">ID History <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis">{{ id_changes|length }}</span></span>
+            </a>
+        </li>
+    {% endif %}
+    <li class="nav-item">
+        <a href="#linked-datasets-section"
+           data-bs-toggle="tab"
+           aria-expanded="false"
+           class="nav-link">
+            <i class="bi bi-database d-md-none d-block"></i>
+            <span class="d-none d-md-block">Linked Datasets <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis">{{ linked_datasets__count|intcomma }}</span></span>
+        </a>
+    </li>
+    <li class="nav-item ms-auto align-self-center">{% include "inventory_management/for_view/update_button.html" %}</li>
+</ul>
