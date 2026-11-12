@@ -259,7 +259,7 @@ class ContainerComponent(
             return
 
         # Nothing matched, so the query is parsed as a description (by an llm)
-        from simmate.apps.chatbot.parsers import parse_container_description
+        from ..ai import parse_container_description
 
         parsed = parse_container_description(query)
 

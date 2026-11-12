@@ -80,6 +80,7 @@ Apps follow a consistent (though optional) layout depending on their purpose (si
 - **`client.py`**: API clients for external services (e.g., Materials Project, PubChem).
 - **`datastores/`**: `Datastore` subclasses for very large datasets (see Datastores below).
 - **`schedules.py`**: Periodic tasks (used by `simmate compute scheduler start`).
+- **`ai/`**: LLM-backed tools for the app (e.g. parsing free text into form inputs), built on the shared llm from `simmate.apps.chatbot`.
 
 ## Toolkit Details (`src/simmate/toolkit/`)
 

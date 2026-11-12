@@ -46,7 +46,8 @@ def parse_container_description(text: str) -> dict:
     Returns:
         The parsed form inputs (see the example above).
     """
-    # TODO: replace this placeholder with a call to the llm (via `get_llm()`).
+    # TODO: replace this placeholder with a call to the llm (via
+    # `simmate.apps.chatbot.llm.get_llm()`).
     # For now, this always gives the example above so that the form can be
     # tried out end to end.
     return {

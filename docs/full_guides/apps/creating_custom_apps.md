@@ -27,6 +27,7 @@ All apps follow the same folder structure. While almost every folder is optional
 
 ```
 ├── example_app
+│   ├── ai/              # LLM-backed tools (parsers, assistants)
 │   ├── command_line/    # custom CLI commands
 │   ├── components/      # HTMX/UI components
 │   ├── migrations/      # Database migrations

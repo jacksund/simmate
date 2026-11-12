@@ -73,6 +73,8 @@ class HtmxComponent:
         # from cache using the component_id
         self.component_id = get_uuid_starting_with_letter()
         self.form_data = {}
+        # so that mount hooks can queue js actions for the first render
+        self.js_actions = []
         # Requests for one component are handled one at a time, as they all
         # modify this same object (see `handle_request`)
         self._request_lock = threading.Lock()
