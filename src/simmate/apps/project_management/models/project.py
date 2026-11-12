@@ -2,6 +2,7 @@ import random
 
 from django.contrib.auth.models import User
 
+from simmate.config import settings
 from simmate.database.core import DatabaseTable, table_column
 
 from ..data import GREEK_GODS
@@ -66,24 +67,17 @@ class Project(DatabaseTable):
     data.
     """
 
-    # TODO: options should be pulled from settings file to allow custom setups
-    # For now, I put in random placeholders
-    discipline_options = [
-        "Battery Materials",
-        "Pesticides",
-        "Photovoltaics",
-        "Other",
-    ]
+    discipline_options = settings.project_management.discipline_options
     discipline = table_column.CharField(
         max_length=50,
         blank=True,
         null=True,
     )
     """
-    The discipline type associated with. The options here are pulled from
-    the simmate settings file. The defaults are made to span many companies
-    and labs, so they are more general, whereas individual simmate instances
-    may want a more well-defined list.
+    The research area this project belongs to. The options are pulled from
+    the simmate settings file (`project_management.discipline_options`). The
+    defaults are general so they span many companies and labs, whereas
+    individual simmate instances may want a more well-defined list.
     """
 
     # -------------------------------------------------------------------------
