@@ -65,11 +65,14 @@
             </div>
         </div>
     </div>
-    <div class="text-center py-2">
-        <a class="btn btn-warning btn-sm"
-           type="button"
-           href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">
-            <i class="bi bi-pencil py-1"></i>&nbsp;&nbsp;Update
-        </a>
-    </div>
+    {% user_can table_entry "update" as can_update %}
+    {% if can_update %}
+        <div class="text-center py-2">
+            <a class="btn btn-warning btn-sm"
+               type="button"
+               href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">
+                <i class="bi bi-pencil py-1"></i>&nbsp;&nbsp;Update
+            </a>
+        </div>
+    {% endif %}
 </div>

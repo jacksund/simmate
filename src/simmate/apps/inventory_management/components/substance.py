@@ -46,6 +46,13 @@ class SubstanceComponent(TableComponent, MoleculeInput, StructureInput):
 
     tabtitle_label_col = "id"
 
+    @classmethod
+    def has_permission(cls, user, component_type, table_entry=None) -> bool:
+        # anyone can view & search, but only admins can register or edit substances
+        if component_type in ["dashboard", "entries", "entry", "report", "search"]:
+            return True
+        return bool(user and user.is_staff)
+
     post_data_mappings = {
         # a multiselect, so a single selected type must still give a list
         "stereochem_type": list[str],

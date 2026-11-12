@@ -35,6 +35,22 @@ class ProjectComponent(TableComponent, UserInput):
     # -------------------------------------------------------------------------
 
     @classmethod
+    def has_permission(cls, user, component_type, table_entry=None) -> bool:
+        # anyone can view & search, admins can create, and admins or the
+        # project's leaders can edit it
+        if component_type in ["dashboard", "entries", "entry", "report", "search"]:
+            return True
+        if not user or not user.is_authenticated:
+            return False
+        if user.is_staff:
+            return True
+        if component_type == "update":
+            return table_entry.leaders.filter(pk=user.pk).exists()
+        return False
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
     def get_extra_entry_context(cls, request, table_entry: Project) -> dict:
 
         count_limit = 50_000
