@@ -89,6 +89,10 @@ class Project(DatabaseTable):
         blank=True,
         related_name="child_projects",
     )
+    """
+    The project that this one is a part of (i.e. a sub-project of). Projects
+    can be nested any number of levels deep to allow folder-like organization.
+    """
 
     num_child_projects_recursive = table_column.IntegerField(blank=True, null=True)
     # a fully iterated version (children + their children)
@@ -97,6 +101,11 @@ class Project(DatabaseTable):
     # True when "parent_project" is null
 
     # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_web_queryset(cls):
+        # the project table links to each parent (one query, not one per row)
+        return cls.objects.select_related("parent_project")
 
     @classmethod
     def suggest_new_name(cls) -> str:
@@ -108,5 +117,28 @@ class Project(DatabaseTable):
             n for n in suggested_names if n not in existing_names
         ]
         return random.choice(suggested_names_cleaned)
+
+    def get_path(self, max_depth: int = 10) -> list["Project"]:
+        """
+        Gives the projects from the top level down to (and including) this
+        one, such as for a breadcrumb.
+
+        Args:
+            max_depth: The most parent projects to walk up through, which
+                also guards against accidental cycles.
+        """
+        path = [self]
+        while path[0].parent_project_id and len(path) <= max_depth:
+            if path[0].parent_project_id in {project.id for project in path}:
+                break  # a cycle
+            parent = (
+                Project.objects.filter(id=path[0].parent_project_id)
+                .only("name", "parent_project_id")
+                .first()
+            )
+            if not parent:
+                break
+            path.insert(0, parent)
+        return path
 
     # -------------------------------------------------------------------------

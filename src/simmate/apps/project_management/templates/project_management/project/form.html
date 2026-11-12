@@ -17,6 +17,9 @@
             <div class="col-md-4">{% htmx_selectbox name="discipline" %}</div>
             <div class="col-md-4">{% htmx_selectbox name="status" %}</div>
         </div>
+        <div class="row">
+            <div class="col-md-4">{% htmx_selectbox name="parent_project_id" label="Parent Project" %}</div>
+        </div>
         {% if component.component_type != "search" %}
             <div class="row">
                 <div class="col-sm">

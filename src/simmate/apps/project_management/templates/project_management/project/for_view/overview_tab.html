@@ -26,6 +26,26 @@
                                 </td>
                             </tr>
                             <tr>
+                                <td>Parent Projects</td>
+                                <td>
+                                    {% if table_entry.parent_project_id %}
+                                        <ol class="breadcrumb m-0">
+                                            {% for project in project_path %}
+                                                <li class="breadcrumb-item {% if forloop.last %}active{% endif %}">
+                                                    {% if forloop.last %}
+                                                        {{ project.name }}
+                                                    {% else %}
+                                                        <a href="{% url 'data_explorer:table-entry' 'Project' project.id %}">{{ project.name }}</a>
+                                                    {% endif %}
+                                                </li>
+                                            {% endfor %}
+                                        </ol>
+                                    {% else %}
+                                        -- (top-level project)
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
                                 <td>Discipline</td>
                                 <td>{{ table_entry.discipline }}</td>
                             </tr>

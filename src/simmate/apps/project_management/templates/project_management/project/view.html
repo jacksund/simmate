@@ -4,6 +4,16 @@
         {% include "project_management/project/for_view/tabs_header.html" %}
         <div class="tab-content">
             {% include "project_management/project/for_view/overview_tab.html" %}
+            {# Sub-projects #}
+            <div class="tab-pane" id="sub-projects-section">
+                {% if table_entry.tree_children %}
+                    <ul class="tree-view">
+                        {% include "project_management/project/for_view/tree_node.html" with node=table_entry is_current=True %}
+                    </ul>
+                {% else %}
+                    <small>There are no projects inside this one.</small>
+                {% endif %}
+            </div>
             {# include "project_management/project/for_view/tags_tab.html" #}
         </div>
     </div>

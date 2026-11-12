@@ -1,7 +1,12 @@
+from functools import cached_property
+
+from django.db.models import Count
+
 from simmate.website.data_explorer.components import TableComponent
 from simmate.website.htmx.components import UserInput
 
 from ..models import Project
+from .dashboard import STATUS_THEMES
 
 
 class ProjectComponent(TableComponent, UserInput):
@@ -60,7 +65,47 @@ class ProjectComponent(TableComponent, UserInput):
         tags = table_entry.tags.order_by("-id").all()[:tags__limit]
         tags__truncated = bool(len(tags) >= tags__limit)
 
+        # Walk down through the sub-projects one level at a time to build the
+        # tree of sub-projects. Only the first `max_nodes` are put in the tree.
+        max_depth = 10
+        max_nodes = 100
+        table_entry.tree_children = []
+        nodes = {table_entry.id: table_entry}
+        descendant_ids = []
+        level = [table_entry.id]
+        for _ in range(max_depth):
+            children = (
+                Project.objects.filter(parent_project_id__in=level)
+                .exclude(id__in=list(nodes) + descendant_ids)  # guards cycles
+                .only("name", "status", "discipline", "parent_project_id")
+                .order_by("name", "id")
+            )
+            level = []
+            for child in children:
+                descendant_ids.append(child.id)
+                level.append(child.id)
+                # the parent may have been left out of the tree by the cap
+                if len(nodes) <= max_nodes and child.parent_project_id in nodes:
+                    child.tree_children = []
+                    child.status_theme = STATUS_THEMES.get(child.status, "secondary")
+                    nodes[child.parent_project_id].tree_children.append(child)
+                    nodes[child.id] = child
+            if not level:
+                break
+        # count all sub-projects, so that we can say how many are not shown
+        counts = dict(
+            Project.objects.filter(parent_project_id__in=list(nodes))
+            .values_list("parent_project_id")
+            .annotate(count=Count("id"))
+            .order_by()
+        )
+        for node in nodes.values():
+            node.tree_more = counts.get(node.id, 0) - len(node.tree_children)
+        table_entry.status_theme = STATUS_THEMES.get(table_entry.status, "secondary")
+
         return {
+            "project_path": table_entry.get_path(),
+            "sub_projects__count": len(descendant_ids),
             "tags": tags,
             "tags__count": tags__count,
             "tags__truncated": tags__truncated,
@@ -78,6 +123,15 @@ class ProjectComponent(TableComponent, UserInput):
         "leaders__ids",
         "members__ids",
     ]
+
+    @cached_property
+    def parent_project_id_options(self) -> list[tuple[int, str]]:
+        projects = Project.objects.order_by("name").values_list("id", "name")
+        table_entry = getattr(self, "table_entry", None)
+        if table_entry:
+            # a project can't be its own parent
+            projects = projects.exclude(id=table_entry.id)
+        return list(projects)
 
     def check_form_for_create(self):
         super().check_form_for_create()
@@ -102,10 +156,30 @@ class ProjectComponent(TableComponent, UserInput):
         "status",
         "leaders__ids",
         "members__ids",
+        "parent_project_id",
     ]
 
     def check_form_for_update(self):
         self.check_required_inputs()
+
+        # the parent can't be this project or one nested inside of it, as
+        # that would create a cycle
+        parent_id = self.form_data.get("parent_project_id", None)
+        if parent_id:
+            nested_ids = {self.table_entry.id}
+            level = [self.table_entry.id]
+            while level and int(parent_id) not in nested_ids:
+                level = list(
+                    Project.objects.filter(parent_project_id__in=level)
+                    .exclude(id__in=nested_ids)
+                    .values_list("id", flat=True)
+                )
+                nested_ids.update(level)
+            if int(parent_id) in nested_ids:
+                self.form_errors.append(
+                    "A project's parent can't be itself or one of its sub-projects."
+                )
+
         # if the sure the Project name was changed, make sure it is a new one
         project_name = self.form_data.get("name", None)
         if project_name:
