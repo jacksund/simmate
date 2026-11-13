@@ -1,0 +1,29 @@
+{% extends "data_explorer/entries.html" %}
+{% block table_headers %}
+    {% table_header "id" "ID" min_width=90 %}
+    {% if not project_view %}
+        {% table_header "project__name" "Project" min_width=100 %}
+    {% endif %}
+    <th style="min-width:90px">Candidate A</th>
+    <th style="min-width:90px">Candidate B</th>
+    <th style="min-width:90px">Winner</th>
+    {% table_header "judge_type" "Judge" min_width=90 %}
+    {% table_header "created_at" "Date" min_width=115 %}
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry %}</td>
+    {% if not project_view %}
+        <td>{% foreign_key_link entry.project "name" %}</td>
+    {% endif %}
+    <td>{% foreign_key_link entry.candidate_a %}</td>
+    <td>{% foreign_key_link entry.candidate_b %}</td>
+    <td>
+        {% if entry.winner %}
+            {{ entry.winner.display_id }}
+        {% else %}
+            (draw)
+        {% endif %}
+    </td>
+    <td>{{ entry.judge_type }}</td>
+    <td>{{ entry.created_at|date:"Y-m-d" }}</td>
+{% endblock %}

@@ -136,7 +136,10 @@ class SubstanceComponent(TableComponent, MoleculeInput, StructureInput):
                 if other.substance_id != table_entry.id
             ]
 
-        projects = table_entry.projects.order_by("name")
+        # the projects where this substance is a candidate
+        candidates = table_entry.project_candidates.select_related("project").order_by(
+            "project__name"
+        )
 
         return {
             "viewer_default": cls.get_viewer_default(table_entry),
@@ -169,8 +172,8 @@ class SubstanceComponent(TableComponent, MoleculeInput, StructureInput):
             "mixtures__count": mixtures__count,
             "mixtures__truncated": mixtures__count > limit,
             "related__count": related_substances__count + mixtures__count,
-            "projects": projects,
-            "projects__count": projects.count(),
+            "candidates": candidates,
+            "candidates__count": candidates.count(),
             "id_changes": list(table_entry.id_changes),
         }
 

@@ -1,0 +1,84 @@
+{% extends "data_explorer/entry.html" %}
+{% block entrycontent %}
+    <div class="row py-2">
+        <div class="row pb-2">
+            <div class="col-12">
+                <div class="page-title-box">
+                    {% user_can table_entry "update" as can_update %}
+                    {% if can_update %}
+                        <div class="page-title-right m-0">
+                            <a role="button"
+                               class="btn btn-outline-primary btn-sm"
+                               href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Edit <i class="bi bi-pencil"></i></a>
+                        </div>
+                    {% endif %}
+                    <h3 class="m-0">Candidate Info</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <table class="table table-simmate mb-0">
+                <tbody>
+                    <tr>
+                        <td>Project</td>
+                        <td>{% foreign_key_link table_entry.project "name" %}</td>
+                    </tr>
+                    <tr>
+                        <td>{% if table_entry.is_mixture %}Mixture{% else %}Substance{% endif %}</td>
+                        <td>
+                            {% if table_entry.is_mixture %}
+                                {% foreign_key_link table_entry.mixture %}
+                                {% if table_entry.mixture.common_name %}({{ table_entry.mixture.common_name }}){% endif %}
+                            {% else %}
+                                {% foreign_key_link table_entry.substance %}
+                                {% if table_entry.substance.common_name %}({{ table_entry.substance.common_name }}){% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Rating</td>
+                        <td>
+                            {{ table_entry.rating|floatformat:0 }}
+                            {% if table_entry.rating_deviation is not None %}
+                                ± {{ table_entry.rating_deviation|floatformat:0 }}
+                            {% endif %}
+                            <small class="text-muted">({{ table_entry.project.rating_system }})</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Matchups</td>
+                        <td>{{ table_entry.num_matchups }}</td>
+                    </tr>
+                    <tr>
+                        <td>Added By</td>
+                        <td>{{ table_entry.added_by.username|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Comments</td>
+                        <td>{{ table_entry.comments|default:"--"|linebreaks }}</td>
+                    </tr>
+                    <tr>
+                        <td>Metadata</td>
+                        <td>
+                            {% if table_entry.metadata %}
+                                <pre class="mb-0">{{ table_entry.metadata|pprint }}</pre>
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row py-2">
+        <h4>
+            Matchups <small>({{ matchups__count }})</small>
+        </h4>
+        {% if matchups %}
+            {% include "project_management/matchup/table.html" with entries=matchups project_view=True truncated=matchups__truncated %}
+        {% else %}
+            <small>This candidate has not been in any matchups yet.</small>
+        {% endif %}
+    </div>
+{% endblock %}

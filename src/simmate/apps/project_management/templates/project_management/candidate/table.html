@@ -1,0 +1,41 @@
+{% extends "data_explorer/entries.html" %}
+{% block table_headers %}
+    {% if project_view %}<th style="min-width:40px">Rank</th>{% endif %}
+    {% table_header "id" "ID" min_width=90 %}
+    {% if not project_view %}
+        {% table_header "project__name" "Project" min_width=100 %}
+    {% endif %}
+    <th style="min-width:150px">Substance / Mixture</th>
+    {% table_header "rating" min_width=80 %}
+    {% table_header "rating_deviation" "± RD" min_width=70 %}
+    {% table_header "num_matchups" "Matchups" min_width=80 %}
+    {% table_header "updated_at" "Updated" min_width=115 %}
+    <th style="min-width:50px">Edit</th>
+{% endblock %}
+{% block table_rows %}
+    {% if project_view %}<td>{{ forloop.counter }}</td>{% endif %}
+    <td>{% foreign_key_link entry %}</td>
+    {% if not project_view %}
+        <td>{% foreign_key_link entry.project "name" %}</td>
+    {% endif %}
+    <td>
+        {% if entry.is_mixture %}
+            {% foreign_key_link entry.mixture %}
+            {% if entry.mixture.common_name %}({{ entry.mixture.common_name }}){% endif %}
+        {% else %}
+            {% foreign_key_link entry.substance %}
+            {% if entry.substance.common_name %}({{ entry.substance.common_name }}){% endif %}
+        {% endif %}
+    </td>
+    <td>{{ entry.rating|floatformat:0 }}</td>
+    <td>
+        {% if entry.rating_deviation is not None %}
+            {{ entry.rating_deviation|floatformat:0 }}
+        {% else %}
+            --
+        {% endif %}
+    </td>
+    <td>{{ entry.num_matchups }}</td>
+    <td>{{ entry.updated_at|date:"Y-m-d" }}</td>
+    {% update_entry_link entry %}
+{% endblock %}

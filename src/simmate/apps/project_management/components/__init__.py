@@ -1,4 +1,6 @@
+from .candidate import CandidateComponent
 from .dashboard import ProjectDashboardComponent
+from .matchup import MatchupComponent
 from .mixins import ProjectInput, ProjectManagementInput
 from .project import ProjectComponent
 from .tag import TagComponent

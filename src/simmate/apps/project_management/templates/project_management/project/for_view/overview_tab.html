@@ -79,6 +79,14 @@
                                 <td>Description</td>
                                 <td>{{ table_entry.description|linebreaks }}</td>
                             </tr>
+                            <tr>
+                                <td>Objective</td>
+                                <td>{{ table_entry.objective|default:"--"|linebreaks }}</td>
+                            </tr>
+                            <tr>
+                                <td>Rating System</td>
+                                <td>{{ table_entry.rating_system }}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>

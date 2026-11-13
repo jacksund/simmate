@@ -65,6 +65,14 @@ class ProjectComponent(TableComponent, UserInput):
         tags = table_entry.tags.order_by("-id").all()[:tags__limit]
         tags__truncated = bool(len(tags) >= tags__limit)
 
+        # the leaderboard of this project's candidates
+        candidates__limit = 25
+        candidates__count = table_entry.candidates.count()
+        candidates = table_entry.candidates.select_related(
+            "substance", "mixture"
+        ).order_by("-rating", "id")[:candidates__limit]
+        candidates__truncated = candidates__count > candidates__limit
+
         # Walk down through the sub-projects one level at a time to build the
         # tree of sub-projects. Only the first `max_nodes` are put in the tree.
         max_depth = 10
@@ -109,6 +117,9 @@ class ProjectComponent(TableComponent, UserInput):
             "tags": tags,
             "tags__count": tags__count,
             "tags__truncated": tags__truncated,
+            "candidates": candidates,
+            "candidates__count": candidates__count,
+            "candidates__truncated": candidates__truncated,
         }
 
     # -------------------------------------------------------------------------
@@ -132,6 +143,9 @@ class ProjectComponent(TableComponent, UserInput):
             # a project can't be its own parent
             projects = projects.exclude(id=table_entry.id)
         return list(projects)
+
+    def mount_for_create(self):
+        self.update_form("rating_system", "glicko")
 
     def check_form_for_create(self):
         super().check_form_for_create()
@@ -157,6 +171,8 @@ class ProjectComponent(TableComponent, UserInput):
         "leaders__ids",
         "members__ids",
         "parent_project_id",
+        "objective",
+        "rating_system",
     ]
 
     def check_form_for_update(self):
@@ -192,6 +208,17 @@ class ProjectComponent(TableComponent, UserInput):
                 self.form_errors.append(
                     f"A project with the name '{project_name}' already exists."
                 )
+
+    # -------------------------------------------------------------------------
+
+    def save_to_db_for_update(self):
+        # ratings depend on the rating system, so they're rebuilt when it changes
+        old_rating_system = Project.objects.values_list("rating_system", flat=True).get(
+            id=self.table_entry.id
+        )
+        super().save_to_db_for_update()
+        if self.table_entry.rating_system != old_rating_system:
+            self.table_entry.recalculate_ratings()
 
     # -------------------------------------------------------------------------
 

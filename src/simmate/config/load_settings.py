@@ -219,6 +219,8 @@ class SimmateSettings:
                     "Project Management": [
                         "simmate.apps.project_management.components.ProjectComponent",
                         "simmate.apps.project_management.components.TagComponent",
+                        "simmate.apps.project_management.components.CandidateComponent",
+                        "simmate.apps.project_management.components.MatchupComponent",
                     ],
                     "Inventory Management": [
                         "simmate.apps.inventory_management.components.SubstanceComponent",
