@@ -78,6 +78,38 @@ def update_url(context, **kwargs):
     return f"?{query}"
 
 
+@register.simple_tag(takes_context=True)
+def user_can(context, table_entry, component_type: str) -> bool:
+    """
+    Whether the current user may use a component type (e.g. "create" or
+    "update") for a table, using its `TableComponent.has_permission`. Give
+    either a table entry or a table name.
+
+    Example use:
+    ``` html
+    {% user_can table_entry "update" as can_update %}
+    {% if can_update %}...update button...{% endif %}
+
+    {% user_can "Tag" "create" as can_create_tag %}
+    ```
+    """
+    # imported here because the views module loads all data explorer components
+    from simmate.website.data_explorer.views import _SAFE_COMPONENTS
+
+    if isinstance(table_entry, str):
+        table_name = table_entry
+        table_entry = None
+    else:
+        table_name = table_entry.table_name
+
+    component = _SAFE_COMPONENTS.get(table_name)
+    if component is None:
+        return False
+
+    user = getattr(context.get("request"), "user", None)
+    return component.has_permission(user, component_type, table_entry)
+
+
 @register.filter(name="markdown")
 def markdown_to_html(markdown_str):
     """

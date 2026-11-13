@@ -17,10 +17,19 @@
             <div class="col-md-4">{% htmx_selectbox name="discipline" %}</div>
             <div class="col-md-4">{% htmx_selectbox name="status" %}</div>
         </div>
+        <div class="row">
+            <div class="col-md-4">{% htmx_selectbox name="parent_project_id" label="Parent Project" %}</div>
+            <div class="col-md-4">{% htmx_selectbox name="rating_system" label="Rating System" %}</div>
+        </div>
         {% if component.component_type != "search" %}
             <div class="row">
                 <div class="col-sm">
                     {% htmx_text_area name="description" placeholder="A quick description about this project and its scope" %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm">
+                    {% htmx_text_area name="objective" placeholder="(optional) What makes one candidate better than another. This sets the rules for judging candidate matchups (e.g. llm debates)." %}
                 </div>
             </div>
         {% endif %}

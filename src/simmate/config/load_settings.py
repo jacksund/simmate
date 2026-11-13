@@ -219,6 +219,8 @@ class SimmateSettings:
                     "Project Management": [
                         "simmate.apps.project_management.components.ProjectComponent",
                         "simmate.apps.project_management.components.TagComponent",
+                        "simmate.apps.project_management.components.CandidateComponent",
+                        "simmate.apps.project_management.components.MatchupComponent",
                     ],
                     "Inventory Management": [
                         "simmate.apps.inventory_management.components.SubstanceComponent",
@@ -399,6 +401,31 @@ class SimmateSettings:
             },
             "materials_project": {
                 "api_key": None,
+            },
+            "project_management": {
+                # single-pick application areas. Override this list in your
+                # settings file to fit your company/lab
+                "discipline_options": [
+                    "Batteries & Energy Storage",
+                    "Photovoltaics",
+                    "Catalysis",
+                    "Hydrogen & Fuel Cells",
+                    "Carbon Capture",
+                    "Semiconductors & Electronics",
+                    "Magnetic & Quantum Materials",
+                    "Polymers",
+                    "Coatings & Corrosion",
+                    "Alloys & Structural Materials",
+                    "Membranes & Separations",
+                    "Pharmaceuticals",
+                    "Agrochemicals",
+                    "Flavors, Fragrances & Consumer Products",
+                    "Biomaterials",
+                    "Environmental Chemistry",
+                    "Methods & Software",
+                    "Shared Resources & Infrastructure",
+                    "Other",
+                ],
             },
             "vasp": {
                 "default_command": "vasp_std > vasp.out",

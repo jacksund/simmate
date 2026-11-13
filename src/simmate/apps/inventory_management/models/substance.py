@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.functional import classproperty
 
+from simmate.apps.project_management.models import Project
 from simmate.config import settings
 from simmate.database.core import DatabaseTable, table_column
 from simmate.database.mixins import ThirdPartyData
@@ -259,16 +260,6 @@ class Substance(DatabaseTable):
 
     If the substance also needs to be delisted, this field can be used to refund
     the user.
-    """
-
-    projects = table_column.ManyToManyField(
-        "project_management.Project",
-        blank=True,
-        related_name="substances",
-        db_table="inventory_management__substance_projects",
-    )
-    """
-    The projects that this substance is associated with.
     """
 
     # -------------------------------------------------------------------------
@@ -820,6 +811,15 @@ class Substance(DatabaseTable):
             Q(old_id=self.id) | Q(new_id=self.id)
         ).order_by("created_at")
 
+    @property
+    def projects(self):
+        """
+        All projects that this substance is a candidate in. See
+        `project_candidates` for each project's candidate entry (e.g. its
+        rating).
+        """
+        return Project.objects.filter(candidates__substance=self).distinct()
+
     @classmethod
     def resolve_id(cls, substance_id: str) -> str:
         """
@@ -865,8 +865,8 @@ class Substance(DatabaseTable):
         """
         Moves everything that links to the old substances over to the new
         one. This includes all foreign keys (e.g. batches, child substances,
-        and third-party dataset entries) and many-to-many links (e.g. mixtures
-        and projects) from any installed app.
+        third-party dataset entries, and project candidates) and many-to-many
+        links (e.g. mixtures) from any installed app.
         """
 
         # foreign keys from other tables (and from this table, e.g. `parent`
@@ -887,8 +887,8 @@ class Substance(DatabaseTable):
                 datastore_synced_at=None,
             )
 
-        # many-to-many links, both those defined on this table (e.g. projects)
-        # and those pointing to it (e.g. mixtures). Links are moved in place so
+        # many-to-many links, both those defined on this table and those
+        # pointing to it (e.g. mixtures). Links are moved in place so
         # that any extra columns (e.g. a mixture component's role) are kept.
         # The new substance may already have some of these links, so those
         # duplicates are dropped first (keeping the new substance's own row).
@@ -929,7 +929,7 @@ class Substance(DatabaseTable):
     def _get_m2m_links(cls) -> list[tuple]:
         """
         Gives every many-to-many link to this table, both those defined on
-        this table (e.g. projects) and those pointing to it (e.g. mixtures).
+        this table and those pointing to it (e.g. mixtures).
 
         Returns:
             A list of (through model, substance id column, other id column).
@@ -955,7 +955,8 @@ class Substance(DatabaseTable):
     def get_referenced_ids(cls, substance_ids: list[str]) -> set[str]:
         """
         Gives which of the given substances are linked to by anything (e.g.
-        batches, mixtures, projects, dataset entries, or other substances).
+        batches, mixtures, project candidates, dataset entries, or other
+        substances).
         These must stay in this table.
         """
         links = cls._get_fk_links() + [

@@ -44,11 +44,13 @@ def test_dashboard(client, monkeypatch):
         response = client.get(alert["url"])
         assert response.status_code == 200, alert["url"]
 
-    projects = ProjectDashboardComponent.get_project_tree()
-    assert {p.name for p in projects} == {"Zeus", "Apollo", "Hermes", "Hestia"}
-    zeus_entry = next(p for p in projects if p.name == "Zeus")
-    assert [c.name for c in zeus_entry.children] == ["Athena"]
+    top_level = ProjectDashboardComponent.get_sub_projects(parent_id=None)
+    assert [p.name for p in top_level] == ["Apollo", "Hermes", "Hestia", "Zeus"]
+    zeus_entry = next(p for p in top_level if p.name == "Zeus")
+    assert zeus_entry.nchild_projects == 1
     assert zeus_entry.nmembers == 2 and zeus_entry.nleaders == 1
+    in_zeus = ProjectDashboardComponent.get_sub_projects(parent_id=zeus.id)
+    assert [p.name for p in in_zeus] == ["Athena"]
 
     my_projects = ProjectDashboardComponent.get_my_projects(member)
     roles = {p.name: p.role for p in my_projects}

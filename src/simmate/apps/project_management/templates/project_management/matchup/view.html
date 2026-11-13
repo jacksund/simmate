@@ -1,0 +1,55 @@
+{% extends "data_explorer/entry.html" %}
+{% block entrycontent %}
+    <div class="row py-2">
+        <div class="col-xl-12">
+            <h3>Matchup Info</h3>
+            <table class="table table-simmate mb-0">
+                <tbody>
+                    <tr>
+                        <td>Project</td>
+                        <td>{% foreign_key_link table_entry.project "name" %}</td>
+                    </tr>
+                    <tr>
+                        <td>Candidate A</td>
+                        <td>
+                            {% foreign_key_link table_entry.candidate_a %}
+                            <small class="text-muted">
+                                ({{ table_entry.ratings_before.a.rating|floatformat:0 }} → {{ table_entry.ratings_after.a.rating|floatformat:0 }})
+                            </small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Candidate B</td>
+                        <td>
+                            {% foreign_key_link table_entry.candidate_b %}
+                            <small class="text-muted">
+                                ({{ table_entry.ratings_before.b.rating|floatformat:0 }} → {{ table_entry.ratings_after.b.rating|floatformat:0 }})
+                            </small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Winner</td>
+                        <td>
+                            {% if table_entry.winner %}
+                                {% foreign_key_link table_entry.winner %}
+                            {% else %}
+                                (draw)
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Judge</td>
+                        <td>
+                            {{ table_entry.judge_type }}
+                            {% if table_entry.judged_by %}(by {{ table_entry.judged_by.username }}){% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Rationale</td>
+                        <td>{{ table_entry.rationale|default:"--"|linebreaks }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

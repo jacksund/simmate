@@ -1,0 +1,37 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    {% include "data_explorer/general_search_options.html" %}
+    <div class="container mt-4 border border-3 border-secondary rounded py-2">
+        <h3>
+            <span class="badge bg-secondary">1. Matchup Info</span>
+        </h3>
+        <div class="row">
+            <div class="col-md-4">
+                {% htmx_selectbox name="project_id" label="Project" options=component.project_options method_name="refresh_options" %}
+            </div>
+            <div class="col-md-4">{% htmx_selectbox name="judge_type" label="Judge" method_name="refresh_options" %}</div>
+        </div>
+        {% if component.component_type == "create" %}
+            {% if component.form_data.judge_type == "llm-debate" %}
+                {% alert theme="info" message="Leave both candidates empty to have the project's rating system pick the next pair. The debate is ran by a worker, and you'll be taken to its job once submitted." %}
+            {% endif %}
+            <div class="row">
+                <div class="col-md-6">
+                    {% htmx_selectbox name="candidate_a_id" label="Candidate A" options=component.candidate_options dynamic_options=True %}
+                </div>
+                <div class="col-md-6">
+                    {% htmx_selectbox name="candidate_b_id" label="Candidate B" options=component.candidate_options dynamic_options=True %}
+                </div>
+            </div>
+            {% if component.form_data.judge_type == "manual" %}
+                <div class="row">
+                    <div class="col-md-4">{% htmx_selectbox name="winner" options=component.winner_options %}</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm">{% htmx_text_area name="rationale" placeholder="(optional) Why this candidate won" %}</div>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+    {% include "data_explorer/dynamic_submit_button.html" %}
+{% endblock %}

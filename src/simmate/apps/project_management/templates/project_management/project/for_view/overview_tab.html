@@ -26,6 +26,26 @@
                                 </td>
                             </tr>
                             <tr>
+                                <td>Parent Projects</td>
+                                <td>
+                                    {% if table_entry.parent_project_id %}
+                                        <ol class="breadcrumb m-0">
+                                            {% for project in project_path %}
+                                                <li class="breadcrumb-item {% if forloop.last %}active{% endif %}">
+                                                    {% if forloop.last %}
+                                                        {{ project.name }}
+                                                    {% else %}
+                                                        <a href="{% url 'data_explorer:table-entry' 'Project' project.id %}">{{ project.name }}</a>
+                                                    {% endif %}
+                                                </li>
+                                            {% endfor %}
+                                        </ol>
+                                    {% else %}
+                                        -- (top-level project)
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
                                 <td>Discipline</td>
                                 <td>{{ table_entry.discipline }}</td>
                             </tr>
@@ -59,17 +79,28 @@
                                 <td>Description</td>
                                 <td>{{ table_entry.description|linebreaks }}</td>
                             </tr>
+                            <tr>
+                                <td>Objective</td>
+                                <td>{{ table_entry.objective|default:"--"|linebreaks }}</td>
+                            </tr>
+                            <tr>
+                                <td>Rating System</td>
+                                <td>{{ table_entry.rating_system }}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
-    <div class="text-center py-2">
-        <a class="btn btn-warning btn-sm"
-           type="button"
-           href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">
-            <i class="bi bi-pencil py-1"></i>&nbsp;&nbsp;Update
-        </a>
-    </div>
+    {% user_can table_entry "update" as can_update %}
+    {% if can_update %}
+        <div class="text-center py-2">
+            <a class="btn btn-warning btn-sm"
+               type="button"
+               href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">
+                <i class="bi bi-pencil py-1"></i>&nbsp;&nbsp;Update
+            </a>
+        </div>
+    {% endif %}
 </div>
