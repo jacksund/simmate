@@ -3,8 +3,6 @@ import random
 
 from django.contrib.auth.models import User
 
-from simmate.apps.chatbot.llm import get_llm
-
 from ..models import Candidate, Matchup, Project
 
 DEBATE_INSTRUCTIONS = """
@@ -117,6 +115,9 @@ def run_debate(
         f"# Candidate A\n{json.dumps(descriptions[candidate_a.id], indent=2, default=str)}\n\n"
         f"# Candidate B\n{json.dumps(descriptions[candidate_b.id], indent=2, default=str)}\n"
     )
+
+    # local import because langchain is an optional dependency (the `chatbot` extra)
+    from simmate.apps.chatbot.llm import get_llm
 
     llm = get_llm().with_structured_output(RESULT_SCHEMA)
     result = llm.invoke(prompt)
