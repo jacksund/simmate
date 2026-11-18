@@ -42,18 +42,18 @@ def days_ago(min_days: float, max_days: float) -> datetime:
 # (id, name, parent_id, status, discipline, description)
 # fmt: off
 PROJECTS = [
-    (1, "Zeus", None, "Active", "Battery Materials", "Discovery of new solid-state Li-ion conductors."),
-    (2, "Athena", 1, "Active", "Battery Materials", "High-throughput DFT screening of sulfide electrolytes."),
-    (3, "Hermes", 1, "Active", "Battery Materials", "Synthesis and conductivity testing of top Zeus candidates."),
+    (1, "Zeus", None, "Active", "Batteries & Energy Storage", "Discovery of new solid-state Li-ion conductors."),
+    (2, "Athena", 1, "Active", "Batteries & Energy Storage", "High-throughput DFT screening of sulfide electrolytes."),
+    (3, "Hermes", 1, "Active", "Batteries & Energy Storage", "Synthesis and conductivity testing of top Zeus candidates."),
     (4, "Apollo", None, "Active", "Photovoltaics", "Lead-free halide perovskites for tandem solar cells."),
     (5, "Artemis", 4, "Requires Update", "Photovoltaics", "Defect tolerance of Sn-based perovskites."),
-    (6, "Demeter", None, "Active", "Pesticides", "Next-generation fungicides with lower soil persistence."),
-    (7, "Persephone", 6, "Under Review", "Pesticides", "Metabolite identification for lead fungicides."),
-    (8, "Hephaestus", None, "Inactive", "Other", "Corrosion-resistant coatings (paused for funding)."),
-    (9, "Poseidon", None, "Active", "Other", "Water purification membranes."),
-    (10, "Triton", 9, "Active", "Other", None),
+    (6, "Demeter", None, "Active", "Agrochemicals", "Next-generation fungicides with lower soil persistence."),
+    (7, "Persephone", 6, "Under Review", "Agrochemicals", "Metabolite identification for lead fungicides."),
+    (8, "Hephaestus", None, "Inactive", "Coatings & Corrosion", "Corrosion-resistant coatings (paused for funding)."),
+    (9, "Poseidon", None, "Active", "Membranes & Separations", "Water purification membranes."),
+    (10, "Triton", 9, "Active", "Membranes & Separations", None),
     (11, "Dionysus", None, "Staged for Deletion", "Other", "Duplicate project made by mistake."),
-    (12, "Hestia", None, "Active", None, "Shared lab resources and equipment."),
+    (12, "Hestia", None, "Active", "Shared Resources & Infrastructure", "Shared lab resources and equipment."),
 ]
 # fmt: on
 

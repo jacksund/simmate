@@ -1,0 +1,30 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    {% include "data_explorer/general_search_options.html" %}
+    <div class="container mt-4 border border-3 border-secondary rounded py-2">
+        <h3>
+            <span class="badge bg-secondary">1. Candidate Info</span>
+        </h3>
+        {% if component.component_type != "update" %}
+            <div class="row">
+                <div class="col-md-4">{% htmx_selectbox name="project_id" label="Project" options=component.project_options %}</div>
+                {% if component.component_type == "create" %}
+                    <div class="col-md-4">
+                        {% htmx_checkbox name="is_mixture" label="Is Mixture" side_text="This candidate is a mixture" defer=False %}
+                    </div>
+                    <div class="col-md-4">
+                        {% if component.form_data.is_mixture %}
+                            {% htmx_text_input name="mixture_id" label="Mixture ID" placeholder="e.g. BCDF-123" %}
+                        {% else %}
+                            {% htmx_text_input name="substance_id" label="Substance ID" placeholder="e.g. BCD-012-3456" %}
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+        <div class="row">
+            <div class="col-sm">{% include "core/basic_elements/comments.html" %}</div>
+        </div>
+    </div>
+    {% include "data_explorer/dynamic_submit_button.html" %}
+{% endblock %}

@@ -2,6 +2,7 @@
 {% block table_headers %}
     {% table_header "discipline" min_width=125 %}
     {% table_header "name" "Project" min_width=125 %}
+    <th style="min-width:125px">Parent</th>
     {% table_header "status" min_width=150 %}
     <th style="min-width:150px">Leader(s)</th>
     <th style="min-width:150px">Members (#)</th>
@@ -12,6 +13,7 @@
 {% block table_rows %}
     <td>{{ entry.discipline }}</td>
     <td>{% foreign_key_link entry "name" %}</td>
+    <td>{% foreign_key_link entry.parent_project "name" %}</td>
     <td>
         {% if entry.status == "Under Review" %}
             {% status_bar "Under Review" "secondary" %}

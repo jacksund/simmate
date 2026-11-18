@@ -28,8 +28,16 @@ def get_all_workflows(
 ) -> list[Workflow]:
     """
     Goes through a list of apps and grabs all workflow objects available.
-    By default, this will grab all installed 'settings.apps'
+    By default, this will grab all installed 'settings.apps', plus the built-in
+    apps that are always installed (e.g. project management).
     """
+    builtin_apps = [
+        "simmate.apps.configs.ProjectManagementConfig",
+        "simmate.apps.configs.InventoryManagementConfig",
+    ]
+    apps_to_search = apps_to_search + [
+        app for app in builtin_apps if app not in apps_to_search
+    ]
     if not exclude_utilities:
         apps_to_search = apps_to_search + [
             "simmate.website.configs.WorkflowExplorerConfig"

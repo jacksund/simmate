@@ -31,6 +31,20 @@ class TagComponent(TableComponent, ProjectInput):
         "update",
     ]
 
+    @classmethod
+    def has_permission(cls, user, component_type, table_entry=None) -> bool:
+        # anyone can view & search, admins can create, and admins or the
+        # leaders of a project-specific tag's project can edit it
+        if component_type in ["dashboard", "entries", "entry", "report", "search"]:
+            return True
+        if not user or not user.is_authenticated:
+            return False
+        if user.is_staff:
+            return True
+        if component_type == "update" and table_entry.project_id:
+            return table_entry.project.leaders.filter(pk=user.pk).exists()
+        return False
+
     # -------------------------------------------------------------------------
 
     def update_tag_type(self):

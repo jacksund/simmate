@@ -12,12 +12,14 @@
                 {% endif %}
             {% endblock %}
             {% block updater %}
-                {% if "update_many" in component.enabled_component_types %}
+                {% user_can table.table_name "update_many" as can_update_many %}
+                {% if "update_many" in component.enabled_component_types and can_update_many %}
                     {% include "data_explorer/update_many.html" %}
                 {% endif %}
             {% endblock %}
             {% block addnew %}
-                {% if "create" in component.enabled_component_types %}
+                {% user_can table.table_name "create" as can_create %}
+                {% if "create" in component.enabled_component_types and can_create %}
                     {% include "data_explorer/create.html" %}
                 {% endif %}
             {% endblock %}

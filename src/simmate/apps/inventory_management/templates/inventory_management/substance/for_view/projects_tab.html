@@ -1,26 +1,33 @@
 <div class="tab-pane" id="projects-section">
-    {% if projects__count %}
+    {% if candidates__count %}
         <div class="table-responsive">
             <table class="table table-simmate mb-0">
                 <thead>
                     <tr>
                         <th style="width: 35%">Project</th>
+                        <th>Candidate</th>
+                        <th>Rating</th>
+                        <th>Matchups</th>
                         <th>Status</th>
-                        <th>Discipline</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for project in projects %}
+                    {% for candidate in candidates %}
                         <tr>
-                            <td>{% foreign_key_link project "name" %}</td>
-                            <td>{{ project.status|default:"--"|capfirst }}</td>
-                            <td>{{ project.discipline|default:"--"|capfirst }}</td>
+                            <td>{% foreign_key_link candidate.project "name" %}</td>
+                            <td>{% foreign_key_link candidate %}</td>
+                            <td>
+                                {{ candidate.rating|floatformat:0 }}
+                                {% if candidate.rating_deviation is not None %}± {{ candidate.rating_deviation|floatformat:0 }}{% endif %}
+                            </td>
+                            <td>{{ candidate.num_matchups }}</td>
+                            <td>{{ candidate.project.status|default:"--"|capfirst }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     {% else %}
-        <small>This substance is not linked to any projects.</small>
+        <small>This substance is not a candidate in any projects.</small>
     {% endif %}
 </div>

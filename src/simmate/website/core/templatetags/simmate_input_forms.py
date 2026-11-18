@@ -130,6 +130,9 @@ def update_entry_link(
     context: dict,
     entry,  # db_object
 ):
+    from .simmate_utils import user_can
+
+    can_update = user_can(context, entry, "update")
     return locals()
 
 

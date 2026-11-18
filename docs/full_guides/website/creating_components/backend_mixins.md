@@ -65,6 +65,39 @@ class ProjectComponent(TableComponent):
     }
 ```
 
+### Permissions
+
+By default, any logged-in user can use every enabled component type. To restrict who can create or update entries, override the `has_permission` classmethod. It receives the user, the component type (e.g. `"create"`, `"update"`, `"update_many"`), and the entry being updated (`None` for types that don't act on one existing entry).
+
+```python
+class ProjectComponent(TableComponent):
+    table = Project
+
+    @classmethod
+    def has_permission(cls, user, component_type, table_entry=None) -> bool:
+        if component_type in ["dashboard", "entries", "entry", "report", "search"]:
+            return True
+        if not user or not user.is_authenticated:
+            return False
+        if user.is_staff:
+            return True
+        # project leaders can edit their own project
+        if component_type == "update":
+            return table_entry.leaders.filter(pk=user.pk).exists()
+        return False
+```
+
+The check runs when the component mounts. A refused user gets a 403 and can't call any of the component's htmx actions. To hide buttons for users without permission, use the `user_can` template tag with either a table entry or a table name:
+
+```html+django
+{% user_can table_entry "update" as can_update %}
+{% if can_update %}
+    <a href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Update</a>
+{% endif %}
+
+{% user_can "Tag" "create" as can_create_tag %}
+```
+
 --------------------------
 
 ## Component Mixins

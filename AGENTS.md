@@ -121,7 +121,7 @@ The web interface is built with Django and HTMX.
 
 - **`server/`**: The root Django project's URLs, views, and ASGI/WSGI entry points. (Django settings live in `config/django/settings.py`.)
 - **`core/`**: Shared components, templates, static files, and base models for the UI.
-- **`data_explorer/`**: App for searching and exploring database tables.
+- **`data_explorer/`**: App for searching and exploring database tables. Per-table write access is set by overriding `TableComponent.has_permission()` (checked on mount); hide buttons with the `{% user_can %}` template tag.
 - **`workflow_explorer/`**: App for submitting workflows and viewing results/analytics.
 - **`compute_management/`**: Compute dashboard, WorkItem/Worker tables, and routes for the worker REST API (served at `/apps/compute/`; views live in `compute/api/`).
 - **`htmx/`**: Base classes and utilities for HTMX-based components.

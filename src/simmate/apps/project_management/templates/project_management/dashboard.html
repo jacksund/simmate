@@ -13,50 +13,8 @@
     {% include "core/basic_elements/alerts_card.html" %}
     {# Projects & My Projects / Disciplines #}
     <div class="row g-3 mb-4">
-        {# Left: Project Tree #}
-        <div class="col-lg-7">
-            <div class="card shadow-sm border-light-subtle h-100">
-                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
-                    <div>
-                        <h5 class="card-title mb-0 fw-semibold">Projects</h5>
-                        <small class="text-muted">Top-level projects and their sub-projects, most recently updated first</small>
-                    </div>
-                    <a href="{% url 'data_explorer:table' 'Project' %}?order_by=-updated_at"
-                       class="btn btn-outline-secondary btn-sm">
-                        View All <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-striped align-middle mb-0 small">
-                            <thead class="table-primary">
-                                <tr>
-                                    <th class="ps-3">Project</th>
-                                    <th>Status</th>
-                                    <th>Discipline</th>
-                                    <th class="text-end">Leaders</th>
-                                    <th class="text-end">Members</th>
-                                    <th class="pe-3">Updated</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for project in projects %}
-                                    {% include "project_management/dashboard_project_row.html" %}
-                                    {% for child in project.children %}
-                                        {% include "project_management/dashboard_project_row.html" with project=child is_child=True %}
-                                    {% endfor %}
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="6"
-                                            class="text-center text-muted py-4">No projects have been created yet.</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {# Left: Project Browser #}
+        <div class="col-lg-7">{% include "project_management/dashboard_projects.html" %}</div>
         {# Right: My Projects & Disciplines #}
         <div class="col-lg-5 d-flex flex-column gap-3">
             {% if request.user.is_authenticated %}

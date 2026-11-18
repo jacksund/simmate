@@ -1,0 +1,95 @@
+{# Folder-like browser for projects, where projects with sub-projects act as folders. Expects `component` (the ProjectDashboardComponent) and `sub_projects` (a Page of the open project's sub-projects). #}
+{# hx-target/swap are inherited by every hx-post button below #}
+{% url 'htmx:component_method' component.component_id 'open_project' as open_url %}
+<div id="project-browser-{{ component.component_id }}"
+     class="card shadow-sm border-light-subtle h-100"
+     hx-target="#project-browser-{{ component.component_id }}"
+     hx-swap="outerHTML">
+    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center py-3 px-3">
+        <h5 class="card-title mb-0 fw-semibold">Projects</h5>
+        <a href="{% url 'data_explorer:table' 'Project' %}?order_by=-updated_at"
+           class="btn btn-outline-secondary btn-sm">
+            View All <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+    {# Breadcrumb (styled like the site's breadcrumbs in core/basic_elements/breadcrumbs.html) #}
+    <div class="d-flex justify-content-between align-items-center gap-2 bg-body-tertiary border-top border-bottom py-2 px-3">
+        <ol class="breadcrumb m-0">
+            <li class="breadcrumb-item">
+                <a href="#" hx-post="{{ open_url }}"><i class="bi bi-house"></i></a>
+            </li>
+            {% for project in component.project_path %}
+                {% if forloop.last %}
+                    <li class="breadcrumb-item active">{{ project.name }}</li>
+                {% else %}
+                    <li class="breadcrumb-item">
+                        <a href="#" hx-post="{{ open_url }}?project_id={{ project.id }}">{{ project.name }}</a>
+                    </li>
+                {% endif %}
+            {% empty %}
+                <li class="breadcrumb-item active">All Projects</li>
+            {% endfor %}
+        </ol>
+        {% if component.current_project_id %}
+            <a href="{% url 'data_explorer:table-entry' 'Project' component.current_project_id %}"
+               class="btn btn-outline-secondary btn-sm py-0 text-nowrap">
+                Details <i class="bi bi-box-arrow-up-right"></i>
+            </a>
+        {% endif %}
+    </div>
+    {# Sub-projects #}
+    <div class="card-body p-0" style="max-height: 30rem; overflow-y: auto">
+        <div class="list-group list-group-flush">
+            {% for project in sub_projects %}
+                <div class="list-group-item d-flex justify-content-between align-items-center gap-2 px-3">
+                    <div class="text-truncate">
+                        {% if project.nchild_projects %}
+                            <button type="button"
+                                    class="btn btn-link p-0 fw-semibold text-body text-decoration-none text-start"
+                                    hx-post="{{ open_url }}?project_id={{ project.id }}">
+                                <i class="bi bi-folder text-warning me-1"></i>{{ project.name }}
+                                <i class="bi bi-chevron-right small text-muted"></i>
+                            </button>
+                        {% else %}
+                            <a href="{% url 'data_explorer:table-entry' 'Project' project.id %}"
+                               class="fw-semibold text-body text-decoration-none">
+                                <i class="bi bi-kanban text-success me-1"></i>{{ project.name }}
+                            </a>
+                        {% endif %}
+                        <div class="small text-muted">
+                            {{ project.discipline|default:"--" }}
+                            {% if project.nchild_projects %}
+                                · {{ project.nchild_projects }} sub-project{{ project.nchild_projects|pluralize }}
+                            {% endif %}
+                            · {{ project.nleaders }} leader{{ project.nleaders|pluralize }}, {{ project.nmembers }} member{{ project.nmembers|pluralize }}
+                            · updated {{ project.updated_at|timesince }} ago
+                        </div>
+                    </div>
+                    <span class="small text-nowrap">{% status_badge project.status|default:"No status" project.status_theme %}</span>
+                </div>
+            {% empty %}
+                <div class="text-center text-muted small py-4">
+                    {% if component.project_path %}
+                        No sub-projects here.
+                    {% else %}
+                        No projects have been created yet.
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {# Pagination #}
+    {% if sub_projects.paginator.num_pages > 1 %}
+        <div class="card-footer bg-transparent d-flex justify-content-between align-items-center px-3">
+            <small class="text-muted">{{ sub_projects.start_index }}–{{ sub_projects.end_index }} of {{ sub_projects.paginator.count }}</small>
+            <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-outline-secondary" {% if sub_projects.has_previous %}hx-post="{{ open_url }}?page={{ sub_projects.previous_page_number }}{% if component.current_project_id %}&project_id={{ component.current_project_id }}{% endif %}"{% else %}disabled{% endif %}>
+                    <i class="bi bi-chevron-left"></i> Prev
+                </button>
+                <button type="button" class="btn btn-outline-secondary" {% if sub_projects.has_next %}hx-post="{{ open_url }}?page={{ sub_projects.next_page_number }}{% if component.current_project_id %}&project_id={{ component.current_project_id }}{% endif %}"{% else %}disabled{% endif %}>
+                    Next <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    {% endif %}
+</div>

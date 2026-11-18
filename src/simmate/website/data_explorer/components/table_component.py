@@ -1,3 +1,4 @@
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
 from django.utils.functional import classproperty
 
@@ -119,6 +120,34 @@ class TableComponent(
 
     # -------------------------------------------------------------------------
 
+    @classmethod
+    def has_permission(
+        cls,
+        user,
+        component_type: str,
+        table_entry: DatabaseTable = None,
+    ) -> bool:
+        """
+        Whether a user is allowed to use this component type. Override this
+        to restrict who can create or update entries in a table. The default
+        allows everyone.
+
+        This is checked when the component mounts (so it also blocks all htmx
+        actions), and by the `user_can` template tag to hide buttons.
+
+        Args:
+            user: The Django user making the request.
+            component_type: The type being used (e.g. "create" or "update").
+            table_entry: The entry being viewed or updated. This is None for
+                types that do not act on a single existing entry (e.g. "create").
+
+        Returns:
+            True if the user is allowed to use this component type.
+        """
+        return True
+
+    # -------------------------------------------------------------------------
+
     def submit_form(self):
 
         # check form is valid
@@ -162,6 +191,16 @@ class TableComponent(
             self.mount_for_update_many()
         else:
             raise Exception(f"Unknown component_type is set: {self.component_type}")
+
+        # Checked after the type-specific mount so that `table_entry` is set
+        # in update mode. Raising here means the component is never cached,
+        # so none of its htmx actions can be called either.
+        user = getattr(self.request, "user", None)
+        if not self.has_permission(user, self.component_type, self.table_entry):
+            raise PermissionDenied(
+                f"You do not have permission to {self.component_type} "
+                f"entries in the {self.table.table_name} table."
+            )
 
         self.mount_url_info()
         self.mount_extra()

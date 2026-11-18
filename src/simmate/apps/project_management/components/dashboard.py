@@ -3,7 +3,10 @@ from datetime import datetime, timedelta
 from urllib.parse import urlencode
 
 from django.contrib.auth.models import User
-from django.db.models import Count, Exists, OuterRef, Prefetch, Q
+from django.core.paginator import Page, Paginator
+from django.db.models import Count, Exists, OuterRef, Q, Subquery
+from django.db.models.functions import Coalesce
+from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
 
@@ -51,6 +54,11 @@ PENDING_STATUSES = ["Pending", "Under Review"]
 Transaction statuses that still need someone to act on them.
 """
 
+PROJECTS_PER_PAGE = 50
+"""
+How many projects are shown at once in the project browser.
+"""
+
 CATALOGS = [
     # (table, title, description, icon, is_finance)
     (
@@ -87,14 +95,41 @@ CATALOGS = [
 class ProjectDashboardComponent(HtmxComponent):
     """
     Project dashboard showing project health, items that need attention
-    (stale projects, projects without leaders, etc.), the project tree, and
+    (stale projects, projects without leaders, etc.), a project browser, and
     the signed-in user's projects. Wallet and transaction panels are only
     shown when `settings.website.show_finances` is True.
+
+    The project browser works like a file explorer, where projects with
+    sub-projects act as folders. The project (and page) a viewer has open is
+    kept on their instance of this component, and browsing only re-renders
+    that card (see `open_project`).
     """
 
     template_name = "project_management/dashboard.html"
 
     refresh_interval = "60s"
+
+    project_path: list[Project] = None
+    """
+    The projects opened in the project browser, from the top level down
+    (i.e. the breadcrumb). Empty when viewing the top-level projects.
+    """
+
+    project_page: int = 1
+    """
+    The page of the open project's sub-projects being shown.
+    """
+
+    def mount(self):
+        self.project_path = []
+
+    @property
+    def current_project_id(self) -> int | None:
+        """
+        The id of the project open in the project browser, or None when
+        viewing the top-level projects.
+        """
+        return self.project_path[-1].id if self.project_path else None
 
     # -------------------------------------------------------------------------
     # Rendering
@@ -113,7 +148,9 @@ class ProjectDashboardComponent(HtmxComponent):
             last_updated=now,
             show_finances=show_finances,
             alerts=self.get_alerts(now, stats, show_finances),
-            projects=self.get_project_tree(),
+            sub_projects=self.get_sub_projects(
+                self.current_project_id, self.project_page
+            ),
             disciplines=self.get_disciplines(),
             my_projects=self.get_my_projects(getattr(self.request, "user", None)),
             recent_transactions=(
@@ -257,28 +294,55 @@ class ProjectDashboardComponent(HtmxComponent):
         return [alert for alert in alerts if alert["count"]]
 
     @staticmethod
-    def get_project_tree(limit: int = 12) -> list[Project]:
+    def get_sub_projects(parent_id: int | None, page: int = 1) -> Page:
         """
-        Grabs top-level projects (most recently updated first) along with
-        their sub-projects. Each project gets `nleaders`, `nmembers`, and
+        Grabs one page of the projects directly inside of a project, sorted by
+        name. Each project gets `nchild_projects`, `nleaders`, `nmembers`, and
         `status_theme` attributes.
+
+        Args:
+            parent_id: The id of the project to look inside of. Use None for
+                the top-level projects.
+            page: The page number to grab. Out-of-range pages give the last
+                page instead.
         """
-        base = Project.objects.annotate(
-            nleaders=Count("leaders", distinct=True),
-            nmembers=Count("members", distinct=True),
-        ).only("name", "status", "discipline", "updated_at")
-        children = base.only("parent_project_id").order_by("name")
-        projects = list(
-            base.filter(parent_project__isnull=True)
-            .prefetch_related(
-                Prefetch("child_projects", queryset=children, to_attr="children")
-            )
-            .order_by("-updated_at")[:limit]
+        # joins would multiply rows (children x leaders x members) and these
+        # only need to run for the projects on this page
+        nchild_projects = (
+            Project.objects.filter(parent_project=OuterRef("pk"))
+            .order_by()
+            .values("parent_project")
+            .annotate(count=Count("id"))
+            .values("count")
         )
-        for project in projects:
-            for entry in [project, *project.children]:
-                entry.status_theme = STATUS_THEMES.get(entry.status, "secondary")
-        return projects
+        nleaders = (
+            Project.leaders.through.objects.filter(project_id=OuterRef("pk"))
+            .order_by()
+            .values("project_id")
+            .annotate(count=Count("id"))
+            .values("count")
+        )
+        nmembers = (
+            Project.members.through.objects.filter(project_id=OuterRef("pk"))
+            .order_by()
+            .values("project_id")
+            .annotate(count=Count("id"))
+            .values("count")
+        )
+        projects = (
+            Project.objects.filter(parent_project_id=parent_id)
+            .only("name", "status", "discipline", "updated_at")
+            .annotate(
+                nchild_projects=Coalesce(Subquery(nchild_projects), 0),
+                nleaders=Coalesce(Subquery(nleaders), 0),
+                nmembers=Coalesce(Subquery(nmembers), 0),
+            )
+            .order_by("name", "id")
+        )
+        page = Paginator(projects, PROJECTS_PER_PAGE).get_page(page)
+        for project in page:
+            project.status_theme = STATUS_THEMES.get(project.status, "secondary")
+        return page
 
     @staticmethod
     def get_disciplines() -> list[dict]:
@@ -342,6 +406,53 @@ class ProjectDashboardComponent(HtmxComponent):
             transaction.from_label = wallet_label(transaction.from_wallet)
             transaction.to_label = wallet_label(transaction.to_wallet)
         return transactions
+
+    # -------------------------------------------------------------------------
+    # Actions
+    # -------------------------------------------------------------------------
+
+    def open_project(self, project_id: int = None, page: int = 1):
+        """
+        Opens a project in the project browser and re-renders only that card.
+
+        Args:
+            project_id: The project to open. This can be a sub-project of the
+                open project, a project in the breadcrumb, or None for the
+                top-level projects.
+            page: The page of sub-projects to show.
+        """
+        path_ids = [project.id for project in self.project_path]
+        if project_id is None:
+            self.project_path = []
+        elif project_id in path_ids:
+            # a breadcrumb, or another page of the open project
+            self.project_path = self.project_path[: path_ids.index(project_id) + 1]
+        else:
+            # Only sub-projects of the open project can be opened. This keeps
+            # the breadcrumb valid without looking up each parent, and ignores
+            # stale clicks (e.g. a double-click on a row)
+            project = (
+                Project.objects.filter(
+                    id=project_id,
+                    parent_project_id=self.current_project_id,
+                )
+                .only("name")
+                .first()
+            )
+            if project:
+                self.project_path.append(project)
+        self.project_page = page
+
+        return render(
+            self.request,
+            "project_management/dashboard_projects.html",
+            {
+                "component": self,
+                "sub_projects": self.get_sub_projects(
+                    self.current_project_id, self.project_page
+                ),
+            },
+        )
 
 
 def explorer_url(table: str, **query) -> str:

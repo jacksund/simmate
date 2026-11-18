@@ -5,11 +5,14 @@
         <div class="row pb-2">
             <div class="col-12">
                 <div class="page-title-box">
-                    <div class="page-title-right m-0">
-                        <a role="button"
-                           class="btn btn-outline-primary btn-sm"
-                           href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Edit <i class="bi bi-pencil"></i></a>
-                    </div>
+                    {% user_can table_entry "update" as can_update %}
+                    {% if can_update %}
+                        <div class="page-title-right m-0">
+                            <a role="button"
+                               class="btn btn-outline-primary btn-sm"
+                               href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Edit <i class="bi bi-pencil"></i></a>
+                        </div>
+                    {% endif %}
                     <h3 class="m-0">Tag Info</h3>
                 </div>
             </div>
