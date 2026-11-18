@@ -1,0 +1,15 @@
+{% extends "data_explorer/entries.html" %}
+{% block table_headers %}
+    {% table_header "name" "Leaderboard" min_width=150 %}
+    <th style="min-width:150px">Parent</th>
+    {% table_header "objective" min_width=300 %}
+    {% table_header "rating_system" "Rating System" min_width=100 %}
+    {% table_header "updated_at" "Updated" min_width=115 %}
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry "name" %}</td>
+    <td>{% foreign_key_link entry.parent_leaderboard "name" %}</td>
+    <td>{{ entry.objective|default:"--"|truncatechars:60 }}</td>
+    <td>{{ entry.rating_system }}</td>
+    <td>{{ entry.updated_at|date:"Y-m-d" }}</td>
+{% endblock %}

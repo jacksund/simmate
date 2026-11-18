@@ -1,0 +1,62 @@
+<div class="tab-pane show active" id="overview-section">
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="row py-2">
+                <div>
+                    <table class="table table-simmate mb-0">
+                        <tbody>
+                            <tr>
+                                <td>Leaderboard</td>
+                                <td>
+                                    <p class="p-1 bg-dark text-light text-center fw-bold rounded col-12 display-6">{{ table_entry.name }}</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Parent Leaderboards</td>
+                                <td>
+                                    {% if table_entry.parent_leaderboard_id %}
+                                        <ol class="breadcrumb m-0">
+                                            {% for leaderboard in leaderboard_path %}
+                                                <li class="breadcrumb-item {% if forloop.last %}active{% endif %}">
+                                                    {% if forloop.last %}
+                                                        {{ leaderboard.name }}
+                                                    {% else %}
+                                                        <a href="{% url 'data_explorer:table-entry' 'Leaderboard' leaderboard.id %}">{{ leaderboard.name }}</a>
+                                                    {% endif %}
+                                                </li>
+                                            {% endfor %}
+                                        </ol>
+                                    {% else %}
+                                        -- (top-level leaderboard)
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Objective</td>
+                                <td>{{ table_entry.objective|default:"--"|linebreaks }}</td>
+                            </tr>
+                            <tr>
+                                <td>Description</td>
+                                <td>{{ table_entry.description|default:"--"|linebreaks }}</td>
+                            </tr>
+                            <tr>
+                                <td>Rating System</td>
+                                <td>{{ table_entry.rating_system }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% user_can table_entry "update" as can_update %}
+    {% if can_update %}
+        <div class="text-center py-2">
+            <a class="btn btn-warning btn-sm"
+               type="button"
+               href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">
+                <i class="bi bi-pencil py-1"></i>&nbsp;&nbsp;Update
+            </a>
+        </div>
+    {% endif %}
+</div>

@@ -7,6 +7,6 @@ RATING_SYSTEMS: dict[str, type[RatingSystem]] = {
     "elo": Elo,
 }
 """
-All rating systems that a project can use, keyed by the value stored in
-`Project.rating_system`.
+All rating systems that a leaderboard can use, keyed by the value stored in
+`Leaderboard.rating_system`.
 """

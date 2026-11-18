@@ -5,11 +5,11 @@ from simmate.database.core import DatabaseTable, table_column
 
 class Matchup(DatabaseTable):
     """
-    A head-to-head comparison of two candidates in a project, where the result
-    updates both of their ratings (see `Project.record_matchup`).
+    A head-to-head comparison of two candidates in a leaderboard, where the
+    result updates both of their ratings (see `Leaderboard.record_matchup`).
 
     The winner is decided either by an llm debate, which judges the two
-    candidates using the project's `objective`, or manually by a user.
+    candidates using the leaderboard's `objective`, or manually by a user.
     """
 
     class Meta:
@@ -22,13 +22,13 @@ class Matchup(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    project = table_column.ForeignKey(
-        "Project",
+    leaderboard = table_column.ForeignKey(
+        "Leaderboard",
         on_delete=table_column.CASCADE,
         related_name="matchups",
     )
     """
-    The project that both candidates belong to.
+    The leaderboard that both candidates belong to.
     """
 
     candidate_a = table_column.ForeignKey(
@@ -99,7 +99,7 @@ class Matchup(DatabaseTable):
     @classmethod
     def get_web_queryset(cls):
         return cls.objects.select_related(
-            "project",
+            "leaderboard",
             "candidate_a__substance",
             "candidate_a__mixture",
             "candidate_b__substance",

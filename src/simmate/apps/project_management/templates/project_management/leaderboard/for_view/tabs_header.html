@@ -1,0 +1,38 @@
+<ul class="nav nav-tabs nav-bordered mb-3">
+    <li class="nav-item">
+        <a href="#overview-section"
+           data-bs-toggle="tab"
+           aria-expanded="true"
+           class="nav-link active">
+            <i class="bi bi-house-door d-md-none d-block"></i>
+            <span class="d-none d-md-block">Overview</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#candidates-section"
+           data-bs-toggle="tab"
+           aria-expanded="false"
+           class="nav-link">
+            <i class="bi bi-trophy d-md-none d-block"></i>
+            <span class="d-none d-md-block">Candidates <small>({{ candidates__count|intcomma }})</small></span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#child-leaderboards-section"
+           data-bs-toggle="tab"
+           aria-expanded="false"
+           class="nav-link">
+            <i class="bi bi-diagram-3 d-md-none d-block"></i>
+            <span class="d-none d-md-block">Child Leaderboards <small>({{ child_leaderboards__count|intcomma }})</small></span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#used-by-section"
+           data-bs-toggle="tab"
+           aria-expanded="false"
+           class="nav-link">
+            <i class="bi bi-kanban d-md-none d-block"></i>
+            <span class="d-none d-md-block">Used By <small>({{ components|length|intcomma }})</small></span>
+        </a>
+    </li>
+</ul>

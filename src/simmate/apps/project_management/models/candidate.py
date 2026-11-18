@@ -5,22 +5,21 @@ from simmate.database.core import DatabaseTable, table_column
 
 class Candidate(DatabaseTable):
     """
-    A substance or mixture that a project is considering, such as a possible
-    drug, catalyst, or battery material.
+    A substance or mixture that a leaderboard is considering, such as a
+    possible drug, catalyst, or battery material.
 
-    Each project's candidates are rated against one another to give a
-    leaderboard (see `Matchup` and `Project.rating_system`). By default, the
-    ratings come from llm debates between pairs of candidates, which are judged
-    using the project's `objective` and each candidate's `metadata` and
-    `comments`. Other apps can add their results (e.g. experimental or
-    computational) to the `metadata` so that later matchups take them into
-    account.
+    Each leaderboard's candidates are rated against one another (see `Matchup`
+    and `Leaderboard.rating_system`). By default, the ratings come from llm
+    debates between pairs of candidates, which are judged using the
+    leaderboard's `objective` and each candidate's `metadata` and `comments`.
+    Other apps can add their results (e.g. experimental or computational) to
+    the `metadata` so that later matchups take them into account.
     """
 
     class Meta:
         db_table = "project_management__candidates"
-        # Note: there is no unique constraint on (project, substance) because
-        # merging two substances that are both candidates of one project would
+        # Note: there is no unique constraint on (leaderboard, substance) because
+        # merging two substances that are both candidates of one leaderboard would
         # break it. Duplicates are blocked by the web form instead.
 
     id_prefix = "CAND"
@@ -30,13 +29,13 @@ class Candidate(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    project = table_column.ForeignKey(
-        "Project",
+    leaderboard = table_column.ForeignKey(
+        "Leaderboard",
         on_delete=table_column.CASCADE,
         related_name="candidates",
     )
     """
-    The project that this candidate belongs to.
+    The leaderboard that this candidate belongs to.
     """
 
     is_mixture = table_column.BooleanField(blank=True, null=True, default=False)
@@ -71,8 +70,8 @@ class Candidate(DatabaseTable):
 
     rating = table_column.FloatField(blank=True, null=True)
     """
-    The candidate's current rating, which the project's leaderboard is sorted
-    by (higher is better). How this is calculated depends on the project's
+    The candidate's current rating, which its leaderboard is sorted by
+    (higher is better). How this is calculated depends on the leaderboard's
     `rating_system`.
     """
 
@@ -86,7 +85,7 @@ class Candidate(DatabaseTable):
 
     rating_data = table_column.JSONField(blank=True, null=True)
     """
-    Any other values that the project's rating system needs to keep for this
+    Any other values that the leaderboard's rating system needs to keep for this
     candidate.
     """
 
@@ -106,7 +105,7 @@ class Candidate(DatabaseTable):
 
     comments = table_column.TextField(blank=True, null=True)
     """
-    Notes from project members about this candidate, such as why it was added
+    Notes from users about this candidate, such as why it was added
     or ideas for it. These are also given to the judge of each matchup.
     """
 
@@ -118,7 +117,7 @@ class Candidate(DatabaseTable):
         null=True,
     )
     """
-    The user that added this candidate to the project.
+    The user that added this candidate to the leaderboard.
     """
 
     # -------------------------------------------------------------------------
@@ -126,17 +125,17 @@ class Candidate(DatabaseTable):
     @classmethod
     def get_web_queryset(cls):
         return cls.objects.select_related(
-            "project",
+            "leaderboard",
             "substance__molecule",
             "mixture",
         )
 
     def save(self, *args, **kwargs):
-        # new candidates start with the initial rating of their project's
+        # new candidates start with the initial rating of their leaderboard's
         # rating system
         if self._state.adding and self.rating is None:
             for column, value in (
-                self.project.get_rating_system().initial_state().items()
+                self.leaderboard.get_rating_system().initial_state().items()
             ):
                 setattr(self, column, value)
         super().save(*args, **kwargs)

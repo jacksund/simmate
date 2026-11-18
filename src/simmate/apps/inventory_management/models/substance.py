@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.functional import classproperty
 
-from simmate.apps.project_management.models import Project
+from simmate.apps.project_management.models import Leaderboard
 from simmate.config import settings
 from simmate.database.core import DatabaseTable, table_column
 from simmate.database.mixins import ThirdPartyData
@@ -812,13 +812,13 @@ class Substance(DatabaseTable):
         ).order_by("created_at")
 
     @property
-    def projects(self):
+    def leaderboards(self):
         """
-        All projects that this substance is a candidate in. See
-        `project_candidates` for each project's candidate entry (e.g. its
+        All leaderboards that this substance is a candidate in. See
+        `project_candidates` for each leaderboard's candidate entry (e.g. its
         rating).
         """
-        return Project.objects.filter(candidates__substance=self).distinct()
+        return Leaderboard.objects.filter(candidates__substance=self).distinct()
 
     @classmethod
     def resolve_id(cls, substance_id: str) -> str:

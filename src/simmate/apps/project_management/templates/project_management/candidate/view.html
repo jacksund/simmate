@@ -20,8 +20,8 @@
             <table class="table table-simmate mb-0">
                 <tbody>
                     <tr>
-                        <td>Project</td>
-                        <td>{% foreign_key_link table_entry.project "name" %}</td>
+                        <td>Leaderboard</td>
+                        <td>{% foreign_key_link table_entry.leaderboard "name" %}</td>
                     </tr>
                     <tr>
                         <td>{% if table_entry.is_mixture %}Mixture{% else %}Substance{% endif %}</td>
@@ -42,7 +42,7 @@
                             {% if table_entry.rating_deviation is not None %}
                                 ± {{ table_entry.rating_deviation|floatformat:0 }}
                             {% endif %}
-                            <small class="text-muted">({{ table_entry.project.rating_system }})</small>
+                            <small class="text-muted">({{ table_entry.leaderboard.rating_system }})</small>
                         </td>
                     </tr>
                     <tr>
@@ -76,7 +76,7 @@
             Matchups <small>({{ matchups__count }})</small>
         </h4>
         {% if matchups %}
-            {% include "project_management/matchup/table.html" with entries=matchups project_view=True truncated=matchups__truncated %}
+            {% include "project_management/matchup/table.html" with entries=matchups leaderboard_view=True truncated=matchups__truncated %}
         {% else %}
             <small>This candidate has not been in any matchups yet.</small>
         {% endif %}

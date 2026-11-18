@@ -218,6 +218,8 @@ class SimmateSettings:
                 "data": {
                     "Project Management": [
                         "simmate.apps.project_management.components.ProjectComponent",
+                        "simmate.apps.project_management.components.ProjectComponentComponent",
+                        "simmate.apps.project_management.components.LeaderboardComponent",
                         "simmate.apps.project_management.components.TagComponent",
                         "simmate.apps.project_management.components.CandidateComponent",
                         "simmate.apps.project_management.components.MatchupComponent",

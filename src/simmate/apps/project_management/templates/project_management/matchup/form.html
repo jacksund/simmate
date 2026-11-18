@@ -7,13 +7,13 @@
         </h3>
         <div class="row">
             <div class="col-md-4">
-                {% htmx_selectbox name="project_id" label="Project" options=component.project_options method_name="refresh_options" %}
+                {% htmx_selectbox name="leaderboard_id" label="Leaderboard" options=component.leaderboard_options method_name="refresh_options" %}
             </div>
             <div class="col-md-4">{% htmx_selectbox name="judge_type" label="Judge" method_name="refresh_options" %}</div>
         </div>
         {% if component.component_type == "create" %}
             {% if component.form_data.judge_type == "llm-debate" %}
-                {% alert theme="info" message="Leave both candidates empty to have the project's rating system pick the next pair. The debate is ran by a worker, and you'll be taken to its job once submitted." %}
+                {% alert theme="info" message="Leave both candidates empty to have the leaderboard's rating system pick the next pair. The debate is ran by a worker, and you'll be taken to its job once submitted." %}
             {% endif %}
             <div class="row">
                 <div class="col-md-6">

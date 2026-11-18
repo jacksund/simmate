@@ -4,40 +4,42 @@ from simmate.compute import WorkItem
 from simmate.utils import logger
 from simmate.workflows import Workflow
 
-from ..models import Project
+from ..models import Leaderboard
 from .matchup import CandidateDebate__Llm__Matchup
 
 
 class CandidateDebate__Llm__Tournament(Workflow):
     """
-    Runs many llm debates between a project's candidates, which builds up the
-    project's leaderboard.
+    Runs many llm debates between a leaderboard's candidates, which builds up
+    their ratings.
 
     This keeps a steady number of debates (`nsteadystate`) submitted to workers
     at all times, until `max_matchups` debates have been submitted and have
     finished. Each debate is its own `candidate-debate.llm.matchup` run.
 
-    Pairs are picked by the project's rating system when each debate is
+    Pairs are picked by the leaderboard's rating system when each debate is
     submitted. A candidate is only in one running debate at a time, so its
     rating is always up to date when it is next picked.
     """
 
-    description_doc_short = "keeps llm debates running to rate a project's candidates"
+    description_doc_short = (
+        "keeps llm debates running to rate a leaderboard's candidates"
+    )
 
     @staticmethod
     def run_config(
-        project_id: int,
+        leaderboard_id: int,
         max_matchups: int = 100,
         nsteadystate: int = 5,
         sleep_step: int = 10,
         debate_tags: list[str] = [],
         **kwargs,
     ):
-        project = Project.objects.get(id=project_id)
-        rating_system = project.get_rating_system()
+        leaderboard = Leaderboard.objects.get(id=leaderboard_id)
+        rating_system = leaderboard.get_rating_system()
         logger.info(
-            f"Starting a tournament of {max_matchups} debates for project "
-            f"{project.name}, with {nsteadystate} running at a time."
+            f"Starting a tournament of {max_matchups} debates for leaderboard "
+            f"{leaderboard.name}, with {nsteadystate} running at a time."
         )
 
         running = {}  # WorkItem id -> the ids of its two candidates
@@ -65,13 +67,13 @@ class CandidateDebate__Llm__Tournament(Workflow):
             busy_ids = {
                 candidate_id for pair in running.values() for candidate_id in pair
             }
-            free = list(project.candidates.exclude(id__in=busy_ids))
+            free = list(leaderboard.candidates.exclude(id__in=busy_ids))
             while len(running) < nsteadystate and nsubmitted < max_matchups:
                 if len(free) < 2:
                     break  # wait for running debates to free up candidates
                 candidate_a, candidate_b = rating_system.pick_pair(free)
                 state = CandidateDebate__Llm__Matchup.run_cloud(
-                    project_id=project.id,
+                    leaderboard_id=leaderboard.id,
                     candidate_a_id=candidate_a.id,
                     candidate_b_id=candidate_b.id,
                     tags=debate_tags,
@@ -82,7 +84,7 @@ class CandidateDebate__Llm__Tournament(Workflow):
                 nsubmitted += 1
 
             if not running:
-                logger.warning("The project needs at least two candidates.")
+                logger.warning("The leaderboard needs at least two candidates.")
                 break
 
             time.sleep(sleep_step)

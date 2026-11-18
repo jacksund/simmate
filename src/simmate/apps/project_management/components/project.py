@@ -5,7 +5,7 @@ from django.db.models import Count
 from simmate.website.data_explorer.components import TableComponent
 from simmate.website.htmx.components import UserInput
 
-from ..models import Project
+from ..models import Candidate, Project
 from .dashboard import STATUS_THEMES
 
 
@@ -14,9 +14,9 @@ class ProjectComponent(TableComponent, UserInput):
 
     display_name = "Projects"
     description_short = (
-        "A container for a collection of related chemistry tasks, hypotheses, "
-        "and results. Projects help group and manage scientific work into "
-        "discrete units."
+        "A concrete build or mission that a team is working on (e.g. a new "
+        "phone model). Each project lists the components it needs and picks "
+        "them from leaderboards."
     )
     tabtitle_label_col = "name"
 
@@ -65,13 +65,29 @@ class ProjectComponent(TableComponent, UserInput):
         tags = table_entry.tags.order_by("-id").all()[:tags__limit]
         tags__truncated = bool(len(tags) >= tags__limit)
 
-        # the leaderboard of this project's candidates
-        candidates__limit = 25
-        candidates__count = table_entry.candidates.count()
-        candidates = table_entry.candidates.select_related(
-            "substance", "mixture"
-        ).order_by("-rating", "id")[:candidates__limit]
-        candidates__truncated = candidates__count > candidates__limit
+        # The components that this project needs, each with the top-rated
+        # candidate of its leaderboard. Components are flagged when the chosen
+        # candidate isn't the top one.
+        components = list(
+            table_entry.components.select_related(
+                "leaderboard__parent_leaderboard",
+                "chosen_candidate__substance",
+                "chosen_candidate__mixture",
+            ).order_by("name", "id")
+        )
+        for component in components:
+            # one query per component, as projects only have a few of them
+            component.top_candidate = (
+                Candidate.objects.filter(leaderboard_id=component.leaderboard_id)
+                .select_related("substance", "mixture")
+                .order_by("-rating", "id")
+                .first()
+            )
+            component.is_not_top = bool(
+                component.chosen_candidate_id
+                and component.top_candidate
+                and component.chosen_candidate_id != component.top_candidate.id
+            )
 
         # Walk down through the sub-projects one level at a time to build the
         # tree of sub-projects. Only the first `max_nodes` are put in the tree.
@@ -117,9 +133,7 @@ class ProjectComponent(TableComponent, UserInput):
             "tags": tags,
             "tags__count": tags__count,
             "tags__truncated": tags__truncated,
-            "candidates": candidates,
-            "candidates__count": candidates__count,
-            "candidates__truncated": candidates__truncated,
+            "components": components,
         }
 
     # -------------------------------------------------------------------------
@@ -143,9 +157,6 @@ class ProjectComponent(TableComponent, UserInput):
             # a project can't be its own parent
             projects = projects.exclude(id=table_entry.id)
         return list(projects)
-
-    def mount_for_create(self):
-        self.update_form("rating_system", "glicko")
 
     def check_form_for_create(self):
         super().check_form_for_create()
@@ -171,8 +182,6 @@ class ProjectComponent(TableComponent, UserInput):
         "leaders__ids",
         "members__ids",
         "parent_project_id",
-        "objective",
-        "rating_system",
     ]
 
     def check_form_for_update(self):
@@ -208,17 +217,6 @@ class ProjectComponent(TableComponent, UserInput):
                 self.form_errors.append(
                     f"A project with the name '{project_name}' already exists."
                 )
-
-    # -------------------------------------------------------------------------
-
-    def save_to_db_for_update(self):
-        # ratings depend on the rating system, so they're rebuilt when it changes
-        old_rating_system = Project.objects.values_list("rating_system", flat=True).get(
-            id=self.table_entry.id
-        )
-        super().save_to_db_for_update()
-        if self.table_entry.rating_system != old_rating_system:
-            self.table_entry.recalculate_ratings()
 
     # -------------------------------------------------------------------------
 

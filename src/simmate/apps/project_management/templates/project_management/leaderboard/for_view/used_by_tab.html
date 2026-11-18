@@ -1,0 +1,32 @@
+<div class="tab-pane" id="used-by-section">
+    {% if components %}
+        <div class="table-responsive">
+            <table class="table table-simmate mb-0">
+                <thead>
+                    <tr>
+                        <th>Project</th>
+                        <th>Component</th>
+                        <th>Chosen Candidate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for component in components %}
+                        <tr>
+                            <td>{% foreign_key_link component.project "name" %}</td>
+                            <td>{% foreign_key_link component "name" %}</td>
+                            <td>
+                                {% if component.chosen_candidate %}
+                                    {% foreign_key_link component.chosen_candidate %}
+                                {% else %}
+                                    --
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <small>No projects pick from this leaderboard yet.</small>
+    {% endif %}
+</div>
