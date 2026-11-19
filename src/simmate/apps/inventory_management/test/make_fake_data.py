@@ -376,11 +376,11 @@ def add_batch(
         substance_id=None if is_mixture else sub_id[key],
         mixture_id=int(key.split("-")[1]) if is_mixture else None,
         batch_type=(
-            "purchased"
+            "Purchased"
             if not in_house
-            else "prepared"
+            else "Prepared"
             if is_mixture
-            else "internal_synthesis"
+            else "Internal Synthesis"
         ),
         comments=None,
         appearance=APPEARANCE_OVERRIDES.get(key, random.choice(APPEARANCE[phase])),

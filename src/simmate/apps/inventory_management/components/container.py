@@ -11,10 +11,7 @@ from simmate.website.data_explorer.components import (
     QuickSearchComponent,
     TableComponent,
 )
-from simmate.website.htmx.components import (
-    MoleculeInput,
-    StructureInput,
-)
+from simmate.website.htmx.components import MoleculeInput
 from simmate.website.htmx.components.mixins import PeriodicTableInput
 
 from ..datastores import SubstanceDatastore
@@ -28,12 +25,12 @@ from ..models import (
     UsageLog,
 )
 from .batch import BatchComponent
+from .dashboard import InventoryDashboardComponent
 
 
 class ContainerComponent(
     TableComponent,
     MoleculeInput,
-    StructureInput,
     PeriodicTableInput,
 ):
     table = Container
@@ -65,12 +62,15 @@ class ContainerComponent(
 
     # CREATE
 
-    # Registering a container has two sections:
-    #   1. Contents & Batch: the user searches for what is in the container and
+    # Registering a container has four sections, which are filled in order:
+    #   1. Chemical: the user searches for what is in the container and
     #      selects an existing substance or mixture, or describes a new one.
-    #      Existing contents can be added to one of their batches. Otherwise,
-    #      a new batch is made, along with a log of the reagents used to make it.
-    #   2. Container Info: where the container is stored and how much is in it.
+    #   2. Batch: existing contents can be added to one of their batches.
+    #      Otherwise, a new batch is made (and saved before moving on), along
+    #      with a log of the reagents used to make it.
+    #   3. Location: where the container is stored, picked by browsing the
+    #      storage locations like folders (or by adding a new one).
+    #   4. Container Info: how much is in the container, its barcode, etc.
     # What was selected is stored as the `contents_mode`, which is one of
     # "existing_substance", "new_substance", "existing_mixture", "new_mixture",
     # or None (nothing selected yet). Batch and mixture inputs are prefixed with
@@ -91,6 +91,7 @@ class ContainerComponent(
     post_data_mappings = {
         # can otherwise be parsed to an int (e.g. a typed ID like "123")
         "search_query": str,
+        "new_location__name": str,
         # each reagent or mixture component row gives one entry to these
         # lists. They stay as str so that blank rows can be parsed
         "reagent_containers": list[str],
@@ -154,9 +155,6 @@ class ContainerComponent(
         self.update_form("reagent_containers", [])
         self.update_form("reagent_amounts", [])
         self.clear_contents()
-
-    def on_change_hook__structure__file(self):
-        self.load_structure("structure")
 
     # -------------------------------------------------------------------------
 
@@ -255,6 +253,10 @@ class ContainerComponent(
             # SMILES that aren't registered yet can be registered as new
             is_new_smiles=search_field == "inchi_key" and not substances,
         )
+        if self.search_results["is_new_smiles"]:
+            # there is nothing else to pick, so go straight to the new substance
+            self.select_new_substance()
+            return
         if not parse_descriptions or search_field != "name" or substances or mixtures:
             return
 
@@ -341,17 +343,6 @@ class ContainerComponent(
         self.form_data["contents_mode"] = "new_substance"
         self.form_data["batch_mode"] = "new"
         self.form_data["molecule"] = molecule
-        # draws the molecule in the molecule input
-        self.js_actions.append(
-            {
-                "add_mol_viewer": [
-                    f"molecule-{self.component_id}-image",
-                    molecule.to_sdf(),
-                    300,
-                    300,
-                ]
-            }
-        )
 
     def clear_contents(self):
         """
@@ -363,8 +354,6 @@ class ContainerComponent(
             "substance_id",
             "mixture_id",
             "molecule",
-            "molecule_original",
-            "structure",
             "mixture__mixture_type",
             "mixture__common_name",
             "mixture__description",
@@ -380,6 +369,7 @@ class ContainerComponent(
             component_units=[],
         )
         self.is_from_description = False
+        self.is_new_batch_saved = False
 
     @property
     def selected_entry(self) -> Substance | Mixture | None:
@@ -466,6 +456,12 @@ class ContainerComponent(
 
     # Batch (existing or new) and the reagents used to make new batches
 
+    is_new_batch_saved: bool = False
+    """
+    Whether the user saved the new batch's details (see `save_new_batch`),
+    which shows them as read-only and marks the batch section as done.
+    """
+
     @property
     def existing_batches(self) -> list[Batch]:
         """
@@ -482,6 +478,7 @@ class ContainerComponent(
         Adds the container to an existing batch, or to a new batch when no
         `batch_id` is given.
         """
+        self.is_new_batch_saved = False
         if batch_id is None:
             self.form_data["batch_mode"] = "new"
             self.form_data.pop("batch_id", None)
@@ -499,6 +496,49 @@ class ContainerComponent(
         """
         self.form_data["batch_mode"] = None
         self.form_data.pop("batch_id", None)
+        self.is_new_batch_saved = False
+
+    def save_new_batch(self):
+        """
+        Checks the new batch's details and, if they are valid, shows them as
+        read-only so that the user can move on to the next section.
+        """
+        errors = []
+        if not self.form_data.get("batch__batch_type"):
+            errors.append("Pick a batch type (or 'Unknown').")
+
+        # blank reagent rows are dropped so that only real ones are listed
+        rows = [
+            (container, amount)
+            for container, amount in self.reagent_rows
+            if container or amount
+        ]
+        self.form_data["reagent_containers"] = [container for container, _ in rows]
+        self.form_data["reagent_amounts"] = [amount for _, amount in rows]
+        for container, amount in rows:
+            try:
+                Container.get_by_barcode_or_id(container)
+            except Container.DoesNotExist as error:
+                errors.append(str(error))
+            try:
+                if Decimal(amount) <= 0:
+                    raise InvalidOperation()
+            except (InvalidOperation, TypeError):
+                errors.append(
+                    "The amount used from each parent batch's container must be "
+                    f"greater than 0 (got '{amount}')."
+                )
+
+        if errors:
+            self.action_error = " ".join(errors)
+        else:
+            self.is_new_batch_saved = True
+
+    def edit_new_batch(self):
+        """
+        Goes back to editing the new batch's details.
+        """
+        self.is_new_batch_saved = False
 
     @property
     def reagent_rows(self) -> list[tuple]:
@@ -522,15 +562,118 @@ class ContainerComponent(
 
     # -------------------------------------------------------------------------
 
+    # Location (browsing the storage locations like folders, and selecting or
+    # adding one). The selected location is the container's `location_id`.
+
+    browse_location_id: int = None
+    """
+    The location open in the location picker, or None for the top-level
+    locations.
+    """
+
+    browse_page: int = 1
+    """
+    The page of the open location's sub-locations being shown.
+    """
+
+    is_creating_location: bool = False
+    """
+    Whether the form for adding a new location inside of the open location
+    is shown (see `toggle_new_location`).
+    """
+
+    new_location__storage_type_options = StorageLocation.storage_type_options
+
+    @property
+    def browse_path(self) -> list[StorageLocation]:
+        """
+        The locations from the top level down to the open location (i.e. the
+        picker's breadcrumb). Empty when viewing the top-level locations.
+        """
+        if self.browse_location_id is None:
+            return []
+        return StorageLocation.objects.get(id=self.browse_location_id).get_path()
+
+    @property
+    def browse_sub_locations(self):
+        """
+        The page of sub-locations shown in the picker (the same as the
+        dashboard's location browser).
+        """
+        return InventoryDashboardComponent.get_sub_locations(
+            self.browse_location_id, self.browse_page
+        )
+
+    @property
+    def selected_location_path(self) -> list[StorageLocation]:
+        """
+        The locations from the top level down to the selected location.
+        """
+        return StorageLocation.objects.get(id=self.form_data["location_id"]).get_path()
+
+    def open_location(self, location_id: int = None, page: int = 1):
+        """
+        Opens a location in the location picker, or the top-level locations
+        when no `location_id` is given.
+        """
+        self.browse_location_id = location_id
+        self.browse_page = page
+        self.is_creating_location = False
+
+    def toggle_new_location(self):
+        """
+        Shows or hides the form for adding a new location inside of the open
+        location.
+        """
+        self.is_creating_location = not self.is_creating_location
+
+    def select_location(self, location_id: int):
+        self.form_data["location_id"] = StorageLocation.objects.get(id=location_id).id
+
+    def clear_location(self):
+        """
+        Goes back to the location picker, which is still on the same folder.
+        """
+        self.form_data.pop("location_id", None)
+
+    def create_location(self):
+        """
+        Adds a new location inside of the open location (or at the top level),
+        and selects it.
+        """
+        name = str(self.form_data.get("new_location__name") or "").strip()
+        if not name:
+            self.action_error = "Give the new location a name."
+            return
+        temperature = self.form_data.get("new_location__temperature_celsius")
+        location = StorageLocation.objects.create(
+            name=name,
+            storage_type=self.form_data.get("new_location__storage_type") or None,
+            # blank means the temperature is unknown
+            temperature_celsius=temperature if temperature not in (None, "") else None,
+            parent_location_id=self.browse_location_id,
+        )
+        for key in [
+            "new_location__name",
+            "new_location__storage_type",
+            "new_location__temperature_celsius",
+        ]:
+            self.form_data.pop(key, None)
+        self.is_creating_location = False
+        self.form_data["location_id"] = location.id
+
+    # -------------------------------------------------------------------------
+
     @property
     def section_states(self) -> dict[str, str]:
         """
-        The state of each form section ("chemical", "batch", and "container"),
-        which sets its color in the form. Sections that are filled in are
-        "done", the first section that is not is "active", and any after it
-        are "waiting". The container section's inputs are hidden while it is
-        "waiting". These are only a guide for the user, and the full checks
-        are in `check_form_for_create`. Only the create form has states.
+        The state of each form section ("chemical", "batch", "location", and
+        "container"), which sets its color in the form. Sections that are
+        filled in are "done", the first section that is not is "active", and
+        any after it are "waiting". The location and container sections'
+        inputs are hidden while they are "waiting". These are only a guide for
+        the user, and the full checks are in `check_form_for_create`. Only the
+        create form has states.
         """
         if self.component_type != "create":
             return {}
@@ -550,21 +693,22 @@ class ContainerComponent(
         else:
             is_chemical_done = contents_mode is not None
 
-        # all new batch inputs are optional, so the batch type is used as the
-        # sign that the user filled them in
         batch_mode = self.form_data.get("batch_mode")
         if batch_mode == "existing":
             is_batch_done = bool(self.form_data.get("batch_id"))
         elif batch_mode == "new":
-            is_batch_done = bool(self.form_data.get("batch__batch_type"))
+            is_batch_done = self.is_new_batch_saved
         else:
             is_batch_done = False
+
+        is_location_done = bool(self.form_data.get("location_id"))
 
         # the container section is only shown once the sections before it are
         # done, so it can't be done (or active) before them
         is_container_done = (
             is_chemical_done
             and is_batch_done
+            and is_location_done
             and all(
                 self.form_data.get(key) not in (None, "")
                 for key in self.required_inputs
@@ -576,6 +720,7 @@ class ContainerComponent(
         for section, is_done in [
             ("chemical", is_chemical_done),
             ("batch", is_batch_done),
+            ("location", is_location_done),
             ("container", is_container_done),
         ]:
             if is_done:
@@ -598,17 +743,8 @@ class ContainerComponent(
                 "new substance or mixture."
             )
         elif contents_mode == "new_substance":
-            molecule = self.form_data.get("molecule")
-            structure = self.form_data.get("structure")
-            # these are False if they failed to load
-            if molecule is False or structure is False:
-                self.form_errors.append(
-                    "The molecule or crystal structure failed to load."
-                )
-            elif molecule is None and structure is None:
-                self.form_errors.append(
-                    "Load a molecule and/or crystal structure for the new substance."
-                )
+            if not isinstance(self.form_data.get("molecule"), ToolkitMolecule):
+                self.form_errors.append("Search for the new substance's SMILES.")
         elif contents_mode == "new_mixture":
             if not self.form_data.get("mixture__mixture_type"):
                 self.form_errors.append("Give the type of the new mixture.")
@@ -660,21 +796,9 @@ class ContainerComponent(
                     "so the container's amount must use the same units."
                 )
         elif self.form_data.get("batch_mode") == "new":
-            for container, amount in self.reagent_rows:
-                if not container and not amount:
-                    continue  # blank rows are skipped
-                try:
-                    Container.get_by_barcode_or_id(container)
-                except Container.DoesNotExist as error:
-                    self.form_errors.append(str(error))
-                try:
-                    if Decimal(amount) <= 0:
-                        raise InvalidOperation()
-                except (InvalidOperation, TypeError):
-                    self.form_errors.append(
-                        "The amount used from each parent batch's container must be "
-                        f"greater than 0 (got '{amount}')."
-                    )
+            # the new batch's details are checked when it is saved
+            if not self.is_new_batch_saved:
+                self.form_errors.append("Save the new batch's details.")
         elif self.form_data.get("contents_mode"):
             self.form_errors.append(
                 "Select an existing batch, or choose to make a new batch."
@@ -719,8 +843,7 @@ class ContainerComponent(
                     # This is the single entry point for registering substances,
                     # and it gives the existing ID if one is already registered
                     substance_id = SubstanceDatastore.get_or_create_id(
-                        molecule=self.form_data.get("molecule"),
-                        structure=self.form_data.get("structure"),
+                        molecule=self.form_data["molecule"],
                         registered_by_id=user_id,
                     )
                 elif contents_mode == "existing_mixture":

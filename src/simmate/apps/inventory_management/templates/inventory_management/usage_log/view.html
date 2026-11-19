@@ -78,7 +78,7 @@
                                 </dd>
                                 <dt class="col-6 col-sm-5 fw-normal text-muted">Batch type</dt>
                                 <dd class="col-6 col-sm-7 mb-0">
-                                    {{ destination.batch_type|default:"--"|replace:"_, "|capfirst }}
+                                    {{ destination.batch_type|default:"--" }}
                                 </dd>
                             </dl>
                         {% else %}
