@@ -1,38 +1,7 @@
 <ul class="nav nav-tabs nav-bordered mb-3">
-    <li class="nav-item">
-        <a href="#overview-section"
-           data-bs-toggle="tab"
-           aria-expanded="true"
-           class="nav-link active">
-            <i class="bi bi-house-door d-md-none d-block"></i>
-            <span class="d-none d-md-block">Overview</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="#components-section"
-           data-bs-toggle="tab"
-           aria-expanded="false"
-           class="nav-link">
-            <i class="bi bi-puzzle d-md-none d-block"></i>
-            <span class="d-none d-md-block">Components <small>({{ components|length|intcomma }})</small></span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="#sub-projects-section"
-           data-bs-toggle="tab"
-           aria-expanded="false"
-           class="nav-link">
-            <i class="bi bi-diagram-3 d-md-none d-block"></i>
-            <span class="d-none d-md-block">Sub-projects <small>({{ sub_projects__count|intcomma }})</small></span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="#tags-section"
-           data-bs-toggle="tab"
-           aria-expanded="false"
-           class="nav-link">
-            <i class="bi bi-tags d-md-none d-block"></i>
-            <span class="d-none d-md-block">Tags <small>({{ tags__count|intcomma }})</small></span>
-        </a>
-    </li>
+    {% include "data_explorer/for_view/tab_link.html" with target="overview-section" icon="house-door" label="Overview" active=True %}
+    {% include "data_explorer/for_view/tab_link.html" with target="components-section" icon="puzzle" label="Components" count=components|length %}
+    {% include "data_explorer/for_view/tab_link.html" with target="sub-projects-section" icon="diagram-3" label="Sub-projects" count=sub_projects__count %}
+    {% include "data_explorer/for_view/tab_link.html" with target="tags-section" icon="tags" label="Tags" count=tags__count %}
+    <li class="nav-item ms-auto align-self-center">{% include "data_explorer/for_view/update_button.html" %}</li>
 </ul>
