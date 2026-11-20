@@ -7,7 +7,7 @@
         </h3>
         {% if component.component_type != "update" %}
             <div class="row">
-                <div class="col-md-4">{% htmx_selectbox name="project_id" label="Project" options=component.project_options %}</div>
+                <div class="col-md-4">{% htmx_selectbox name="leaderboard_id" label="Leaderboard" options=component.leaderboard_options %}</div>
                 {% if component.component_type == "create" %}
                     <div class="col-md-4">
                         {% htmx_checkbox name="is_mixture" label="Is Mixture" side_text="This candidate is a mixture" defer=False %}

@@ -53,7 +53,7 @@
                         <dd class="col-6 col-sm-7">
                             {% if batch %}
                                 {% foreign_key_link batch %}
-                                {% if batch.batch_type %}<span class="text-muted">· {{ batch.batch_type|replace:"_, " }}</span>{% endif %}
+                                {% if batch.batch_type %}<span class="text-muted">· {{ batch.batch_type }}</span>{% endif %}
                             {% else %}
                                 --
                             {% endif %}

@@ -79,28 +79,10 @@
                                 <td>Description</td>
                                 <td>{{ table_entry.description|linebreaks }}</td>
                             </tr>
-                            <tr>
-                                <td>Objective</td>
-                                <td>{{ table_entry.objective|default:"--"|linebreaks }}</td>
-                            </tr>
-                            <tr>
-                                <td>Rating System</td>
-                                <td>{{ table_entry.rating_system }}</td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
-    {% user_can table_entry "update" as can_update %}
-    {% if can_update %}
-        <div class="text-center py-2">
-            <a class="btn btn-warning btn-sm"
-               type="button"
-               href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">
-                <i class="bi bi-pencil py-1"></i>&nbsp;&nbsp;Update
-            </a>
-        </div>
-    {% endif %}
 </div>

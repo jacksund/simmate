@@ -1,0 +1,7 @@
+<ul class="nav nav-tabs nav-bordered mb-3">
+    {% include "data_explorer/for_view/tab_link.html" with target="overview-section" icon="house-door" label="Overview" active=True %}
+    {% include "data_explorer/for_view/tab_link.html" with target="candidates-section" icon="trophy" label="Candidates" count=candidates__count %}
+    {% include "data_explorer/for_view/tab_link.html" with target="child-leaderboards-section" icon="diagram-3" label="Child Leaderboards" count=child_leaderboards__count %}
+    {% include "data_explorer/for_view/tab_link.html" with target="used-by-section" icon="kanban" label="Used By" count=components|length %}
+    <li class="nav-item ms-auto align-self-center">{% include "data_explorer/for_view/update_button.html" %}</li>
+</ul>

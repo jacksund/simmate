@@ -69,6 +69,13 @@ CATALOGS = [
         False,
     ),
     (
+        "Leaderboard",
+        "Leaderboards",
+        "Candidates ranked for each use, from general to specific",
+        "bi-trophy text-danger",
+        False,
+    ),
+    (
         "Tag",
         "Tags",
         "Labels for organizing project data",

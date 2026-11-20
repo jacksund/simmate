@@ -1,6 +1,6 @@
 class RatingSystem:
     """
-    Base class for how a project's candidates are rated.
+    Base class for how a leaderboard's candidates are rated.
 
     The default approach is pairwise: two candidates are compared in a
     `Matchup` (e.g. an llm debate), and the result updates both of their
@@ -9,7 +9,7 @@ class RatingSystem:
 
     A rating system only works with a candidate's rating columns (`rating`,
     `rating_deviation`, `rating_data`, and `num_matchups`) and never saves
-    anything to the database. Saving is handled by `Project.record_matchup`.
+    anything to the database. Saving is handled by `Leaderboard.record_matchup`.
 
     Custom fitness functions can be added later as subclasses too. These can
     override `update` and `pick_pair`, or score each candidate on its own

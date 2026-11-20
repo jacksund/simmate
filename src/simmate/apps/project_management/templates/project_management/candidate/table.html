@@ -1,9 +1,9 @@
 {% extends "data_explorer/entries.html" %}
 {% block table_headers %}
-    {% if project_view %}<th style="min-width:40px">Rank</th>{% endif %}
+    {% if leaderboard_view %}<th style="min-width:40px">Rank</th>{% endif %}
     {% table_header "id" "ID" min_width=90 %}
-    {% if not project_view %}
-        {% table_header "project__name" "Project" min_width=100 %}
+    {% if not leaderboard_view %}
+        {% table_header "leaderboard__name" "Leaderboard" min_width=100 %}
     {% endif %}
     <th style="min-width:150px">Substance / Mixture</th>
     {% table_header "rating" min_width=80 %}
@@ -13,10 +13,10 @@
     <th style="min-width:50px">Edit</th>
 {% endblock %}
 {% block table_rows %}
-    {% if project_view %}<td>{{ forloop.counter }}</td>{% endif %}
+    {% if leaderboard_view %}<td>{{ forloop.counter }}</td>{% endif %}
     <td>{% foreign_key_link entry %}</td>
-    {% if not project_view %}
-        <td>{% foreign_key_link entry.project "name" %}</td>
+    {% if not leaderboard_view %}
+        <td>{% foreign_key_link entry.leaderboard "name" %}</td>
     {% endif %}
     <td>
         {% if entry.is_mixture %}

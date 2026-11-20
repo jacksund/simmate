@@ -136,10 +136,10 @@ class SubstanceComponent(TableComponent, MoleculeInput, StructureInput):
                 if other.substance_id != table_entry.id
             ]
 
-        # the projects where this substance is a candidate
-        candidates = table_entry.project_candidates.select_related("project").order_by(
-            "project__name"
-        )
+        # the leaderboards where this substance is a candidate
+        candidates = table_entry.project_candidates.select_related(
+            "leaderboard"
+        ).order_by("leaderboard__name")
 
         return {
             "viewer_default": cls.get_viewer_default(table_entry),

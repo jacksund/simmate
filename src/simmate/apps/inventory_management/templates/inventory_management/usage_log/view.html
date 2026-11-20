@@ -2,7 +2,7 @@
 {% block entrycontent %}
     {% with container=table_entry.source_container destination=table_entry.destination_batch %}
         <div class="d-flex justify-content-end border-bottom pb-2 mb-3">
-            {% include "inventory_management/for_view/update_button.html" %}
+            {% include "data_explorer/for_view/update_button.html" %}
         </div>
         {# What was taken, by whom, and when #}
         <div class="card border-primary-subtle bg-primary-subtle mb-3">
@@ -78,7 +78,7 @@
                                 </dd>
                                 <dt class="col-6 col-sm-5 fw-normal text-muted">Batch type</dt>
                                 <dd class="col-6 col-sm-7 mb-0">
-                                    {{ destination.batch_type|default:"--"|replace:"_, "|capfirst }}
+                                    {{ destination.batch_type|default:"--" }}
                                 </dd>
                             </dl>
                         {% else %}

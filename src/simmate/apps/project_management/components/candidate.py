@@ -3,11 +3,11 @@ from django.db.models import Q
 from simmate.apps.inventory_management.models import Mixture, Substance
 from simmate.website.data_explorer.components import TableComponent
 
-from ..models import Candidate, Matchup, Project
-from .mixins import ProjectInput
+from ..models import Candidate, Matchup
+from .mixins import LeaderboardInput
 
 
-class CandidateComponent(TableComponent, ProjectInput):
+class CandidateComponent(TableComponent, LeaderboardInput):
     table = Candidate
 
     template_names = {
@@ -20,9 +20,9 @@ class CandidateComponent(TableComponent, ProjectInput):
 
     display_name = "Candidates"
     description_short = (
-        "The substances and mixtures that a project is considering. Candidates "
-        "are rated against one another (e.g. through llm debates) to give each "
-        "project a leaderboard."
+        "The substances and mixtures that a leaderboard is considering. "
+        "Candidates are rated against one another (e.g. through llm debates) "
+        "to rank them for the leaderboard's objective."
     )
 
     enabled_component_types = [
@@ -36,9 +36,8 @@ class CandidateComponent(TableComponent, ProjectInput):
 
     @classmethod
     def has_permission(cls, user, component_type, table_entry=None) -> bool:
-        # anyone can view & search, and admins or the project's leaders and
-        # members can add & edit candidates. (For creating, the project is
-        # only known once the form is filled, so it's checked on submit.)
+        # anyone can view & search, any signed-in user can add candidates, and
+        # admins or the user that added a candidate can edit it
         if component_type in ["dashboard", "entries", "entry", "report", "search"]:
             return True
         if not user or not user.is_authenticated:
@@ -46,10 +45,7 @@ class CandidateComponent(TableComponent, ProjectInput):
         if user.is_staff or component_type == "create":
             return True
         if component_type == "update":
-            return Project.objects.filter(
-                Q(leaders=user) | Q(members=user),
-                id=table_entry.project_id,
-            ).exists()
+            return table_entry.added_by_id == user.id
         return False
 
     # -------------------------------------------------------------------------
@@ -75,7 +71,7 @@ class CandidateComponent(TableComponent, ProjectInput):
     # CREATE
 
     required_inputs = [
-        "project_id",
+        "leaderboard_id",
         "is_mixture",
         # "substance_id",  # only if is_mixture=False
         # "mixture_id",  # only if is_mixture=True
@@ -89,15 +85,7 @@ class CandidateComponent(TableComponent, ProjectInput):
         if self.form_errors:
             return
 
-        user = self.request.user
-        project_id = self.form_data["project_id"]
-        if not user.is_staff and not Project.objects.filter(
-            Q(leaders=user) | Q(members=user),
-            id=project_id,
-        ):
-            self.form_errors.append(
-                "Only the project's leaders and members can add candidates."
-            )
+        leaderboard_id = self.form_data["leaderboard_id"]
 
         # Substances and mixtures are typed in by their IDs, so these are
         # looked up and swapped for the real database IDs here
@@ -113,7 +101,10 @@ class CandidateComponent(TableComponent, ProjectInput):
                 )
                 return
             self.form_data["mixture_id"] = mixture.id
-            existing = Candidate.objects.filter(project_id=project_id, mixture=mixture)
+            existing = Candidate.objects.filter(
+                leaderboard_id=leaderboard_id,
+                mixture=mixture,
+            )
         else:
             self.form_data["mixture_id"] = None
             try:
@@ -129,13 +120,14 @@ class CandidateComponent(TableComponent, ProjectInput):
                 return
             self.form_data["substance_id"] = substance.id
             existing = Candidate.objects.filter(
-                project_id=project_id,
+                leaderboard_id=leaderboard_id,
                 substance=substance,
             )
 
         if existing.exists():
             self.form_errors.append(
-                f"This is already a candidate of the project ({existing.first().display_id})."
+                "This is already a candidate of the leaderboard "
+                f"({existing.first().display_id})."
             )
 
     def unmount_for_create(self):
@@ -147,7 +139,7 @@ class CandidateComponent(TableComponent, ProjectInput):
     # UPDATE
 
     # only the notes can be changed. Ratings come from matchups, and the
-    # project or substance can't be swapped once matchups exist.
+    # leaderboard or substance can't be swapped once matchups exist.
     mount_for_update_columns = [
         "comments",
     ]

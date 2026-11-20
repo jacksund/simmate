@@ -1,4 +1,9 @@
-from simmate.apps.project_management.models import Project, Transaction, Wallet
+from simmate.apps.project_management.models import (
+    Leaderboard,
+    Project,
+    Transaction,
+    Wallet,
+)
 
 
 def test_project_fake_data(fake_data):
@@ -9,6 +14,8 @@ def test_project_fake_data(fake_data):
     zeus = Project.objects.get(name="Zeus")
     assert zeus.child_projects.count() == zeus.num_child_projects_recursive == 2
     assert zeus.leaders.exists()
+    assert zeus.components.get().leaderboard.parent_leaderboard.name == "Batteries"
+    assert Leaderboard.objects.filter(parent_leaderboard__isnull=True).count() == 2
 
     # user wallets come from a signal when the users are created
     assert Wallet.objects.filter(user__username="chemist1", wallet_type="user").exists()

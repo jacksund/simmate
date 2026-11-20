@@ -45,4 +45,4 @@ def test_compute_fake_data(fake_data, client):
     worker = SimmateWorker.objects.filter(work_items__isnull=False).first()
     response = client.get(f"/data/SimmateWorker/{worker.id}/")
     assert response.status_code == 200
-    assert "Work Items (" in response.content.decode()
+    assert 'Work Items <span class="badge' in response.content.decode()

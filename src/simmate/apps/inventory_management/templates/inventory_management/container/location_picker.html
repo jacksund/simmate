@@ -1,0 +1,133 @@
+{# Folder-like picker for the container's storage location (styled like the dashboard's location browser). Expects `component` (the ContainerComponent). #}
+{# The user goes into a location, then either uses it or adds a new location inside of it. #}
+{# hx-target/include/swap are inherited by every hx-post button below, so the whole form re-renders #}
+{% url 'htmx:component_method' component.component_id 'open_location' as open_url %}
+{% with path=component.browse_path sub_locations=component.browse_sub_locations %}
+    {% with open_location=path|last %}
+        <div class="card shadow-sm border-light-subtle"
+             hx-target="#{{ component.component_id }}"
+             hx-include="#{{ component.component_id }}"
+             hx-indicator="#loading-spinner-corner"
+             hx-swap="outerHTML settle:0">
+            {# Breadcrumb (styled like the site's breadcrumbs in core/basic_elements/breadcrumbs.html) #}
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 bg-body-tertiary border-bottom py-2 px-3">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item">
+                        <a href="#" hx-post="{{ open_url }}"><i class="bi bi-house"></i></a>
+                    </li>
+                    {% for location in path %}
+                        {% if forloop.last %}
+                            <li class="breadcrumb-item active">{{ location.name|default:location.display_id }}</li>
+                        {% else %}
+                            <li class="breadcrumb-item">
+                                <a href="#"
+                                   hx-post="{{ open_url }}?location_id={{ location.id }}">{{ location.name|default:location.display_id }}</a>
+                            </li>
+                        {% endif %}
+                    {% empty %}
+                        <li class="breadcrumb-item active">All Locations</li>
+                    {% endfor %}
+                </ol>
+                <div class="d-flex gap-2">
+                    {% if not component.is_creating_location %}
+                        {% if open_location %}
+                            {% htmx_button method_name="toggle_new_location" label="New sub-location" icon="plus-lg" theme="outline-primary" small=True grouped=True %}
+                        {% else %}
+                            {% htmx_button method_name="toggle_new_location" label="New location" icon="plus-lg" theme="outline-primary" small=True grouped=True %}
+                        {% endif %}
+                    {% endif %}
+                    {% if open_location %}
+                        {% htmx_button method_name="select_location" label="Use this location" icon="check-lg" theme="primary" small=True grouped=True location_id=open_location.id %}
+                    {% endif %}
+                </div>
+            </div>
+            {# A new location inside of the open one, shown only when asked for #}
+            {% if component.is_creating_location %}
+                <div class="border-bottom py-2 px-3">
+                    <div class="small fw-semibold mt-1">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        New location in
+                        {% if open_location %}
+                            {{ open_location.name|default:open_location.display_id }}
+                        {% else %}
+                            the top level
+                        {% endif %}
+                    </div>
+                    <div class="row align-items-end">
+                        <div class="col-md-4">{% htmx_text_input name="new_location__name" label="Name" placeholder="e.g. Shelf 2" %}</div>
+                        <div class="col-md-4">{% htmx_selectbox name="new_location__storage_type" label="Type" %}</div>
+                        <div class="col-md-4">
+                            {% htmx_number_input name="new_location__temperature_celsius" label="Temp. (&deg;C)" placeholder="(optional) use 20 for room temp" %}
+                        </div>
+                    </div>
+                    {% if component.action_error %}
+                        {% alert theme="danger" message=component.action_error %}
+                    {% endif %}
+                    <div class="d-flex justify-content-end gap-2 my-2">
+                        {% htmx_button method_name="toggle_new_location" label="Cancel" theme="outline-secondary" small=True grouped=True %}
+                        {% htmx_button method_name="create_location" label="Create" icon="plus-lg" theme="primary" small=True grouped=True %}
+                    </div>
+                </div>
+            {% endif %}
+            {# Sub-locations of the open location. The name and the button both go into it #}
+            <div class="card-body p-0" style="max-height: 24rem; overflow-y: auto">
+                <div class="list-group list-group-flush">
+                    {% for location in sub_locations %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center gap-2 px-3">
+                            <div class="text-truncate">
+                                <button type="button"
+                                        class="btn btn-link p-0 fw-semibold text-body text-decoration-none text-start"
+                                        hx-post="{{ open_url }}?location_id={{ location.id }}">
+                                    {% if location.nsublocations %}
+                                        <i class="bi bi-folder text-warning me-1"></i>{{ location.name|default:location.display_id }}
+                                        <i class="bi bi-chevron-right small text-muted"></i>
+                                    {% else %}
+                                        <i class="bi bi-geo-alt text-success me-1"></i>{{ location.name|default:location.display_id }}
+                                    {% endif %}
+                                </button>
+                                <div class="small text-muted">
+                                    {{ location.storage_type|default:"--"|capfirst }}
+                                    {% if location.nsublocations %}
+                                        · {{ location.nsublocations }} sub-location{{ location.nsublocations|pluralize }}
+                                    {% endif %}
+                                    {% if location.temperature_celsius is not None %}
+                                        ·
+                                        {% if location.is_cold %}<i class="bi bi-snow text-info"></i>{% endif %}
+                                        {{ location.temperature_celsius }} °C
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <button type="button"
+                                    class="btn btn-outline-primary btn-sm text-nowrap"
+                                    hx-post="{{ open_url }}?location_id={{ location.id }}">
+                                Select <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                    {% empty %}
+                        <div class="text-center text-muted small py-4">
+                            {% if open_location %}
+                                No sub-locations here.
+                            {% else %}
+                                No storage locations have been added yet.
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {# Pagination #}
+            {% if sub_locations.paginator.num_pages > 1 %}
+                <div class="d-flex justify-content-between align-items-center border-top py-2 px-3">
+                    <small class="text-muted">{{ sub_locations.start_index }}–{{ sub_locations.end_index }} of {{ sub_locations.paginator.count }}</small>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-secondary" {% if sub_locations.has_previous %}hx-post="{{ open_url }}?page={{ sub_locations.previous_page_number }}{% if open_location %}&location_id={{ open_location.id }}{% endif %}"{% else %}disabled{% endif %}>
+                            <i class="bi bi-chevron-left"></i> Prev
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" {% if sub_locations.has_next %}hx-post="{{ open_url }}?page={{ sub_locations.next_page_number }}{% if open_location %}&location_id={{ open_location.id }}{% endif %}"{% else %}disabled{% endif %}>
+                            Next <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% endwith %}
+{% endwith %}

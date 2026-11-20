@@ -1,0 +1,21 @@
+{% extends "data_explorer/entry.html" %}
+{% block entrycontent %}
+    <div>
+        {% include "project_management/leaderboard/for_view/tabs_header.html" %}
+        <div class="tab-content">
+            {% include "project_management/leaderboard/for_view/overview_tab.html" %}
+            {% include "project_management/leaderboard/for_view/candidates_tab.html" %}
+            {# Child leaderboards #}
+            <div class="tab-pane" id="child-leaderboards-section">
+                {% if table_entry.tree_children %}
+                    <ul class="tree-view">
+                        {% include "project_management/leaderboard/for_view/tree_node.html" with node=table_entry is_current=True %}
+                    </ul>
+                {% else %}
+                    <small>There are no more specific leaderboards inside this one.</small>
+                {% endif %}
+            </div>
+            {% include "project_management/leaderboard/for_view/used_by_tab.html" %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,23 +1,12 @@
 {% extends "data_explorer/entry.html" %}
 {% block entrycontent %}
+    <div class="d-flex justify-content-end border-bottom pb-2 mb-3">
+        {% include "data_explorer/for_view/update_button.html" %}
+    </div>
     {# Base Info #}
     <div class="row py-2">
-        <div class="row pb-2">
-            <div class="col-12">
-                <div class="page-title-box">
-                    {% user_can table_entry "update" as can_update %}
-                    {% if can_update %}
-                        <div class="page-title-right m-0">
-                            <a role="button"
-                               class="btn btn-outline-primary btn-sm"
-                               href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Edit <i class="bi bi-pencil"></i></a>
-                        </div>
-                    {% endif %}
-                    <h3 class="m-0">Tag Info</h3>
-                </div>
-            </div>
-        </div>
         <div class="col-xl-12">
+            <h3>Tag Info</h3>
             <div class="row py-2">
                 <div>
                     <table class="table table-simmate mb-0">

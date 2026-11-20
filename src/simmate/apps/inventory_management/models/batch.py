@@ -69,16 +69,16 @@ class Batch(DatabaseTable):
     """
 
     batch_type_options = [
-        "internal_synthesis",
-        "external_synthesis",
-        "purchased",
-        "isolated",
-        "prepared",
-        "reprocessed",
-        "aliquot",
-        "pooled",
-        "unknown",
-        "other",
+        "Internal Synthesis",
+        "External Synthesis",
+        "Purchased",
+        "Isolated",
+        "Prepared",
+        "Reprocessed",
+        "Aliquot",
+        "Pooled",
+        "Unknown",
+        "Other",
     ]
     batch_type = table_column.CharField(
         max_length=20,
@@ -86,30 +86,31 @@ class Batch(DatabaseTable):
         null=True,
     )
     """
-    How this batch was obtained. Must be one of `batch_type_options`.
+    How this batch was obtained. Must be one of `batch_type_options`, which
+    are written as they are shown in the UI.
 
     For example:
-        - `internal_synthesis`: made in-house by a chemical reaction, including
+        - `Internal Synthesis`: made in-house by a chemical reaction, including
           its workup and purification
-        - `external_synthesis`: custom-made by a contract lab or CRO
-        - `purchased`: bought from a supplier's catalog
-        - `isolated`: separated out of a natural source or a parent mixture
+        - `External Synthesis`: custom-made by a contract lab or CRO
+        - `Purchased`: bought from a supplier's catalog
+        - `Isolated`: separated out of a natural source or a parent mixture
           (e.g. an extract or a chromatography fraction). This is not the
           purification step of a normal synthesis, which is still an
-          `internal_synthesis`.
-        - `prepared`: made by combining or diluting other batches without a
+          `Internal Synthesis`.
+        - `Prepared`: made by combining or diluting other batches without a
           reaction (e.g. a stock solution or a formulation)
-        - `reprocessed`: an existing batch that was repurified, recrystallized,
+        - `Reprocessed`: an existing batch that was repurified, recrystallized,
           dried, or milled
-        - `aliquot`: split off from a parent batch. Only use this when the
+        - `Aliquot`: split off from a parent batch. Only use this when the
           portion needs its own identity (e.g. separate QC or it is sent to
           another group). Otherwise, add a container to the existing batch.
-        - `pooled`: several batches of the same substance or mixture combined
+        - `Pooled`: several batches of the same substance or mixture combined
           into one
-        - `unknown`: the origin is not known (e.g. legacy or bulk-imported
+        - `Unknown`: the origin is not known (e.g. legacy or bulk-imported
           records)
 
-    For `prepared`, `reprocessed`, `aliquot`, and `pooled` batches, the source
+    For `Prepared`, `Reprocessed`, `Aliquot`, and `Pooled` batches, the source
     batches should be set in `parent_batches`.
     """
 

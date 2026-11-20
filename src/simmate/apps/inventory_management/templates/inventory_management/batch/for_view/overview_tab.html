@@ -23,7 +23,7 @@
                 {% if table_entry.batch_number %}<div class="text-muted">Batch #{{ table_entry.batch_number }}</div>{% endif %}
                 <div class="mt-2 mb-4">
                     {% if table_entry.batch_type %}
-                        <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ table_entry.batch_type|replace:"_, "|capfirst }}</span>
+                        <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ table_entry.batch_type }}</span>
                     {% endif %}
                     {% if table_entry.is_depleted %}
                         <span class="badge bg-danger-subtle text-danger-emphasis"
@@ -82,7 +82,7 @@
                 <dl class="row mb-4">
                     <dt class="col-6 col-sm-5 fw-normal text-muted">Batch type</dt>
                     <dd class="col-6 col-sm-7">
-                        {{ table_entry.batch_type|default:"--"|replace:"_, "|capfirst }}
+                        {{ table_entry.batch_type|default:"--" }}
                     </dd>
                     <dt class="col-6 col-sm-5 fw-normal text-muted">
                         <span data-bs-toggle="tooltip"

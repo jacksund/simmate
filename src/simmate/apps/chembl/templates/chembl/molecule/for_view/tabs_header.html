@@ -23,7 +23,7 @@
            aria-expanded="false"
            class="nav-link">
             <i class="bi bi-file-earmark-text d-md-none d-block"></i>
-            <span class="d-none d-md-block">Documents <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis">{{ documents__count }}</span></span>
+            <span class="d-none d-md-block">Documents <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis">{{ documents__count|intcomma }}</span></span>
         </a>
     </li>
     <li class="nav-item">
@@ -32,7 +32,7 @@
            aria-expanded="false"
            class="nav-link">
             <i class="bi bi-clipboard-data d-md-none d-block"></i>
-            <span class="d-none d-md-block">Assays <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis">{{ assays__count }}</span></span>
+            <span class="d-none d-md-block">Assays <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis">{{ assays__count|intcomma }}</span></span>
         </a>
     </li>
 </ul>

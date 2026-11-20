@@ -15,7 +15,7 @@ class TagComponent(TableComponent, ProjectInput):
         "update": "project_management/tag/form.html",
     }
 
-    display_name = "Tags, Labels, & Categories"
+    display_name = "Tags"
     description_short = (
         "Customizable labels that help with organizing project items like "
         "hypotheses, targets, and orders. Tags allow for flexible "

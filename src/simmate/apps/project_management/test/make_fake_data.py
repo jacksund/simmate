@@ -1,6 +1,6 @@
 """
-Generates `fake_data.zip`, which holds fake projects, tags, wallets, and
-transactions for tests and for exploring the UI (see `simmate database load-test-data`).
+Generates `fake_data.zip`, which holds fake projects, leaderboards, tags,
+wallets, and transactions for tests and for exploring the UI (see `simmate database load-test-data`).
 
 Rerun this script whenever the project models change. The output is
 deterministic (fixed random seed), so the zip only changes when this script
@@ -234,6 +234,57 @@ for wallet in wallets:
 
 # -----------------------------------------------------------------------------
 
+# These are made last, so the random rows above stay the same as before
+
+# (id, name, parent_id, objective)
+# fmt: off
+LEADERBOARDS = [
+    (1, "Batteries", None, None),
+    (2, "Solid Electrolytes", 1, "Solid electrolyte for an all-solid-state Li-metal battery. Rank on room-temperature Li-ion conductivity, stability against Li metal, and ease of processing."),
+    (3, "Sulfide Solid Electrolytes", 2, "Same as Solid Electrolytes, limited to sulfides, plus low H2S release when exposed to air."),
+    (4, "Solar Absorbers", None, None),
+    (5, "Lead-Free Perovskite Absorbers", 4, "Lead-free halide perovskite absorber for the top cell of a tandem solar cell. Rank on a band gap near 1.7 eV, defect tolerance, and stability under heat and light."),
+]
+# fmt: on
+
+leaderboards = []
+for leaderboard_id, name, parent_id, objective in LEADERBOARDS:
+    created_at = days_ago(30, 300)
+    leaderboards.append(
+        dict(
+            id=leaderboard_id,
+            created_at=created_at,
+            updated_at=created_at,
+            name=name,
+            objective=objective,
+            rating_system="glicko",
+            parent_leaderboard_id=parent_id,
+        )
+    )
+
+# (project_id, name, leaderboard_id)
+COMPONENTS = [
+    (1, "Electrolyte", 2),
+    (2, "Sulfide electrolyte", 3),
+    (4, "Top-cell absorber", 5),
+]
+
+components = []
+for i, (project_id, name, leaderboard_id) in enumerate(COMPONENTS, start=1):
+    created_at = days_ago(10, 300)
+    components.append(
+        dict(
+            id=i,
+            created_at=created_at,
+            updated_at=created_at,
+            project_id=project_id,
+            name=name,
+            leaderboard_id=leaderboard_id,
+        )
+    )
+
+# -----------------------------------------------------------------------------
+
 write_fake_data(
     filename=get_fake_data_path(LABEL),
     tables={
@@ -241,6 +292,8 @@ write_fake_data(
         f"{LABEL}.Project": projects,
         f"{LABEL}.Project_leaders": project_leaders,
         f"{LABEL}.Project_members": project_members,
+        f"{LABEL}.Leaderboard": leaderboards,
+        f"{LABEL}.ProjectComponent": components,
         f"{LABEL}.Tag": tags,
         f"{LABEL}.Wallet": wallets,
         f"{LABEL}.Transaction": transactions,

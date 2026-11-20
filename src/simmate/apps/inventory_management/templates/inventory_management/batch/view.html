@@ -2,11 +2,11 @@
 {% block entrycontent %}
     <div>
         <ul class="nav nav-tabs nav-bordered mb-3">
-            {% include "inventory_management/for_view/tab_link.html" with target="overview-section" icon="house-door" label="Overview" active=True %}
-            {% include "inventory_management/for_view/tab_link.html" with target="containers-section" icon="box-seam" label="Containers" count=containers__count %}
-            {% include "inventory_management/for_view/tab_link.html" with target="usage-logs-section" icon="journal-text" label="Usage Logs" count=usage_logs__count %}
-            {% include "inventory_management/for_view/tab_link.html" with target="lineage-section" icon="diagram-3" label="Lineage" count=lineage__count %}
-            <li class="nav-item ms-auto align-self-center">{% include "inventory_management/for_view/update_button.html" %}</li>
+            {% include "data_explorer/for_view/tab_link.html" with target="overview-section" icon="house-door" label="Overview" active=True %}
+            {% include "data_explorer/for_view/tab_link.html" with target="containers-section" icon="box-seam" label="Containers" count=containers__count %}
+            {% include "data_explorer/for_view/tab_link.html" with target="usage-logs-section" icon="journal-text" label="Usage Logs" count=usage_logs__count %}
+            {% include "data_explorer/for_view/tab_link.html" with target="lineage-section" icon="diagram-3" label="Lineage" count=lineage__count %}
+            <li class="nav-item ms-auto align-self-center">{% include "data_explorer/for_view/update_button.html" %}</li>
         </ul>
         <div class="tab-content">
             {% include "inventory_management/batch/for_view/overview_tab.html" %}
