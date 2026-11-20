@@ -1,0 +1,19 @@
+{# The inventory requests of a substance or mixture page. Set `is_mixture` on mixture pages. #}
+<div class="tab-pane" id="requests-section">
+    <div class="d-flex justify-content-end mb-2">
+        <a role="button"
+           class="btn btn-primary btn-sm"
+           href="{% url 'data_explorer:table-entry-new' 'InventoryRequest' %}?{% if is_mixture %}mixture_id={{ table_entry.display_id }}{% else %}substance_id={{ table_entry.id }}{% endif %}">Request More <i class="bi bi-cart-plus"></i></a>
+    </div>
+    {% if inventory_requests__count %}
+        {% include "inventory_management/inventory_request/table.html" with entries=inventory_requests truncated=inventory_requests__truncated hide_item=True %}
+        <div class="text-center py-2">
+            <a role="button"
+               class="btn btn-outline-primary btn-sm"
+               target="_blank"
+               href="{% url 'data_explorer:table' 'InventoryRequest' %}?{% if is_mixture %}mixture_id{% else %}substance_id{% endif %}={{ table_entry.id }}">View All <i class="bi bi-box-arrow-up-right"></i></a>
+        </div>
+    {% else %}
+        <small>There are no requests for this {% if is_mixture %}mixture{% else %}substance{% endif %}.</small>
+    {% endif %}
+</div>

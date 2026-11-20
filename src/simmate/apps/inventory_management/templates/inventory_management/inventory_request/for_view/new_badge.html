@@ -1,0 +1,6 @@
+{# Whether a inventory request is for something that was made before #}
+{% if was_made_before %}
+    {% status_badge "Remake" "secondary" icon="bi-arrow-repeat" %}
+{% else %}
+    {% status_badge "New" "info" icon="bi-stars" %}
+{% endif %}

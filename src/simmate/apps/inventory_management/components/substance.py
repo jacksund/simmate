@@ -10,7 +10,13 @@ from simmate.website.htmx.components import (
     StructureInput,
 )
 
-from ..models import Container, MixtureComponent, Substance, UsageLog
+from ..models import (
+    Container,
+    InventoryRequest,
+    MixtureComponent,
+    Substance,
+    UsageLog,
+)
 
 
 class SubstanceComponent(TableComponent, MoleculeInput, StructureInput):
@@ -141,6 +147,12 @@ class SubstanceComponent(TableComponent, MoleculeInput, StructureInput):
             "leaderboard"
         ).order_by("leaderboard__name")
 
+        # requests for more of this substance (e.g. targets, remakes, & orders)
+        inventory_requests = InventoryRequest.get_web_queryset().filter(
+            substance=table_entry
+        )
+        inventory_requests__count = inventory_requests.count()
+
         return {
             "viewer_default": cls.get_viewer_default(table_entry),
             "linked_datasets": linked_datasets,
@@ -174,6 +186,11 @@ class SubstanceComponent(TableComponent, MoleculeInput, StructureInput):
             "related__count": related_substances__count + mixtures__count,
             "candidates": candidates,
             "candidates__count": candidates.count(),
+            "inventory_requests": inventory_requests.order_by("-created_at", "-id")[
+                :limit
+            ],
+            "inventory_requests__count": inventory_requests__count,
+            "inventory_requests__truncated": inventory_requests__count > limit,
             "id_changes": list(table_entry.id_changes),
         }
 

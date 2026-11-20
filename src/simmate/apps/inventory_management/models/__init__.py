@@ -1,5 +1,6 @@
 from .batch import Batch
 from .container import Container
+from .inventory_request import InventoryRequest
 from .mixture import Mixture
 from .mixture_component import MixtureComponent
 from .molecule import Molecule

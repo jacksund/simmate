@@ -2,7 +2,7 @@ from django.db.models import F
 
 from simmate.website.data_explorer.components import TableComponent
 
-from ..models import Container, Mixture, UsageLog
+from ..models import Container, InventoryRequest, Mixture, UsageLog
 
 
 class MixtureComponent(TableComponent):
@@ -88,6 +88,12 @@ class MixtureComponent(TableComponent):
         ).select_related("source_container", "user")
         usage_logs__count = usage_logs.count()
 
+        # requests for more of this mixture (e.g. targets, remakes, & orders)
+        inventory_requests = InventoryRequest.get_web_queryset().filter(
+            mixture=table_entry
+        )
+        inventory_requests__count = inventory_requests.count()
+
         return {
             "mixture_components": components,
             "mixture_components__count": components__count,
@@ -101,4 +107,9 @@ class MixtureComponent(TableComponent):
             "usage_logs": usage_logs.order_by("-created_at", "-id")[:limit],
             "usage_logs__count": usage_logs__count,
             "usage_logs__truncated": usage_logs__count > limit,
+            "inventory_requests": inventory_requests.order_by("-created_at", "-id")[
+                :limit
+            ],
+            "inventory_requests__count": inventory_requests__count,
+            "inventory_requests__truncated": inventory_requests__count > limit,
         }

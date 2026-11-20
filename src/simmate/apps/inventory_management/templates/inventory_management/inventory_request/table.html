@@ -1,0 +1,47 @@
+{% extends "data_explorer/entries.html" %}
+{# Set `hide_item` when every request is of the same item (e.g. on a substance's page) #}
+{% block table_headers %}
+    {% table_header "id" "ID" min_width=100 %}
+    {% table_header "created_at" "Created" min_width=110 %}
+    {% if not hide_item %}<th style="min-width:150px">Substance / Mixture</th>{% endif %}
+    {% table_header "fulfillment_type" "Fulfillment" min_width=150 %}
+    {% table_header "status" min_width=140 %}
+    {% table_header "amount" min_width=100 %}
+    {% table_header "needed_by" "Needed By" min_width=110 %}
+    {% table_header "priority" min_width=90 %}
+    {% table_header "requested_by__username" "Requested By" min_width=125 %}
+    {% table_header "assigned_to__username" "Assigned To" min_width=125 %}
+    {% table_header "project__name" "Project" min_width=100 %}
+    <th style="min-width:50px">Edit</th>
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry %}</td>
+    <td class="text-nowrap">{{ entry.created_at|date:"Y-m-d" }}</td>
+    {% if not hide_item %}
+        <td>
+            {% include "inventory_management/dashboard_item.html" with batch=entry %}
+            {% include "inventory_management/inventory_request/for_view/new_badge.html" with was_made_before=entry.was_made_before %}
+        </td>
+    {% endif %}
+    <td>{{ entry.fulfillment_type|default:"--" }}</td>
+    <td>{% include "inventory_management/inventory_request/for_view/status_bar.html" with status=entry.status %}</td>
+    <td class="text-nowrap">
+        {% if entry.amount is not None %}
+            {{ entry.amount|floatformat:"-3" }} {{ entry.amount_units|default:"" }}
+        {% else %}
+            --
+        {% endif %}
+    </td>
+    <td class="text-nowrap">{{ entry.needed_by|date:"Y-m-d"|default:"--" }}</td>
+    <td>{{ entry.priority|default:"--" }}</td>
+    <td>{{ entry.requested_by.username|default:"--" }}</td>
+    <td>{{ entry.assigned_to.username|default:"--" }}</td>
+    <td>
+        {% if entry.project %}
+            {% foreign_key_link entry.project "name" %}
+        {% else %}
+            --
+        {% endif %}
+    </td>
+    {% update_entry_link entry %}
+{% endblock %}

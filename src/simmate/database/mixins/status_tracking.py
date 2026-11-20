@@ -7,11 +7,15 @@ from ..core import DatabaseTable, table_column
 
 class StatusTracking(DatabaseTable):
     """
-    A calculation is the result of a single `workflow.run()` call. Thus, a
-    calculation is synonmyous with a Prefect "Flow-Run". Becuase of this,
-    every table that inherits from this Calculation class will be directly
-    linked to a specific Workflow. You can access this workflow via the
-    `workflow` attribute.
+    Adds a `status` column for request-like entries (e.g. inventory requests),
+    along with how long each entry has sat in its current status
+    (`status_age`) and how long it took to complete (`days_to_completed`).
+
+    Child tables must add a `history` table (via django-simple-history), which
+    is where the timestamp of each status change comes from (see the note on
+    `history` below). The cached `status_age` and `days_to_completed` columns
+    are refreshed with `update_status_age` and `update_days_to_completed`
+    (e.g. in a daily schedule).
     """
 
     class Meta:
@@ -19,15 +23,18 @@ class StatusTracking(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # NOTE: many child classes override these defaults
+    # NOTE: child classes can override these defaults
 
     status_options = [
         "Under Review",
+        "Approved",
         "In Progress",
         "On Hold",
         "Completed",
-        "Canceled",
         "Failed",
+        "Rejected",
+        "Canceled",
+        "Duplicate",
         "Staged for Deletion",
     ]
     status = table_column.CharField(
@@ -36,35 +43,53 @@ class StatusTracking(DatabaseTable):
         blank=True,
     )
     """
-    The current status of the entry/request.
-    
+    The current status of the entry. Must be one of `status_options`.
+
     Possible values:
-        - "Under Review": Request is currently being evaluated.
-        - "In Progress": Work on the request has started.
-        - "On Hold": Request is paused or awaiting additional input.
-        - "Completed": Request has been fulfilled successfully.
-        - "Canceled": Request was stopped before completion.
-        - "Failed": Request could not be completed due to an error or issue.
-        - "Staged for Deletion": Request is marked for removal from the database.
+        - "Under Review": submitted and waiting for a decision.
+        - "Approved": accepted and queued, but work has not started.
+        - "In Progress": work has started (e.g. synthesis is underway or an
+          order was placed).
+        - "On Hold": paused or waiting on more input.
+        - "Completed": fulfilled successfully.
+        - "Failed": attempted, but could not be completed.
+        - "Rejected": declined by a reviewer.
+        - "Canceled": withdrawn before completion (e.g. by the requester).
+        - "Duplicate": closed because another entry covers it.
+        - "Staged for Deletion": marked for removal from the database.
     """
 
-    # BUG: must be set by child class
-    # from simple_history.models import HistoricalRecords
-    # history = HistoricalRecords()
+    open_status_options = [
+        "Under Review",
+        "Approved",
+        "In Progress",
+        "On Hold",
+    ]
+    """
+    The statuses where an entry is still pending. Only these have a
+    `status_age`.
+    """
+
+    # NOTE: `history` must be set by each child class. It isn't set here with
+    # `HistoricalRecords(inherit=True)` because inherited history tables
+    # can't be given a `table_name`, and we want them to follow the naming of
+    # other simmate tables. For example:
+    #   from simple_history.models import HistoricalRecords
+    #   history = HistoricalRecords(table_name="example__requests__history")
 
     # -------------------------------------------------------------------------
 
     status_completed_name: str = "Completed"
     """
     Name of the status to be used for calculating `days_to_completed`. By
-    default this is `Completed` but some apps use an alternative status such
-    as `Synthesized`, `Registered`, `Fixed`, etc.
+    default this is `Completed`, but child classes can use an alternative
+    status (e.g. `Synthesized` or `Fixed`).
     """
 
     days_to_completed = table_column.IntegerField(null=True, blank=True)
     """
-    The total number of days it took for the target to go from initial
-    submission (`created_at`) to reaching a status of synthesized/completed state.
+    The total number of days it took for the entry to go from initial
+    submission (`created_at`) to reaching the `status_completed_name` status.
     """
 
     def get_days_to_completed(self) -> int:
@@ -89,22 +114,13 @@ class StatusTracking(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    status_age_enable = ["Proposed", "In Progress", "Contracted (CRO)"]
-    status_age_disable = [
-        "Reference Only",
-        "Proposal Rejected",
-        "Synthesized",
-        "Synthesis Failed",
-        "Staged for Deletion",
-    ]
-
     status_age = table_column.IntegerField(null=True, blank=True)
     """
     The total number of days that the entry has been sitting with its current
     status.
 
-    Note, this is only tracked for pending status types (see `status_age_enable` list). 
-    Once synthesized/canceled/etc, this will revert to None (see `status_age_disable` list)
+    Note, this is only tracked for pending statuses (see `open_status_options`).
+    Once the entry is completed, canceled, etc., this reverts to None.
     """
 
     def get_status_age(self) -> int:
@@ -123,16 +139,14 @@ class StatusTracking(DatabaseTable):
         Updates the status age column for all entries in the table
         """
 
-        # unset any `status_age` set for columns that should no longer have them
-        for target in cls.objects.filter(
-            status__in=cls.status_age_disable,
-            status_age__isnull=False,
-        ).all():
-            target.update_wo_timestamp(status_age=None)
+        # unset any `status_age` for entries that are no longer pending
+        cls.objects.exclude(status__in=cls.open_status_options).filter(
+            status_age__isnull=False
+        ).update(status_age=None)
 
         # update `status_age`
         for target in cls.objects.filter(
-            status__in=cls.status_age_enable,
+            status__in=cls.open_status_options,
         ).all():
             target.update_wo_timestamp(status_age=target.get_status_age())
 
@@ -183,11 +197,14 @@ class StatusTracking(DatabaseTable):
     ]
     status_color_map = {
         "Under Review": "rgba(249, 200, 81, 1)",  # yellow
+        "Approved": "rgba(120, 200, 235, 1)",  # light blue
         "In Progress": "rgba(4, 144, 204, 1)",  # blue
         "On Hold": "rgba(0, 0, 0, 1)",  # black
         "Completed": "rgba(16, 196, 105, 1)",  # green
-        "Canceled": "rgba(200, 200, 200, 1)",  # light grey
         "Failed": "rgba(255, 91, 91, 1)",  # red
+        "Rejected": "rgba(253, 126, 20, 1)",  # orange
+        "Canceled": "rgba(200, 200, 200, 1)",  # light grey
+        "Duplicate": "rgba(200, 200, 200, 1)",  # light grey
         "Staged for Deletion": "rgba(100, 100, 100, 1)",  # dark grey
     }
 
@@ -232,7 +249,7 @@ class StatusTracking(DatabaseTable):
 
     @classmethod
     def get_age_histogram(cls, df: DataFrame):
-        df_s = df[df.status.isin(cls.status_age_enable)]
+        df_s = df[df.status.isin(cls.open_status_options)]
         figure = plotly_express.histogram(
             df_s,
             x="status_age",

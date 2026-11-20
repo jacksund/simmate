@@ -7,6 +7,7 @@
         {% include "data_explorer/for_view/tab_link.html" with target="structure-details-section" icon="box" label="Structure" %}
     {% endif %}
     {% include "data_explorer/for_view/tab_link.html" with target="inventory-section" icon="box-seam" label="Inventory" count=batches__count %}
+    {% include "data_explorer/for_view/tab_link.html" with target="requests-section" icon="cart" label="Requests" count=inventory_requests__count %}
     {% include "data_explorer/for_view/tab_link.html" with target="related-section" icon="diagram-3" label="Related" count=related__count %}
     {% include "data_explorer/for_view/tab_link.html" with target="leaderboards-section" icon="trophy" label="Leaderboards" count=candidates__count %}
     {% if id_changes %}

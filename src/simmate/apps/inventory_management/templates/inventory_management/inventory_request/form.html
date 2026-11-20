@@ -1,0 +1,103 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    {% include "data_explorer/general_search_options.html" %}
+    {% if component.component_type != "update" %}
+        <div class="container mt-4 border border-3 border-secondary rounded py-2">
+            <h3>
+                <span class="badge bg-secondary">1. Requested Item</span>
+            </h3>
+            <div class="row">
+                {% if component.component_type == "create" %}
+                    <div class="col-md-4">
+                        {% htmx_checkbox name="is_mixture" label="Is Mixture" side_text="This request is for a mixture" defer=False %}
+                    </div>
+                    <div class="col-md-4">
+                        {% if component.form_data.is_mixture %}
+                            {% htmx_text_input name="mixture_id" label="Mixture ID" placeholder="e.g. BCDF-123" %}
+                        {% else %}
+                            {% htmx_text_input name="substance_id" label="Substance ID" placeholder="e.g. BCD-012-3456" %}
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="col-md-4">
+                        {% htmx_text_input name="substance_id" label="Substance ID" placeholder="e.g. BCD-012-3456" %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+    <div class="container mt-4 border border-3 border-secondary rounded py-2">
+        <h3>
+            <span class="badge bg-secondary">2. Request Info</span>
+        </h3>
+        <div class="row">
+            {% if component.component_type != "create" %}
+                <div class="col-md-4">{% htmx_selectbox name="status" %}</div>
+            {% endif %}
+            <div class="col-md-4">{% htmx_selectbox name="fulfillment_type" label="Fulfillment Type" %}</div>
+            <div class="col-md-4">{% htmx_selectbox name="priority" %}</div>
+        </div>
+        {% if component.component_type != "search" %}
+            <div class="row">
+                <div class="col-md-4">
+                    {% htmx_number_input name="amount" label="Amount Requested" placeholder="(optional) e.g. 50" %}
+                </div>
+                <div class="col-md-4">{% htmx_selectbox name="amount_units" label="Amount Units" %}</div>
+                <div class="col-md-4">{% htmx_date_input name="needed_by" label="Needed By" %}</div>
+            </div>
+        {% endif %}
+        <div class="row">
+            <div class="col-md-4">
+                {% htmx_selectbox name="requested_by_id" label="Requested By" options=component.user_options %}
+            </div>
+            <div class="col-md-4">
+                {% htmx_selectbox name="assigned_to_id" label="Assigned To" options=component.user_options %}
+            </div>
+            <div class="col-md-4">{% htmx_selectbox name="project_id" label="Project" options=component.project_options %}</div>
+        </div>
+        {# these are set automatically, so they are only searched on #}
+        {% if component.component_type == "search" %}
+            <div class="row">
+                <div class="col-md-4">
+                    {% htmx_selectbox name="submitted_by_id" label="Submitted By" options=component.user_options %}
+                </div>
+                <div class="col-md-4">
+                    {% htmx_selectbox name="completed_by_id" label="Completed By" options=component.user_options %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    {% if component.component_type != "search" %}
+        <div class="container mt-4 border border-3 border-secondary rounded py-2">
+            <h3>
+                <span class="badge bg-secondary">3. Supplier Info</span>
+            </h3>
+            <p class="text-muted small mb-1">Only needed for external syntheses and purchases.</p>
+            <div class="row">
+                <div class="col-md-4">{% htmx_text_input name="supplier" placeholder="(optional) e.g. Sigma-Aldrich" %}</div>
+                <div class="col-md-4">
+                    {% htmx_text_input name="supplier_catalog_number" label="Supplier Product #" placeholder="(optional) e.g. 50-177-2891" %}
+                </div>
+                <div class="col-md-4">
+                    {% htmx_number_input name="estimated_cost" label="Estimated Cost (USD)" placeholder="(optional)" %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <div class="container mt-4 border border-3 border-secondary rounded py-2">
+        <h3>
+            <span class="badge bg-secondary">{% if component.component_type == "search" %}3{% else %}4{% endif %}. Notes</span>
+        </h3>
+        {% if component.component_type == "update" %}
+            <div class="row">
+                <div class="col-md-4">
+                    {% htmx_number_input name="batch_id" label="Fulfilled By (Batch ID)" placeholder="(optional) the batch that fulfilled this" is_int=True %}
+                </div>
+            </div>
+        {% endif %}
+        <div class="row">
+            <div class="col-sm">{% include "core/basic_elements/comments.html" %}</div>
+        </div>
+    </div>
+    {% include "data_explorer/dynamic_submit_button.html" %}
+{% endblock %}

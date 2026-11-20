@@ -4,11 +4,13 @@
         <ul class="nav nav-tabs nav-bordered mb-3">
             {% include "data_explorer/for_view/tab_link.html" with target="overview-section" icon="house-door" label="Overview" active=True %}
             {% include "data_explorer/for_view/tab_link.html" with target="inventory-section" icon="box-seam" label="Inventory" count=batches__count %}
+            {% include "data_explorer/for_view/tab_link.html" with target="requests-section" icon="cart" label="Requests" count=inventory_requests__count %}
             <li class="nav-item ms-auto align-self-center">{% include "data_explorer/for_view/update_button.html" %}</li>
         </ul>
         <div class="tab-content">
             {% include "inventory_management/mixture/for_view/overview_tab.html" %}
             {% include "inventory_management/mixture/for_view/inventory_tab.html" %}
+            {% include "inventory_management/for_view/requests_tab.html" with is_mixture=True %}
         </div>
     </div>
 {% endblock %}

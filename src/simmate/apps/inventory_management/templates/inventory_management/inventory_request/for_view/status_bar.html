@@ -1,0 +1,18 @@
+{# The `status` of a inventory request, colored by its stage #}
+{% if status == "Under Review" %}
+    {% status_bar status "warning" %}
+{% elif status == "Approved" %}
+    {% status_bar status "info" %}
+{% elif status == "In Progress" %}
+    {% status_bar status "primary" %}
+{% elif status == "Completed" %}
+    {% status_bar status "success" %}
+{% elif status == "Failed" or status == "Rejected" %}
+    {% status_bar status "danger" %}
+{% elif status == "Staged for Deletion" %}
+    {% status_bar status "dark" %}
+{% elif status %}
+    {% status_bar status "secondary" %}
+{% else %}
+    --
+{% endif %}
