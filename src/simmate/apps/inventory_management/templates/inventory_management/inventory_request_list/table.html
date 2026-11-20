@@ -1,0 +1,23 @@
+{% extends "data_explorer/entries.html" %}
+{% block table_headers %}
+    {% table_header "id" "ID" min_width=90 %}
+    {% table_header "created_at" "Created" min_width=110 %}
+    {% table_header "title" min_width=200 %}
+    {% table_header "project__name" "Project" min_width=100 %}
+    {% table_header "submitted_by__username" "Submitted By" min_width=125 %}
+    {% table_header "num_requests" "Requests" min_width=100 %}
+    <th style="min-width:180px">Progress</th>
+    {% table_header "status" min_width=120 %}
+    <th style="min-width:50px">Edit</th>
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry %}</td>
+    <td class="text-nowrap">{{ entry.created_at|date:"Y-m-d" }}</td>
+    <td>{{ entry.title|default:"--" }}</td>
+    <td>{% foreign_key_link entry.project "name" %}</td>
+    <td>{{ entry.submitted_by.username|default:"--" }}</td>
+    <td>{{ entry.num_requests }}</td>
+    <td>{% include "inventory_management/inventory_request_list/for_view/progress_bar.html" with counts=entry %}</td>
+    <td>{% include "inventory_management/inventory_request_list/for_view/status_bar.html" with status=entry.status %}</td>
+    {% update_entry_link entry %}
+{% endblock %}

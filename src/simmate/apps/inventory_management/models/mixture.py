@@ -1,4 +1,5 @@
 import random
+import re
 
 from simmate.database.core import DatabaseTable, table_column
 
@@ -30,6 +31,14 @@ class Mixture(DatabaseTable):
         Generates a random 4-letter prefix for use as the `id_prefix`.
         """
         return "".join(random.choices(Mixture._LETTERS, k=4))
+
+    @staticmethod
+    def validate_display_id(display_id: str) -> bool:
+        """
+        Checks that the ID has the format of a mixture's `display_id` (e.g.
+        "BCDF-123"). This does not check the database.
+        """
+        return bool(re.fullmatch(r"[A-Z]{4}-\d+", display_id.strip().upper()))
 
     id = table_column.BigAutoField(primary_key=True)
     """

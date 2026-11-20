@@ -136,6 +136,26 @@ def my_method(self):
     self.js_actions.append({"type": "alert", "message": "Task completed!"})
 ```
 
+### Reading Uploaded Files Yourself
+
+By default, uploaded files are parsed before they reach the component: CSV and Excel (`.xlsx`) files become a pandas `DataFrame` (with column types guessed by pandas) and structure files become a toolkit `Structure`. Table files are detected by their extension first, as browsers send CSV files with differing content types.
+
+To read a file yourself (e.g. to keep every cell as text, or to show read errors to the user), list its input name in `raw_file_inputs`. The file is then given as a Django `UploadedFile`, and its `on_change_hook__<name>` method is called as usual. The `read_table_file` method reads CSV and Excel files the same way as the default, and gives a `ValueError` if a file can't be read.
+
+```python
+class MyComponent(TableComponent):
+    raw_file_inputs = ["my_file"]
+
+    def on_change_hook__my_file(self):
+        file = self.form_data.pop("my_file")
+        try:
+            df = self.read_table_file(file, as_text=True)  # cells kept as text
+        except ValueError as error:
+            self.action_error = str(error)
+            return
+        # ...
+```
+
 ### Parent-Child Communication
 
 Use `self.retarget()` to force a parent component (or any other div) to re-render in response to a child component's action.

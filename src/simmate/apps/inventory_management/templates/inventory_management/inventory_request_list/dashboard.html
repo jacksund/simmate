@@ -1,0 +1,11 @@
+{% extends "data_explorer/dashboard.html" %}
+{# New lists can have up to 100 rows, so they get a full page instead of the usual side panel #}
+{% block addnew %}
+    {% user_can table.table_name "create" as can_create %}
+    {% if can_create %}
+        <a class="btn btn-success my-1"
+           href="{% url 'data_explorer:table-entry-new' table.table_name %}">
+            <i class="bi bi-plus-circle py-1"></i>&nbsp;&nbsp;New List
+        </a>
+    {% endif %}
+{% endblock %}

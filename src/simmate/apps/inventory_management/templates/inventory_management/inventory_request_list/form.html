@@ -1,0 +1,205 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    <div class="container mt-4 border border-3 border-secondary rounded py-2">
+        <h3>
+            <span class="badge bg-secondary">1. List Info</span>
+        </h3>
+        <div class="row">
+            <div class="col-md-6">
+                {% htmx_text_input name="title" placeholder="e.g. Round 3 targets or Sigma order" max_length=100 %}
+            </div>
+            <div class="col-md-6">{% htmx_selectbox name="project_id" label="Project" options=component.project_options %}</div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                {% htmx_text_area name="description" nrows=2 placeholder="(optional) what this list is for, e.g. the design rationale of these targets" %}
+            </div>
+        </div>
+    </div>
+    {% if component.component_type == "create" %}
+        {% with preview=component.preview shared=component.shared_values %}
+            {# Values copied onto every request #}
+            <div class="container mt-4 border border-3 border-secondary rounded py-2">
+                <h3>
+                    <span class="badge bg-secondary">2. Shared Values</span>
+                </h3>
+                <p class="text-muted small mb-1">
+                    These are used for every request. A row can use a different value by filling in its own cell.
+                </p>
+                <div class="row">
+                    <div class="col-md-4">
+                        {% htmx_selectbox name="requested_by_id" label="Requested By" options=component.user_options %}
+                    </div>
+                    <div class="col-md-4">
+                        {% htmx_selectbox name="assigned_to_id" label="Assigned To" options=component.user_options %}
+                    </div>
+                    <div class="col-md-4">{% htmx_date_input name="needed_by" label="Needed By" %}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">{% htmx_selectbox name="fulfillment_type" label="Fulfillment Type" %}</div>
+                    <div class="col-md-4">{% htmx_selectbox name="priority" %}</div>
+                    <div class="col-md-2">
+                        {% htmx_number_input name="amount" label="Amount" placeholder="(optional) e.g. 50" %}
+                    </div>
+                    <div class="col-md-2">{% htmx_selectbox name="amount_units" label="Units" %}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">{% htmx_text_input name="supplier" placeholder="(optional) e.g. Sigma-Aldrich" %}</div>
+                    <div class="col-md-4">
+                        {% htmx_number_input name="estimated_cost" label="Estimated Cost (USD)" placeholder="(optional) per request" %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm">{% include "core/basic_elements/comments.html" %}</div>
+                </div>
+            </div>
+            {# One row per request #}
+            <div class="container mt-4 border border-3 border-secondary rounded py-2">
+                <h3>
+                    <span class="badge bg-secondary">3. Items</span>
+                </h3>
+                <p class="text-muted small mb-2">
+                    Give each item as a substance ID (e.g. BCD-012-3456), a mixture ID (e.g. BCDF-123), or a SMILES. New SMILES are registered as substances when the list is saved. A list can have up to {{ component.max_requests }} items.
+                </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        {% htmx_file_upload name="request_file" label="Upload a CSV or Excel File" file_type=".csv,.xlsx" %}
+                        <div class="small text-muted">
+                            Columns:
+                            <code>{{ component.row_columns|join:", " }}</code>
+                            (only <code>item</code> is required)
+                            <br>
+                            <a download="inventory_request_list.csv"
+                               href="data:text/csv;charset=utf-8,{{ component.template_csv|urlencode:'' }}">
+                                <i class="bi bi-download"></i> Download a template
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="my-2">
+                            <label class="form-label" for="{{ component.component_id }}-paste_text">Or Paste Items</label>
+                            <textarea id="{{ component.component_id }}-paste_text"
+                                      name="paste_text"
+                                      class="form-control font-monospace"
+                                      rows="3"
+                                      placeholder="One item per line, with an optional amount and units (e.g. 'BCD-012-3456, 50, mg'). Cells copied from Excel also work, and can start with a header row.">{{ component.form_data.paste_text|default:"" }}</textarea>
+                        </div>
+                        {% htmx_button method_name="load_paste" label="Add Lines" icon="plus-circle" theme="outline-primary" small=True %}
+                    </div>
+                </div>
+                {% include "htmx/partials/action_alert.html" %}
+                {% if preview.status_counts %}
+                    <div class="d-flex flex-wrap gap-2 my-2">
+                        {% with counts=preview.status_counts %}
+                            {% if counts.substance %}<span class="badge bg-success">{{ counts.substance }} substance{{ counts.substance|pluralize }}</span>{% endif %}
+                            {% if counts.mixture %}<span class="badge bg-success">{{ counts.mixture }} mixture{{ counts.mixture|pluralize }}</span>{% endif %}
+                            {% if counts.new %}<span class="badge bg-info">{{ counts.new }} new substance{{ counts.new|pluralize }}</span>{% endif %}
+                            {% if counts.invalid %}<span class="badge bg-danger">{{ counts.invalid }} invalid</span>{% endif %}
+                        {% endwith %}
+                        {% if preview.warnings %}
+                            <span class="badge bg-warning text-dark">{{ preview.warnings|length }} warning{{ preview.warnings|length|pluralize }}</span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                {% if preview.rows %}
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-1">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th style="min-width: 220px">Item (ID or SMILES)</th>
+                                    <th style="min-width: 220px">Status</th>
+                                    <th style="min-width: 90px">Amount</th>
+                                    <th style="min-width: 90px">Units</th>
+                                    <th style="min-width: 170px">Fulfillment</th>
+                                    <th style="min-width: 110px">Priority</th>
+                                    <th style="min-width: 120px">Needed By</th>
+                                    <th style="min-width: 140px">Supplier</th>
+                                    <th style="min-width: 130px">Supplier Product #</th>
+                                    <th style="min-width: 100px">Cost (USD)</th>
+                                    <th style="min-width: 180px">Comments</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in preview.rows %}
+                                    <tr class="{% if row.errors %}table-danger{% elif row.warnings %}table-warning{% endif %}">
+                                        <td class="text-muted small">{{ row.number }}</td>
+                                        <td>
+                                            <input class="form-control form-control-sm font-monospace"
+                                                   type="text"
+                                                   name="row__item"
+                                                   value="{{ row.cells.item }}"
+                                                   placeholder="e.g. BCD-012-3456 or CCO"
+                                                   {% htmx_post %}>
+                                        </td>
+                                        <td class="small">
+                                            {% if row.status == "substance" %}
+                                                {% status_badge row.info.substance_id "success" %}
+                                            {% elif row.status == "mixture" %}
+                                                {% status_badge row.cells.item|upper "success" %}
+                                            {% elif row.status == "new" %}
+                                                {% status_badge "New" "info" %}
+                                            {% elif row.status == "invalid" %}
+                                                {% status_badge "Invalid" "danger" %}
+                                            {% endif %}
+                                            {% for message in row.errors %}<div class="text-danger">{{ message }}</div>{% endfor %}
+                                            {% for message in row.warnings %}<div class="text-warning-emphasis">{{ message }}</div>{% endfor %}
+                                            {% for message in row.notes %}<div class="text-muted">{{ message }}</div>{% endfor %}
+                                        </td>
+                                        <td>
+                                            {% include "inventory_management/inventory_request_list/for_form/row_input.html" with name="row__amount" value=row.cells.amount shared_value=shared.amount %}
+                                        </td>
+                                        <td>
+                                            {% include "inventory_management/inventory_request_list/for_form/row_select.html" with name="row__amount_units" value=row.cells.amount_units options=component.amount_units_options shared_value=shared.amount_units %}
+                                        </td>
+                                        <td>
+                                            {% include "inventory_management/inventory_request_list/for_form/row_select.html" with name="row__fulfillment_type" value=row.cells.fulfillment_type options=component.fulfillment_type_options shared_value=shared.fulfillment_type %}
+                                        </td>
+                                        <td>
+                                            {% include "inventory_management/inventory_request_list/for_form/row_select.html" with name="row__priority" value=row.cells.priority options=component.priority_options shared_value=shared.priority %}
+                                        </td>
+                                        <td>
+                                            {% include "inventory_management/inventory_request_list/for_form/row_input.html" with name="row__needed_by" value=row.cells.needed_by shared_value=shared.needed_by|default:"YYYY-MM-DD" %}
+                                        </td>
+                                        <td>
+                                            {% include "inventory_management/inventory_request_list/for_form/row_input.html" with name="row__supplier" value=row.cells.supplier shared_value=shared.supplier %}
+                                        </td>
+                                        <td>
+                                            {% include "inventory_management/inventory_request_list/for_form/row_input.html" with name="row__supplier_catalog_number" value=row.cells.supplier_catalog_number %}
+                                        </td>
+                                        <td>
+                                            {% include "inventory_management/inventory_request_list/for_form/row_input.html" with name="row__estimated_cost" value=row.cells.estimated_cost shared_value=shared.estimated_cost %}
+                                        </td>
+                                        <td>
+                                            {% include "inventory_management/inventory_request_list/for_form/row_input.html" with name="row__comments" value=row.cells.comments shared_value=shared.comments|yesno:"(shared comments)," %}
+                                        </td>
+                                        <td>
+                                            {% htmx_button method_name="remove_row" icon="trash" theme="outline-danger" small=True show_label=False grouped=True index=forloop.counter0 %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+                <div class="d-flex flex-wrap gap-2 my-2">
+                    {% htmx_button method_name="add_row" label="Add Row" icon="plus-circle" theme="outline-primary" small=True grouped=True %}
+                    {% htmx_button method_name="refresh" label="Check Rows" icon="arrow-repeat" theme="outline-secondary" small=True grouped=True %}
+                    {% if preview.rows %}
+                        {% htmx_button method_name="clear_rows" label="Clear All" icon="x-circle" theme="outline-danger" small=True grouped=True %}
+                    {% endif %}
+                </div>
+            </div>
+            {% include "data_explorer/dynamic_submit_button.html" %}
+            {% if preview.warnings and not preview.errors %}
+                <div class="text-center small text-muted">
+                    {{ preview.warnings|length }} warning{{ preview.warnings|length|pluralize }} (e.g. an item listed twice or that already has an open request)
+                </div>
+                {% htmx_button method_name="submit_form_with_warnings" label="Save Anyway" icon="exclamation-triangle" theme="warning" %}
+            {% endif %}
+        {% endwith %}
+    {% else %}
+        {% include "data_explorer/dynamic_submit_button.html" %}
+    {% endif %}
+{% endblock %}

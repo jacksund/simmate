@@ -160,13 +160,36 @@ class DatabaseTable(models.Model, ArchiveMixin):
             DoesNotExist: if the ID is malformed, if no row has that number,
                 or if the prefix does not match the row's `id_prefix`.
         """
-        prefix, _, number = display_id.strip().upper().rpartition("-")
-        row = cls.objects.filter(id=int(number)).first() if number.isdigit() else None
-        if not row or (row.id_prefix or "") != prefix:
+        row = cls.get_by_display_ids([display_id]).get(display_id)
+        if not row:
             raise cls.DoesNotExist(
                 f"No {cls.table_label} found with ID: '{display_id}'"
             )
         return row
+
+    @classmethod
+    def get_by_display_ids(cls, display_ids: list[str]) -> dict[str, "DatabaseTable"]:
+        """
+        Loads many rows using their `display_id`s (e.g. ["L-123", "L-456"])
+        in a single query. This is the bulk version of `get_by_display_id`.
+
+        Returns:
+            A dictionary that maps each given display ID (as written) to its
+            row. IDs that are malformed, not found, or have a prefix that does
+            not match the row's `id_prefix` are left out.
+        """
+        numbers = {}  # display ID as written --> (prefix, integer id)
+        for display_id in display_ids:
+            prefix, _, number = display_id.strip().upper().rpartition("-")
+            if number.isdigit():
+                numbers[display_id] = (prefix, int(number))
+
+        rows = cls.objects.in_bulk({number for _, number in numbers.values()})
+        return {
+            display_id: rows[number]
+            for display_id, (prefix, number) in numbers.items()
+            if number in rows and (rows[number].id_prefix or "") == prefix
+        }
 
     @classproperty
     def columns(cls):

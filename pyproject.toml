@@ -24,6 +24,7 @@ dependencies = [
     "numba>=0.64.0",
     "pandas>=2.0.0,<4.0.0",
     "polars>=1.41.2,<2.0.0",
+    "openpyxl>=3.1.0,<4.0.0",  # reading .xlsx uploads with pandas
     "django>=5.2.11,<6.0.0",
     "typer>=0.24.1,<0.25.0",
     "psycopg2-binary>=2.9.11,<3.0.0",

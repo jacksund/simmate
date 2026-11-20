@@ -1,5 +1,6 @@
 import re
 import threading
+from pathlib import Path
 from typing import get_args, get_origin
 
 import numpy
@@ -376,10 +377,21 @@ class HtmxComponent:
                 for value in values
             ]
 
+    raw_file_inputs: list[str] = []
+    """
+    Names of file inputs whose uploads are given to the component as-is (as
+    django `UploadedFile` objects) instead of being parsed by
+    `_parse_single_file`. Useful when a component reads the file itself, such
+    as a CSV that must be loaded as text (see `read_table_file`) or whose read
+    errors should be shown to the user.
+    """
+
     def _parse_file_item(self, key, files, result):
         files_parsed = []
         for file in files:
-            files_parsed.append(self._parse_single_file(file))
+            files_parsed.append(
+                file if key in self.raw_file_inputs else self._parse_single_file(file)
+            )
 
         if not files_parsed:
             return
@@ -388,19 +400,69 @@ class HtmxComponent:
         else:
             result[key] = files_parsed
 
-    def _parse_single_file(self, file):
-        if file.content_type == "text/csv":
-            df = pandas.read_csv(file)
-            df.replace({numpy.nan: None}, inplace=True)
-            return df
+    _table_file_types = {
+        ".csv": "text/csv",
+        ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }
 
-        if (
-            file.content_type
-            == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        ):
-            df = pandas.read_excel(file)
+    @classmethod
+    def _get_table_file_type(cls, file) -> str | None:
+        """
+        Gives ".csv" or ".xlsx" for table files (else None). The extension is
+        checked first, as browsers send CSV files with differing content types
+        (e.g. Windows often gives "application/vnd.ms-excel").
+        """
+        suffix = Path(file.name).suffix.lower()
+        if suffix in cls._table_file_types:
+            return suffix
+        for suffix, content_type in cls._table_file_types.items():
+            if file.content_type == content_type:
+                return suffix
+        return None
+
+    @classmethod
+    def read_table_file(cls, file, as_text: bool = False) -> pandas.DataFrame:
+        """
+        Reads an uploaded CSV or Excel (.xlsx) file into a DataFrame.
+
+        Args:
+            file: The uploaded file.
+            as_text: Whether to keep every cell as text (e.g. so catalog
+                numbers keep their leading zeros), where empty cells give "".
+                Otherwise, pandas guesses the type of each column and empty
+                cells give None.
+
+        Raises:
+            ValueError: if the file is not a CSV or Excel file, or can't be read.
+        """
+        file_type = cls._get_table_file_type(file)
+        if not file_type:
+            raise ValueError("Upload a .csv or .xlsx file.")
+        options = dict(dtype=str, keep_default_na=False) if as_text else {}
+        try:
+            if file_type == ".xlsx":
+                df = pandas.read_excel(file, **options)
+            else:
+                try:
+                    # Excel adds a BOM to UTF-8 files
+                    df = pandas.read_csv(file, encoding="utf-8-sig", **options)
+                except UnicodeDecodeError:
+                    # Excel's default "CSV" format isn't UTF-8
+                    file.seek(0)
+                    df = pandas.read_csv(
+                        file, encoding="cp1252", encoding_errors="replace", **options
+                    )
+        except Exception as error:
+            # files come from users, so any failure to read them is reported
+            # the same way
+            raise ValueError(f"The file could not be read ({error}).")
+        if not as_text:
             df.replace({numpy.nan: None}, inplace=True)
-            return df
+        return df
+
+    def _parse_single_file(self, file):
+        if self._get_table_file_type(file):
+            return self.read_table_file(file)
 
         elif file.name == "POSCAR":
             return Structure.from_str(

@@ -1,0 +1,105 @@
+{% extends "data_explorer/entry.html" %}
+{% block entrycontent %}
+    <div class="d-flex justify-content-end border-bottom pb-2 mb-3">
+        {% include "data_explorer/for_view/update_button.html" %}
+    </div>
+    {# What the list is for and how far along its requests are #}
+    <div class="card border-primary-subtle bg-primary-subtle mb-3">
+        <div class="card-body py-3">
+            <div class="d-flex flex-wrap justify-content-center align-items-center column-gap-3 row-gap-2">
+                <i class="bi bi-list-check text-primary-emphasis fs-5"></i>
+                <span class="fs-4 fw-semibold text-primary-emphasis">{{ table_entry.title|default:"(untitled)" }}</span>
+                <div style="min-width: 160px">
+                    {% include "inventory_management/inventory_request_list/for_view/status_bar.html" with status=table_entry.status %}
+                </div>
+            </div>
+            <div class="mx-auto mt-3" style="max-width: 500px">
+                {% include "inventory_management/inventory_request_list/for_view/progress_bar.html" with counts=table_entry %}
+            </div>
+        </div>
+    </div>
+    <div class="row g-3">
+        {# About the list #}
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">
+                        <i class="bi bi-info-circle me-1"></i> List
+                    </div>
+                    <dl class="row mb-0">
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">Submitted by</dt>
+                        <dd class="col-6 col-sm-7">
+                            {{ table_entry.submitted_by.username|default:"--" }}
+                        </dd>
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">Created</dt>
+                        <dd class="col-6 col-sm-7">
+                            {{ table_entry.created_at|date:"M. jS Y" }}
+                        </dd>
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">Project</dt>
+                        <dd class="col-6 col-sm-7">
+                            {% foreign_key_link table_entry.project "name" %}
+                        </dd>
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">Description</dt>
+                        <dd class="col-6 col-sm-7 mb-0">
+                            {{ table_entry.description|default:"--"|linebreaksbr }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        {# How many requests are at each status #}
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-uppercase small text-muted fw-semibold border-bottom pb-1 mb-2">
+                        <i class="bi bi-bar-chart me-1"></i> Requests by Status
+                    </div>
+                    {% if status_counts %}
+                        <dl class="row mb-0">
+                            {% for row in status_counts %}
+                                <dt class="col-8 col-sm-7 fw-normal">
+                                    {% include "inventory_management/inventory_request/for_view/status_bar.html" with status=row.status %}
+                                </dt>
+                                <dd class="col-4 col-sm-5 {% if forloop.last %}mb-0{% endif %}">
+                                    {{ row.count }}
+                                </dd>
+                            {% endfor %}
+                        </dl>
+                    {% else %}
+                        <small>This list has no requests.</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {# The requests themselves #}
+    <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 mb-2 gap-2">
+        <h4 class="mb-0">Requests</h4>
+        <div class="d-flex flex-wrap gap-2">
+            {# admins can select every request here and update them together #}
+            <a role="button"
+               class="btn btn-outline-primary btn-sm"
+               href="{% url 'data_explorer:table' 'InventoryRequest' %}?request_list_id={{ table_entry.id }}&page_size=100">
+                Edit in Table <i class="bi bi-pencil-square"></i>
+            </a>
+            <a role="button"
+               class="btn btn-outline-secondary btn-sm"
+               href="{% url 'data_explorer:table' 'InventoryRequest' %}?request_list_id={{ table_entry.id }}&format=curated-csv">
+                Download CSV <i class="bi bi-download"></i>
+            </a>
+            {% user_can "InventoryRequest" "create" as can_create_request %}
+            {% if can_create_request %}
+                <a role="button"
+                   class="btn btn-primary btn-sm"
+                   href="{% url 'data_explorer:table-entry-new' 'InventoryRequest' %}?request_list_id={{ table_entry.id }}">
+                    Add Request <i class="bi bi-cart-plus"></i>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    {% if inventory_requests %}
+        {% include "inventory_management/inventory_request/table.html" with entries=inventory_requests truncated=inventory_requests__truncated hide_list=True %}
+    {% else %}
+        <small>This list has no requests.</small>
+    {% endif %}
+{% endblock %}

@@ -231,6 +231,7 @@ class SimmateSettings:
                         "simmate.apps.inventory_management.components.ContainerComponent",
                         "simmate.apps.inventory_management.components.UsageLogComponent",
                         "simmate.apps.inventory_management.components.InventoryRequestComponent",
+                        "simmate.apps.inventory_management.components.InventoryRequestListComponent",
                         "simmate.apps.inventory_management.components.StorageLocationComponent",
                     ],
                     "Crystalline Catalogs": [

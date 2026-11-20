@@ -244,6 +244,11 @@ class TableComponent(
             if self.component_type == "search"
             else self.request.get_full_path()
         )
+        # The bulk-update form is shown on a table's page, where the GET params
+        # are filters for the table (e.g. `?project_id=1&page_size=100`). These
+        # must not be saved to every selected entry.
+        if self.component_type == "update_many":
+            return
         # and then GET params
         get_kwargs = parse_request_get(self.request)
         self.form_data.update(get_kwargs)

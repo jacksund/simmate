@@ -1,7 +1,13 @@
 {% extends "htmx/form_base.html" %}
 {% block form %}
     {% include "data_explorer/general_search_options.html" %}
-    {% if component.component_type != "update" %}
+    {% if component.component_type == "create" %}
+        <div class="alert alert-info mt-3 mb-0" role="alert">
+            <i class="bi bi-info-circle mx-2"></i>
+            Requesting many items at once? Make a <a href="{% url 'data_explorer:table-entry-new' 'InventoryRequestList' %}"><b>request list <i class="bi bi-box-arrow-up-right"></i></b></a> instead.
+        </div>
+    {% endif %}
+    {% if component.component_type == "create" or component.component_type == "search" %}
         <div class="container mt-4 border border-3 border-secondary rounded py-2">
             <h3>
                 <span class="badge bg-secondary">1. Requested Item</span>
@@ -54,6 +60,11 @@
                 {% htmx_selectbox name="assigned_to_id" label="Assigned To" options=component.user_options %}
             </div>
             <div class="col-md-4">{% htmx_selectbox name="project_id" label="Project" options=component.project_options %}</div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                {% htmx_selectbox name="request_list_id" label="Request List" options=component.request_list_options %}
+            </div>
         </div>
         {# these are set automatically, so they are only searched on #}
         {% if component.component_type == "search" %}

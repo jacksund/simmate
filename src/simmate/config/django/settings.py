@@ -111,6 +111,10 @@ EMAIL_TIMEOUT = settings.website.email.timeout
 # This sets the default field for primary keys in django models
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
+# Every htmx action posts the full form of its component, and bulk forms (e.g.
+# 100 rows of inventory requests) go over Django's default limit of 1,000 fields
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10_000
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

@@ -2,6 +2,7 @@ from .batch import BatchComponent
 from .container import ContainerComponent
 from .dashboard import InventoryDashboardComponent
 from .inventory_request import InventoryRequestComponent
+from .inventory_request_list import InventoryRequestListComponent
 from .mixture import MixtureComponent
 from .storage_location import StorageLocationComponent
 from .substance import SubstanceComponent

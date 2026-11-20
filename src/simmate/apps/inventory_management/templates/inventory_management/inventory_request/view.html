@@ -17,7 +17,7 @@
                     {% foreign_key_link table_entry.substance %}
                 {% endif %}
             </span>
-            {% include "inventory_management/inventory_request/for_view/new_badge.html" %}
+            {% include "inventory_management/inventory_request/for_view/new_badge.html" with was_made_before=table_entry.was_made_before %}
             <div style="min-width: 160px">
                 {% include "inventory_management/inventory_request/for_view/status_bar.html" with status=table_entry.status %}
             </div>
@@ -54,11 +54,12 @@
                         </dd>
                         <dt class="col-6 col-sm-5 fw-normal text-muted">Project</dt>
                         <dd class="col-6 col-sm-7">
-                            {% if table_entry.project %}
-                                {% foreign_key_link table_entry.project "name" %}
-                            {% else %}
-                                --
-                            {% endif %}
+                            {% foreign_key_link table_entry.project "name" %}
+                        </dd>
+                        <dt class="col-6 col-sm-5 fw-normal text-muted">Request list</dt>
+                        <dd class="col-6 col-sm-7">
+                            {% foreign_key_link table_entry.request_list %}
+                            <span class="text-muted">{{ table_entry.request_list.title|default:"" }}</span>
                         </dd>
                         <dt class="col-6 col-sm-5 fw-normal text-muted">Days in status</dt>
                         <dd class="col-6 col-sm-7">

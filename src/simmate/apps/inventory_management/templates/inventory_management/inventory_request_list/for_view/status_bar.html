@@ -1,0 +1,10 @@
+{# The `status` of a request list, which comes from its requests (see `InventoryRequestList.get_web_queryset`) #}
+{% if status == "Open" %}
+    {% status_bar status "primary" %}
+{% elif status == "Completed" %}
+    {% status_bar status "success" %}
+{% elif status %}
+    {% status_bar status "secondary" %}
+{% else %}
+    --
+{% endif %}

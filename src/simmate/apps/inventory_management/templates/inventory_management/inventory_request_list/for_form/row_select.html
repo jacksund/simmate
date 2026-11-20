@@ -1,0 +1,16 @@
+{# A dropdown for one cell of a new list's table. The blank option uses the `shared_value`, and a `value` that isn't one of the `options` (e.g. from a file) is kept so that its error is shown #}
+<select class="form-select form-select-sm" name="{{ name }}">
+    <option value="">
+        {% if shared_value %}
+            ({{ shared_value }})
+        {% else %}
+            --
+        {% endif %}
+    </option>
+    {% for option in options %}
+        <option value="{{ option }}" {% if option == value %}selected{% endif %}>{{ option }}</option>
+    {% endfor %}
+    {% if value and value not in options %}
+        <option value="{{ value }}" selected>{{ value }} (invalid)</option>
+    {% endif %}
+</select>

@@ -1,8 +1,10 @@
+from functools import cached_property
+
 from simmate.apps.project_management.components.mixins import ProjectInput
 from simmate.website.data_explorer.components import TableComponent
 from simmate.website.htmx.components import UserInput
 
-from ..models import Batch, InventoryRequest, Mixture, Substance
+from ..models import Batch, InventoryRequest, InventoryRequestList, Mixture, Substance
 
 
 class InventoryRequestComponent(TableComponent, UserInput, ProjectInput):
@@ -21,6 +23,7 @@ class InventoryRequestComponent(TableComponent, UserInput, ProjectInput):
         "search": "inventory_management/inventory_request/form.html",
         "create": "inventory_management/inventory_request/form.html",
         "update": "inventory_management/inventory_request/form.html",
+        "update_many": "inventory_management/inventory_request/form.html",
     }
 
     enabled_component_types = [
@@ -30,12 +33,15 @@ class InventoryRequestComponent(TableComponent, UserInput, ProjectInput):
         "search",
         "create",
         "update",
+        "update_many",
     ]
 
     @classmethod
     def has_permission(cls, user, component_type, table_entry=None) -> bool:
         # anyone can view & search, any signed-in user can make a request, and
-        # admins, the submitter, the requester, or the assigned user can edit it
+        # admins, the submitter, the requester, or the assigned user can edit it.
+        # Only admins can update many requests at once ("update_many"), as the
+        # selected requests aren't checked one by one.
         if component_type in ["dashboard", "entries", "entry", "report", "search"]:
             return True
         if not user or not user.is_authenticated:
@@ -56,15 +62,28 @@ class InventoryRequestComponent(TableComponent, UserInput, ProjectInput):
 
     @classmethod
     def get_extra_entry_context(cls, request, table_entry: InventoryRequest) -> dict:
-        # the entry page loads the row without `get_web_queryset`, so this
-        # annotation is grabbed separately
-        was_made_before = (
-            InventoryRequest.get_web_queryset()
-            .filter(id=table_entry.id)
-            .values_list("was_made_before", flat=True)
-            .first()
-        )
-        return {"was_made_before": was_made_before}
+        # the entry page loads the row without `get_web_queryset`, so it is
+        # reloaded with its related rows and `was_made_before` (and replaces
+        # the given entry)
+        return {
+            "table_entry": InventoryRequest.get_web_queryset().get(id=table_entry.id)
+        }
+
+    # -------------------------------------------------------------------------
+
+    @cached_property
+    def request_list_options(self) -> list[tuple[int, str]]:
+        """
+        The newest request lists (e.g. "RL-12: Round 3 targets"), plus the
+        current list of the form if it is older.
+        """
+        lists = InventoryRequestList.objects.order_by("-id")
+        current_id = self.form_data.get("request_list_id")
+        options = list(lists.values_list("id", "title")[:50])
+        if current_id and current_id not in [option[0] for option in options]:
+            options += list(lists.filter(id=current_id).values_list("id", "title"))
+        prefix = InventoryRequestList.id_prefix
+        return [(id, f"{prefix}-{id}: {title or ''}") for id, title in options]
 
     # -------------------------------------------------------------------------
 
@@ -124,6 +143,18 @@ class InventoryRequestComponent(TableComponent, UserInput, ProjectInput):
                 return
             self.form_data["substance_id"] = substance.id
 
+        self.check_request_list()
+
+    def check_request_list(self):
+        request_list_id = self.form_data.get("request_list_id")
+        if (
+            request_list_id
+            and not InventoryRequestList.objects.filter(id=request_list_id).exists()
+        ):
+            self.form_errors.append(
+                "'request_list_id' must be the ID of an existing request list."
+            )
+
     def unmount_for_create(self):
         super().unmount_for_create()
         self.table_entry.submitted_by = self.request.user
@@ -143,19 +174,13 @@ class InventoryRequestComponent(TableComponent, UserInput, ProjectInput):
         "requested_by_id",
         "assigned_to_id",
         "project_id",
+        "request_list_id",
         "supplier",
         "supplier_catalog_number",
         "estimated_cost",
         "batch_id",
         "comments",
     ]
-
-    def mount_for_update(self):
-        super().mount_for_update()
-        # date inputs give and expect "YYYY-MM-DD" text, not a date object
-        needed_by = self.form_data.get("needed_by")
-        if needed_by:
-            self.form_data["needed_by"] = needed_by.isoformat()
 
     def check_form_for_update(self):
         # the fulfilling batch must be of the requested substance or mixture
@@ -172,3 +197,25 @@ class InventoryRequestComponent(TableComponent, UserInput, ProjectInput):
                 "'batch_id' must be the ID of a batch of the requested substance "
                 "or mixture."
             )
+        self.check_request_list()
+
+    # -------------------------------------------------------------------------
+
+    # UPDATE MANY
+
+    # e.g. approving or assigning every request of a list at once (from the
+    # InventoryRequest table filtered by `request_list_id`)
+
+    n_ids_to_update_max = InventoryRequestList.max_requests
+
+    # the requested item and its fulfilling batch are set one request at a time
+    ignore_on_update_many = [
+        "is_mixture",
+        "substance_id",
+        "mixture_id",
+        "batch_id",
+    ]
+
+    def check_form_for_update_many(self):
+        super().check_form_for_update_many()
+        self.check_request_list()

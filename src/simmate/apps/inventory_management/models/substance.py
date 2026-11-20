@@ -826,18 +826,45 @@ class Substance(DatabaseTable):
         Gives the current ID for the given one, following any merges or
         promotions. IDs that are active (or not found) are returned unchanged.
         """
+        return cls.resolve_ids([substance_id])[substance_id] or substance_id
+
+    @classmethod
+    def resolve_ids(cls, substance_ids: list[str]) -> dict[str, str | None]:
+        """
+        The bulk version of `resolve_id`, which checks many IDs with one query
+        to this table plus (at most) one to the `SubstanceDatastore`. Nothing
+        is copied into this table.
+
+        Returns:
+            A dictionary that maps each given ID to its current ID (following
+            any merges or promotions), or to None if the ID is not found.
+        """
         from ..datastores import SubstanceDatastore
 
-        row = cls.objects.filter(id=substance_id).values("replaced_by_id").first()
-        if not row and SubstanceDatastore.chunk_files:
+        replaced_by = dict(
+            cls.objects.filter(id__in=substance_ids).values_list(
+                "id", "replaced_by_id"
+            )
+        )
+        missing = [i for i in substance_ids if i not in replaced_by]
+        if missing and SubstanceDatastore.chunk_files:
             # not in this table, so check the full catalog
             df = (
-                SubstanceDatastore.filter(id=substance_id)
-                .select("replaced_by_id")
+                SubstanceDatastore.filter(id__in=missing)
+                .select(["id", "replaced_by_id"])
                 .collect()
             )
-            row = df.to_dicts()[0] if len(df) else None
-        return (row and row["replaced_by_id"]) or substance_id
+            replaced_by.update(
+                {row["id"]: row["replaced_by_id"] for row in df.iter_rows(named=True)}
+            )
+        return {
+            substance_id: (
+                (replaced_by[substance_id] or substance_id)
+                if substance_id in replaced_by
+                else None
+            )
+            for substance_id in substance_ids
+        }
 
     @classmethod
     def get_by_id(cls, substance_id: str) -> "Substance":

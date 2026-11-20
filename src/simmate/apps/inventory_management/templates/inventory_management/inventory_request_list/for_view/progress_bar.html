@@ -1,0 +1,28 @@
+{# How many of a request list's requests are completed, closed without completing, and still open. `counts` is a list from `InventoryRequestList.get_web_queryset` #}
+{% if counts.num_requests %}
+    <div class="progress-stacked"
+         style="height: 0.75rem"
+         title="{{ counts.num_completed }} completed, {{ counts.num_closed }} closed, {{ counts.num_open }} open">
+        <div class="progress"
+             role="progressbar"
+             aria-label="Completed"
+             style="width: {% widthratio counts.num_completed counts.num_requests 100 %}%">
+            <div class="progress-bar bg-success"></div>
+        </div>
+        <div class="progress"
+             role="progressbar"
+             aria-label="Closed"
+             style="width: {% widthratio counts.num_closed counts.num_requests 100 %}%">
+            <div class="progress-bar bg-secondary"></div>
+        </div>
+        <div class="progress"
+             role="progressbar"
+             aria-label="Open"
+             style="width: {% widthratio counts.num_open counts.num_requests 100 %}%">
+            <div class="progress-bar bg-primary-subtle"></div>
+        </div>
+    </div>
+    <div class="small text-muted mt-1">{{ counts.num_completed }} / {{ counts.num_requests }} completed</div>
+{% else %}
+    --
+{% endif %}

@@ -1,8 +1,10 @@
 import json
 import urllib
+from datetime import date, datetime
 
 from django import template
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 from plotly.graph_objects import Figure
 
@@ -270,6 +272,14 @@ def htmx_date_input(
     """
     label = _get_input_label(name, label)
     current_value = _get_input_value(context, name)
+    # Date inputs only accept ISO text (e.g. "2026-12-31"), not the localized
+    # text that django renders for date objects (e.g. from a table entry)
+    if isinstance(current_value, datetime) and timezone.is_aware(current_value):
+        current_value = timezone.localtime(current_value)
+    if isinstance(current_value, date):
+        current_value = current_value.strftime(
+            "%Y-%m-%dT%H:%M" if include_time else "%Y-%m-%d"
+        )
     component = context.get("component")
     return locals()
 
